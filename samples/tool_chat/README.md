@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2026 Martin.Bechard@DevConsult.ca; third-party source excerpts retain their original rights. -->
 # Tool chat — request, observation, follow-up
 
 ## Purpose
@@ -33,11 +34,11 @@ charges and is not required to follow the scripted call sequence.
 
 ## Code and execution flow
 
-- `app.py` owns the graph and prompts. The system instruction asks for a reference
-  lookup before answering, explaining why a tool is relevant to this task.
-- `tools.py` owns `workflow_reference(topic)`. Its docstring is exposed to the
-  model as the tool description; the implementation returns a local reference.
-- `simulation.py` scripts four model responses. It does **not** fake tool
+- `app.py` selects models, client, and recorder.
+- `src/lg_report/workflows/tool_chat.py` composes the participating agents.
+- `src/lg_report/agents/reference_chat_agent.py` owns the agent instructions and registration.
+- `src/lg_report/tools/workflow_reference.py` owns the callable evidence tools.
+- `test_case.py` scripts four model responses. It does **not** fake tool
   execution: LangGraph dispatches the registered Python function.
 - Shared reporting wraps the application; no report-generation code is inside
   the tool or graph definition.
@@ -70,3 +71,10 @@ The request/result linkage and captured graph should still reconcile.
 
 See the [sample catalog](../README.md) for common configuration and simulation
 assumptions. The reporting library never infers real cache usage from history.
+
+## Interactive client
+
+Add `--client console --live` to the launch command after configuring this sample's
+`.env`. The shared console accepts prompts and `/attach PATH` text files, `/send`,
+and `/quit`. Both clients use the same workflow and retained conversation history.
+See [component and sequence diagrams](../../docs/chat-composition.md).

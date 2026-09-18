@@ -1,48 +1,48 @@
-"""Lesson 2: connect a model decision, local tool execution, and follow-up request.
+"""Wire reference_chat_agent to a user client and local reports.
 
-The model produces tool-call JSON; LangGraph executes the named function and
-appends its observation. The next model call consumes that expanded history.
+The scenario owns fixed prompts and responses. Console mode uses the same graph
+with a configured provider; tracing and conversation history remain shared.
+
+AI attribution: Generated with AI assistance.
+
+Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
 
-from deepagents import create_deep_agent
-from deepagents.backends import StateBackend
-from langchain_core.language_models import BaseChatModel
-from langgraph.graph.state import CompiledStateGraph
+from lg_report.platform.conversation import Request
+from lg_report.platform.model_config import configured_model
+from lg_report.platform.sample_runtime import launch_local
+from lg_report.platform.static_client import StaticClient
+from lg_report.workflows.tool_chat import build_workflow
 
-from lg_report.sample_runtime import execute, select_model, settings_for
-from samples.tool_chat.simulation import make_simulated_model
-from samples.tool_chat.tools import workflow_reference
-
-SYSTEM_PROMPT = "Use workflow_reference to obtain evidence for each question about agent workflows, then answer concisely using the observation."
-USER_PROMPTS = [
-    "Explain the main steps in an agent workflow.",
-    "How does a tool observation help the agent answer?",
-]
+from .test_case import USER_PROMPTS, make_simulated_model
 
 
-def build_agent(model: BaseChatModel) -> CompiledStateGraph:
-    # Register the actual function, not a fabricated tool-result string. This is
-    # what makes the resulting trace a runnable tool-use example rather than a
-    # preassembled report. LangGraph owns the model/tool/model routing.
-    return create_deep_agent(
-        model=model,
-        tools=[workflow_reference],
-        backend=StateBackend(),
-        name="reference-chat-agent",
-        system_prompt=SYSTEM_PROMPT,
-    )
+def create_run(live: bool):
+    """Build the workflow and return its provider and model name for reporting.
+
+    ``live`` is the explicit CLI choice: True constructs configured API clients;
+    False creates fresh scripted models for this sample's fixed test case. Neither
+    branch invokes an LLM here. Configuration failures propagate to the launcher
+    so a requested provider run cannot quietly become a simulated success.
+    """
+    # Offline fixtures have fixed answers; only --live supports arbitrary user
+    # questions. Both choices still execute the same workflow and tracing path.
+    if live:
+        model, provider, model_name = configured_model()
+    else:
+        model, provider, model_name = make_simulated_model(), "demo", "scripted-chat"
+    return build_workflow(model), provider, model_name
 
 
 def main() -> None:
-    settings = settings_for(__file__, __doc__)
-    model, provider, model_name = select_model(settings, make_simulated_model)
-    graph = build_agent(model)
-    execute(
-        graph,
-        USER_PROMPTS,
-        settings,
-        provider=provider,
-        model=model_name,
+    """Select a client and record one complete conversation."""
+    launch_local(
+        app_file=__file__,
+        description=__doc__,
+        create_run=create_run,
+        make_static_client=lambda: StaticClient(
+            [Request(prompt) for prompt in USER_PROMPTS]
+        ),
         title="Reference lookup · two turns",
     )
 

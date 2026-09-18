@@ -1,65 +1,94 @@
-# Simple chat — conversation context
+<!-- Copyright (c) 2026 Martin.Bechard@DevConsult.ca; third-party source excerpts retain their original rights. -->
+# Simple chat — an agent with interchangeable clients
 
 ## Purpose
 
-Learn how a second user turn differs from a fresh conversation. The second model
-request retains the system instructions, the first user prompt, and the first
-assistant response, then adds the new user prompt. This is the baseline for
-understanding token and cost growth before introducing tools.
+Learn to separate an agent's behavior from its user and its test cases. The agent
+receives messages at runtime; it does not know the test prompts, read terminal
+input, or generate reports. The session retains history so later requests include
+earlier user messages, attachments, assistant answers, and any tool exchanges.
 
-## Run
+## Files and responsibilities
 
-From the repository root:
+The reusable code lives under `src/lg_report/`:
+
+- **`workflows/simple_chat.py`** composes the single-agent workflow.
+- **`agents/chat_agent.py`** defines the named agent, its system instructions,
+  and its DeepAgents graph. It imports no client or test case.
+- **`platform/conversation.py`** defines requests, text attachments, the client
+  interface, and the session loop that retains history and turn metadata.
+- **`platform/console_client.py`** accepts human prompts and text files.
+- **`platform/static_client.py`** consumes requests supplied by any test case;
+  it contains no predefined prompts or expected answers.
+- **`platform/simulated_model.py`** and **`platform/demo_meter.py`** provide the
+  generic offline model and context/token simulation.
+- **`report/`** captures traces, prices usage, and exports HTML/Excel.
+- **`tools/`** is the home for application tools. Simple chat defines none.
+
+This sample directory contains **`app.py`** for component wiring and
+**`test_case.py`** for the scenario's user prompts and prerecorded model answers,
+plus this README and configuration example. A client simulator and a model
+simulator serve different roles even when one test case configures both.
+
+A future user-avatar agent can implement `receive()` and `respond(result)` from
+`ChatClient`: after receiving an answer, it chooses the next request, or returns
+`None` to end. Such an avatar would live in its own named file under `agents/`.
+No avatar agent is implemented yet.
+
+## Run the static test case
 
 ```bash
 uv sync
 uv run python -m samples.simple_chat.app
 ```
 
-The command prints its HTML report path and writes `spans.jsonl`, `run.json`,
-`prices.json`, and `report.html` to a fresh directory under `reports/simple_chat/`.
-Use `--out reports/my-chat-run` to name a new run directory.
+Default client: `static`. Default model: simulated. This executes a real graph
+with two predefined user turns and two prerecorded responses, without provider
+charges. Daily pricing/FX lookups may still access the network. Use `--prices`
+and `--fx-file` to supply those references without lookups.
 
-To use a real model:
+The graph still includes DeepAgents' built-in tool definitions, which consume
+context even though its instructions ask it to answer without tools. StateBackend
+keeps built-in file operations in graph state rather than the local filesystem.
+
+## Console chat
 
 ```bash
 cp samples/simple_chat/.env.example samples/simple_chat/.env
-# Edit that .env and supply the selected provider's key.
-uv run python -m samples.simple_chat.app --live
+# Configure an OpenAI or Anthropic API key in that file.
+uv run python -m samples.simple_chat.app --client console --live
 ```
 
-The model adapter is the only part that changes between offline and live modes.
-Live mode requires a valid key and incurs provider charges. Default mode makes
-no provider request; the shared daily exchange-rate lookup may access the network.
+Enter a prompt and read the response. Commands:
 
-## Code and execution flow
+- `/attach /path/to/notes.txt` queues a UTF-8 text file for the next prompt.
+  Paths may contain spaces; do not surround them with quotes.
+- `/send` submits queued files without additional prompt text.
+- `/quit` or EOF ends the session and writes the report. Ctrl-C at the input
+  prompt also ends normally; interruption during model execution is recorded as
+  a failed/interrupted execution, not a completed answer.
 
-- `app.py` defines `SYSTEM_PROMPT`, `USER_PROMPTS`, `build_agent(model)`, and `main()`.
-- `simulation.py` supplies two distinct assistant responses, not token totals.
-- `build_agent()` uses `create_deep_agent()`, which returns a compiled LangGraph
-  graph. Framework middleware remains visible in the execution tree.
-- `execute()` attaches reporting around the graph invocation. The shared
-  `ConversationAgent` passes the previous messages into the next user turn.
+Multiple files can be queued. Their names and text are inserted into the user
+message, then retained in conversation history. Files are not uploaded through a
+provider file API, and PDF/image/binary decoding is not supported. Attached text
+is sent to the configured provider in live mode and appears in local trace/report
+content unless `--metadata-only` is selected.
 
-Expected offline sequence: **user → model response → user → model response**.
-There are two LLM requests, labelled R1 and R2, and no tool execution.
+Console requires `--live`: fixed offline answers would be misleading for arbitrary
+human questions. To run the same static test against a real provider, use `--live`
+with the default static client.
 
-DeepAgents still supplies built-in tool definitions; these consume input context
-even when no tools are called. The system prompt tells the model to answer
-directly. `StateBackend` keeps built-in file operations in graph state rather
-than the developer's filesystem. This sample is not a bare tool-free model API.
+## Reports and checks
 
-## What to inspect
+The command prints its HTML report path and saves `spans.jsonl`, `run.json`,
+`prices.json`, and `report.html` under a fresh `reports/simple_chat/` directory.
+`--out` selects a new directory. Reports are finalized when the session ends;
+quitting before any request produces an incomplete report with no model spans.
 
-In R1, expand the fresh-input components and identify tool definitions, system
-instructions, and the user prompt. In R2, compare cached history with the new
-user prompt. Trace those counts through the cost chart and execution tree.
-The run contains two turns; it must not treat the first answer as the final
-answer for the entire conversation.
+In the static run, compare R1's fresh input with R2's cached history and new prompt.
+Edit test prompts in `test_case.py`, not the agent file. When changing the
+scenario in offline mode, update the corresponding answers in `test_case.py`.
+Tests in `tests/test_simple_chat_clients.py` exercise file context, console input,
+history, and the interrupt boundary without contacting a provider.
 
-Try editing `USER_PROMPTS` and the matching scripted responses. Their message
-lengths change the simulator's counts automatically. A real model may choose a
-different answer length and cache behavior; those reported counts are retained.
-
-See the [sample catalog](../README.md) for shared configuration, simulation
-assumptions, and the boundary between model execution and report generation.
+All samples follow this structure; Langfuse variants share the same workflows.

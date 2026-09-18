@@ -1,0 +1,261 @@
+<!-- Copyright (c) 2026 Martin.Bechard@DevConsult.ca; third-party source excerpts retain their original rights. -->
+{# Render the offline HTML report from normalized trace and pricing data.
+Conversation, agent activity, cost chart, and execution tree share accounting prepared in render.py.
+Conditional sections preserve unknown costs and separate reasoning from visible
+output. Inline JavaScript controls local tree expansion and chart tooltips; it
+makes no provider requests. Jinja comments do not appear in the exported report.
+AI attribution: Generated with AI assistance.
+#}<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{{ run.title }} · LG Report</title>
+<style>
+:root{color-scheme:light;--ink:#193e42;--muted:#617679;--line:#d5e0dc;--accent:#087d6c}*{box-sizing:border-box}body{margin:0;background:#f4f6f2;color:var(--ink);font:14px/1.5 system-ui,sans-serif}main{padding:16px 32px;max-width:1800px;margin:auto}header{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;border-top:3px solid var(--accent);padding:8px 0}.eyebrow{text-transform:uppercase;font-size:11px;letter-spacing:.15em;color:var(--accent)}h1{font-size:24px;margin:0}h2{font-size:22px}p{color:var(--muted)}.cards{display:flex;gap:12px 28px;flex-wrap:wrap;margin:8px 0 16px;padding:8px 0;border-bottom:1px solid var(--line)}.card{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}.card strong{font-size:16px}.card span,small{color:var(--muted)}.error-row td,.error-event{background:#ffd3d3!important;color:#8b1010!important}.span-id{font:10px/1.4 monospace;overflow-wrap:anywhere;max-width:120px;min-width:100px;text-align:left}.description-cell{min-width:280px;max-width:380px;text-align:left;white-space:normal}.turn{background:white;border:1px solid var(--line);border-radius:8px;padding:18px;margin:16px 0}.event{padding:12px 16px;margin:12px 0}.llm-event{background:#f5f8fd}.tool-event{border-left:2px solid #c4cbd2;margin-left:20px}.llm-event>.event-heading{color:#173b70}.event pre{margin:8px 0}.stale{background:#ffd3d3!important;color:#8b1010!important;padding:3px 5px;border-radius:3px}.rate-date{display:block;font-size:10px;margin-top:3px}.notice{background:#fff1d4;padding:12px 16px;border-radius:8px}.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:15px 0}button{border:1px solid var(--line);border-radius:5px;background:white;color:var(--ink);padding:7px 12px;cursor:pointer}button:focus-visible,summary:focus-visible{outline:3px solid #007cb0;outline-offset:2px}.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:10px;background:white;max-height:75vh}table{border-collapse:separate;border-spacing:0;width:100%;min-width:1500px}th,td{padding:13px 10px;border-bottom:1px solid var(--line);text-align:right;vertical-align:top;min-width:112px}th{position:sticky;top:0;background:#eaf0eb;z-index:2;font-size:11px;text-transform:uppercase;text-align:right}th:first-child,td:first-child{position:sticky;left:0;text-align:left;min-width:310px;max-width:390px;background:#fff;z-index:1;border-right:1px solid var(--line)}th:first-child{z-index:3;background:#eaf0eb}.tokens{font-size:17px;font-weight:600;font-variant-numeric:tabular-nums}.euro{color:var(--accent);font-size:12px}.dollar{font-size:11px;color:var(--muted)}.kind{font-size:10px;text-transform:uppercase;color:var(--accent)}.step-name{font-weight:600;overflow-wrap:anywhere}.toggle{padding:1px 5px;margin-right:5px}.context{margin-top:6px;font-size:12px;white-space:normal}.context summary{cursor:pointer;color:var(--accent)}dl{margin:8px 0}dt{font-weight:600}dd{margin:0 0 8px;overflow-wrap:anywhere}.status{font-size:11px}.error,.partial{color:#a44c10}.tree-row[hidden]{display:none}.subtree{font-size:10px;color:var(--muted)}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:white;padding:20px;border:1px solid var(--line)}footer{font-size:12px;color:var(--muted);margin-top:24px}@media(max-width:700px){main{padding:16px}h1{font-size:26px}th:first-child,td:first-child{min-width:240px;max-width:270px}}@media print{.toolbar{display:none}.table-wrap{overflow:visible;max-height:none}.tree-row[hidden]{display:table-row}th,td{position:static!important}main{padding:0}table{font-size:9px;min-width:0}}
+
+/* Conversation metrics use the full card width; reference dates remain in the pricing section. */
+.turn-heading,.event-heading{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.turn-heading{justify-content:space-between;margin-bottom:12px}.turn-heading h3{margin:0}
+
+.turn .table-wrap{max-height:none}.turn table{min-width:1080px;table-layout:fixed}
+.turn th,.turn td{min-width:0;padding:10px 8px}.turn th:first-child,.turn td:first-child{width:180px;min-width:180px;max-width:180px}
+.turn .tokens{font-size:15px;white-space:nowrap}.turn .tokens small{font-size:10px;font-weight:400}
+.turn .euro,.turn .dollar{white-space:nowrap}.turn .event .span-id{max-width:none;min-width:0;white-space:nowrap}
+.turn .event-heading{font-size:15px}.turn .llm-response-heading{font-size:15px;font-weight:700}.reasoning-section{margin:8px 0 16px}.output-label{margin-top:16px!important}.thinking-preview{font-style:italic;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;line-height:1.5;max-height:4.5em;white-space:pre-wrap;margin:8px 0}.prompt-label{font-size:13px;font-weight:600;margin-top:8px}.turn .event{padding:10px 14px}.turn pre{padding:14px;margin:8px 0}
+.cost-line{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}.request-costs{margin:12px 0}.input-detail{margin-left:20px;padding-left:12px}.step-metrics{display:flex;flex-wrap:wrap;gap:12px 24px;margin:12px 0}.metric{min-width:130px}.metric>span{display:block;color:var(--muted);font-size:11px}.metric strong{display:block;font-size:15px}.call-context{background:#eef4ef;padding:10px 12px;margin:10px 0;font-size:13px}.turn-cost{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}.turn-cost .euro,.turn-cost .dollar{display:inline}
+.agent-label{font-weight:600;color:#684296;margin-bottom:8px}.agent-activity{border-left:4px solid #8462a7;padding:12px 16px;margin:12px 0;background:#f6f1fb}.agent-activity h3{margin:0 0 8px}.agent-activity a{color:#684296}
+/* Tool definitions form a closed panel so subsequent prompts are visibly outside it. */
+.tool-definitions{margin:12px 0 24px;padding:0 16px;border:1px solid #b8c9cc;border-radius:8px;background:#edf3f3}
+.tool-definitions>summary.prompt-label{margin:0;padding:12px 0;cursor:pointer;list-style:none}
+.tool-definitions>summary::before{content:"▸";display:inline-block;width:18px}
+.tool-definitions[open]>summary::before{content:"▾"}
+.tool-definitions[open]{padding-bottom:16px}
+.tool-definitions[open]>summary{border-bottom:1px solid #b8c9cc;margin-bottom:16px}
+.tool-definitions h5{font-size:13px;margin:20px 0 6px}
+/* Agent and tool execution scopes retain their own ancestry guide lines. */
+.conversation-thread{padding-left:0}
+.conversation-agent{border-left:3px solid #8462a7;padding:10px 0 10px 14px;margin:0}
+.conversation-children{padding:8px 0 8px 18px}
+.conversation-thread .tool-event{margin-left:18px;border-left:2px solid #8b969f}
+.conversation-thread .event{margin-top:0;margin-bottom:0}
+.conversation-thread .conversation-agent>.agent-label{padding:4px 14px}
+@media(max-width:700px){.conversation-agent{padding-left:8px}.conversation-children{padding-left:10px}.conversation-thread .tool-event{margin-left:10px}}
+/* Native disclosures keep their labels keyboard accessible when collapsed. */
+.agent-activity>summary,.conversation-agent>summary,.event>summary,.turn>summary{cursor:pointer;list-style:none;padding:6px 0}
+.agent-activity>summary::before,.conversation-agent>summary::before,.event>summary::before,.turn>summary::before{content:"▸";display:inline-block;width:14px;flex-shrink:0}
+.agent-activity[open]>summary::before,.conversation-agent[open]>summary::before,.event[open]>summary::before,.turn[open]>summary::before{content:"▾"}
+summary::-webkit-details-marker{display:none}
+.activity-children{padding-left:20px;margin-top:12px}
+.activity-children>.agent-activity{margin-bottom:0}
+.turn>summary{justify-content:flex-start}.turn>summary .turn-cost{margin-left:auto}
+</style></head><body><main>
+{# Header: demo alone triggers the offline label; real recordings make no simulation claim. #}<header><h1>{{ run.title }}</h1><span>{{ run.status }}</span>{% if run.demo %}<small>Offline demonstration · no provider billed</small>{% endif %}</header>
+
+{# Summary: EUR requires recorded FX; missing pricing switches the USD label to known subtotal, never all-calls-priced. #}<div class="cards"><div class="card"><span>Estimated model cost</span><strong>{% if prices.exchange %}{{ '%.6f'|format(summary.known_cost * prices.exchange.rate) }} EUR{% else %}EUR unavailable{% endif %}</strong><small>{{ '%.6f'|format(summary.known_cost) }} USD · {{ 'known subtotal' if summary.unpriced_calls else 'all calls priced' }}</small></div><div class="card"><span>Input tokens · including cache</span><strong>{{ '{:,}'.format(summary.input_tokens) }}</strong></div><div class="card"><span>Output tokens · including reasoning</span><strong>{{ '{:,}'.format(summary.output_tokens) }}</strong></div><div class="card"><span>Model calls / elapsed</span><strong>{{ summary.model_calls }} / {{ '%.2f'|format(summary.duration_ms / 1000) }}s</strong></div></div>
+
+{# Missing-data notice: any unpriced call means subtotals cannot represent the full run; missing usage is reported separately. #}{% if summary.unpriced_calls %}<p class="notice">{{ summary.unpriced_calls }} model call(s) could not be priced; {{ summary.missing_usage }} have unknown token usage. Known subtotals are incomplete.</p>{% endif %}
+{# Money: only available FX permits conversion; an older reference marks EUR stale. show_date currently gates an empty block and adds no output. #}{% macro money(usd, show_date=true) %}<div class="euro {{ 'stale' if prices.exchange and prices.exchange.date < today else '' }}">{% if prices.exchange %}{{ '%.6f'|format(usd * prices.exchange.rate) }} EUR{% else %}EUR unknown{% endif %}</div>{% if prices.exchange and show_date %}{% endif %}<div class="dollar">{{ '%.6f'|format(usd) }} USD</div>{% endmacro %}
+{# Token cells: show only selected categories. No model descendants means no usage cell; partial values display a known-subtotal marker. Old tariff dates mark cells stale independently of FX. #}{% macro token_cells(metrics, show_date=true) %}{% for cell in metrics.cells %}{% if loop.index0 in visible_token_indices %}<td class="{{ 'stale' if metrics.stale_prices else '' }}">{% if metrics.has_usage %}<div class="tokens">{{ '{:,}'.format(cell.tokens) }} <small>tokens</small>{% if cell.partial %}*{% endif %}</div>{{ money(cell.usd, show_date) }}{% if cell.partial %}<div class="partial">Known only / unknown remainder</div>{% endif %}{% else %}—{% endif %}</td>{% endif %}{% endfor %}{% endmacro %}
+{% macro token_headers() %}{% for key,label in categories %}<th>{{ label }}</th>{% endfor %}{% endmacro %}
+{# Counts: None means unreported, whereas zero is an actual recorded count and must remain visible. #}{% macro count(value) %}{{ value ~ ' tokens' if value is not none else 'tokens unreported' }}{% endmacro %}
+{# Category lines: require a selected category and either nonzero tokens or incomplete data; known zeros add no clutter. Output with tool calls includes their JSON. Partial amounts retain an incomplete label. #}{% macro category_costs(event, indices) %}{% for cell in event.cells %}{% if loop.index0 in indices and (cell.tokens or cell.partial) %}<div class="cost-line"><strong>{{ 'Output · including tool calls' if loop.index0 == 5 and event.has_tool_calls else all_categories[loop.index0][1] }} · {{ count(cell.tokens) }}</strong>{{ money(cell.usd, false) }}{% if cell.partial %}<span>Incomplete</span>{% endif %}</div>{% endif %}{% endfor %}{% endmacro %}
+<h2>LLM costs by request</h2>
+{# Chart: absence means no FX conversion was possible; partial chart values remain explicitly known-only. Rectangles require nonzero EUR to avoid invisible interactive segments. #}{% if chart %}<p>EUR per LLM invocation, including its response. The line shows cumulative cost on the same EUR scale. Hover or focus for details.</p>{% if chart.partial %}<p class="partial">Known costs only; some usage or prices are unavailable.</p>{% endif %}
+<div style="display:flex;gap:18px;flex-wrap:wrap">{% for item in chart.legend %}<span><span style="display:inline-block;width:12px;height:12px;background:{{ item.color }};margin-right:6px"></span>{{ item.label }}</span>{% endfor %}<span><span style="display:inline-block;width:20px;border-top:3px solid #912c42;margin-right:6px"></span>Cumulative total</span></div>
+<div style="overflow-x:auto"><svg viewBox="0 0 {{ chart.width }} {{ chart.height }}" style="width:100%;min-width:{{ chart.width }}px" role="img" aria-label="Stacked EUR costs for each LLM request"><text x="8" y="16" font-size="12">EUR</text>
+{% for tick in chart.ticks %}<line x1="75" x2="{{ chart.width - 15 }}" y1="{{ tick.y }}" y2="{{ tick.y }}" stroke="#d5e0dc"/><text x="68" y="{{ tick.y + 4 }}" text-anchor="end" font-size="10">{{ '%.6f'|format(tick.value) }}</text>{% endfor %}
+{% for bar in chart.bars %}{% for segment in bar.segments if segment.eur %}<rect x="{{ bar.x }}" y="{{ segment.y }}" width="{{ chart.bar_width }}" height="{{ segment.height }}" fill="{{ segment.color }}" tabindex="0" data-cost-tip="{{ bar.label }} · Turn {{ bar.turn }} · {{ bar.agent.name if bar.agent else 'Agent unreported' }} | {{ segment.label }} | {{ segment.tokens }} tokens | {{ '%.8f'|format(segment.eur) }} EUR"></rect>{% endfor %}<text x="{{ bar.center }}" y="310" text-anchor="middle" font-size="11">{{ bar.short_label }}</text><text transform="translate({{ bar.center }}, 322) rotate(-90)" text-anchor="end" dominant-baseline="middle" font-family="monospace" font-size="9" fill="#684296">{{ bar.agent_name }}</text>{% endfor %}{% for group in chart.groups %}<line x1="{{ group.start }}" x2="{{ group.end }}" y1="{{ chart.turn_line_y }}" y2="{{ chart.turn_line_y }}" stroke="#617679"/><text x="{{ (group.start + group.end) / 2 }}" y="{{ chart.turn_line_y + 19 }}" text-anchor="middle" font-size="12">Turn {{ group.turn }}</text>{% endfor %}<polyline points="{{ chart.line_points }}" fill="none" stroke="#912c42" stroke-width="3" pointer-events="none"/>{% for bar in chart.bars %}<circle cx="{{ bar.center }}" cy="{{ bar.cumulative_y }}" r="5" fill="#912c42" stroke="white" stroke-width="2" tabindex="0" data-cost-tip="{{ bar.label }} · Turn {{ bar.turn }} · {{ bar.agent.name if bar.agent else 'Agent unreported' }} | Cumulative total | {{ '%.8f'|format(bar.cumulative) }} EUR"/>{% endfor %}</svg></div>
+{% else %}<p>EUR chart unavailable: no exchange rate was recorded.</p>{% endif %}
+
+
+<h2>Agent activity</h2>
+<p>Agents are identified by the named execution scopes enclosing model calls in the trace. Each entry is one invocation; times are relative to the run start. Costs include only that agent’s own model calls, excluding delegated agents.</p>
+{% macro activity_nodes(nodes) %}{% for activity in nodes %}{% set agent=activity.step %}
+<details open class="agent-activity" id="agent-{{ agent.id }}">
+<summary><strong>{{ agent.name }}</strong> · Turn {{ agent.context.get('report_turn', 1) }} · {{ agent.status }}</summary>
+<div>{% if activity.caller %}{{ 'Delegated by' if activity.delegation else 'Called by' }} <a href="#agent-{{ activity.caller.id }}">{{ activity.caller.name }}</a>{% else %}Top-level agent{% endif %}{% if activity.delegation %} · via task{% endif %} · Turn {{ agent.context.get('report_turn', 1) }}</div>
+<div>Started +{{ '%.2f'|format(activity.start_ms / 1000) }}s · Duration {{ '%.2f'|format(agent.duration_ms / 1000) }}s · Status: {{ agent.status }} · {{ activity.model_calls }} model call(s)</div>
+<div class="cost-line">Own model cost {% if activity.has_usage %}{{ money(activity.total, false) }}{% if activity.partial %}<span class="partial">Incomplete — known subtotal only</span>{% endif %}{% else %}No model calls recorded{% endif %}</div>
+{% if activity.children %}<div class="activity-children">{{ activity_nodes(activity.children) }}</div>{% endif %}
+</details>
+{% endfor %}{% endmacro %}
+<div class="toolbar"><button type="button" data-disclosure-target="agent-activity-list" data-expand="true">Expand all agents</button><button type="button" data-disclosure-target="agent-activity-list" data-expand="false">Collapse all agents</button></div>
+<div id="agent-activity-list">{% if agents.roots %}{{ activity_nodes(agents.roots) }}{% else %}<p>No agent execution scope was recorded.</p>{% endif %}</div>
+
+{% if collaboration %}
+<section aria-labelledby="collaboration-heading">
+<h3 id="collaboration-heading">Agent collaboration</h3>
+<p>Read downward in time order. Each lane is one agent invocation; arrows show calls and successful returns. Boxes show model and tool activity with their recorded outcome. Timestamps mark activity starts or returns, not a proportional time scale. Click an agent name for details.</p>
+{% for diagram in collaboration %}
+<h4>Turn {{ diagram.turn }}</h4>
+<div style="overflow-x:auto">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {{ diagram.width }} {{ diagram.height }}" style="display:block;width:{{ diagram.width }}px;max-width:none" role="group" aria-label="Agent collaboration for turn {{ diagram.turn }}">
+<defs><marker id="collaboration-arrow-{{ loop.index }}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#684296"></path></marker></defs>
+{% set marker=loop.index %}
+{% for lane in diagram.lanes %}
+<line x1="{{ lane.x }}" x2="{{ lane.x }}" y1="{{ diagram.header_height }}" y2="{{ diagram.height - 10 }}" stroke="#c7b8db" stroke-dasharray="4 4"></line>
+<a href="#agent-{{ lane.step.id }}" aria-label="Activity details for {{ lane.step.name }}">
+<rect x="{{ lane.x - 125 }}" y="4" width="250" height="{{ diagram.header_height - 8 }}" rx="8" fill="#f6f1fb" stroke="#8462a7"></rect>
+{% for line in lane.name_lines %}<text x="{{ lane.x }}" y="{{ 26 + loop.index0 * 16 }}" text-anchor="middle" font-size="13" font-weight="600" fill="#684296">{{ line }}</text>{% endfor %}
+<text x="{{ lane.x }}" y="{{ diagram.header_height - 34 }}" text-anchor="middle" font-size="11">Status: {{ lane.step.status }}</text>
+<text x="{{ lane.x }}" y="{{ diagram.header_height - 17 }}" text-anchor="middle" font-size="11">{{ lane.model_calls }} model call(s) · {{ '%.2f'|format(lane.step.duration_ms) }} ms</text>
+</a>
+{% endfor %}
+{% for event in diagram.events %}
+<text x="8" y="{{ event.y + 4 }}" font-size="10" fill="#617679">+{{ '%.2f'|format(event.time_ms) }} ms</text>
+{% if event.source != event.target %}
+<line x1="{{ event.x1 }}" x2="{{ event.x2 }}" y1="{{ event.y }}" y2="{{ event.y }}" stroke="#684296" stroke-width="2" marker-end="url(#collaboration-arrow-{{ marker }})" {% if event.order == 2 %}stroke-dasharray="6,4"{% endif %}></line>
+{% for line in event.lines %}<text x="{{ event.center }}" y="{{ event.y - 8 - (event.lines|length - loop.index) * 16 }}" text-anchor="middle" font-size="11" fill="#684296">{{ line }}</text>{% endfor %}
+{% else %}
+<rect x="{{ event.x1 - 120 }}" y="{{ event.y - 14 }}" width="240" height="{{ event.box_height }}" rx="5" fill="{{ '#f5f8fd' if event.status == 'ok' else '#fff1d4' }}" stroke="{{ '#8096b4' if event.status == 'ok' else '#a44c10' }}"></rect>
+{% for line in event.lines %}<text x="{{ event.x1 }}" y="{{ event.y + 4 + loop.index0 * 16 }}" text-anchor="middle" font-size="11">{{ line }}</text>{% endfor %}
+{% endif %}
+{% endfor %}
+</svg>
+</div>
+{% endfor %}
+</section>
+{% endif %}
+
+<h2>Conversation</h2>
+<div class="toolbar"><button type="button" data-disclosure-target="conversation-list" data-expand="true">Expand all conversation</button><button type="button" data-disclosure-target="conversation-list" data-expand="false">Collapse all conversation</button></div>
+{# Events: model spans use LLM styling and global request labels; tools use neutral styling. Only actual errors get error styling. Model/effort appear only when recorded; tool events instead show arguments. #}{% macro conversation_nodes(nodes, turn) %}{% for node in nodes %}{% set step=node.step %}{% if node.event is not defined %}<details open class="conversation-agent" aria-label="Agent {{ step.name }}"><summary class="agent-label">Agent · {{ step.name }} · {{ step.status }}</summary>{{ conversation_nodes(node.children, turn) }}</details>{% else %}{% set event=node.event %}<details open class="event {{ 'llm-event' if step.kind == 'model' else 'tool-event' }} {{ 'error-event' if step.status == 'error' else '' }}"><summary class="event-heading"><strong>{% if step.kind == 'model' %}{{ event.request_label }} · LLM request · {{ count(event.growth.input_tokens) }}{% else %}Tool · {{ step.name }}{% endif %}</strong>{% if step.model %} · {{ step.model }}{% if step.effort %}-{{ step.effort }}{% endif %}{% endif %}<span class="status">· {{ step.status }}{% if event.partial %} · incomplete cost{% endif %}</span><span class="span-id">{{ step.id }}</span></summary>{% if event.agent %}<div class="agent-label">Agent · <a href="#agent-{{ event.agent.id }}">{{ event.agent.name }}</a></div>{% endif %}{% if event.delegated_agents %}<div class="agent-label">Delegation · {% for child in event.delegated_agents %}<a href="#agent-{{ child.id }}">{{ child.name }}</a>{{ ', ' if not loop.last else '' }}{% endfor %}</div>{% endif %}{% if step.kind == 'model' %}
+{# History: a prior context or nonzero cache read warrants the history line; missing usage stays unreported and partial pricing stays incomplete. #}{% if event.growth.previous_tokens is not none or (step.usage and step.usage.cache_read) %}<div class="cost-line"><strong>Conversation history · cache read · {{ count(step.usage.cache_read if step.usage else none) }}</strong>{{ money(event.cells[1].usd, false) }}{% if event.cells[1].partial %}<span>Incomplete</span>{% endif %}</div>{% endif %}
+<div class="request-costs" aria-label="Input token costs">{{ category_costs(event, [0,4]) }}</div>
+<div class="input-detail">
+{# Definitions belong to this request, including tools never called. None preserves omitted/legacy evidence; an empty list is explicitly tool-free. #}
+<details class="tool-definitions"><summary class="prompt-label">Tool definitions · {{ count(step.context.get('simulated_definitions_tokens')) }}</summary>
+{% if step.tool_definitions is none %}<p>Tool definitions were not captured for this request.</p>
+{% elif not step.tool_definitions %}<p>No tools were bound to this request.</p>
+{% else %}{% for definition in step.tool_definitions %}{% set tool = definition.get('function', definition) %}
+<h5>{{ tool.get('name', tool.get('type', 'Tool')) }}</h5>
+{% if tool.get('description') %}<p>{{ tool.description }}</p>{% endif %}
+<pre>{{ tool.get('parameters', tool.get('input_schema', definition))|tojson(indent=2) }}</pre>
+{% endfor %}{% endif %}</details>
+
+{# History: a prior context or nonzero cache read warrants the history line; missing usage stays unreported and partial pricing stays incomplete. #}{% if event.growth.previous_tokens is none %}<div class="request-setup"><div class="prompt-label">System prompt · {{ count(step.context.get('simulated_system_tokens')) }}</div>{% for message in step.request if message.role == 'system' %}<pre>{{ message.content or 'Empty system message (message framing only).' }}</pre>{% endfor %}</div>{% endif %}
+{# Prompt: the first event alone presents the turn prompt; None indicates omitted content rather than an empty user prompt. #}{% if event.first_in_turn %}<div class="prompt-label">User prompt · {{ count(turn.request_tokens) }}</div><pre>{{ turn.request if turn.request is not none else 'Content was omitted from this recording.' }}</pre>{% endif %}
+{# Fresh tool input: inspect only the unretained suffix and tool-role messages; attach the matching tool-result estimate rather than recharging historical tool content. #}{% for message in step.request[event.growth.retained:] if message.role == 'tool' %}<div class="prompt-label">Tool result{% for part in event.input_parts if part.label == 'Tool-result input' %} · {{ count(part.tokens) }}{% endfor %}</div><pre>{{ message.content }}</pre>{% endfor %}
+</div>
+{# Context movement: a recorded ledger count, including zero, permits cache-write/context lines; missing ledger data must not be invented for live calls. #}{% if event.request_cache_write is not none %}<div class="prompt-label">Cache write · {{ count(event.request_cache_write) }}</div><div class="prompt-label">Context: Added: {{ count(event.request_cache_write) }} · Total: {{ count(event.request_context_total) }}</div>{% endif %}
+{# Request completion: warn for incomplete accounting; non-model events render their captured tool arguments instead of model input costs. #}{% if event.partial %}<span class="partial">Incomplete</span>{% endif %}{% else %}{% for message in step.request %}<h5>Tool arguments</h5><pre>{{ message.content }}</pre>{% endfor %}{% endif %}
+
+{% if node.children %}<div class="conversation-children">{{ conversation_nodes(node.children, turn) }}</div>{% endif %}
+{# Responses: model headings/counts differ from tool results. Render reasoning and output costs once on the first model response; reasoning requires tokens or text, and its preview requires actual text. Nonempty content is plain text or serialized structured data; tool-call JSON remains separate. Missing responses show a captured error or omission. Model-only ledger/totals and tool-call labels follow the response; absent ledger counts do not become zeros. #}{% for message in event.response_messages %}<h5 class="{{ 'llm-response-heading' if step.kind == 'model' else '' }}">{{ 'LLM response' if step.kind == 'model' else 'Tool result' }}{% if step.kind == 'model' %} · {{ count(event.response_tokens[loop.index0]) }}{% endif %}</h5>{% if step.kind == 'model' and loop.first %}{% if event.cells[6].tokens or event.thinking_text %}<div class="reasoning-section">{{ category_costs(event, [6]) }}{% if event.thinking_text %}<div class="thinking-preview">{{ event.thinking_text }}</div>{% endif %}</div>{% endif %}<div class="response-costs" aria-label="Output token costs">{{ category_costs(event, [5]) }}</div>{% endif %}{% if message.content %}<pre>{{ message.content if message.content is string else message.content|tojson(indent=2) }}</pre>{% endif %}{% for call in message.get('tool_calls',[]) %}<pre>{{ call|tojson(indent=2) }}</pre>{% endfor %}{% endfor %}{% if not step.response %}<p>{{ step.error or 'Response content was omitted from this recording.' }}</p>{% endif %}{% if step.kind == 'model' %}{% if event.response_cache_write is not none %}<div class="prompt-label">Cache write · {{ count(event.response_cache_write) }}</div><div class="prompt-label">Context: Added: {{ count(event.response_cache_write) }} · Total: {{ count(event.response_context_total) }}</div>{% endif %}<div class="cost-line"><strong>Call cost</strong>{{ money(event.total, false) }}</div>{% endif %}{% if step.kind == 'model' %}{% for message in step.response %}{% for call in message.get('tool_calls',[]) %}<h5>Tool call: {{ call.name }}</h5>{% endfor %}{% endfor %}{% endif %}<div class="status">Status: {{ step.status }}</div></details>{% endif %}{% endfor %}{% endmacro %}
+
+{# Turn totals: partial flags warn that the displayed subtotal omits unknown charges rather than representing a complete price. #}<div id="conversation-list">{% for turn in turns %}<details open class="turn"><summary class="turn-heading"><strong>Turn {{ turn.number }}</strong><span class="turn-cost">Turn cost {{ money(turn.total, false) }}{% if turn.partial %} · incomplete{% endif %}</span></summary>{% if turn.partial %}<p class="partial">Incomplete cost: some usage or pricing is unknown.</p>{% endif %}
+<div class="conversation-thread">{{ conversation_nodes(turn.conversation_nodes, turn) }}</div></details>{% endfor %}</div>
+
+<h2>Execution tree</h2><p>Drill into graph nodes, model calls, and tools. Each token category has its own column with EUR and USD cost underneath. Categories are disjoint: fresh input excludes cache; output excludes reasoning.</p>
+<div class="toolbar"><button id="expand-all" type="button">Expand all</button><button id="collapse-all" type="button">Collapse all</button><span>{{ run.steps|length }} spans · parent rows show subtree totals; do not add parent and child rows together.</span></div>
+
+
+<div class="table-wrap"><table aria-label="Expandable execution trace and token costs"><thead><tr><th>Operation</th><th>Span ID</th><th>Status</th><th>Description</th><th>Model · effort</th><th>Elapsed</th>{{ token_headers() }}<th>Total cost<br>EUR / USD</th></tr></thead><tbody>
+{# Tree: only error status colors the whole row; non-ok status labels remain marked. Root parent IDs are empty for traversal. Only parents get expansion controls/subtree labels. Error/context metadata appears only when present (graph step zero remains valid). Model names/effort require recorded values; missing effort is explicit. Rows without model descendants show dashes, while partial totals remain marked. #}{% for row in rows %}{% set step=row.step %}<tr class="tree-row {{ 'error-row' if step.status == 'error' else '' }}" data-index="{{ row.index }}" data-parent="{{ row.parent if row.parent is not none else '' }}"><td><div style="padding-left:{{ row.depth * 14 }}px"><div class="kind">{{ 'agent' if step.id in agents.scopes else step.kind }} <span class="status {{ 'error' if step.status != 'ok' else '' }}">· {{ step.status }}</span></div><div class="step-name">{% if row.has_children %}<button type="button" class="toggle" aria-expanded="true" aria-label="Toggle children of {{ step.name }}">−</button>{% endif %}{{ step.name }}</div>{% if row.has_children %}<div class="subtree">Subtree totals</div>{% endif %}</div></td><td class="span-id">{{ step.id }}</td><td>{{ step.status }}{% if step.error %}<br>{{ step.error }}{% endif %}</td><td class="description-cell">{{ row.description }}{% if step.context.get('langgraph_step') is not none %}<div class="context">Graph step {{ step.context.langgraph_step }}</div>{% endif %}{% if step.context.get('requested_tools') %}<div class="context">Requested: {{ step.context.requested_tools|join(', ') }}</div>{% endif %}{% if step.context.get('finish_reason') %}<div class="context">Completion: {{ step.context.finish_reason }}</div>{% endif %}</td><td>{% if step.model %}{{ step.model }}{% if step.effort %}-{{ step.effort }}{% endif %}<div class="context">{{ step.provider }}{% if not step.effort %} · effort not reported{% endif %}</div>{% else %}—{% endif %}</td><td>{{ '%.2f'|format(step.duration_ms) }} ms</td>{{ token_cells(row, false) }}<td>{% if row.has_usage %}{{ money(row.total, false) }}{% if row.partial %}<span class="partial">Incomplete</span>{% endif %}{% else %}—{% endif %}</td></tr>{% endfor %}
+</tbody></table></div>
+<h2>Token price references</h2>
+{% for model,error in prices.refresh_errors.items() %}<p class="notice">{{ model }}: {{ error }}</p>{% endfor %}
+{# FX reference: show recorded conversion and stale publication date; missing fetched_at identifies supplied data. Without FX show the recorded failure or absence, preserving USD amounts. #}{% if prices.exchange %}<p class="{{ 'stale' if prices.exchange.date < today else '' }}">1 USD = {{ prices.exchange.rate }} EUR · Rate reference date <strong>{{ prices.exchange.date }}</strong> · fetched {{ prices.exchange.fetched_at.isoformat() if prices.exchange.fetched_at else 'supplied from file' }} · source {{ prices.exchange.source }}. Latest published daily rate; weekends and holidays may use an earlier date.</p>{% else %}<p class="notice">{{ prices.exchange_error or 'No exchange-rate snapshot is available.' }} EUR amounts are unknown; USD amounts remain available.</p>{% endif %}
+<p>USD per million tokens · verification dates apply to every rate in the row. Red means older than today ({{ today }}). Dates record price verification, not when this HTML was generated.</p>
+{# Tariffs: use model verification date or snapshot date; past dates trigger stale styling. Unspecified write rate uses the five-minute tariff. None means Unknown, but zero remains a valid rate. EUR equivalents require FX. #}<div class="table-wrap"><table aria-label="Token price references and dates"><thead><tr><th>Model / verification date</th><th>Input</th><th>Cache read</th><th>Cache write</th><th>Output / reasoning</th></tr></thead><tbody>{% for name,rate in prices.models.items() %}{% set verified=rate.as_of or prices.as_of %}<tr class="{{ 'stale' if verified < today else '' }}"><td class="{{ 'stale' if verified < today else '' }}">{{ name }}<strong class="rate-date {{ 'stale' if verified < today else '' }}">Verified {{ verified }}</strong><div class="context">{{ rate.source or prices.sources|join(' · ') }}</div></td>{% for value in [rate.input,rate.cache_read,rate.cache_write if rate.cache_write is not none else rate.cache_write_5m,rate.output] %}<td>{% if value is not none %}{{ value }} USD / 1M tokens{% if prices.exchange %}<div class="euro">{{ '%.6f'|format(value * prices.exchange.rate) }} EUR / 1M tokens</div>{% endif %}{% else %}Unknown{% endif %}</td>{% endfor %}</tr>{% endfor %}</tbody></table></div>
+<details><summary>Complete pricing and exchange-rate data</summary><p>{{ prices.note }}</p><pre>{{ prices.model_dump_json(indent=2) }}</pre></details>
+{# Footer: only simulated runs carry simulation assumptions; live recordings never claim simulated token counting. #}<footer><div>Run {{ run.id }}</div>{% if run.demo %}<p>Offline demonstration: actual graph execution with scripted responses. Token counts use message and tool-definition JSON words and punctuation. The simulation retains completed conversation history, including responses, for subsequent cache reads.</p>{% endif %}<p>Turn costs sum model calls once. Tool fees are outside this model-token estimate.</p>Only model calls contribute token charges. Reasoning is priced at the output-token rate. Missing usage or prices are never assumed free. Context is framework metadata or application-authored annotations, not inferred private reasoning. Token estimates exclude tool fees, infrastructure, taxes, and discounts. Schema {{ run.schema_version }}.</footer>
+<div id="cost-tooltip" role="tooltip" hidden style="position:fixed;z-index:20;pointer-events:none;background:#173b70;color:white;padding:10px 14px;border-radius:6px;box-shadow:0 3px 12px #0003;white-space:pre-line;font-size:13px;max-width:280px"></div>
+</main><script>
+const costTip = document.getElementById('cost-tooltip');
+/** Show one shared tooltip for either a bar segment or cumulative-cost point. */
+function showCostTip(segment, event) {
+  costTip.textContent = segment.dataset.costTip.split(' | ').join('\n');
+  costTip.hidden = false;
+  const rect = segment.getBoundingClientRect();
+  // Keyboard focus has no pointer coordinates; anchor to the chart element.
+  // Clamp both axes so a tooltip remains readable at viewport boundaries.
+  const x = event.clientX ?? rect.right;
+  const y = event.clientY ?? rect.top;
+  costTip.style.left = Math.max(8, Math.min(x + 14, window.innerWidth - costTip.offsetWidth - 8)) + 'px';
+  costTip.style.top = Math.max(8, Math.min(y + 14, window.innerHeight - costTip.offsetHeight - 8)) + 'px';
+}
+document.querySelectorAll('[data-cost-tip]').forEach(segment => {
+  segment.setAttribute('aria-label', segment.dataset.costTip);
+  segment.addEventListener('pointerenter', event => showCostTip(segment, event));
+  segment.addEventListener('pointermove', event => showCostTip(segment, event));
+  segment.addEventListener('pointerleave', () => costTip.hidden = true);
+  segment.addEventListener('focus', () => showCostTip(segment, {}));
+  segment.addEventListener('blur', () => costTip.hidden = true);
+});
+{# Tooltip: Escape dismisses the popup; other keys leave keyboard navigation unchanged. #}document.addEventListener('keydown', event => { if (event.key === 'Escape') costTip.hidden = true; });
+
+// Row indices are template-local identifiers, not provider span IDs. Parent
+// indices let visibility follow the execution hierarchy without altering totals.
+const treeRows = Array.from(document.querySelectorAll('.tree-row'));
+const rowByIndex = new Map(treeRows.map(row => [row.dataset.index, row]));
+const expandedRowIndices = new Set(treeRows.map(row => row.dataset.index));
+
+/** Apply ancestor visibility while preserving each descendant's own open state. */
+function refreshTreeVisibility() {
+  for (const row of treeRows) {
+    let parentIndex = row.dataset.parent;
+    let visible = true;
+    // The empty parent is the root sentinel; roots remain visible even when
+    // Collapse all removes every entry from the expanded set.
+    while (parentIndex !== '') {
+      // Any closed ancestor hides the entire branch, not just direct children.
+      if (!expandedRowIndices.has(parentIndex)) {
+        visible = false;
+        break;
+      }
+      parentIndex = rowByIndex.get(parentIndex).dataset.parent;
+    }
+    row.hidden = !visible;
+    const toggleButton = row.querySelector('.toggle');
+    // Leaves have no expansion control. Parents expose the same state to
+    // assistive technology and the visual plus/minus affordance.
+    if (toggleButton) {
+      const isExpanded = expandedRowIndices.has(row.dataset.index);
+      toggleButton.setAttribute('aria-expanded', String(isExpanded));
+      toggleButton.textContent = isExpanded ? '−' : '+';
+    }
+  }
+}
+for (const row of treeRows) {
+  const toggleButton = row.querySelector('.toggle');
+  // Only parent rows have children to hide; leaf rows need no click handler.
+  if (toggleButton) {
+    toggleButton.addEventListener('click', () => {
+      const rowIndex = row.dataset.index;
+      // Toggle only this parent; descendants retain their choices for reopening.
+      if (expandedRowIndices.has(rowIndex)) expandedRowIndices.delete(rowIndex);
+      else expandedRowIndices.add(rowIndex);
+      refreshTreeVisibility();
+    });
+  }
+}
+document.getElementById('expand-all').addEventListener('click', () => {
+  for (const row of treeRows) expandedRowIndices.add(row.dataset.index);
+  refreshTreeVisibility();
+});
+document.getElementById('collapse-all').addEventListener('click', () => {
+  expandedRowIndices.clear();
+  refreshTreeVisibility();
+});
+refreshTreeVisibility();
+// Section controls affect only their own disclosures, leaving the trace tree alone.
+for (const button of document.querySelectorAll('[data-disclosure-target]')) {
+  button.addEventListener('click', () => {
+    const section = document.getElementById(button.dataset.disclosureTarget);
+    for (const detail of section.querySelectorAll('details')) {
+      detail.open = button.dataset.expand === 'true';
+    }
+  });
+}
+// Agent links must also reveal a target nested inside a collapsed caller.
+function revealAgentTarget() {
+  const target = document.getElementById(location.hash.slice(1));
+  if (!target || !target.classList.contains('agent-activity')) return;
+  for (let node = target; node; node = node.parentElement) {
+    if (node.tagName === 'DETAILS') node.open = true;
+  }
+  target.scrollIntoView({block: 'start'});
+}
+window.addEventListener('hashchange', revealAgentTarget);
+document.addEventListener('click', event => {
+  if (event.target.closest('a[href^="#agent-"]')) setTimeout(revealAgentTarget, 0);
+});
+revealAgentTarget();
+</script></body></html>

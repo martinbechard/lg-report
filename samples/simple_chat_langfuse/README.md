@@ -1,130 +1,70 @@
+<!-- Copyright (c) 2026 Martin.Bechard@DevConsult.ca; third-party source excerpts retain their original rights. -->
 # Simple chat with Langfuse
 
-## Purpose
+This is the same `agents/chat_agent.py` used by the local-report sample. It uses
+the same clients and `platform.Conversation`; only the recording wrapper changes.
+There is no second graph definition and no Langfuse-specific conversation loop.
 
-Learn where tracing attaches to a DeepAgents/LangGraph application. This variant
-runs the same two-turn conversation as [simple chat](../simple_chat/README.md),
-but sends execution traces through the **official Langfuse callback**. It does
-not attach `TraceCapture`, call `record_run`, or generate local HTML/Excel files.
-The result is a public trace you inspect in Langfuse without logging in.
-The sample publishes every run, including live runs. Anyone who can reach the
-configured server and has the link can view its contents. Our local instance
-is bound to localhost; project administration and API ingestion still require
-authentication.
+Start with [How the parts fit together](../../docs/chat-composition.md) for the
+Mermaid component and sequence diagrams, ownership table, and failure behavior.
 
-The graph remains application code in `app.py`. Prompts and scripted responses
-are reused from the baseline sample so the instrumentation is the meaningful
-difference. The simulator supplies usage through the normal model message API;
-it does not create Langfuse spans itself.
+## Configuration
 
-## This workstation
-
-The local development instance is at http://localhost:3001, with project
-`lg-report-dev`. Its Compose checkout and operational notes are in
-`/Users/martinbechard/dev/langfuse-local/LOCAL-SETUP.md`. The sample
-`.env` is configured for that instance; run the command below directly.
-Local login credentials are kept in the Compose checkout's private `.env`,
-not in this README.
-
-## Configure and run
-
-From the repository root:
-
-```sh
-uv sync --locked
+```bash
 cp samples/simple_chat_langfuse/.env.example samples/simple_chat_langfuse/.env
 ```
 
-Create a project in your Langfuse instance and enter its public key, secret key,
-and base URL in that `.env`. The example URL is Langfuse Cloud's EU endpoint.
-For a local instance, set `LANGFUSE_BASE_URL=http://localhost:3000` and use keys
-created in that local project. This sample does not provision a Langfuse server.
+Set `LANGFUSE_BASE_URL`, `LANGFUSE_PUBLIC_KEY`, and `LANGFUSE_SECRET_KEY` for your
+project. For the existing local installation, the endpoint is
+`http://localhost:3001`; keys belong in the private `.env`, not source control.
+Live model mode additionally needs the selected provider key and model settings.
 
-Run the application:
+## Static test case
 
-```sh
+```bash
 uv run python -m samples.simple_chat_langfuse.app
 ```
 
-It checks project authentication, prints both answers, flushes pending spans,
-and prints the trace URL. Langfuse ingestion is asynchronous: the trace may take
-a moment to appear. A printed URL is not a server-side delivery confirmation;
-check the UI and any exporter errors. Missing configuration or authentication
-failure stops execution before model invocation. There is no local-capture fallback.
+This reuses `samples/simple_chat/test_case.py`: two user prompts and scripted
+assistant responses. It makes no LLM provider call, but sends real traces to the
+configured Langfuse endpoint. `--live` uses the same requests with a real model.
 
-By default, the LLM is simulated, so no OpenAI/Anthropic key or paid model call is
-needed. **Tracing is real:** messages, responses, and metadata are sent to your
-configured Langfuse server. This is not a fully offline command. The application
-uses no exchange-rate service, pricing file, or local report directory.
+## Console chat
 
-To call a real model, configure `LG_PROVIDER`, `LG_MODEL`, and its API key in the
-same `.env`, then add `--live` to the command above. Only the selected provider's
-key is required. Live calls incur provider charges. Shell variables take
-precedence over `.env`; `--env-file` selects a different configuration file.
-
-## Read the code
-
-1. `build_agent()` constructs the graph. `StateBackend` keeps built-in file tools
-   in memory. The prompt requests direct answers, although DeepAgents still
-   supplies its built-in tool definitions to the model.
-2. `main()` calls the shared `lg_report.langfuse_runtime.launch`, which loads
-   configuration and verifies Langfuse access before selecting
-   the model. `CallbackHandler` is selected explicitly for that project key.
-3. The shared runtime's `run_conversation()` opens one parent trace and a span for each turn. Passing
-   the handler in `graph.invoke(config=...)` captures nested graph/model calls.
-4. Each new request includes the complete preceding message history. A shared
-   trace groups execution; it does not store conversation state for the graph.
-5. The shared runtime flushes on success and shuts down in `finally`, including failures,
-   because this short-lived process must allow queued telemetry to finish.
-
-Ambient LangSmith tracing is disabled for these invocations so this lesson has
-one tracing destination. Errors from the graph propagate through Langfuse's
-span contexts; the CLI prints an exception type without copying provider error
-payloads to the terminal.
-
-## What to inspect
-
-Expect this hierarchy in simulated mode, with framework nodes between turns
-and model generations:
-
-```text
-simple-chat-langfuse
-  Turn 1
-    chat-agent → model → generation
-  Turn 2
-    chat-agent → model → generation
+```bash
+uv run python -m samples.simple_chat_langfuse.app --client console --live
 ```
 
-There should be two model generations, distinct answers, and no tool execution.
-Turn 2 includes the earlier user prompt and assistant response. Inspect its
-input/cache usage and compare it with Turn 1. The callback preserves the model's
-`report_effort`, purpose annotation, and the invocation's `report_turn` metadata.
+Enter prompts at `User:`. `/attach PATH` queues a UTF-8 text file, `/send` sends
+queued files without additional prompt text, and `/quit` ends the session. EOF
+also ends normally. History and attachments persist across requests. The console
+requires a real model because the static answers cannot answer arbitrary prompts.
 
-Simulated counts measure message/tool-definition JSON, not provider tokenizer
-output. They assume reuse of the completed conversation as cached context. In
-live mode, provider-reported usage determines the counts. Langfuse normalizes
-input into exclusive fresh/cache categories, so do not subtract cached tokens
-from its fresh-input value again.
+Traces are **private by default**. Add `--public-trace` only when you want the
+captured content visible through a public trace link. This includes attached file
+text and applies to hosted as well as local Langfuse. API keys are still required.
+No local HTML, Excel, pricing refresh, or trace JSON files are produced here.
 
-`scripted-chat` is a fictitious model. Langfuse does not receive our `models.json`
-price table, so this sample does not promise a cost for it. Configure an explicit
-custom model price in Langfuse if you want illustrative costs. Missing pricing
-is not evidence of zero cost. Real model pricing depends on Langfuse's model
-configuration. EUR conversion, our presentation, and workbook projections are
-outside this tracing sample; a Langfuse-to-`Run` importer is not implemented here.
+## Execution and trace structure
 
-## Verification
+1. `app.py` chooses models, the shared `workflows/simple_chat.py` workflow, and a client.
+2. `platform.langfuse_runtime.launch` loads configuration and validates access
+   before constructing the graph. It selects the static or console client.
+3. `run_conversation` opens one root and attaches the official callback once.
+4. `Conversation` requests each user turn, retains history, and invokes the graph.
+   Its optional scope hook opens `Turn N`, records the result, and closes the span.
+5. The callback records nested graph/model/tool observations. The wrapper flushes
+   and shuts down the SDK before exit and prints the trace URL on success.
 
-```sh
-uv run pytest tests/test_langfuse_sample.py -q
-```
+Inspect one root, two turn spans, and two model observations in the default test.
+The second model request should include the first prompt and answer. Static and
+console clients use identical history rules. Client waiting time belongs to the
+root duration, not the turn duration.
 
-The tests run the real graph, Langfuse SDK, and official callback with an
-in-memory span exporter. They verify parentage, two-turn history, token/cache
-accounting, annotations, error spans, and configuration failures without a
-server or model credentials. Hosted authentication, ingestion, and UI display
-require running against your configured project.
+Failures close turn/root spans as errors and still shut down the SDK. Empty sessions
+are incomplete; approval interrupts stop the conversation and are marked interrupted.
+This sample does not implement approval/resume. A printed URL is an identifier;
+server ingestion may take a moment after SDK export finishes.
 
-References: [Langfuse DeepAgents integration](https://langfuse.com/integrations/frameworks/langchain-deepagents),
-[LangChain callback](https://langfuse.com/integrations/frameworks/langchain),
-[token accounting](https://langfuse.com/docs/observability/features/token-and-cost-tracking).
+`tests/test_langfuse_sample.py` uses the actual SDK/callback with an in-memory
+exporter to verify trace ancestry, usage, content, clients, and failure handling.

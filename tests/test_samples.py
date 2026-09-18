@@ -1,4 +1,13 @@
-"""Exercise each documented application command from outside the repository."""
+"""Run the documented sample commands from outside the repository directory.
+
+Subprocess checks catch broken package imports, path assumptions, and missing
+output artifacts that direct factory calls would miss. Explicit pricing and FX
+files keep these tests offline; rerun checks protect prior evidence from overwrite.
+
+AI attribution: Generated with AI assistance.
+
+Copyright (c) 2026 Martin.Bechard@DevConsult.ca
+"""
 
 import json
 import subprocess
@@ -7,9 +16,9 @@ from pathlib import Path
 
 import pytest
 
-from lg_report.pricing import load_prices
-from lg_report.render import conversation_turns
-from lg_report.schema import Run
+from lg_report.report.pricing import load_prices
+from lg_report.report.render import conversation_turns
+from lg_report.report.schema import Run
 
 
 @pytest.mark.parametrize(
@@ -19,6 +28,8 @@ from lg_report.schema import Run
         ("tool_chat", 4, 2, 2),
         ("thinking_agent", 7, 6, 1),
         ("subagent_chat", 4, 2, 1),
+        ("expert_dispatch", 12, 6, 3),
+        ("review_loop", 4, 0, 1),
     ],
 )
 def test_standalone_application(name, calls, tools, turn_count, tmp_path):

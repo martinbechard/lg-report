@@ -1,0 +1,1102 @@
+<!-- Copyright (c) 2026 Martin.Bechard@DevConsult.ca; third-party source excerpts retain their original rights. -->
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Dispatcher · movies, sports, and history · LG Report</title>
+<style>
+:root{color-scheme:light;--ink:#193e42;--muted:#617679;--line:#d5e0dc;--accent:#087d6c}*{box-sizing:border-box}body{margin:0;background:#f4f6f2;color:var(--ink);font:14px/1.5 system-ui,sans-serif}main{padding:16px 32px;max-width:1800px;margin:auto}header{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;border-top:3px solid var(--accent);padding:8px 0}.eyebrow{text-transform:uppercase;font-size:11px;letter-spacing:.15em;color:var(--accent)}h1{font-size:24px;margin:0}h2{font-size:22px}p{color:var(--muted)}.cards{display:flex;gap:12px 28px;flex-wrap:wrap;margin:8px 0 16px;padding:8px 0;border-bottom:1px solid var(--line)}.card{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}.card strong{font-size:16px}.card span,small{color:var(--muted)}.error-row td,.error-event{background:#ffd3d3!important;color:#8b1010!important}.span-id{font:10px/1.4 monospace;overflow-wrap:anywhere;max-width:120px;min-width:100px;text-align:left}.description-cell{min-width:280px;max-width:380px;text-align:left;white-space:normal}.turn{background:white;border:1px solid var(--line);border-radius:8px;padding:18px;margin:16px 0}.event{padding:12px 16px;margin:12px 0}.llm-event{background:#f5f8fd}.tool-event{border-left:2px solid #c4cbd2;margin-left:20px}.llm-event>.event-heading{color:#173b70}.event pre{margin:8px 0}.stale{background:#ffd3d3!important;color:#8b1010!important;padding:3px 5px;border-radius:3px}.rate-date{display:block;font-size:10px;margin-top:3px}.notice{background:#fff1d4;padding:12px 16px;border-radius:8px}.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:15px 0}button{border:1px solid var(--line);border-radius:5px;background:white;color:var(--ink);padding:7px 12px;cursor:pointer}button:focus-visible,summary:focus-visible{outline:3px solid #007cb0;outline-offset:2px}.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:10px;background:white;max-height:75vh}table{border-collapse:separate;border-spacing:0;width:100%;min-width:1500px}th,td{padding:13px 10px;border-bottom:1px solid var(--line);text-align:right;vertical-align:top;min-width:112px}th{position:sticky;top:0;background:#eaf0eb;z-index:2;font-size:11px;text-transform:uppercase;text-align:right}th:first-child,td:first-child{position:sticky;left:0;text-align:left;min-width:310px;max-width:390px;background:#fff;z-index:1;border-right:1px solid var(--line)}th:first-child{z-index:3;background:#eaf0eb}.tokens{font-size:17px;font-weight:600;font-variant-numeric:tabular-nums}.euro{color:var(--accent);font-size:12px}.dollar{font-size:11px;color:var(--muted)}.kind{font-size:10px;text-transform:uppercase;color:var(--accent)}.step-name{font-weight:600;overflow-wrap:anywhere}.toggle{padding:1px 5px;margin-right:5px}.context{margin-top:6px;font-size:12px;white-space:normal}.context summary{cursor:pointer;color:var(--accent)}dl{margin:8px 0}dt{font-weight:600}dd{margin:0 0 8px;overflow-wrap:anywhere}.status{font-size:11px}.error,.partial{color:#a44c10}.tree-row[hidden]{display:none}.subtree{font-size:10px;color:var(--muted)}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:white;padding:20px;border:1px solid var(--line)}footer{font-size:12px;color:var(--muted);margin-top:24px}@media(max-width:700px){main{padding:16px}h1{font-size:26px}th:first-child,td:first-child{min-width:240px;max-width:270px}}@media print{.toolbar{display:none}.table-wrap{overflow:visible;max-height:none}.tree-row[hidden]{display:table-row}th,td{position:static!important}main{padding:0}table{font-size:9px;min-width:0}}
+
+/* Conversation metrics use the full card width; reference dates remain in the pricing section. */
+.turn-heading,.event-heading{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.turn-heading{justify-content:space-between;margin-bottom:12px}.turn-heading h3{margin:0}
+
+.turn .table-wrap{max-height:none}.turn table{min-width:1080px;table-layout:fixed}
+.turn th,.turn td{min-width:0;padding:10px 8px}.turn th:first-child,.turn td:first-child{width:180px;min-width:180px;max-width:180px}
+.turn .tokens{font-size:15px;white-space:nowrap}.turn .tokens small{font-size:10px;font-weight:400}
+.turn .euro,.turn .dollar{white-space:nowrap}.turn .event .span-id{max-width:none;min-width:0;white-space:nowrap}
+.turn .event-heading{font-size:15px}.turn .llm-response-heading{font-size:15px;font-weight:700}.reasoning-section{margin:8px 0 16px}.output-label{margin-top:16px!important}.thinking-preview{font-style:italic;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;line-height:1.5;max-height:4.5em;white-space:pre-wrap;margin:8px 0}.prompt-label{font-size:13px;font-weight:600;margin-top:8px}.turn .event{padding:10px 14px}.turn pre{padding:14px;margin:8px 0}
+.cost-line{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}.request-costs{margin:12px 0}.input-detail{margin-left:20px;padding-left:12px}.step-metrics{display:flex;flex-wrap:wrap;gap:12px 24px;margin:12px 0}.metric{min-width:130px}.metric>span{display:block;color:var(--muted);font-size:11px}.metric strong{display:block;font-size:15px}.call-context{background:#eef4ef;padding:10px 12px;margin:10px 0;font-size:13px}.turn-cost{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}.turn-cost .euro,.turn-cost .dollar{display:inline}
+.agent-label{font-weight:600;color:#684296;margin-bottom:8px}.agent-activity{border-left:4px solid #8462a7;padding:12px 16px;margin:12px 0;background:#f6f1fb}.agent-activity h3{margin:0 0 8px}.agent-activity a{color:#684296}
+/* Tool definitions form a closed panel so subsequent prompts are visibly outside it. */
+.tool-definitions{margin:12px 0 24px;padding:0 16px;border:1px solid #b8c9cc;border-radius:8px;background:#edf3f3}
+.tool-definitions>summary.prompt-label{margin:0;padding:12px 0;cursor:pointer;list-style:none}
+.tool-definitions>summary::before{content:"▸";display:inline-block;width:18px}
+.tool-definitions[open]>summary::before{content:"▾"}
+.tool-definitions[open]{padding-bottom:16px}
+.tool-definitions[open]>summary{border-bottom:1px solid #b8c9cc;margin-bottom:16px}
+.tool-definitions h5{font-size:13px;margin:20px 0 6px}
+/* Agent and tool execution scopes retain their own ancestry guide lines. */
+.conversation-thread{padding-left:0}
+.conversation-agent{border-left:3px solid #8462a7;padding:10px 0 10px 14px;margin:0}
+.conversation-children{padding:8px 0 8px 18px}
+.conversation-thread .tool-event{margin-left:18px;border-left:2px solid #8b969f}
+.conversation-thread .event{margin-top:0;margin-bottom:0}
+.conversation-thread .conversation-agent>.agent-label{padding:4px 14px}
+@media(max-width:700px){.conversation-agent{padding-left:8px}.conversation-children{padding-left:10px}.conversation-thread .tool-event{margin-left:10px}}
+/* Native disclosures keep their labels keyboard accessible when collapsed. */
+.agent-activity>summary,.conversation-agent>summary,.event>summary,.turn>summary{cursor:pointer;list-style:none;padding:6px 0}
+.agent-activity>summary::before,.conversation-agent>summary::before,.event>summary::before,.turn>summary::before{content:"▸";display:inline-block;width:14px;flex-shrink:0}
+.agent-activity[open]>summary::before,.conversation-agent[open]>summary::before,.event[open]>summary::before,.turn[open]>summary::before{content:"▾"}
+summary::-webkit-details-marker{display:none}
+.activity-children{padding-left:20px;margin-top:12px}
+.activity-children>.agent-activity{margin-bottom:0}
+.turn>summary{justify-content:flex-start}.turn>summary .turn-cost{margin-left:auto}
+</style></head><body><main>
+<header><h1>Dispatcher · movies, sports, and history</h1><span>ok</span><small>Offline demonstration · no provider billed</small></header>
+
+<div class="cards"><div class="card"><span>Estimated model cost</span><strong>0.001266 EUR</strong><small>0.001451 USD · all calls priced</small></div><div class="card"><span>Input tokens · including cache</span><strong>6,172</strong></div><div class="card"><span>Output tokens · including reasoning</span><strong>858</strong></div><div class="card"><span>Model calls / elapsed</span><strong>12 / 0.02s</strong></div></div>
+
+
+
+
+
+
+
+<h2>LLM costs by request</h2>
+<p>EUR per LLM invocation, including its response. The line shows cumulative cost on the same EUR scale. Hover or focus for details.</p>
+<div style="display:flex;gap:18px;flex-wrap:wrap"><span><span style="display:inline-block;width:12px;height:12px;background:#2458a6;margin-right:6px"></span>Fresh input</span><span><span style="display:inline-block;width:12px;height:12px;background:#35a6a0;margin-right:6px"></span>Cache read</span><span><span style="display:inline-block;width:12px;height:12px;background:#658d35;margin-right:6px"></span>Output · non-reasoning</span><span><span style="display:inline-block;width:20px;border-top:3px solid #912c42;margin-right:6px"></span>Cumulative total</span></div>
+<div style="overflow-x:auto"><svg viewBox="0 0 680 470" style="width:100%;min-width:680px" role="img" aria-label="Stacked EUR costs for each LLM request"><text x="8" y="16" font-size="12">EUR</text>
+<line x1="75" x2="665" y1="290" y2="290" stroke="#d5e0dc"/><text x="68" y="294" text-anchor="end" font-size="10">0.000000</text><line x1="75" x2="665" y1="225" y2="225" stroke="#d5e0dc"/><text x="68" y="229" text-anchor="end" font-size="10">0.000364</text><line x1="75" x2="665" y1="160" y2="160" stroke="#d5e0dc"/><text x="68" y="164" text-anchor="end" font-size="10">0.000728</text><line x1="75" x2="665" y1="95" y2="95" stroke="#d5e0dc"/><text x="68" y="99" text-anchor="end" font-size="10">0.001092</text><line x1="75" x2="665" y1="30" y2="30" stroke="#d5e0dc"/><text x="68" y="34" text-anchor="end" font-size="10">0.001456</text>
+<rect x="85" y="278.16053972600275" width="16" height="11.839460273997226" fill="#2458a6" tabindex="0" data-cost-tip="Request 1 · Turn 1 · dispatcher_agent | Fresh input | 380 tokens | 0.00006632 EUR"></rect><rect x="85" y="262.8315543186169" width="16" height="15.328985407385883" fill="#658d35" tabindex="0" data-cost-tip="Request 1 · Turn 1 · dispatcher_agent | Output · non-reasoning | 82 tokens | 0.00008586 EUR"></rect><text x="93.0" y="310" text-anchor="middle" font-size="11">R1</text><text transform="translate(93.0, 322) rotate(-90)" text-anchor="end" dominant-baseline="middle" font-family="monospace" font-size="9" fill="#684296">dispatcher_agent</text><rect x="109" y="281.99278607784925" width="16" height="8.007213922150756" fill="#2458a6" tabindex="0" data-cost-tip="Request 2 · Turn 1 · movie_expert | Fresh input | 257 tokens | 0.00004485 EUR"></rect><rect x="109" y="268.15931144191563" width="16" height="13.833474635933602" fill="#658d35" tabindex="0" data-cost-tip="Request 2 · Turn 1 · movie_expert | Output · non-reasoning | 74 tokens | 0.00007749 EUR"></rect><text x="117.0" y="310" text-anchor="middle" font-size="11">R2</text><text transform="translate(117.0, 322) rotate(-90)" text-anchor="end" dominant-baseline="middle" font-family="monospace" font-size="9" fill="#684296">movie_expert</text><rect x="133" y="288.03714211246887" width="16" height="1.962857887531119" fill="#2458a6" tabindex="0" data-cost-tip="Request 3 · Turn 1 · movie_expert | Fresh input | 63 tokens | 0.00001099 EUR"></rect><rect x="133" y="287.0058628096549" width="16" height="1.031279302813969" fill="#35a6a0" tabindex="0" data-cost-tip="Request 3 · Turn 1 · movie_expert | Cache read | 331 tokens | 0.00000578 EUR"></rect><rect x="133" y="277.09810394878355" width="16" height="9.907758860871361" fill="#658d35" tabindex="0" data-cost-tip="Request 3 · Turn 1 · movie_expert | Output · non-reasoning | 53 tokens | 0.00005550 EUR"></rect><text x="141.0" y="310" text-anchor="middle" font-size="11">R3</text><text transform="translate(141.0, 322) rotate(-90)" text-anchor="end" dominant-baseline="middle" font-family="monospace" font-size="9" fill="#684296">movie_expert</text><rect x="157" y="288.2240809589004" width="16" height="1.7759190410995838" fill="#2458a6" tabindex="0" data-cost-tip="Request 4 · Turn 1 · dispatcher_agent | Fresh input | 57 tokens | 0.00000995 EUR"></rect><rect x="157" y="286.7846518413776" width="16" height="1.4394291175228207" fill="#35a6a0" tabindex="0" data-cost-tip="Request 4 · Turn 1 · dispatcher_agent | Cache read | 462 tokens | 0.00000806 EUR"></rect><rect x="157" y="276.8768929805062" width="16" height="9.907758860871361" fill="#658d35" tabindex="0" data-cost-tip="Request 4 · Turn 1 · dispatcher_agent | Output · non-reasoning | 53 tokens | 0.00005550 EUR"></rect><text x="165.0" y="310" text-anchor="middle" font-size="11">R4</text><text transform="translate(165.0, 322) rotate(-90)" text-anchor="end" dominant-baseline="middle" font-family="monospace" font-size="9" fill="#684296">dispatcher_agent</text><rect x="209" y="288.75374102378976" width="16" height="1.2462589762102343" fill="#2458a6" tabindex="0" data-cost-tip="Request 5 · Turn 2 · dispatcher_agent | Fresh input | 40 tokens | 0.00000698 EUR"></rect><rect x="209" y="286.9715906878091" width="16" height="1.782150335980635" fill="#35a6a0" tabindex="0" data-cost-tip="Request 5 · Turn 2 · dispatcher_agent | Cache read | 572 tokens | 0.00000998 EUR"></rect><rect x="209" y="270.520972201834" width="16" height="16.45061848597509" fill="#658d35" tabindex="0" data-cost-tip="Request 5 · Turn 2 · dispatcher_agent | Output · non-reasoning | 88 tokens | 0.00009215 EUR"></rect><text x="217.0" y="310" text-anchor="middle" font-size="11">R5</text><text transform="translate(217.0, 322) rotate(-90)" text-anchor="end" dominant-baseline="middle" font-family="monospace" font-size="9" fill="#684296">dispatcher_agent</text><rect x="233" y="281.86816018022824" width="16" height="8.131839819771779" fill="#2458a6" tabindex="0" data-cost-tip="Request 6 · Turn 2 · sports_expert | Fresh input | 261 tokens | 0.00004555 EUR"></rect><rect x="233" y="266.91305246570545" width="16" height="14.95510771452281" fill="#658d35" tabindex="0" data-cost-tip="Request 6 · Turn 2 · sports_expert | Output · non-reasoning | 80 tokens | 0.00008377 EUR"></rect><text x="241.0" y="310" text-anchor="middle" font-size="11">R6</text><text transform="translate(241.0, 322) rotate(-90)" text-anchor="end" dominant-baseline="middle" font-family="monospace" font-size="9" fill="#684296">sports_expert</text><rect x="257" y="287.6321079452006" width="16" height="2.3678920547994453" fill="#2458a6" tabindex="0" data-cost-tip="Request 7 · Turn 2 · sports_expert | Fresh input | 76 tokens | 0.00001326 EUR"></rect><rect x="257" y="286.56967216798137" width="16" height="1.0624357772192248" fill="#35a6a0" tabindex="0" data-cost-tip="Request 7 · Turn 2 · sports_expert | Cache read | 341 tokens | 0.00000595 EUR"></rect><rect x="257" y="275.3533413820892" width="16" height="11.216330785892108" fill="#658d35" tabindex="0" data-cost-tip="Request 7 · Turn 2 · sports_expert | Output · non-reasoning | 60 tokens | 0.00006283 EUR"></rect><text x="265.0" y="310" text-anchor="middle" font-size="11">R7</text><text transform="translate(265.0, 322) rotate(-90)" text-anchor="end" dominant-baseline="middle" font-family="monospace" font-size="9" fill="#684296">sports_expert</text><rect x="281" y="288.00598563806363" width="16" height="1.9940143619363748" fill="#2458a6" tabindex="0" data-cost-tip="Request 8 · Turn 2 · dispatcher_agent | Fresh input | 64 tokens | 0.00001117 EUR"></rect><rect x="281" y="285.82503242969574" width="16" height="2.18095320836791" fill="#35a6a0" tabindex="0" data-cost-tip="Request 8 · Turn 2 · dispatcher_agent | Cache read | 700 tokens | 0.00001222 EUR"></rect><rect x="281" y="274.6087016438036" width="16" height="11.216330785892108" fill="#658d35" tabindex="0" data-cost-tip="Request 8 · Turn 2 · dispatcher_agent | Output · non-reasoning | 60 tokens | 0.00006283 EUR"></rect><text x="289.0" y="310" text-anchor="middle" font-size="11">R8</text><text transform="translate(289.0, 322) rotate(-90)" text-anchor="end" dominant-baseline="middle" font-family="monospace" font-size="9" fill="#684296">dispatcher_agent</text><rect x="333" y="288.8160539726003" width="16" height="1.1839460273997227" fill="#2458a6" tabindex="0" data-cost-tip="Request 9 · Turn 3 · dispatcher_agent | Fresh input | 38 tokens | 0.00000663 EUR"></rect><rect x="333" y="286.2487604816072" width="16" height="2.5672934909930825" fill="#35a6a0" tabindex="0" data-cost-tip="Request 9 · Turn 3 · dispatcher_agent | Cache read | 824 tokens | 0.00001438 EUR"></rect><rect x="333" y="270.17201968849514" width="16" height="16.076740793112023" fill="#658d35" tabindex="0" data-cost-tip="Request 9 · Turn 3 · dispatcher_agent | Output · non-reasoning | 86 tokens | 0.00009005 EUR"></rect><text x="341.0" y="310" text-anchor="middle" font-size="11">R9</text><text transform="translate(341.0, 322) rotate(-90)" text-anchor="end" dominant-baseline="middle" font-family="monospace" font-size="9" fill="#684296">dispatcher_agent</text><rect x="357" y="281.9304731290387" width="16" height="8.069526870961267" fill="#2458a6" tabindex="0" data-cost-tip="Request 10 · Turn 3 · history_expert | Fresh input | 259 tokens | 0.00004520 EUR"></rect><rect x="357" y="267.349243107379" width="16" height="14.581230021659742" fill="#658d35" tabindex="0" data-cost-tip="Request 10 · Turn 3 · history_expert | Output · non-reasoning | 78 tokens | 0.00008168 EUR"></rect><text x="365.0" y="310" text-anchor="middle" font-size="11">R10</text><text transform="translate(365.0, 322) rotate(-90)" text-anchor="end" dominant-baseline="middle" font-family="monospace" font-size="9" fill="#684296">history_expert</text><rect x="381" y="287.320543201148" width="16" height="2.6794567988520037" fill="#2458a6" tabindex="0" data-cost-tip="Request 11 · Turn 3 · history_expert | Fresh input | 86 tokens | 0.00001501 EUR"></rect><rect x="381" y="286.2705700136909" width="16" height="1.0499731874571225" fill="#35a6a0" tabindex="0" data-cost-tip="Request 11 · Turn 3 · history_expert | Cache read | 337 tokens | 0.00000588 EUR"></rect><rect x="381" y="272.8109730706203" width="16" height="13.45959694307053" fill="#658d35" tabindex="0" data-cost-tip="Request 11 · Turn 3 · history_expert | Output · non-reasoning | 72 tokens | 0.00007539 EUR"></rect><text x="389.0" y="310" text-anchor="middle" font-size="11">R11</text><text transform="translate(389.0, 322) rotate(-90)" text-anchor="end" dominant-baseline="middle" font-family="monospace" font-size="9" fill="#684296">history_expert</text><rect x="405" y="287.6321079452006" width="16" height="2.3678920547994453" fill="#2458a6" tabindex="0" data-cost-tip="Request 12 · Turn 3 · dispatcher_agent | Fresh input | 76 tokens | 0.00001326 EUR"></rect><rect x="405" y="284.6784741715823" width="16" height="2.953633773618255" fill="#35a6a0" tabindex="0" data-cost-tip="Request 12 · Turn 3 · dispatcher_agent | Cache read | 948 tokens | 0.00001654 EUR"></rect><rect x="405" y="271.21887722851176" width="16" height="13.45959694307053" fill="#658d35" tabindex="0" data-cost-tip="Request 12 · Turn 3 · dispatcher_agent | Output · non-reasoning | 72 tokens | 0.00007539 EUR"></rect><text x="413.0" y="310" text-anchor="middle" font-size="11">R12</text><text transform="translate(413.0, 322) rotate(-90)" text-anchor="end" dominant-baseline="middle" font-family="monospace" font-size="9" fill="#684296">dispatcher_agent</text><line x1="85" x2="173" y1="430" y2="430" stroke="#617679"/><text x="129.0" y="449" text-anchor="middle" font-size="12">Turn 1</text><line x1="209" x2="297" y1="430" y2="430" stroke="#617679"/><text x="253.0" y="449" text-anchor="middle" font-size="12">Turn 2</text><line x1="333" x2="421" y1="430" y2="430" stroke="#617679"/><text x="377.0" y="449" text-anchor="middle" font-size="12">Turn 3</text><polyline points="93.0,262.8315543186169 117.0,240.99086576053253 141.0,228.08896970931607 165.0,214.9658626898223 217.0,195.48683489165637 241.0,172.39988735736176 265.0,157.75322873945098 289.0,142.3619303832546 341.0,122.53395007174979 365.0,99.88319317912877 389.0,82.69416624974912 413.0,63.913043478260875" fill="none" stroke="#912c42" stroke-width="3" pointer-events="none"/><circle cx="93.0" cy="262.8315543186169" r="5" fill="#912c42" stroke="white" stroke-width="2" tabindex="0" data-cost-tip="Request 1 · Turn 1 · dispatcher_agent | Cumulative total | 0.00015218 EUR"/><circle cx="117.0" cy="240.99086576053253" r="5" fill="#912c42" stroke="white" stroke-width="2" tabindex="0" data-cost-tip="Request 2 · Turn 1 · movie_expert | Cumulative total | 0.00027452 EUR"/><circle cx="141.0" cy="228.08896970931607" r="5" fill="#912c42" stroke="white" stroke-width="2" tabindex="0" data-cost-tip="Request 3 · Turn 1 · movie_expert | Cumulative total | 0.00034679 EUR"/><circle cx="165.0" cy="214.9658626898223" r="5" fill="#912c42" stroke="white" stroke-width="2" tabindex="0" data-cost-tip="Request 4 · Turn 1 · dispatcher_agent | Cumulative total | 0.00042030 EUR"/><circle cx="217.0" cy="195.48683489165637" r="5" fill="#912c42" stroke="white" stroke-width="2" tabindex="0" data-cost-tip="Request 5 · Turn 2 · dispatcher_agent | Cumulative total | 0.00052941 EUR"/><circle cx="241.0" cy="172.39988735736176" r="5" fill="#912c42" stroke="white" stroke-width="2" tabindex="0" data-cost-tip="Request 6 · Turn 2 · sports_expert | Cumulative total | 0.00065873 EUR"/><circle cx="265.0" cy="157.75322873945098" r="5" fill="#912c42" stroke="white" stroke-width="2" tabindex="0" data-cost-tip="Request 7 · Turn 2 · sports_expert | Cumulative total | 0.00074077 EUR"/><circle cx="289.0" cy="142.3619303832546" r="5" fill="#912c42" stroke="white" stroke-width="2" tabindex="0" data-cost-tip="Request 8 · Turn 2 · dispatcher_agent | Cumulative total | 0.00082698 EUR"/><circle cx="341.0" cy="122.53395007174979" r="5" fill="#912c42" stroke="white" stroke-width="2" tabindex="0" data-cost-tip="Request 9 · Turn 3 · dispatcher_agent | Cumulative total | 0.00093804 EUR"/><circle cx="365.0" cy="99.88319317912877" r="5" fill="#912c42" stroke="white" stroke-width="2" tabindex="0" data-cost-tip="Request 10 · Turn 3 · history_expert | Cumulative total | 0.00106492 EUR"/><circle cx="389.0" cy="82.69416624974912" r="5" fill="#912c42" stroke="white" stroke-width="2" tabindex="0" data-cost-tip="Request 11 · Turn 3 · history_expert | Cumulative total | 0.00116120 EUR"/><circle cx="413.0" cy="63.913043478260875" r="5" fill="#912c42" stroke="white" stroke-width="2" tabindex="0" data-cost-tip="Request 12 · Turn 3 · dispatcher_agent | Cumulative total | 0.00126640 EUR"/></svg></div>
+
+
+
+<h2>Agent activity</h2>
+<p>Agents are identified by the named execution scopes enclosing model calls in the trace. Each entry is one invocation; times are relative to the run start. Costs include only that agent’s own model calls, excluding delegated agents.</p>
+
+<div class="toolbar"><button type="button" data-disclosure-target="agent-activity-list" data-expand="true">Expand all agents</button><button type="button" data-disclosure-target="agent-activity-list" data-expand="false">Collapse all agents</button></div>
+<div id="agent-activity-list">
+<details open class="agent-activity" id="agent-01a0b6e6-9966-75c0-b937-8610be36cddf">
+<summary><strong>dispatcher_agent</strong> · Turn 1 · ok</summary>
+<div>Top-level agent · Turn 1</div>
+<div>Started +0.00s · Duration 0.01s · Status: ok · 2 model call(s)</div>
+<div class="cost-line">Own model cost <div class="euro ">0.000226 EUR</div><div class="dollar">0.000259 USD</div></div>
+<div class="activity-children">
+<details open class="agent-activity" id="agent-01a0b6e6-996a-7c13-bdb4-545abce1857e">
+<summary><strong>movie_expert</strong> · Turn 1 · ok</summary>
+<div>Delegated by <a href="#agent-01a0b6e6-9966-75c0-b937-8610be36cddf">dispatcher_agent</a> · via task · Turn 1</div>
+<div>Started +0.00s · Duration 0.00s · Status: ok · 2 model call(s)</div>
+<div class="cost-line">Own model cost <div class="euro ">0.000195 EUR</div><div class="dollar">0.000223 USD</div></div>
+
+</details>
+</div>
+</details>
+
+<details open class="agent-activity" id="agent-01a0b6e6-996f-7710-8f44-1e16b9b24cb7">
+<summary><strong>dispatcher_agent</strong> · Turn 2 · ok</summary>
+<div>Top-level agent · Turn 2</div>
+<div>Started +0.01s · Duration 0.01s · Status: ok · 2 model call(s)</div>
+<div class="cost-line">Own model cost <div class="euro ">0.000195 EUR</div><div class="dollar">0.000224 USD</div></div>
+<div class="activity-children">
+<details open class="agent-activity" id="agent-01a0b6e6-9971-7af0-a1a8-b6b89e6b8454">
+<summary><strong>sports_expert</strong> · Turn 2 · ok</summary>
+<div>Delegated by <a href="#agent-01a0b6e6-996f-7710-8f44-1e16b9b24cb7">dispatcher_agent</a> · via task · Turn 2</div>
+<div>Started +0.01s · Duration 0.00s · Status: ok · 2 model call(s)</div>
+<div class="cost-line">Own model cost <div class="euro ">0.000211 EUR</div><div class="dollar">0.000242 USD</div></div>
+
+</details>
+</div>
+</details>
+
+<details open class="agent-activity" id="agent-01a0b6e6-9975-7751-8ac9-f1bf0c6f9a8f">
+<summary><strong>dispatcher_agent</strong> · Turn 3 · ok</summary>
+<div>Top-level agent · Turn 3</div>
+<div>Started +0.01s · Duration 0.01s · Status: ok · 2 model call(s)</div>
+<div class="cost-line">Own model cost <div class="euro ">0.000216 EUR</div><div class="dollar">0.000248 USD</div></div>
+<div class="activity-children">
+<details open class="agent-activity" id="agent-01a0b6e6-9977-7c81-95b2-9b543792c7c1">
+<summary><strong>history_expert</strong> · Turn 3 · ok</summary>
+<div>Delegated by <a href="#agent-01a0b6e6-9975-7751-8ac9-f1bf0c6f9a8f">dispatcher_agent</a> · via task · Turn 3</div>
+<div>Started +0.02s · Duration 0.00s · Status: ok · 2 model call(s)</div>
+<div class="cost-line">Own model cost <div class="euro ">0.000223 EUR</div><div class="dollar">0.000256 USD</div></div>
+
+</details>
+</div>
+</details>
+</div>
+
+
+<section aria-labelledby="collaboration-heading">
+<h3 id="collaboration-heading">Agent collaboration</h3>
+<p>Read downward in time order. Each lane is one agent invocation; arrows show calls and successful returns. Boxes show model and tool activity with their recorded outcome. Timestamps mark activity starts or returns, not a proportional time scale. Click an agent name for details.</p>
+
+<h4>Turn 1</h4>
+<div style="overflow-x:auto">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 659" style="display:block;width:660px;max-width:none" role="group" aria-label="Agent collaboration for turn 1">
+<defs><marker id="collaboration-arrow-1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#684296"></path></marker></defs>
+
+
+<line x1="220" x2="220" y1="81" y2="649" stroke="#c7b8db" stroke-dasharray="4 4"></line>
+<a href="#agent-01a0b6e6-9966-75c0-b937-8610be36cddf" aria-label="Activity details for dispatcher_agent">
+<rect x="95" y="4" width="250" height="73" rx="8" fill="#f6f1fb" stroke="#8462a7"></rect>
+<text x="220" y="26" text-anchor="middle" font-size="13" font-weight="600" fill="#684296">dispatcher_agent</text>
+<text x="220" y="47" text-anchor="middle" font-size="11">Status: ok</text>
+<text x="220" y="64" text-anchor="middle" font-size="11">2 model call(s) · 8.94 ms</text>
+</a>
+
+<line x1="500" x2="500" y1="81" y2="649" stroke="#c7b8db" stroke-dasharray="4 4"></line>
+<a href="#agent-01a0b6e6-996a-7c13-bdb4-545abce1857e" aria-label="Activity details for movie_expert">
+<rect x="375" y="4" width="250" height="73" rx="8" fill="#f6f1fb" stroke="#8462a7"></rect>
+<text x="500" y="26" text-anchor="middle" font-size="13" font-weight="600" fill="#684296">movie_expert</text>
+<text x="500" y="47" text-anchor="middle" font-size="11">Status: ok</text>
+<text x="500" y="64" text-anchor="middle" font-size="11">2 model call(s) · 3.34 ms</text>
+</a>
+
+
+<text x="8" y="115" font-size="10" fill="#617679">+0.00 ms</text>
+
+<rect x="100" y="97" width="240" height="28" rx="5" fill="#f5f8fd" stroke="#8096b4"></rect>
+<text x="220" y="115" text-anchor="middle" font-size="11">Started</text>
+
+
+<text x="8" y="173" font-size="10" fill="#617679">+1.79 ms</text>
+
+<rect x="100" y="155" width="240" height="28" rx="5" fill="#f5f8fd" stroke="#8096b4"></rect>
+<text x="220" y="173" text-anchor="middle" font-size="11">R1 · LLM · ok</text>
+
+
+<text x="8" y="231" font-size="10" fill="#617679">+4.37 ms</text>
+
+<line x1="220" x2="500" y1="227" y2="227" stroke="#684296" stroke-width="2" marker-end="url(#collaboration-arrow-1)" ></line>
+<text x="360.0" y="219" text-anchor="middle" font-size="11" fill="#684296">Delegate via task</text>
+
+
+<text x="8" y="289" font-size="10" fill="#617679">+5.41 ms</text>
+
+<rect x="380" y="271" width="240" height="28" rx="5" fill="#f5f8fd" stroke="#8096b4"></rect>
+<text x="500" y="289" text-anchor="middle" font-size="11">R2 · LLM · ok</text>
+
+
+<text x="8" y="347" font-size="10" fill="#617679">+6.32 ms</text>
+
+<rect x="380" y="329" width="240" height="44" rx="5" fill="#f5f8fd" stroke="#8096b4"></rect>
+<text x="500" y="347" text-anchor="middle" font-size="11">Tool · search_movie_reference</text><text x="500" y="363" text-anchor="middle" font-size="11">· ok</text>
+
+
+<text x="8" y="421" font-size="10" fill="#617679">+7.17 ms</text>
+
+<rect x="380" y="403" width="240" height="28" rx="5" fill="#f5f8fd" stroke="#8096b4"></rect>
+<text x="500" y="421" text-anchor="middle" font-size="11">R3 · LLM · ok</text>
+
+
+<text x="8" y="479" font-size="10" fill="#617679">+7.84 ms</text>
+
+<line x1="500" x2="220" y1="475" y2="475" stroke="#684296" stroke-width="2" marker-end="url(#collaboration-arrow-1)" stroke-dasharray="6,4"></line>
+<text x="360.0" y="467" text-anchor="middle" font-size="11" fill="#684296">Return from task</text>
+
+
+<text x="8" y="537" font-size="10" fill="#617679">+8.43 ms</text>
+
+<rect x="100" y="519" width="240" height="28" rx="5" fill="#f5f8fd" stroke="#8096b4"></rect>
+<text x="220" y="537" text-anchor="middle" font-size="11">R4 · LLM · ok</text>
+
+
+<text x="8" y="595" font-size="10" fill="#617679">+8.94 ms</text>
+
+<rect x="100" y="577" width="240" height="28" rx="5" fill="#f5f8fd" stroke="#8096b4"></rect>
+<text x="220" y="595" text-anchor="middle" font-size="11">Finished · ok</text>
+
+
+</svg>
+</div>
+
+<h4>Turn 2</h4>
+<div style="overflow-x:auto">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 659" style="display:block;width:660px;max-width:none" role="group" aria-label="Agent collaboration for turn 2">
+<defs><marker id="collaboration-arrow-2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#684296"></path></marker></defs>
+
+
+<line x1="220" x2="220" y1="81" y2="649" stroke="#c7b8db" stroke-dasharray="4 4"></line>
+<a href="#agent-01a0b6e6-996f-7710-8f44-1e16b9b24cb7" aria-label="Activity details for dispatcher_agent">
+<rect x="95" y="4" width="250" height="73" rx="8" fill="#f6f1fb" stroke="#8462a7"></rect>
+<text x="220" y="26" text-anchor="middle" font-size="13" font-weight="600" fill="#684296">dispatcher_agent</text>
+<text x="220" y="47" text-anchor="middle" font-size="11">Status: ok</text>
+<text x="220" y="64" text-anchor="middle" font-size="11">2 model call(s) · 5.73 ms</text>
+</a>
+
+<line x1="500" x2="500" y1="81" y2="649" stroke="#c7b8db" stroke-dasharray="4 4"></line>
+<a href="#agent-01a0b6e6-9971-7af0-a1a8-b6b89e6b8454" aria-label="Activity details for sports_expert">
+<rect x="375" y="4" width="250" height="73" rx="8" fill="#f6f1fb" stroke="#8462a7"></rect>
+<text x="500" y="26" text-anchor="middle" font-size="13" font-weight="600" fill="#684296">sports_expert</text>
+<text x="500" y="47" text-anchor="middle" font-size="11">Status: ok</text>
+<text x="500" y="64" text-anchor="middle" font-size="11">2 model call(s) · 2.99 ms</text>
+</a>
+
+
+<text x="8" y="115" font-size="10" fill="#617679">+9.05 ms</text>
+
+<rect x="100" y="97" width="240" height="28" rx="5" fill="#f5f8fd" stroke="#8096b4"></rect>
+<text x="220" y="115" text-anchor="middle" font-size="11">Started</text>
+
+
+<text x="8" y="173" font-size="10" fill="#617679">+9.50 ms</text>
+
+<rect x="100" y="155" width="240" height="28" rx="5" fill="#f5f8fd" stroke="#8096b4"></rect>
+<text x="220" y="173" text-anchor="middle" font-size="11">R5 · LLM · ok</text>
+
+
+<text x="8" y="231" font-size="10" fill="#617679">+10.46 ms</text>
+
+<line x1="220" x2="500" y1="227" y2="227" stroke="#684296" stroke-width="2" marker-end="url(#collaboration-arrow-2)" ></line>
+<text x="360.0" y="219" text-anchor="middle" font-size="11" fill="#684296">Delegate via task</text>
+
+
+<text x="8" y="289" font-size="10" fill="#617679">+11.37 ms</text>
+
+<rect x="380" y="271" width="240" height="28" rx="5" fill="#f5f8fd" stroke="#8096b4"></rect>
+<text x="500" y="289" text-anchor="middle" font-size="11">R6 · LLM · ok</text>
+
+
+<text x="8" y="347" font-size="10" fill="#617679">+12.10 ms</text>
+
+<rect x="380" y="329" width="240" height="44" rx="5" fill="#f5f8fd" stroke="#8096b4"></rect>
+<text x="500" y="347" text-anchor="middle" font-size="11">Tool ·</text><text x="500" y="363" text-anchor="middle" font-size="11">search_sports_reference · ok</text>
+
+
+<text x="8" y="421" font-size="10" fill="#617679">+12.88 ms</text>
+
+<rect x="380" y="403" width="240" height="28" rx="5" fill="#f5f8fd" stroke="#8096b4"></rect>
+<text x="500" y="421" text-anchor="middle" font-size="11">R7 · LLM · ok</text>
+
+
+<text x="8" y="479" font-size="10" fill="#617679">+13.59 ms</text>
+
+<line x1="500" x2="220" y1="475" y2="475" stroke="#684296" stroke-width="2" marker-end="url(#collaboration-arrow-2)" stroke-dasharray="6,4"></line>
+<text x="360.0" y="467" text-anchor="middle" font-size="11" fill="#684296">Return from task</text>
+
+
+<text x="8" y="537" font-size="10" fill="#617679">+14.21 ms</text>
+
+<rect x="100" y="519" width="240" height="28" rx="5" fill="#f5f8fd" stroke="#8096b4"></rect>
+<text x="220" y="537" text-anchor="middle" font-size="11">R8 · LLM · ok</text>
+
+
+<text x="8" y="595" font-size="10" fill="#617679">+14.78 ms</text>
+
+<rect x="100" y="577" width="240" height="28" rx="5" fill="#f5f8fd" stroke="#8096b4"></rect>
+<text x="220" y="595" text-anchor="middle" font-size="11">Finished · ok</text>
+
+
+</svg>
+</div>
+
+<h4>Turn 3</h4>
+<div style="overflow-x:auto">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 659" style="display:block;width:660px;max-width:none" role="group" aria-label="Agent collaboration for turn 3">
+<defs><marker id="collaboration-arrow-3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#684296"></path></marker></defs>
+
+
+<line x1="220" x2="220" y1="81" y2="649" stroke="#c7b8db" stroke-dasharray="4 4"></line>
+<a href="#agent-01a0b6e6-9975-7751-8ac9-f1bf0c6f9a8f" aria-label="Activity details for dispatcher_agent">
+<rect x="95" y="4" width="250" height="73" rx="8" fill="#f6f1fb" stroke="#8462a7"></rect>
+<text x="220" y="26" text-anchor="middle" font-size="13" font-weight="600" fill="#684296">dispatcher_agent</text>
+<text x="220" y="47" text-anchor="middle" font-size="11">Status: ok</text>
+<text x="220" y="64" text-anchor="middle" font-size="11">2 model call(s) · 6.93 ms</text>
+</a>
+
+<line x1="500" x2="500" y1="81" y2="649" stroke="#c7b8db" stroke-dasharray="4 4"></line>
+<a href="#agent-01a0b6e6-9977-7c81-95b2-9b543792c7c1" aria-label="Activity details for history_expert">
+<rect x="375" y="4" width="250" height="73" rx="8" fill="#f6f1fb" stroke="#8462a7"></rect>
+<text x="500" y="26" text-anchor="middle" font-size="13" font-weight="600" fill="#684296">history_expert</text>
+<text x="500" y="47" text-anchor="middle" font-size="11">Status: ok</text>
+<text x="500" y="64" text-anchor="middle" font-size="11">2 model call(s) · 3.44 ms</text>
+</a>
+
+
+<text x="8" y="115" font-size="10" fill="#617679">+14.90 ms</text>
+
+<rect x="100" y="97" width="240" height="28" rx="5" fill="#f5f8fd" stroke="#8096b4"></rect>
+<text x="220" y="115" text-anchor="middle" font-size="11">Started</text>
+
+
+<text x="8" y="173" font-size="10" fill="#617679">+15.46 ms</text>
+
+<rect x="100" y="155" width="240" height="28" rx="5" fill="#f5f8fd" stroke="#8096b4"></rect>
+<text x="220" y="173" text-anchor="middle" font-size="11">R9 · LLM · ok</text>
+
+
+<text x="8" y="231" font-size="10" fill="#617679">+17.10 ms</text>
+
+<line x1="220" x2="500" y1="227" y2="227" stroke="#684296" stroke-width="2" marker-end="url(#collaboration-arrow-3)" ></line>
+<text x="360.0" y="219" text-anchor="middle" font-size="11" fill="#684296">Delegate via task</text>
+
+
+<text x="8" y="289" font-size="10" fill="#617679">+18.16 ms</text>
+
+<rect x="380" y="271" width="240" height="28" rx="5" fill="#f5f8fd" stroke="#8096b4"></rect>
+<text x="500" y="289" text-anchor="middle" font-size="11">R10 · LLM · ok</text>
+
+
+<text x="8" y="347" font-size="10" fill="#617679">+19.37 ms</text>
+
+<rect x="380" y="329" width="240" height="44" rx="5" fill="#f5f8fd" stroke="#8096b4"></rect>
+<text x="500" y="347" text-anchor="middle" font-size="11">Tool ·</text><text x="500" y="363" text-anchor="middle" font-size="11">search_history_reference · ok</text>
+
+
+<text x="8" y="421" font-size="10" fill="#617679">+20.01 ms</text>
+
+<rect x="380" y="403" width="240" height="28" rx="5" fill="#f5f8fd" stroke="#8096b4"></rect>
+<text x="500" y="421" text-anchor="middle" font-size="11">R11 · LLM · ok</text>
+
+
+<text x="8" y="479" font-size="10" fill="#617679">+20.67 ms</text>
+
+<line x1="500" x2="220" y1="475" y2="475" stroke="#684296" stroke-width="2" marker-end="url(#collaboration-arrow-3)" stroke-dasharray="6,4"></line>
+<text x="360.0" y="467" text-anchor="middle" font-size="11" fill="#684296">Return from task</text>
+
+
+<text x="8" y="537" font-size="10" fill="#617679">+21.24 ms</text>
+
+<rect x="100" y="519" width="240" height="28" rx="5" fill="#f5f8fd" stroke="#8096b4"></rect>
+<text x="220" y="537" text-anchor="middle" font-size="11">R12 · LLM · ok</text>
+
+
+<text x="8" y="595" font-size="10" fill="#617679">+21.83 ms</text>
+
+<rect x="100" y="577" width="240" height="28" rx="5" fill="#f5f8fd" stroke="#8096b4"></rect>
+<text x="220" y="595" text-anchor="middle" font-size="11">Finished · ok</text>
+
+
+</svg>
+</div>
+
+</section>
+
+
+<h2>Conversation</h2>
+<div class="toolbar"><button type="button" data-disclosure-target="conversation-list" data-expand="true">Expand all conversation</button><button type="button" data-disclosure-target="conversation-list" data-expand="false">Collapse all conversation</button></div>
+
+
+<div id="conversation-list"><details open class="turn"><summary class="turn-heading"><strong>Turn 1</strong><span class="turn-cost">Turn cost <div class="euro ">0.000420 EUR</div><div class="dollar">0.000482 USD</div></span></summary>
+<div class="conversation-thread"><details open class="conversation-agent" aria-label="Agent dispatcher_agent"><summary class="agent-label">Agent · dispatcher_agent · ok</summary><details open class="event llm-event "><summary class="event-heading"><strong>R1 · LLM request · 380 tokens</strong> · scripted-chat-light<span class="status">· ok</span><span class="span-id">01a0b6e6-9968-7c52-95f9-a5d1a59f0c88</span></summary><div class="agent-label">Agent · <a href="#agent-01a0b6e6-9966-75c0-b937-8610be36cddf">dispatcher_agent</a></div>
+
+<div class="request-costs" aria-label="Input token costs"><div class="cost-line"><strong>Fresh input · 380 tokens</strong><div class="euro ">0.000066 EUR</div><div class="dollar">0.000076 USD</div></div></div>
+<div class="input-detail">
+
+<details class="tool-definitions"><summary class="prompt-label">Tool definitions · 221 tokens</summary>
+
+<h5>task</h5>
+<p>Delegate a self-contained question to the matching expert. Available experts:
+- movie_expert: Specialist for questions about movies, with its own local reference lookup.
+- sports_expert: Specialist for questions about sports, with its own local reference lookup.
+- history_expert: Specialist for questions about history, with its own local reference lookup.</p>
+<pre>{
+  "properties": {
+    "description": {
+      "description": "A detailed description of the task for the subagent to perform autonomously. Include all necessary context and specify the expected output format.",
+      "type": "string"
+    },
+    "subagent_type": {
+      "description": "The type of subagent to use. Must be one of the available agent types listed in the tool description.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "description",
+    "subagent_type"
+  ],
+  "type": "object"
+}</pre>
+</details>
+
+<div class="request-setup"><div class="prompt-label">System prompt · 125 tokens</div><pre>You are a dispatcher for movies, sports, and history. For each question, select the most relevant expert from the task tool descriptions and delegate a self-contained question to exactly that expert. Include relevant context from earlier turns when needed. Use the expert&#39;s answer to respond; do not answer domain questions yourself. For ambiguous questions ask the user which domain they mean. For requests outside these domains explain the supported subjects without delegating. Never choose an expert merely to force a match.</pre></div>
+<div class="prompt-label">User prompt · 34 tokens</div><pre>Who directed Spirited Away?</pre>
+
+</div>
+<div class="prompt-label">Cache write · 380 tokens</div><div class="prompt-label">Context: Added: 380 tokens · Total: 380 tokens</div>
+
+
+
+<h5 class="llm-response-heading">LLM response · 82 tokens</h5><div class="response-costs" aria-label="Output token costs"><div class="cost-line"><strong>Output · including tool calls · 82 tokens</strong><div class="euro ">0.000086 EUR</div><div class="dollar">0.000098 USD</div></div></div><pre>{
+  "args": {
+    "description": "Who directed Spirited Away?",
+    "subagent_type": "movie_expert"
+  },
+  "id": "dispatch-1",
+  "name": "task",
+  "type": "tool_call"
+}</pre><div class="prompt-label">Cache write · 82 tokens</div><div class="prompt-label">Context: Added: 82 tokens · Total: 462 tokens</div><div class="cost-line"><strong>Call cost</strong><div class="euro ">0.000152 EUR</div><div class="dollar">0.000174 USD</div></div><h5>Tool call: task</h5><div class="status">Status: ok</div></details><details open class="event tool-event "><summary class="event-heading"><strong>Tool · task</strong><span class="status">· ok</span><span class="span-id">01a0b6e6-996a-7c13-bdb4-54448e7bf840</span></summary><div class="agent-label">Agent · <a href="#agent-01a0b6e6-9966-75c0-b937-8610be36cddf">dispatcher_agent</a></div><div class="agent-label">Delegation · <a href="#agent-01a0b6e6-996a-7c13-bdb4-545abce1857e">movie_expert</a></div><h5>Tool arguments</h5><pre>{&#39;subagent_type&#39;: &#39;movie_expert&#39;, &#39;description&#39;: &#39;Who directed Spirited Away?&#39;}</pre>
+
+<div class="conversation-children"><details open class="conversation-agent" aria-label="Agent movie_expert"><summary class="agent-label">Agent · movie_expert · ok</summary><details open class="event llm-event "><summary class="event-heading"><strong>R2 · LLM request · 257 tokens</strong> · scripted-chat-light<span class="status">· ok</span><span class="span-id">01a0b6e6-996b-7782-94a9-9d748d3efee6</span></summary><div class="agent-label">Agent · <a href="#agent-01a0b6e6-996a-7c13-bdb4-545abce1857e">movie_expert</a></div>
+
+<div class="request-costs" aria-label="Input token costs"><div class="cost-line"><strong>Fresh input · 257 tokens</strong><div class="euro ">0.000045 EUR</div><div class="dollar">0.000051 USD</div></div></div>
+<div class="input-detail">
+
+<details class="tool-definitions"><summary class="prompt-label">Tool definitions · 121 tokens</summary>
+
+<h5>search_movie_reference</h5>
+<p>Look up local movie evidence by phrase; return sources or an explicit miss.</p>
+<pre>{
+  "properties": {
+    "query": {
+      "description": "A movie topic or question containing a title or name to match. The small teaching collection covers Spirited Away and Miyazaki.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "query"
+  ],
+  "type": "object"
+}</pre>
+</details>
+
+<div class="request-setup"><div class="prompt-label">System prompt · 102 tokens</div><pre>You are the movies expert. Use search_movie_reference to retrieve evidence before answering the delegated question. Base factual claims on the returned passages and cite their source URLs. If no relevant evidence is found, explain the collection&#39;s limits instead of inventing an answer or claiming web research. Answer concisely. The collection is a small local teaching reference, not a complete or continually updated source.</pre></div>
+
+
+</div>
+<div class="prompt-label">Cache write · 257 tokens</div><div class="prompt-label">Context: Added: 257 tokens · Total: 257 tokens</div>
+
+
+
+<h5 class="llm-response-heading">LLM response · 74 tokens</h5><div class="response-costs" aria-label="Output token costs"><div class="cost-line"><strong>Output · including tool calls · 74 tokens</strong><div class="euro ">0.000077 EUR</div><div class="dollar">0.000089 USD</div></div></div><pre>{
+  "args": {
+    "query": "Who directed Spirited Away?"
+  },
+  "id": "retrieve-1",
+  "name": "search_movie_reference",
+  "type": "tool_call"
+}</pre><div class="prompt-label">Cache write · 74 tokens</div><div class="prompt-label">Context: Added: 74 tokens · Total: 331 tokens</div><div class="cost-line"><strong>Call cost</strong><div class="euro ">0.000122 EUR</div><div class="dollar">0.000140 USD</div></div><h5>Tool call: search_movie_reference</h5><div class="status">Status: ok</div></details><details open class="event tool-event "><summary class="event-heading"><strong>Tool · search_movie_reference</strong><span class="status">· ok</span><span class="span-id">01a0b6e6-996c-7a73-ae69-843a3d837a71</span></summary><div class="agent-label">Agent · <a href="#agent-01a0b6e6-996a-7c13-bdb4-545abce1857e">movie_expert</a></div><h5>Tool arguments</h5><pre>{&#39;query&#39;: &#39;Who directed Spirited Away?&#39;}</pre>
+
+
+<h5 class="">Tool result</h5><pre>Spirited Away
+Spirited Away was directed by Hayao Miyazaki and released in 2001.
+Source: https://www.ghibli.jp/works/</pre><div class="status">Status: ok</div></details><details open class="event llm-event "><summary class="event-heading"><strong>R3 · LLM request · 394 tokens</strong> · scripted-chat-light<span class="status">· ok</span><span class="span-id">01a0b6e6-996d-76b0-9370-fbb279478b31</span></summary><div class="agent-label">Agent · <a href="#agent-01a0b6e6-996a-7c13-bdb4-545abce1857e">movie_expert</a></div>
+<div class="cost-line"><strong>Conversation history · cache read · 331 tokens</strong><div class="euro ">0.000006 EUR</div><div class="dollar">0.000007 USD</div></div>
+<div class="request-costs" aria-label="Input token costs"><div class="cost-line"><strong>Fresh input · 63 tokens</strong><div class="euro ">0.000011 EUR</div><div class="dollar">0.000013 USD</div></div></div>
+<div class="input-detail">
+
+<details class="tool-definitions"><summary class="prompt-label">Tool definitions · 121 tokens</summary>
+
+<h5>search_movie_reference</h5>
+<p>Look up local movie evidence by phrase; return sources or an explicit miss.</p>
+<pre>{
+  "properties": {
+    "query": {
+      "description": "A movie topic or question containing a title or name to match. The small teaching collection covers Spirited Away and Miyazaki.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "query"
+  ],
+  "type": "object"
+}</pre>
+</details>
+
+
+
+<div class="prompt-label">Tool result · 63 tokens</div><pre>Spirited Away
+Spirited Away was directed by Hayao Miyazaki and released in 2001.
+Source: https://www.ghibli.jp/works/</pre>
+</div>
+<div class="prompt-label">Cache write · 63 tokens</div><div class="prompt-label">Context: Added: 63 tokens · Total: 394 tokens</div>
+
+
+
+<h5 class="llm-response-heading">LLM response · 53 tokens</h5><div class="response-costs" aria-label="Output token costs"><div class="cost-line"><strong>Output · non-reasoning · 53 tokens</strong><div class="euro ">0.000055 EUR</div><div class="dollar">0.000064 USD</div></div></div><pre>Hayao Miyazaki directed Spirited Away, released in 2001. Source: https://www.ghibli.jp/works/</pre><div class="prompt-label">Cache write · 53 tokens</div><div class="prompt-label">Context: Added: 53 tokens · Total: 447 tokens</div><div class="cost-line"><strong>Call cost</strong><div class="euro ">0.000072 EUR</div><div class="dollar">0.000083 USD</div></div><div class="status">Status: ok</div></details></details></div>
+<h5 class="">Tool result</h5><pre>Command(update={&#39;messages&#39;: [ToolMessage(content=&#39;Hayao Miyazaki directed Spirited Away, released in 2001. Source: https://www.ghibli.jp/works/&#39;, tool_call_id=&#39;dispatch-1&#39;)]})</pre><div class="status">Status: ok</div></details><details open class="event llm-event "><summary class="event-heading"><strong>R4 · LLM request · 519 tokens</strong> · scripted-chat-light<span class="status">· ok</span><span class="span-id">01a0b6e6-996f-7710-8f44-1e0bdf990890</span></summary><div class="agent-label">Agent · <a href="#agent-01a0b6e6-9966-75c0-b937-8610be36cddf">dispatcher_agent</a></div>
+<div class="cost-line"><strong>Conversation history · cache read · 462 tokens</strong><div class="euro ">0.000008 EUR</div><div class="dollar">0.000009 USD</div></div>
+<div class="request-costs" aria-label="Input token costs"><div class="cost-line"><strong>Fresh input · 57 tokens</strong><div class="euro ">0.000010 EUR</div><div class="dollar">0.000011 USD</div></div></div>
+<div class="input-detail">
+
+<details class="tool-definitions"><summary class="prompt-label">Tool definitions · 221 tokens</summary>
+
+<h5>task</h5>
+<p>Delegate a self-contained question to the matching expert. Available experts:
+- movie_expert: Specialist for questions about movies, with its own local reference lookup.
+- sports_expert: Specialist for questions about sports, with its own local reference lookup.
+- history_expert: Specialist for questions about history, with its own local reference lookup.</p>
+<pre>{
+  "properties": {
+    "description": {
+      "description": "A detailed description of the task for the subagent to perform autonomously. Include all necessary context and specify the expected output format.",
+      "type": "string"
+    },
+    "subagent_type": {
+      "description": "The type of subagent to use. Must be one of the available agent types listed in the tool description.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "description",
+    "subagent_type"
+  ],
+  "type": "object"
+}</pre>
+</details>
+
+
+
+<div class="prompt-label">Tool result · 57 tokens</div><pre>Hayao Miyazaki directed Spirited Away, released in 2001. Source: https://www.ghibli.jp/works/</pre>
+</div>
+<div class="prompt-label">Cache write · 57 tokens</div><div class="prompt-label">Context: Added: 57 tokens · Total: 519 tokens</div>
+
+
+
+<h5 class="llm-response-heading">LLM response · 53 tokens</h5><div class="response-costs" aria-label="Output token costs"><div class="cost-line"><strong>Output · non-reasoning · 53 tokens</strong><div class="euro ">0.000055 EUR</div><div class="dollar">0.000064 USD</div></div></div><pre>Hayao Miyazaki directed Spirited Away, released in 2001. Source: https://www.ghibli.jp/works/</pre><div class="prompt-label">Cache write · 53 tokens</div><div class="prompt-label">Context: Added: 53 tokens · Total: 572 tokens</div><div class="cost-line"><strong>Call cost</strong><div class="euro ">0.000074 EUR</div><div class="dollar">0.000084 USD</div></div><div class="status">Status: ok</div></details></details></div></details><details open class="turn"><summary class="turn-heading"><strong>Turn 2</strong><span class="turn-cost">Turn cost <div class="euro ">0.000407 EUR</div><div class="dollar">0.000466 USD</div></span></summary>
+<div class="conversation-thread"><details open class="conversation-agent" aria-label="Agent dispatcher_agent"><summary class="agent-label">Agent · dispatcher_agent · ok</summary><details open class="event llm-event "><summary class="event-heading"><strong>R5 · LLM request · 612 tokens</strong> · scripted-chat-light<span class="status">· ok</span><span class="span-id">01a0b6e6-9970-7141-a740-d0968c1caccf</span></summary><div class="agent-label">Agent · <a href="#agent-01a0b6e6-996f-7710-8f44-1e16b9b24cb7">dispatcher_agent</a></div>
+<div class="cost-line"><strong>Conversation history · cache read · 572 tokens</strong><div class="euro ">0.000010 EUR</div><div class="dollar">0.000011 USD</div></div>
+<div class="request-costs" aria-label="Input token costs"><div class="cost-line"><strong>Fresh input · 40 tokens</strong><div class="euro ">0.000007 EUR</div><div class="dollar">0.000008 USD</div></div></div>
+<div class="input-detail">
+
+<details class="tool-definitions"><summary class="prompt-label">Tool definitions · 221 tokens</summary>
+
+<h5>task</h5>
+<p>Delegate a self-contained question to the matching expert. Available experts:
+- movie_expert: Specialist for questions about movies, with its own local reference lookup.
+- sports_expert: Specialist for questions about sports, with its own local reference lookup.
+- history_expert: Specialist for questions about history, with its own local reference lookup.</p>
+<pre>{
+  "properties": {
+    "description": {
+      "description": "A detailed description of the task for the subagent to perform autonomously. Include all necessary context and specify the expected output format.",
+      "type": "string"
+    },
+    "subagent_type": {
+      "description": "The type of subagent to use. Must be one of the available agent types listed in the tool description.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "description",
+    "subagent_type"
+  ],
+  "type": "object"
+}</pre>
+</details>
+
+
+<div class="prompt-label">User prompt · 40 tokens</div><pre>How many players does a basketball team have on court?</pre>
+
+</div>
+<div class="prompt-label">Cache write · 40 tokens</div><div class="prompt-label">Context: Added: 40 tokens · Total: 612 tokens</div>
+
+
+
+<h5 class="llm-response-heading">LLM response · 88 tokens</h5><div class="response-costs" aria-label="Output token costs"><div class="cost-line"><strong>Output · including tool calls · 88 tokens</strong><div class="euro ">0.000092 EUR</div><div class="dollar">0.000106 USD</div></div></div><pre>{
+  "args": {
+    "description": "How many players does a basketball team have on court?",
+    "subagent_type": "sports_expert"
+  },
+  "id": "dispatch-2",
+  "name": "task",
+  "type": "tool_call"
+}</pre><div class="prompt-label">Cache write · 88 tokens</div><div class="prompt-label">Context: Added: 88 tokens · Total: 700 tokens</div><div class="cost-line"><strong>Call cost</strong><div class="euro ">0.000109 EUR</div><div class="dollar">0.000125 USD</div></div><h5>Tool call: task</h5><div class="status">Status: ok</div></details><details open class="event tool-event "><summary class="event-heading"><strong>Tool · task</strong><span class="status">· ok</span><span class="span-id">01a0b6e6-9970-7141-a740-d0bfe27c2e3c</span></summary><div class="agent-label">Agent · <a href="#agent-01a0b6e6-996f-7710-8f44-1e16b9b24cb7">dispatcher_agent</a></div><div class="agent-label">Delegation · <a href="#agent-01a0b6e6-9971-7af0-a1a8-b6b89e6b8454">sports_expert</a></div><h5>Tool arguments</h5><pre>{&#39;subagent_type&#39;: &#39;sports_expert&#39;, &#39;description&#39;: &#39;How many players does a basketball team have on court?&#39;}</pre>
+
+<div class="conversation-children"><details open class="conversation-agent" aria-label="Agent sports_expert"><summary class="agent-label">Agent · sports_expert · ok</summary><details open class="event llm-event "><summary class="event-heading"><strong>R6 · LLM request · 261 tokens</strong> · scripted-chat-light<span class="status">· ok</span><span class="span-id">01a0b6e6-9971-7af0-a1a8-b6df9c345923</span></summary><div class="agent-label">Agent · <a href="#agent-01a0b6e6-9971-7af0-a1a8-b6b89e6b8454">sports_expert</a></div>
+
+<div class="request-costs" aria-label="Input token costs"><div class="cost-line"><strong>Fresh input · 261 tokens</strong><div class="euro ">0.000046 EUR</div><div class="dollar">0.000052 USD</div></div></div>
+<div class="input-detail">
+
+<details class="tool-definitions"><summary class="prompt-label">Tool definitions · 119 tokens</summary>
+
+<h5>search_sports_reference</h5>
+<p>Look up local sports evidence by phrase; return sources or an explicit miss.</p>
+<pre>{
+  "properties": {
+    "query": {
+      "description": "A sports topic or question containing a phrase to match. The small teaching collection covers standard basketball team size.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "query"
+  ],
+  "type": "object"
+}</pre>
+</details>
+
+<div class="request-setup"><div class="prompt-label">System prompt · 102 tokens</div><pre>You are the sports expert. Use search_sports_reference to retrieve evidence before answering the delegated question. Base factual claims on the returned passages and cite their source URLs. If no relevant evidence is found, explain the collection&#39;s limits instead of inventing an answer or claiming web research. Answer concisely. The collection is a small local teaching reference, not a complete or continually updated source.</pre></div>
+
+
+</div>
+<div class="prompt-label">Cache write · 261 tokens</div><div class="prompt-label">Context: Added: 261 tokens · Total: 261 tokens</div>
+
+
+
+<h5 class="llm-response-heading">LLM response · 80 tokens</h5><div class="response-costs" aria-label="Output token costs"><div class="cost-line"><strong>Output · including tool calls · 80 tokens</strong><div class="euro ">0.000084 EUR</div><div class="dollar">0.000096 USD</div></div></div><pre>{
+  "args": {
+    "query": "How many players does a basketball team have on court?"
+  },
+  "id": "retrieve-2",
+  "name": "search_sports_reference",
+  "type": "tool_call"
+}</pre><div class="prompt-label">Cache write · 80 tokens</div><div class="prompt-label">Context: Added: 80 tokens · Total: 341 tokens</div><div class="cost-line"><strong>Call cost</strong><div class="euro ">0.000129 EUR</div><div class="dollar">0.000148 USD</div></div><h5>Tool call: search_sports_reference</h5><div class="status">Status: ok</div></details><details open class="event tool-event "><summary class="event-heading"><strong>Tool · search_sports_reference</strong><span class="status">· ok</span><span class="span-id">01a0b6e6-9972-7312-93fe-cff9684abceb</span></summary><div class="agent-label">Agent · <a href="#agent-01a0b6e6-9971-7af0-a1a8-b6b89e6b8454">sports_expert</a></div><h5>Tool arguments</h5><pre>{&#39;query&#39;: &#39;How many players does a basketball team have on court?&#39;}</pre>
+
+
+<h5 class="">Tool result</h5><pre>Standard basketball teams
+Standard basketball has two teams of five players on court. This is not the separate 3x3 format.
+Source: https://about.fiba.basketball/en/our-sport/basketball</pre><div class="status">Status: ok</div></details><details open class="event llm-event "><summary class="event-heading"><strong>R7 · LLM request · 417 tokens</strong> · scripted-chat-light<span class="status">· ok</span><span class="span-id">01a0b6e6-9973-7780-a1eb-adb3fb3983f4</span></summary><div class="agent-label">Agent · <a href="#agent-01a0b6e6-9971-7af0-a1a8-b6b89e6b8454">sports_expert</a></div>
+<div class="cost-line"><strong>Conversation history · cache read · 341 tokens</strong><div class="euro ">0.000006 EUR</div><div class="dollar">0.000007 USD</div></div>
+<div class="request-costs" aria-label="Input token costs"><div class="cost-line"><strong>Fresh input · 76 tokens</strong><div class="euro ">0.000013 EUR</div><div class="dollar">0.000015 USD</div></div></div>
+<div class="input-detail">
+
+<details class="tool-definitions"><summary class="prompt-label">Tool definitions · 119 tokens</summary>
+
+<h5>search_sports_reference</h5>
+<p>Look up local sports evidence by phrase; return sources or an explicit miss.</p>
+<pre>{
+  "properties": {
+    "query": {
+      "description": "A sports topic or question containing a phrase to match. The small teaching collection covers standard basketball team size.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "query"
+  ],
+  "type": "object"
+}</pre>
+</details>
+
+
+
+<div class="prompt-label">Tool result · 76 tokens</div><pre>Standard basketball teams
+Standard basketball has two teams of five players on court. This is not the separate 3x3 format.
+Source: https://about.fiba.basketball/en/our-sport/basketball</pre>
+</div>
+<div class="prompt-label">Cache write · 76 tokens</div><div class="prompt-label">Context: Added: 76 tokens · Total: 417 tokens</div>
+
+
+
+<h5 class="llm-response-heading">LLM response · 60 tokens</h5><div class="response-costs" aria-label="Output token costs"><div class="cost-line"><strong>Output · non-reasoning · 60 tokens</strong><div class="euro ">0.000063 EUR</div><div class="dollar">0.000072 USD</div></div></div><pre>A basketball team has five players on court during normal play. Source: https://about.fiba.basketball/en/our-sport/basketball</pre><div class="prompt-label">Cache write · 60 tokens</div><div class="prompt-label">Context: Added: 60 tokens · Total: 477 tokens</div><div class="cost-line"><strong>Call cost</strong><div class="euro ">0.000082 EUR</div><div class="dollar">0.000094 USD</div></div><div class="status">Status: ok</div></details></details></div>
+<h5 class="">Tool result</h5><pre>Command(update={&#39;messages&#39;: [ToolMessage(content=&#39;A basketball team has five players on court during normal play. Source: https://about.fiba.basketball/en/our-sport/basketball&#39;, tool_call_id=&#39;dispatch-2&#39;)]})</pre><div class="status">Status: ok</div></details><details open class="event llm-event "><summary class="event-heading"><strong>R8 · LLM request · 764 tokens</strong> · scripted-chat-light<span class="status">· ok</span><span class="span-id">01a0b6e6-9974-7a81-a411-9511293e2f31</span></summary><div class="agent-label">Agent · <a href="#agent-01a0b6e6-996f-7710-8f44-1e16b9b24cb7">dispatcher_agent</a></div>
+<div class="cost-line"><strong>Conversation history · cache read · 700 tokens</strong><div class="euro ">0.000012 EUR</div><div class="dollar">0.000014 USD</div></div>
+<div class="request-costs" aria-label="Input token costs"><div class="cost-line"><strong>Fresh input · 64 tokens</strong><div class="euro ">0.000011 EUR</div><div class="dollar">0.000013 USD</div></div></div>
+<div class="input-detail">
+
+<details class="tool-definitions"><summary class="prompt-label">Tool definitions · 221 tokens</summary>
+
+<h5>task</h5>
+<p>Delegate a self-contained question to the matching expert. Available experts:
+- movie_expert: Specialist for questions about movies, with its own local reference lookup.
+- sports_expert: Specialist for questions about sports, with its own local reference lookup.
+- history_expert: Specialist for questions about history, with its own local reference lookup.</p>
+<pre>{
+  "properties": {
+    "description": {
+      "description": "A detailed description of the task for the subagent to perform autonomously. Include all necessary context and specify the expected output format.",
+      "type": "string"
+    },
+    "subagent_type": {
+      "description": "The type of subagent to use. Must be one of the available agent types listed in the tool description.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "description",
+    "subagent_type"
+  ],
+  "type": "object"
+}</pre>
+</details>
+
+
+
+<div class="prompt-label">Tool result · 64 tokens</div><pre>A basketball team has five players on court during normal play. Source: https://about.fiba.basketball/en/our-sport/basketball</pre>
+</div>
+<div class="prompt-label">Cache write · 64 tokens</div><div class="prompt-label">Context: Added: 64 tokens · Total: 764 tokens</div>
+
+
+
+<h5 class="llm-response-heading">LLM response · 60 tokens</h5><div class="response-costs" aria-label="Output token costs"><div class="cost-line"><strong>Output · non-reasoning · 60 tokens</strong><div class="euro ">0.000063 EUR</div><div class="dollar">0.000072 USD</div></div></div><pre>A basketball team has five players on court during normal play. Source: https://about.fiba.basketball/en/our-sport/basketball</pre><div class="prompt-label">Cache write · 60 tokens</div><div class="prompt-label">Context: Added: 60 tokens · Total: 824 tokens</div><div class="cost-line"><strong>Call cost</strong><div class="euro ">0.000086 EUR</div><div class="dollar">0.000099 USD</div></div><div class="status">Status: ok</div></details></details></div></details><details open class="turn"><summary class="turn-heading"><strong>Turn 3</strong><span class="turn-cost">Turn cost <div class="euro ">0.000439 EUR</div><div class="dollar">0.000504 USD</div></span></summary>
+<div class="conversation-thread"><details open class="conversation-agent" aria-label="Agent dispatcher_agent"><summary class="agent-label">Agent · dispatcher_agent · ok</summary><details open class="event llm-event "><summary class="event-heading"><strong>R9 · LLM request · 862 tokens</strong> · scripted-chat-light<span class="status">· ok</span><span class="span-id">01a0b6e6-9976-7da0-b8c0-79e4ea2fe0bf</span></summary><div class="agent-label">Agent · <a href="#agent-01a0b6e6-9975-7751-8ac9-f1bf0c6f9a8f">dispatcher_agent</a></div>
+<div class="cost-line"><strong>Conversation history · cache read · 824 tokens</strong><div class="euro ">0.000014 EUR</div><div class="dollar">0.000016 USD</div></div>
+<div class="request-costs" aria-label="Input token costs"><div class="cost-line"><strong>Fresh input · 38 tokens</strong><div class="euro ">0.000007 EUR</div><div class="dollar">0.000008 USD</div></div></div>
+<div class="input-detail">
+
+<details class="tool-definitions"><summary class="prompt-label">Tool definitions · 221 tokens</summary>
+
+<h5>task</h5>
+<p>Delegate a self-contained question to the matching expert. Available experts:
+- movie_expert: Specialist for questions about movies, with its own local reference lookup.
+- sports_expert: Specialist for questions about sports, with its own local reference lookup.
+- history_expert: Specialist for questions about history, with its own local reference lookup.</p>
+<pre>{
+  "properties": {
+    "description": {
+      "description": "A detailed description of the task for the subagent to perform autonomously. Include all necessary context and specify the expected output format.",
+      "type": "string"
+    },
+    "subagent_type": {
+      "description": "The type of subagent to use. Must be one of the available agent types listed in the tool description.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "description",
+    "subagent_type"
+  ],
+  "type": "object"
+}</pre>
+</details>
+
+
+<div class="prompt-label">User prompt · 38 tokens</div><pre>In which year did the Berlin Wall fall?</pre>
+
+</div>
+<div class="prompt-label">Cache write · 38 tokens</div><div class="prompt-label">Context: Added: 38 tokens · Total: 862 tokens</div>
+
+
+
+<h5 class="llm-response-heading">LLM response · 86 tokens</h5><div class="response-costs" aria-label="Output token costs"><div class="cost-line"><strong>Output · including tool calls · 86 tokens</strong><div class="euro ">0.000090 EUR</div><div class="dollar">0.000103 USD</div></div></div><pre>{
+  "args": {
+    "description": "In which year did the Berlin Wall fall?",
+    "subagent_type": "history_expert"
+  },
+  "id": "dispatch-3",
+  "name": "task",
+  "type": "tool_call"
+}</pre><div class="prompt-label">Cache write · 86 tokens</div><div class="prompt-label">Context: Added: 86 tokens · Total: 948 tokens</div><div class="cost-line"><strong>Call cost</strong><div class="euro ">0.000111 EUR</div><div class="dollar">0.000127 USD</div></div><h5>Tool call: task</h5><div class="status">Status: ok</div></details><details open class="event tool-event "><summary class="event-heading"><strong>Tool · task</strong><span class="status">· ok</span><span class="span-id">01a0b6e6-9977-7c81-95b2-9b4fffc07925</span></summary><div class="agent-label">Agent · <a href="#agent-01a0b6e6-9975-7751-8ac9-f1bf0c6f9a8f">dispatcher_agent</a></div><div class="agent-label">Delegation · <a href="#agent-01a0b6e6-9977-7c81-95b2-9b543792c7c1">history_expert</a></div><h5>Tool arguments</h5><pre>{&#39;subagent_type&#39;: &#39;history_expert&#39;, &#39;description&#39;: &#39;In which year did the Berlin Wall fall?&#39;}</pre>
+
+<div class="conversation-children"><details open class="conversation-agent" aria-label="Agent history_expert"><summary class="agent-label">Agent · history_expert · ok</summary><details open class="event llm-event "><summary class="event-heading"><strong>R10 · LLM request · 259 tokens</strong> · scripted-chat-light<span class="status">· ok</span><span class="span-id">01a0b6e6-9978-7180-8dd7-2e074a53c6c1</span></summary><div class="agent-label">Agent · <a href="#agent-01a0b6e6-9977-7c81-95b2-9b543792c7c1">history_expert</a></div>
+
+<div class="request-costs" aria-label="Input token costs"><div class="cost-line"><strong>Fresh input · 259 tokens</strong><div class="euro ">0.000045 EUR</div><div class="dollar">0.000052 USD</div></div></div>
+<div class="input-detail">
+
+<details class="tool-definitions"><summary class="prompt-label">Tool definitions · 119 tokens</summary>
+
+<h5>search_history_reference</h5>
+<p>Look up local history evidence by phrase; return sources or an explicit miss.</p>
+<pre>{
+  "properties": {
+    "query": {
+      "description": "A historical topic or question containing a phrase to match. The small teaching collection covers the Berlin Wall opening.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "query"
+  ],
+  "type": "object"
+}</pre>
+</details>
+
+<div class="request-setup"><div class="prompt-label">System prompt · 102 tokens</div><pre>You are the history expert. Use search_history_reference to retrieve evidence before answering the delegated question. Base factual claims on the returned passages and cite their source URLs. If no relevant evidence is found, explain the collection&#39;s limits instead of inventing an answer or claiming web research. Answer concisely. The collection is a small local teaching reference, not a complete or continually updated source.</pre></div>
+
+
+</div>
+<div class="prompt-label">Cache write · 259 tokens</div><div class="prompt-label">Context: Added: 259 tokens · Total: 259 tokens</div>
+
+
+
+<h5 class="llm-response-heading">LLM response · 78 tokens</h5><div class="response-costs" aria-label="Output token costs"><div class="cost-line"><strong>Output · including tool calls · 78 tokens</strong><div class="euro ">0.000082 EUR</div><div class="dollar">0.000094 USD</div></div></div><pre>{
+  "args": {
+    "query": "In which year did the Berlin Wall fall?"
+  },
+  "id": "retrieve-3",
+  "name": "search_history_reference",
+  "type": "tool_call"
+}</pre><div class="prompt-label">Cache write · 78 tokens</div><div class="prompt-label">Context: Added: 78 tokens · Total: 337 tokens</div><div class="cost-line"><strong>Call cost</strong><div class="euro ">0.000127 EUR</div><div class="dollar">0.000145 USD</div></div><h5>Tool call: search_history_reference</h5><div class="status">Status: ok</div></details><details open class="event tool-event "><summary class="event-heading"><strong>Tool · search_history_reference</strong><span class="status">· ok</span><span class="span-id">01a0b6e6-9979-7050-909a-6ecb9931aae3</span></summary><div class="agent-label">Agent · <a href="#agent-01a0b6e6-9977-7c81-95b2-9b543792c7c1">history_expert</a></div><h5>Tool arguments</h5><pre>{&#39;query&#39;: &#39;In which year did the Berlin Wall fall?&#39;}</pre>
+
+
+<h5 class="">Tool result</h5><pre>Opening of the Berlin Wall
+The Berlin Wall opened on 9 November 1989. The opening and subsequent physical demolition are distinct events.
+Source: https://www.stiftung-berliner-mauer.de/de/ueber-uns/leichte-sprache/geschichte</pre><div class="status">Status: ok</div></details><details open class="event llm-event "><summary class="event-heading"><strong>R11 · LLM request · 423 tokens</strong> · scripted-chat-light<span class="status">· ok</span><span class="span-id">01a0b6e6-997a-76a3-9c93-9be8c9d089f8</span></summary><div class="agent-label">Agent · <a href="#agent-01a0b6e6-9977-7c81-95b2-9b543792c7c1">history_expert</a></div>
+<div class="cost-line"><strong>Conversation history · cache read · 337 tokens</strong><div class="euro ">0.000006 EUR</div><div class="dollar">0.000007 USD</div></div>
+<div class="request-costs" aria-label="Input token costs"><div class="cost-line"><strong>Fresh input · 86 tokens</strong><div class="euro ">0.000015 EUR</div><div class="dollar">0.000017 USD</div></div></div>
+<div class="input-detail">
+
+<details class="tool-definitions"><summary class="prompt-label">Tool definitions · 119 tokens</summary>
+
+<h5>search_history_reference</h5>
+<p>Look up local history evidence by phrase; return sources or an explicit miss.</p>
+<pre>{
+  "properties": {
+    "query": {
+      "description": "A historical topic or question containing a phrase to match. The small teaching collection covers the Berlin Wall opening.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "query"
+  ],
+  "type": "object"
+}</pre>
+</details>
+
+
+
+<div class="prompt-label">Tool result · 86 tokens</div><pre>Opening of the Berlin Wall
+The Berlin Wall opened on 9 November 1989. The opening and subsequent physical demolition are distinct events.
+Source: https://www.stiftung-berliner-mauer.de/de/ueber-uns/leichte-sprache/geschichte</pre>
+</div>
+<div class="prompt-label">Cache write · 86 tokens</div><div class="prompt-label">Context: Added: 86 tokens · Total: 423 tokens</div>
+
+
+
+<h5 class="llm-response-heading">LLM response · 72 tokens</h5><div class="response-costs" aria-label="Output token costs"><div class="cost-line"><strong>Output · non-reasoning · 72 tokens</strong><div class="euro ">0.000075 EUR</div><div class="dollar">0.000086 USD</div></div></div><pre>The Berlin Wall opened on 9 November 1989, the opening preceded its physical demolition. Source: https://www.stiftung-berliner-mauer.de/de/ueber-uns/leichte-sprache/geschichte</pre><div class="prompt-label">Cache write · 72 tokens</div><div class="prompt-label">Context: Added: 72 tokens · Total: 495 tokens</div><div class="cost-line"><strong>Call cost</strong><div class="euro ">0.000096 EUR</div><div class="dollar">0.000110 USD</div></div><div class="status">Status: ok</div></details></details></div>
+<h5 class="">Tool result</h5><pre>Command(update={&#39;messages&#39;: [ToolMessage(content=&#39;The Berlin Wall opened on 9 November 1989, the opening preceded its physical demolition. Source: https://www.stiftung-berliner-mauer.de/de/ueber-uns/leichte-sprache/geschichte&#39;, tool_call_id=&#39;dispatch-3&#39;)]})</pre><div class="status">Status: ok</div></details><details open class="event llm-event "><summary class="event-heading"><strong>R12 · LLM request · 1024 tokens</strong> · scripted-chat-light<span class="status">· ok</span><span class="span-id">01a0b6e6-997b-7863-8313-aaa46286a1c5</span></summary><div class="agent-label">Agent · <a href="#agent-01a0b6e6-9975-7751-8ac9-f1bf0c6f9a8f">dispatcher_agent</a></div>
+<div class="cost-line"><strong>Conversation history · cache read · 948 tokens</strong><div class="euro ">0.000017 EUR</div><div class="dollar">0.000019 USD</div></div>
+<div class="request-costs" aria-label="Input token costs"><div class="cost-line"><strong>Fresh input · 76 tokens</strong><div class="euro ">0.000013 EUR</div><div class="dollar">0.000015 USD</div></div></div>
+<div class="input-detail">
+
+<details class="tool-definitions"><summary class="prompt-label">Tool definitions · 221 tokens</summary>
+
+<h5>task</h5>
+<p>Delegate a self-contained question to the matching expert. Available experts:
+- movie_expert: Specialist for questions about movies, with its own local reference lookup.
+- sports_expert: Specialist for questions about sports, with its own local reference lookup.
+- history_expert: Specialist for questions about history, with its own local reference lookup.</p>
+<pre>{
+  "properties": {
+    "description": {
+      "description": "A detailed description of the task for the subagent to perform autonomously. Include all necessary context and specify the expected output format.",
+      "type": "string"
+    },
+    "subagent_type": {
+      "description": "The type of subagent to use. Must be one of the available agent types listed in the tool description.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "description",
+    "subagent_type"
+  ],
+  "type": "object"
+}</pre>
+</details>
+
+
+
+<div class="prompt-label">Tool result · 76 tokens</div><pre>The Berlin Wall opened on 9 November 1989, the opening preceded its physical demolition. Source: https://www.stiftung-berliner-mauer.de/de/ueber-uns/leichte-sprache/geschichte</pre>
+</div>
+<div class="prompt-label">Cache write · 76 tokens</div><div class="prompt-label">Context: Added: 76 tokens · Total: 1024 tokens</div>
+
+
+
+<h5 class="llm-response-heading">LLM response · 72 tokens</h5><div class="response-costs" aria-label="Output token costs"><div class="cost-line"><strong>Output · non-reasoning · 72 tokens</strong><div class="euro ">0.000075 EUR</div><div class="dollar">0.000086 USD</div></div></div><pre>The Berlin Wall opened on 9 November 1989, the opening preceded its physical demolition. Source: https://www.stiftung-berliner-mauer.de/de/ueber-uns/leichte-sprache/geschichte</pre><div class="prompt-label">Cache write · 72 tokens</div><div class="prompt-label">Context: Added: 72 tokens · Total: 1096 tokens</div><div class="cost-line"><strong>Call cost</strong><div class="euro ">0.000105 EUR</div><div class="dollar">0.000121 USD</div></div><div class="status">Status: ok</div></details></details></div></details></div>
+
+<h2>Execution tree</h2><p>Drill into graph nodes, model calls, and tools. Each token category has its own column with EUR and USD cost underneath. Categories are disjoint: fresh input excludes cache; output excludes reasoning.</p>
+<div class="toolbar"><button id="expand-all" type="button">Expand all</button><button id="collapse-all" type="button">Collapse all</button><span>42 spans · parent rows show subtree totals; do not add parent and child rows together.</span></div>
+
+
+<div class="table-wrap"><table aria-label="Expandable execution trace and token costs"><thead><tr><th>Operation</th><th>Span ID</th><th>Status</th><th>Description</th><th>Model · effort</th><th>Elapsed</th><th>Fresh input</th><th>Cache read</th><th>Cache write</th><th>Output · non-reasoning</th><th>Reasoning</th><th>Total cost<br>EUR / USD</th></tr></thead><tbody>
+<tr class="tree-row " data-index="0" data-parent=""><td><div style="padding-left:0px"><div class="kind">agent <span class="status ">· ok</span></div><div class="step-name"><button type="button" class="toggle" aria-expanded="true" aria-label="Toggle children of dispatcher_agent">−</button>dispatcher_agent</div><div class="subtree">Subtree totals</div></div></td><td class="span-id">01a0b6e6-9966-75c0-b937-8610be36cddf</td><td>ok</td><td class="description-cell">Execute the dispatcher_agent workflow operation and pass its result to the next graph step.</td><td>—</td><td>8.94 ms</td><td class=""><div class="tokens">757 <small>tokens</small></div><div class="euro ">0.000132 EUR</div><div class="dollar">0.000151 USD</div></td><td class=""><div class="tokens">793 <small>tokens</small></div><div class="euro ">0.000014 EUR</div><div class="dollar">0.000016 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td class=""><div class="tokens">262 <small>tokens</small></div><div class="euro ">0.000274 EUR</div><div class="dollar">0.000314 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="euro ">0.000420 EUR</div><div class="dollar">0.000482 USD</div></td></tr><tr class="tree-row " data-index="1" data-parent="0"><td><div style="padding-left:14px"><div class="kind">workflow <span class="status ">· ok</span></div><div class="step-name"><button type="button" class="toggle" aria-expanded="true" aria-label="Toggle children of model">−</button>model</div><div class="subtree">Subtree totals</div></div></td><td class="span-id">01a0b6e6-9967-7fd2-8d6e-c99b52c07a28</td><td>ok</td><td class="description-cell">Prepare the current conversation, run model middleware, and invoke the chat model.<div class="context">Graph step 1</div></td><td>—</td><td>2.42 ms</td><td class=""><div class="tokens">380 <small>tokens</small></div><div class="euro ">0.000066 EUR</div><div class="dollar">0.000076 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td class=""><div class="tokens">82 <small>tokens</small></div><div class="euro ">0.000086 EUR</div><div class="dollar">0.000098 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="euro ">0.000152 EUR</div><div class="dollar">0.000174 USD</div></td></tr><tr class="tree-row " data-index="2" data-parent="1"><td><div style="padding-left:28px"><div class="kind">model <span class="status ">· ok</span></div><div class="step-name">SharedSimulatedModel</div></div></td><td class="span-id">01a0b6e6-9968-7c52-95f9-a5d1a59f0c88</td><td>ok</td><td class="description-cell">Execute this agent&#39;s role using the shared LLM and its bound tool.<div class="context">Graph step 1</div><div class="context">Requested: task</div></td><td>scripted-chat-light<div class="context">demo</div></td><td>0.84 ms</td><td class=""><div class="tokens">380 <small>tokens</small></div><div class="euro ">0.000066 EUR</div><div class="dollar">0.000076 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td class=""><div class="tokens">82 <small>tokens</small></div><div class="euro ">0.000086 EUR</div><div class="dollar">0.000098 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="euro ">0.000152 EUR</div><div class="dollar">0.000174 USD</div></td></tr><tr class="tree-row " data-index="3" data-parent="0"><td><div style="padding-left:14px"><div class="kind">workflow <span class="status ">· ok</span></div><div class="step-name"><button type="button" class="toggle" aria-expanded="true" aria-label="Toggle children of tools">−</button>tools</div><div class="subtree">Subtree totals</div></div></td><td class="span-id">01a0b6e6-996a-7c13-bdb4-543650e704db</td><td>ok</td><td class="description-cell">Execute tool calls requested by the preceding model response and return their observations.<div class="context">Graph step 2</div></td><td>—</td><td>4.51 ms</td><td class=""><div class="tokens">320 <small>tokens</small></div><div class="euro ">0.000056 EUR</div><div class="dollar">0.000064 USD</div></td><td class=""><div class="tokens">331 <small>tokens</small></div><div class="euro ">0.000006 EUR</div><div class="dollar">0.000007 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td class=""><div class="tokens">127 <small>tokens</small></div><div class="euro ">0.000133 EUR</div><div class="dollar">0.000152 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="euro ">0.000195 EUR</div><div class="dollar">0.000223 USD</div></td></tr><tr class="tree-row " data-index="4" data-parent="3"><td><div style="padding-left:28px"><div class="kind">tool <span class="status ">· ok</span></div><div class="step-name"><button type="button" class="toggle" aria-expanded="true" aria-label="Toggle children of task">−</button>task</div><div class="subtree">Subtree totals</div></div></td><td class="span-id">01a0b6e6-996a-7c13-bdb4-54448e7bf840</td><td>ok</td><td class="description-cell">Delegate a self-contained question to the matching expert. Available experts:
+- movie_expert: Specialist for questions about movies, with its own local reference lookup.
+- sports_expert: Specialist for questions about sports, with its own local reference lookup.
+- history_expert: Specialist for questions about history, with its own local reference lookup.<div class="context">Graph step 2</div></td><td>—</td><td>3.87 ms</td><td class=""><div class="tokens">320 <small>tokens</small></div><div class="euro ">0.000056 EUR</div><div class="dollar">0.000064 USD</div></td><td class=""><div class="tokens">331 <small>tokens</small></div><div class="euro ">0.000006 EUR</div><div class="dollar">0.000007 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td class=""><div class="tokens">127 <small>tokens</small></div><div class="euro ">0.000133 EUR</div><div class="dollar">0.000152 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="euro ">0.000195 EUR</div><div class="dollar">0.000223 USD</div></td></tr><tr class="tree-row " data-index="5" data-parent="4"><td><div style="padding-left:42px"><div class="kind">agent <span class="status ">· ok</span></div><div class="step-name"><button type="button" class="toggle" aria-expanded="true" aria-label="Toggle children of movie_expert">−</button>movie_expert</div><div class="subtree">Subtree totals</div></div></td><td class="span-id">01a0b6e6-996a-7c13-bdb4-545abce1857e</td><td>ok</td><td class="description-cell">Execute the movie_expert workflow operation and pass its result to the next graph step.<div class="context">Graph step 2</div></td><td>—</td><td>3.34 ms</td><td class=""><div class="tokens">320 <small>tokens</small></div><div class="euro ">0.000056 EUR</div><div class="dollar">0.000064 USD</div></td><td class=""><div class="tokens">331 <small>tokens</small></div><div class="euro ">0.000006 EUR</div><div class="dollar">0.000007 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td class=""><div class="tokens">127 <small>tokens</small></div><div class="euro ">0.000133 EUR</div><div class="dollar">0.000152 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="euro ">0.000195 EUR</div><div class="dollar">0.000223 USD</div></td></tr><tr class="tree-row " data-index="6" data-parent="5"><td><div style="padding-left:56px"><div class="kind">workflow <span class="status ">· ok</span></div><div class="step-name"><button type="button" class="toggle" aria-expanded="true" aria-label="Toggle children of model">−</button>model</div><div class="subtree">Subtree totals</div></div></td><td class="span-id">01a0b6e6-996b-7782-94a9-9d6166b5c7ab</td><td>ok</td><td class="description-cell">Prepare the current conversation, run model middleware, and invoke the chat model.<div class="context">Graph step 1</div></td><td>—</td><td>1.02 ms</td><td class=""><div class="tokens">257 <small>tokens</small></div><div class="euro ">0.000045 EUR</div><div class="dollar">0.000051 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td class=""><div class="tokens">74 <small>tokens</small></div><div class="euro ">0.000077 EUR</div><div class="dollar">0.000089 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="euro ">0.000122 EUR</div><div class="dollar">0.000140 USD</div></td></tr><tr class="tree-row " data-index="7" data-parent="6"><td><div style="padding-left:70px"><div class="kind">model <span class="status ">· ok</span></div><div class="step-name">SharedSimulatedModel</div></div></td><td class="span-id">01a0b6e6-996b-7782-94a9-9d748d3efee6</td><td>ok</td><td class="description-cell">Execute this agent&#39;s role using the shared LLM and its bound tool.<div class="context">Graph step 1</div><div class="context">Requested: search_movie_reference</div></td><td>scripted-chat-light<div class="context">demo</div></td><td>0.23 ms</td><td class=""><div class="tokens">257 <small>tokens</small></div><div class="euro ">0.000045 EUR</div><div class="dollar">0.000051 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td class=""><div class="tokens">74 <small>tokens</small></div><div class="euro ">0.000077 EUR</div><div class="dollar">0.000089 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="euro ">0.000122 EUR</div><div class="dollar">0.000140 USD</div></td></tr><tr class="tree-row " data-index="8" data-parent="5"><td><div style="padding-left:56px"><div class="kind">workflow <span class="status ">· ok</span></div><div class="step-name"><button type="button" class="toggle" aria-expanded="true" aria-label="Toggle children of tools">−</button>tools</div><div class="subtree">Subtree totals</div></div></td><td class="span-id">01a0b6e6-996c-7a73-ae69-842fcae4efa9</td><td>ok</td><td class="description-cell">Execute tool calls requested by the preceding model response and return their observations.<div class="context">Graph step 2</div></td><td>—</td><td>0.67 ms</td><td class="">—</td><td class="">—</td><td class="">—</td><td class="">—</td><td class="">—</td><td>—</td></tr><tr class="tree-row " data-index="9" data-parent="8"><td><div style="padding-left:70px"><div class="kind">tool <span class="status ">· ok</span></div><div class="step-name">search_movie_reference</div></div></td><td class="span-id">01a0b6e6-996c-7a73-ae69-843a3d837a71</td><td>ok</td><td class="description-cell">Look up local movie evidence by phrase; return sources or an explicit miss.<div class="context">Graph step 2</div></td><td>—</td><td>0.22 ms</td><td class="">—</td><td class="">—</td><td class="">—</td><td class="">—</td><td class="">—</td><td>—</td></tr><tr class="tree-row " data-index="10" data-parent="5"><td><div style="padding-left:56px"><div class="kind">workflow <span class="status ">· ok</span></div><div class="step-name"><button type="button" class="toggle" aria-expanded="true" aria-label="Toggle children of model">−</button>model</div><div class="subtree">Subtree totals</div></div></td><td class="span-id">01a0b6e6-996d-76b0-9370-fba3888457a2</td><td>ok</td><td class="description-cell">Prepare the current conversation, run model middleware, and invoke the chat model.<div class="context">Graph step 3</div></td><td>—</td><td>0.55 ms</td><td class=""><div class="tokens">63 <small>tokens</small></div><div class="euro ">0.000011 EUR</div><div class="dollar">0.000013 USD</div></td><td class=""><div class="tokens">331 <small>tokens</small></div><div class="euro ">0.000006 EUR</div><div class="dollar">0.000007 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td class=""><div class="tokens">53 <small>tokens</small></div><div class="euro ">0.000055 EUR</div><div class="dollar">0.000064 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="euro ">0.000072 EUR</div><div class="dollar">0.000083 USD</div></td></tr><tr class="tree-row " data-index="11" data-parent="10"><td><div style="padding-left:70px"><div class="kind">model <span class="status ">· ok</span></div><div class="step-name">SharedSimulatedModel</div></div></td><td class="span-id">01a0b6e6-996d-76b0-9370-fbb279478b31</td><td>ok</td><td class="description-cell">Execute this agent&#39;s role using the shared LLM and its bound tool.<div class="context">Graph step 3</div></td><td>scripted-chat-light<div class="context">demo</div></td><td>0.24 ms</td><td class=""><div class="tokens">63 <small>tokens</small></div><div class="euro ">0.000011 EUR</div><div class="dollar">0.000013 USD</div></td><td class=""><div class="tokens">331 <small>tokens</small></div><div class="euro ">0.000006 EUR</div><div class="dollar">0.000007 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td class=""><div class="tokens">53 <small>tokens</small></div><div class="euro ">0.000055 EUR</div><div class="dollar">0.000064 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="euro ">0.000072 EUR</div><div class="dollar">0.000083 USD</div></td></tr><tr class="tree-row " data-index="12" data-parent="0"><td><div style="padding-left:14px"><div class="kind">workflow <span class="status ">· ok</span></div><div class="step-name"><button type="button" class="toggle" aria-expanded="true" aria-label="Toggle children of model">−</button>model</div><div class="subtree">Subtree totals</div></div></td><td class="span-id">01a0b6e6-996e-7422-a3b3-ec894f849014</td><td>ok</td><td class="description-cell">Prepare the current conversation, run model middleware, and invoke the chat model.<div class="context">Graph step 3</div></td><td>—</td><td>0.56 ms</td><td class=""><div class="tokens">57 <small>tokens</small></div><div class="euro ">0.000010 EUR</div><div class="dollar">0.000011 USD</div></td><td class=""><div class="tokens">462 <small>tokens</small></div><div class="euro ">0.000008 EUR</div><div class="dollar">0.000009 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td class=""><div class="tokens">53 <small>tokens</small></div><div class="euro ">0.000055 EUR</div><div class="dollar">0.000064 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="euro ">0.000074 EUR</div><div class="dollar">0.000084 USD</div></td></tr><tr class="tree-row " data-index="13" data-parent="12"><td><div style="padding-left:28px"><div class="kind">model <span class="status ">· ok</span></div><div class="step-name">SharedSimulatedModel</div></div></td><td class="span-id">01a0b6e6-996f-7710-8f44-1e0bdf990890</td><td>ok</td><td class="description-cell">Execute this agent&#39;s role using the shared LLM and its bound tool.<div class="context">Graph step 3</div></td><td>scripted-chat-light<div class="context">demo</div></td><td>0.24 ms</td><td class=""><div class="tokens">57 <small>tokens</small></div><div class="euro ">0.000010 EUR</div><div class="dollar">0.000011 USD</div></td><td class=""><div class="tokens">462 <small>tokens</small></div><div class="euro ">0.000008 EUR</div><div class="dollar">0.000009 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td class=""><div class="tokens">53 <small>tokens</small></div><div class="euro ">0.000055 EUR</div><div class="dollar">0.000064 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="euro ">0.000074 EUR</div><div class="dollar">0.000084 USD</div></td></tr><tr class="tree-row " data-index="14" data-parent=""><td><div style="padding-left:0px"><div class="kind">agent <span class="status ">· ok</span></div><div class="step-name"><button type="button" class="toggle" aria-expanded="true" aria-label="Toggle children of dispatcher_agent">−</button>dispatcher_agent</div><div class="subtree">Subtree totals</div></div></td><td class="span-id">01a0b6e6-996f-7710-8f44-1e16b9b24cb7</td><td>ok</td><td class="description-cell">Execute the dispatcher_agent workflow operation and pass its result to the next graph step.</td><td>—</td><td>5.73 ms</td><td class=""><div class="tokens">441 <small>tokens</small></div><div class="euro ">0.000077 EUR</div><div class="dollar">0.000088 USD</div></td><td class=""><div class="tokens">1,613 <small>tokens</small></div><div class="euro ">0.000028 EUR</div><div class="dollar">0.000032 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td class=""><div class="tokens">288 <small>tokens</small></div><div class="euro ">0.000302 EUR</div><div class="dollar">0.000346 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="euro ">0.000407 EUR</div><div class="dollar">0.000466 USD</div></td></tr><tr class="tree-row " data-index="15" data-parent="14"><td><div style="padding-left:14px"><div class="kind">workflow <span class="status ">· ok</span></div><div class="step-name"><button type="button" class="toggle" aria-expanded="true" aria-label="Toggle children of model">−</button>model</div><div class="subtree">Subtree totals</div></div></td><td class="span-id">01a0b6e6-996f-7710-8f44-1e212cbf3c36</td><td>ok</td><td class="description-cell">Prepare the current conversation, run model middleware, and invoke the chat model.<div class="context">Graph step 1</div></td><td>—</td><td>0.55 ms</td><td class=""><div class="tokens">40 <small>tokens</small></div><div class="euro ">0.000007 EUR</div><div class="dollar">0.000008 USD</div></td><td class=""><div class="tokens">572 <small>tokens</small></div><div class="euro ">0.000010 EUR</div><div class="dollar">0.000011 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td class=""><div class="tokens">88 <small>tokens</small></div><div class="euro ">0.000092 EUR</div><div class="dollar">0.000106 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="euro ">0.000109 EUR</div><div class="dollar">0.000125 USD</div></td></tr><tr class="tree-row " data-index="16" data-parent="15"><td><div style="padding-left:28px"><div class="kind">model <span class="status ">· ok</span></div><div class="step-name">SharedSimulatedModel</div></div></td><td class="span-id">01a0b6e6-9970-7141-a740-d0968c1caccf</td><td>ok</td><td class="description-cell">Execute this agent&#39;s role using the shared LLM and its bound tool.<div class="context">Graph step 1</div><div class="context">Requested: task</div></td><td>scripted-chat-light<div class="context">demo</div></td><td>0.27 ms</td><td class=""><div class="tokens">40 <small>tokens</small></div><div class="euro ">0.000007 EUR</div><div class="dollar">0.000008 USD</div></td><td class=""><div class="tokens">572 <small>tokens</small></div><div class="euro ">0.000010 EUR</div><div class="dollar">0.000011 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td class=""><div class="tokens">88 <small>tokens</small></div><div class="euro ">0.000092 EUR</div><div class="dollar">0.000106 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="euro ">0.000109 EUR</div><div class="dollar">0.000125 USD</div></td></tr><tr class="tree-row " data-index="17" data-parent="14"><td><div style="padding-left:14px"><div class="kind">workflow <span class="status ">· ok</span></div><div class="step-name"><button type="button" class="toggle" aria-expanded="true" aria-label="Toggle children of tools">−</button>tools</div><div class="subtree">Subtree totals</div></div></td><td class="span-id">01a0b6e6-9970-7141-a740-d0afa0394fe8</td><td>ok</td><td class="description-cell">Execute tool calls requested by the preceding model response and return their observations.<div class="context">Graph step 2</div></td><td>—</td><td>3.72 ms</td><td class=""><div class="tokens">337 <small>tokens</small></div><div class="euro ">0.000059 EUR</div><div class="dollar">0.000067 USD</div></td><td class=""><div class="tokens">341 <small>tokens</small></div><div class="euro ">0.000006 EUR</div><div class="dollar">0.000007 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td class=""><div class="tokens">140 <small>tokens</small></div><div class="euro ">0.000147 EUR</div><div class="dollar">0.000168 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="euro ">0.000211 EUR</div><div class="dollar">0.000242 USD</div></td></tr><tr class="tree-row " data-index="18" data-parent="17"><td><div style="padding-left:28px"><div class="kind">tool <span class="status ">· ok</span></div><div class="step-name"><button type="button" class="toggle" aria-expanded="true" aria-label="Toggle children of task">−</button>task</div><div class="subtree">Subtree totals</div></div></td><td class="span-id">01a0b6e6-9970-7141-a740-d0bfe27c2e3c</td><td>ok</td><td class="description-cell">Delegate a self-contained question to the matching expert. Available experts:
+- movie_expert: Specialist for questions about movies, with its own local reference lookup.
+- sports_expert: Specialist for questions about sports, with its own local reference lookup.
+- history_expert: Specialist for questions about history, with its own local reference lookup.<div class="context">Graph step 2</div></td><td>—</td><td>3.34 ms</td><td class=""><div class="tokens">337 <small>tokens</small></div><div class="euro ">0.000059 EUR</div><div class="dollar">0.000067 USD</div></td><td class=""><div class="tokens">341 <small>tokens</small></div><div class="euro ">0.000006 EUR</div><div class="dollar">0.000007 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td class=""><div class="tokens">140 <small>tokens</small></div><div class="euro ">0.000147 EUR</div><div class="dollar">0.000168 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="euro ">0.000211 EUR</div><div class="dollar">0.000242 USD</div></td></tr><tr class="tree-row " data-index="19" data-parent="18"><td><div style="padding-left:42px"><div class="kind">agent <span class="status ">· ok</span></div><div class="step-name"><button type="button" class="toggle" aria-expanded="true" aria-label="Toggle children of sports_expert">−</button>sports_expert</div><div class="subtree">Subtree totals</div></div></td><td class="span-id">01a0b6e6-9971-7af0-a1a8-b6b89e6b8454</td><td>ok</td><td class="description-cell">Execute the sports_expert workflow operation and pass its result to the next graph step.<div class="context">Graph step 2</div></td><td>—</td><td>2.99 ms</td><td class=""><div class="tokens">337 <small>tokens</small></div><div class="euro ">0.000059 EUR</div><div class="dollar">0.000067 USD</div></td><td class=""><div class="tokens">341 <small>tokens</small></div><div class="euro ">0.000006 EUR</div><div class="dollar">0.000007 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td class=""><div class="tokens">140 <small>tokens</small></div><div class="euro ">0.000147 EUR</div><div class="dollar">0.000168 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="euro ">0.000211 EUR</div><div class="dollar">0.000242 USD</div></td></tr><tr class="tree-row " data-index="20" data-parent="19"><td><div style="padding-left:56px"><div class="kind">workflow <span class="status ">· ok</span></div><div class="step-name"><button type="button" class="toggle" aria-expanded="true" aria-label="Toggle children of model">−</button>model</div><div class="subtree">Subtree totals</div></div></td><td class="span-id">01a0b6e6-9971-7af0-a1a8-b6c94f42b69a</td><td>ok</td><td class="description-cell">Prepare the current conversation, run model middleware, and invoke the chat model.<div class="context">Graph step 1</div></td><td>—</td><td>0.93 ms</td><td class=""><div class="tokens">261 <small>tokens</small></div><div class="euro ">0.000046 EUR</div><div class="dollar">0.000052 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td class=""><div class="tokens">80 <small>tokens</small></div><div class="euro ">0.000084 EUR</div><div class="dollar">0.000096 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="euro ">0.000129 EUR</div><div class="dollar">0.000148 USD</div></td></tr><tr class="tree-row " data-index="21" data-parent="20"><td><div style="padding-left:70px"><div class="kind">model <span class="status ">· ok</span></div><div class="step-name">SharedSimulatedModel</div></div></td><td class="span-id">01a0b6e6-9971-7af0-a1a8-b6df9c345923</td><td>ok</td><td class="description-cell">Execute this agent&#39;s role using the shared LLM and its bound tool.<div class="context">Graph step 1</div><div class="context">Requested: search_sports_reference</div></td><td>scripted-chat-light<div class="context">demo</div></td><td>0.19 ms</td><td class=""><div class="tokens">261 <small>tokens</small></div><div class="euro ">0.000046 EUR</div><div class="dollar">0.000052 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td class=""><div class="tokens">80 <small>tokens</small></div><div class="euro ">0.000084 EUR</div><div class="dollar">0.000096 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="euro ">0.000129 EUR</div><div class="dollar">0.000148 USD</div></td></tr><tr class="tree-row " data-index="22" data-parent="19"><td><div style="padding-left:56px"><div class="kind">workflow <span class="status ">· ok</span></div><div class="step-name"><button type="button" class="toggle" aria-expanded="true" aria-label="Toggle children of tools">−</button>tools</div><div class="subtree">Subtree totals</div></div></td><td class="span-id">01a0b6e6-9972-7312-93fe-cfe79029a969</td><td>ok</td><td class="description-cell">Execute tool calls requested by the preceding model response and return their observations.<div class="context">Graph step 2</div></td><td>—</td><td>0.54 ms</td><td class="">—</td><td class="">—</td><td class="">—</td><td class="">—</td><td class="">—</td><td>—</td></tr><tr class="tree-row " data-index="23" data-parent="22"><td><div style="padding-left:70px"><div class="kind">tool <span class="status ">· ok</span></div><div class="step-name">search_sports_reference</div></div></td><td class="span-id">01a0b6e6-9972-7312-93fe-cff9684abceb</td><td>ok</td><td class="description-cell">Look up local sports evidence by phrase; return sources or an explicit miss.<div class="context">Graph step 2</div></td><td>—</td><td>0.13 ms</td><td class="">—</td><td class="">—</td><td class="">—</td><td class="">—</td><td class="">—</td><td>—</td></tr><tr class="tree-row " data-index="24" data-parent="19"><td><div style="padding-left:56px"><div class="kind">workflow <span class="status ">· ok</span></div><div class="step-name"><button type="button" class="toggle" aria-expanded="true" aria-label="Toggle children of model">−</button>model</div><div class="subtree">Subtree totals</div></div></td><td class="span-id">01a0b6e6-9973-7780-a1eb-ada8d0716df9</td><td>ok</td><td class="description-cell">Prepare the current conversation, run model middleware, and invoke the chat model.<div class="context">Graph step 3</div></td><td>—</td><td>0.61 ms</td><td class=""><div class="tokens">76 <small>tokens</small></div><div class="euro ">0.000013 EUR</div><div class="dollar">0.000015 USD</div></td><td class=""><div class="tokens">341 <small>tokens</small></div><div class="euro ">0.000006 EUR</div><div class="dollar">0.000007 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td class=""><div class="tokens">60 <small>tokens</small></div><div class="euro ">0.000063 EUR</div><div class="dollar">0.000072 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="euro ">0.000082 EUR</div><div class="dollar">0.000094 USD</div></td></tr><tr class="tree-row " data-index="25" data-parent="24"><td><div style="padding-left:70px"><div class="kind">model <span class="status ">· ok</span></div><div class="step-name">SharedSimulatedModel</div></div></td><td class="span-id">01a0b6e6-9973-7780-a1eb-adb3fb3983f4</td><td>ok</td><td class="description-cell">Execute this agent&#39;s role using the shared LLM and its bound tool.<div class="context">Graph step 3</div></td><td>scripted-chat-light<div class="context">demo</div></td><td>0.24 ms</td><td class=""><div class="tokens">76 <small>tokens</small></div><div class="euro ">0.000013 EUR</div><div class="dollar">0.000015 USD</div></td><td class=""><div class="tokens">341 <small>tokens</small></div><div class="euro ">0.000006 EUR</div><div class="dollar">0.000007 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td class=""><div class="tokens">60 <small>tokens</small></div><div class="euro ">0.000063 EUR</div><div class="dollar">0.000072 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="euro ">0.000082 EUR</div><div class="dollar">0.000094 USD</div></td></tr><tr class="tree-row " data-index="26" data-parent="14"><td><div style="padding-left:14px"><div class="kind">workflow <span class="status ">· ok</span></div><div class="step-name"><button type="button" class="toggle" aria-expanded="true" aria-label="Toggle children of model">−</button>model</div><div class="subtree">Subtree totals</div></div></td><td class="span-id">01a0b6e6-9974-7a81-a411-950513a9c2df</td><td>ok</td><td class="description-cell">Prepare the current conversation, run model middleware, and invoke the chat model.<div class="context">Graph step 3</div></td><td>—</td><td>0.67 ms</td><td class=""><div class="tokens">64 <small>tokens</small></div><div class="euro ">0.000011 EUR</div><div class="dollar">0.000013 USD</div></td><td class=""><div class="tokens">700 <small>tokens</small></div><div class="euro ">0.000012 EUR</div><div class="dollar">0.000014 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td class=""><div class="tokens">60 <small>tokens</small></div><div class="euro ">0.000063 EUR</div><div class="dollar">0.000072 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="euro ">0.000086 EUR</div><div class="dollar">0.000099 USD</div></td></tr><tr class="tree-row " data-index="27" data-parent="26"><td><div style="padding-left:28px"><div class="kind">model <span class="status ">· ok</span></div><div class="step-name">SharedSimulatedModel</div></div></td><td class="span-id">01a0b6e6-9974-7a81-a411-9511293e2f31</td><td>ok</td><td class="description-cell">Execute this agent&#39;s role using the shared LLM and its bound tool.<div class="context">Graph step 3</div></td><td>scripted-chat-light<div class="context">demo</div></td><td>0.32 ms</td><td class=""><div class="tokens">64 <small>tokens</small></div><div class="euro ">0.000011 EUR</div><div class="dollar">0.000013 USD</div></td><td class=""><div class="tokens">700 <small>tokens</small></div><div class="euro ">0.000012 EUR</div><div class="dollar">0.000014 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td class=""><div class="tokens">60 <small>tokens</small></div><div class="euro ">0.000063 EUR</div><div class="dollar">0.000072 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="euro ">0.000086 EUR</div><div class="dollar">0.000099 USD</div></td></tr><tr class="tree-row " data-index="28" data-parent=""><td><div style="padding-left:0px"><div class="kind">agent <span class="status ">· ok</span></div><div class="step-name"><button type="button" class="toggle" aria-expanded="true" aria-label="Toggle children of dispatcher_agent">−</button>dispatcher_agent</div><div class="subtree">Subtree totals</div></div></td><td class="span-id">01a0b6e6-9975-7751-8ac9-f1bf0c6f9a8f</td><td>ok</td><td class="description-cell">Execute the dispatcher_agent workflow operation and pass its result to the next graph step.</td><td>—</td><td>6.93 ms</td><td class=""><div class="tokens">459 <small>tokens</small></div><div class="euro ">0.000080 EUR</div><div class="dollar">0.000092 USD</div></td><td class=""><div class="tokens">2,109 <small>tokens</small></div><div class="euro ">0.000037 EUR</div><div class="dollar">0.000042 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td class=""><div class="tokens">308 <small>tokens</small></div><div class="euro ">0.000323 EUR</div><div class="dollar">0.000370 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="euro ">0.000439 EUR</div><div class="dollar">0.000504 USD</div></td></tr><tr class="tree-row " data-index="29" data-parent="28"><td><div style="padding-left:14px"><div class="kind">workflow <span class="status ">· ok</span></div><div class="step-name"><button type="button" class="toggle" aria-expanded="true" aria-label="Toggle children of model">−</button>model</div><div class="subtree">Subtree totals</div></div></td><td class="span-id">01a0b6e6-9975-7751-8ac9-f1cfc084b3b0</td><td>ok</td><td class="description-cell">Prepare the current conversation, run model middleware, and invoke the chat model.<div class="context">Graph step 1</div></td><td>—</td><td>1.00 ms</td><td class=""><div class="tokens">38 <small>tokens</small></div><div class="euro ">0.000007 EUR</div><div class="dollar">0.000008 USD</div></td><td class=""><div class="tokens">824 <small>tokens</small></div><div class="euro ">0.000014 EUR</div><div class="dollar">0.000016 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td class=""><div class="tokens">86 <small>tokens</small></div><div class="euro ">0.000090 EUR</div><div class="dollar">0.000103 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="euro ">0.000111 EUR</div><div class="dollar">0.000127 USD</div></td></tr><tr class="tree-row " data-index="30" data-parent="29"><td><div style="padding-left:28px"><div class="kind">model <span class="status ">· ok</span></div><div class="step-name">SharedSimulatedModel</div></div></td><td class="span-id">01a0b6e6-9976-7da0-b8c0-79e4ea2fe0bf</td><td>ok</td><td class="description-cell">Execute this agent&#39;s role using the shared LLM and its bound tool.<div class="context">Graph step 1</div><div class="context">Requested: task</div></td><td>scripted-chat-light<div class="context">demo</div></td><td>0.42 ms</td><td class=""><div class="tokens">38 <small>tokens</small></div><div class="euro ">0.000007 EUR</div><div class="dollar">0.000008 USD</div></td><td class=""><div class="tokens">824 <small>tokens</small></div><div class="euro ">0.000014 EUR</div><div class="dollar">0.000016 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td class=""><div class="tokens">86 <small>tokens</small></div><div class="euro ">0.000090 EUR</div><div class="dollar">0.000103 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="euro ">0.000111 EUR</div><div class="dollar">0.000127 USD</div></td></tr><tr class="tree-row " data-index="31" data-parent="28"><td><div style="padding-left:14px"><div class="kind">workflow <span class="status ">· ok</span></div><div class="step-name"><button type="button" class="toggle" aria-expanded="true" aria-label="Toggle children of tools">−</button>tools</div><div class="subtree">Subtree totals</div></div></td><td class="span-id">01a0b6e6-9977-7c81-95b2-9b35e016fb11</td><td>ok</td><td class="description-cell">Execute tool calls requested by the preceding model response and return their observations.<div class="context">Graph step 2</div></td><td>—</td><td>4.30 ms</td><td class=""><div class="tokens">345 <small>tokens</small></div><div class="euro ">0.000060 EUR</div><div class="dollar">0.000069 USD</div></td><td class=""><div class="tokens">337 <small>tokens</small></div><div class="euro ">0.000006 EUR</div><div class="dollar">0.000007 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td class=""><div class="tokens">150 <small>tokens</small></div><div class="euro ">0.000157 EUR</div><div class="dollar">0.000180 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="euro ">0.000223 EUR</div><div class="dollar">0.000256 USD</div></td></tr><tr class="tree-row " data-index="32" data-parent="31"><td><div style="padding-left:28px"><div class="kind">tool <span class="status ">· ok</span></div><div class="step-name"><button type="button" class="toggle" aria-expanded="true" aria-label="Toggle children of task">−</button>task</div><div class="subtree">Subtree totals</div></div></td><td class="span-id">01a0b6e6-9977-7c81-95b2-9b4fffc07925</td><td>ok</td><td class="description-cell">Delegate a self-contained question to the matching expert. Available experts:
+- movie_expert: Specialist for questions about movies, with its own local reference lookup.
+- sports_expert: Specialist for questions about sports, with its own local reference lookup.
+- history_expert: Specialist for questions about history, with its own local reference lookup.<div class="context">Graph step 2</div></td><td>—</td><td>3.83 ms</td><td class=""><div class="tokens">345 <small>tokens</small></div><div class="euro ">0.000060 EUR</div><div class="dollar">0.000069 USD</div></td><td class=""><div class="tokens">337 <small>tokens</small></div><div class="euro ">0.000006 EUR</div><div class="dollar">0.000007 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td class=""><div class="tokens">150 <small>tokens</small></div><div class="euro ">0.000157 EUR</div><div class="dollar">0.000180 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="euro ">0.000223 EUR</div><div class="dollar">0.000256 USD</div></td></tr><tr class="tree-row " data-index="33" data-parent="32"><td><div style="padding-left:42px"><div class="kind">agent <span class="status ">· ok</span></div><div class="step-name"><button type="button" class="toggle" aria-expanded="true" aria-label="Toggle children of history_expert">−</button>history_expert</div><div class="subtree">Subtree totals</div></div></td><td class="span-id">01a0b6e6-9977-7c81-95b2-9b543792c7c1</td><td>ok</td><td class="description-cell">Execute the history_expert workflow operation and pass its result to the next graph step.<div class="context">Graph step 2</div></td><td>—</td><td>3.44 ms</td><td class=""><div class="tokens">345 <small>tokens</small></div><div class="euro ">0.000060 EUR</div><div class="dollar">0.000069 USD</div></td><td class=""><div class="tokens">337 <small>tokens</small></div><div class="euro ">0.000006 EUR</div><div class="dollar">0.000007 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td class=""><div class="tokens">150 <small>tokens</small></div><div class="euro ">0.000157 EUR</div><div class="dollar">0.000180 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="euro ">0.000223 EUR</div><div class="dollar">0.000256 USD</div></td></tr><tr class="tree-row " data-index="34" data-parent="33"><td><div style="padding-left:56px"><div class="kind">workflow <span class="status ">· ok</span></div><div class="step-name"><button type="button" class="toggle" aria-expanded="true" aria-label="Toggle children of model">−</button>model</div><div class="subtree">Subtree totals</div></div></td><td class="span-id">01a0b6e6-9978-7180-8dd7-2df2210167b6</td><td>ok</td><td class="description-cell">Prepare the current conversation, run model middleware, and invoke the chat model.<div class="context">Graph step 1</div></td><td>—</td><td>1.36 ms</td><td class=""><div class="tokens">259 <small>tokens</small></div><div class="euro ">0.000045 EUR</div><div class="dollar">0.000052 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td class=""><div class="tokens">78 <small>tokens</small></div><div class="euro ">0.000082 EUR</div><div class="dollar">0.000094 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="euro ">0.000127 EUR</div><div class="dollar">0.000145 USD</div></td></tr><tr class="tree-row " data-index="35" data-parent="34"><td><div style="padding-left:70px"><div class="kind">model <span class="status ">· ok</span></div><div class="step-name">SharedSimulatedModel</div></div></td><td class="span-id">01a0b6e6-9978-7180-8dd7-2e074a53c6c1</td><td>ok</td><td class="description-cell">Execute this agent&#39;s role using the shared LLM and its bound tool.<div class="context">Graph step 1</div><div class="context">Requested: search_history_reference</div></td><td>scripted-chat-light<div class="context">demo</div></td><td>0.21 ms</td><td class=""><div class="tokens">259 <small>tokens</small></div><div class="euro ">0.000045 EUR</div><div class="dollar">0.000052 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td class=""><div class="tokens">78 <small>tokens</small></div><div class="euro ">0.000082 EUR</div><div class="dollar">0.000094 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="euro ">0.000127 EUR</div><div class="dollar">0.000145 USD</div></td></tr><tr class="tree-row " data-index="36" data-parent="33"><td><div style="padding-left:56px"><div class="kind">workflow <span class="status ">· ok</span></div><div class="step-name"><button type="button" class="toggle" aria-expanded="true" aria-label="Toggle children of tools">−</button>tools</div><div class="subtree">Subtree totals</div></div></td><td class="span-id">01a0b6e6-9979-7050-909a-6eb1cc18df30</td><td>ok</td><td class="description-cell">Execute tool calls requested by the preceding model response and return their observations.<div class="context">Graph step 2</div></td><td>—</td><td>0.52 ms</td><td class="">—</td><td class="">—</td><td class="">—</td><td class="">—</td><td class="">—</td><td>—</td></tr><tr class="tree-row " data-index="37" data-parent="36"><td><div style="padding-left:70px"><div class="kind">tool <span class="status ">· ok</span></div><div class="step-name">search_history_reference</div></div></td><td class="span-id">01a0b6e6-9979-7050-909a-6ecb9931aae3</td><td>ok</td><td class="description-cell">Look up local history evidence by phrase; return sources or an explicit miss.<div class="context">Graph step 2</div></td><td>—</td><td>0.14 ms</td><td class="">—</td><td class="">—</td><td class="">—</td><td class="">—</td><td class="">—</td><td>—</td></tr><tr class="tree-row " data-index="38" data-parent="33"><td><div style="padding-left:56px"><div class="kind">workflow <span class="status ">· ok</span></div><div class="step-name"><button type="button" class="toggle" aria-expanded="true" aria-label="Toggle children of model">−</button>model</div><div class="subtree">Subtree totals</div></div></td><td class="span-id">01a0b6e6-997a-76a3-9c93-9bdfdfbee3eb</td><td>ok</td><td class="description-cell">Prepare the current conversation, run model middleware, and invoke the chat model.<div class="context">Graph step 3</div></td><td>—</td><td>0.56 ms</td><td class=""><div class="tokens">86 <small>tokens</small></div><div class="euro ">0.000015 EUR</div><div class="dollar">0.000017 USD</div></td><td class=""><div class="tokens">337 <small>tokens</small></div><div class="euro ">0.000006 EUR</div><div class="dollar">0.000007 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td class=""><div class="tokens">72 <small>tokens</small></div><div class="euro ">0.000075 EUR</div><div class="dollar">0.000086 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="euro ">0.000096 EUR</div><div class="dollar">0.000110 USD</div></td></tr><tr class="tree-row " data-index="39" data-parent="38"><td><div style="padding-left:70px"><div class="kind">model <span class="status ">· ok</span></div><div class="step-name">SharedSimulatedModel</div></div></td><td class="span-id">01a0b6e6-997a-76a3-9c93-9be8c9d089f8</td><td>ok</td><td class="description-cell">Execute this agent&#39;s role using the shared LLM and its bound tool.<div class="context">Graph step 3</div></td><td>scripted-chat-light<div class="context">demo</div></td><td>0.22 ms</td><td class=""><div class="tokens">86 <small>tokens</small></div><div class="euro ">0.000015 EUR</div><div class="dollar">0.000017 USD</div></td><td class=""><div class="tokens">337 <small>tokens</small></div><div class="euro ">0.000006 EUR</div><div class="dollar">0.000007 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td class=""><div class="tokens">72 <small>tokens</small></div><div class="euro ">0.000075 EUR</div><div class="dollar">0.000086 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="euro ">0.000096 EUR</div><div class="dollar">0.000110 USD</div></td></tr><tr class="tree-row " data-index="40" data-parent="28"><td><div style="padding-left:14px"><div class="kind">workflow <span class="status ">· ok</span></div><div class="step-name"><button type="button" class="toggle" aria-expanded="true" aria-label="Toggle children of model">−</button>model</div><div class="subtree">Subtree totals</div></div></td><td class="span-id">01a0b6e6-997b-7863-8313-aa90011ab2e9</td><td>ok</td><td class="description-cell">Prepare the current conversation, run model middleware, and invoke the chat model.<div class="context">Graph step 3</div></td><td>—</td><td>0.65 ms</td><td class=""><div class="tokens">76 <small>tokens</small></div><div class="euro ">0.000013 EUR</div><div class="dollar">0.000015 USD</div></td><td class=""><div class="tokens">948 <small>tokens</small></div><div class="euro ">0.000017 EUR</div><div class="dollar">0.000019 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td class=""><div class="tokens">72 <small>tokens</small></div><div class="euro ">0.000075 EUR</div><div class="dollar">0.000086 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="euro ">0.000105 EUR</div><div class="dollar">0.000121 USD</div></td></tr><tr class="tree-row " data-index="41" data-parent="40"><td><div style="padding-left:28px"><div class="kind">model <span class="status ">· ok</span></div><div class="step-name">SharedSimulatedModel</div></div></td><td class="span-id">01a0b6e6-997b-7863-8313-aaa46286a1c5</td><td>ok</td><td class="description-cell">Execute this agent&#39;s role using the shared LLM and its bound tool.<div class="context">Graph step 3</div></td><td>scripted-chat-light<div class="context">demo</div></td><td>0.35 ms</td><td class=""><div class="tokens">76 <small>tokens</small></div><div class="euro ">0.000013 EUR</div><div class="dollar">0.000015 USD</div></td><td class=""><div class="tokens">948 <small>tokens</small></div><div class="euro ">0.000017 EUR</div><div class="dollar">0.000019 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td class=""><div class="tokens">72 <small>tokens</small></div><div class="euro ">0.000075 EUR</div><div class="dollar">0.000086 USD</div></td><td class=""><div class="tokens">0 <small>tokens</small></div><div class="euro ">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="euro ">0.000105 EUR</div><div class="dollar">0.000121 USD</div></td></tr>
+</tbody></table></div>
+<h2>Token price references</h2>
+
+<p class="">1 USD = 0.8726 EUR · Rate reference date <strong>2026-09-18</strong> · fetched 2026-09-18T16:42:45.011974+00:00 · source https://api.frankfurter.dev/v2/rate/usd/eur?providers=ecb. Latest published daily rate; weekends and holidays may use an earlier date.</p>
+<p>USD per million tokens · verification dates apply to every rate in the row. Red means older than today (2026-09-18). Dates record price verification, not when this HTML was generated.</p>
+<div class="table-wrap"><table aria-label="Token price references and dates"><thead><tr><th>Model / verification date</th><th>Input</th><th>Cache read</th><th>Cache write</th><th>Output / reasoning</th></tr></thead><tbody><tr class=""><td class="">openai:gpt-5.5<strong class="rate-date ">Verified 2026-09-18</strong><div class="context">https://developers.openai.com/api/docs/models/gpt-5.5.md</div></td><td>5 USD / 1M tokens<div class="euro">4.363000 EUR / 1M tokens</div></td><td>0.5 USD / 1M tokens<div class="euro">0.436300 EUR / 1M tokens</div></td><td>Unknown</td><td>30 USD / 1M tokens<div class="euro">26.178000 EUR / 1M tokens</div></td></tr><tr class=""><td class="">openai:gpt-5.6-luna<strong class="rate-date ">Verified 2026-09-18</strong><div class="context">https://developers.openai.com/api/docs/models/gpt-5.6-luna.md</div></td><td>0.2 USD / 1M tokens<div class="euro">0.174520 EUR / 1M tokens</div></td><td>0.02 USD / 1M tokens<div class="euro">0.017452 EUR / 1M tokens</div></td><td>0.250 USD / 1M tokens<div class="euro">0.218150 EUR / 1M tokens</div></td><td>1.2 USD / 1M tokens<div class="euro">1.047120 EUR / 1M tokens</div></td></tr><tr class=""><td class="">openai:gpt-5.6-sol<strong class="rate-date ">Verified 2026-09-18</strong><div class="context">https://developers.openai.com/api/docs/models/gpt-5.6-sol.md</div></td><td>4 USD / 1M tokens<div class="euro">3.490400 EUR / 1M tokens</div></td><td>0.4 USD / 1M tokens<div class="euro">0.349040 EUR / 1M tokens</div></td><td>5.00 USD / 1M tokens<div class="euro">4.363000 EUR / 1M tokens</div></td><td>20 USD / 1M tokens<div class="euro">17.452000 EUR / 1M tokens</div></td></tr><tr class=""><td class="">anthropic:claude-sonnet-5<strong class="rate-date ">Verified 2026-09-18</strong><div class="context">https://platform.claude.com/docs/en/about-claude/pricing</div></td><td>2 USD / 1M tokens<div class="euro">1.745200 EUR / 1M tokens</div></td><td>0.20 USD / 1M tokens<div class="euro">0.174520 EUR / 1M tokens</div></td><td>2.50 USD / 1M tokens<div class="euro">2.181500 EUR / 1M tokens</div></td><td>10 USD / 1M tokens<div class="euro">8.726000 EUR / 1M tokens</div></td></tr><tr class=""><td class="">anthropic:claude-opus-4-8<strong class="rate-date ">Verified 2026-09-18</strong><div class="context">https://platform.claude.com/docs/en/about-claude/pricing</div></td><td>5 USD / 1M tokens<div class="euro">4.363000 EUR / 1M tokens</div></td><td>0.50 USD / 1M tokens<div class="euro">0.436300 EUR / 1M tokens</div></td><td>6.25 USD / 1M tokens<div class="euro">5.453750 EUR / 1M tokens</div></td><td>25 USD / 1M tokens<div class="euro">21.815000 EUR / 1M tokens</div></td></tr><tr class=""><td class="">anthropic:claude-fable-5-1<strong class="rate-date ">Verified 2026-09-18</strong><div class="context">https://platform.claude.com/docs/en/about-claude/pricing</div></td><td>10 USD / 1M tokens<div class="euro">8.726000 EUR / 1M tokens</div></td><td>0.25 USD / 1M tokens<div class="euro">0.218150 EUR / 1M tokens</div></td><td>12.50 USD / 1M tokens<div class="euro">10.907500 EUR / 1M tokens</div></td><td>50 USD / 1M tokens<div class="euro">43.630000 EUR / 1M tokens</div></td></tr><tr class=""><td class="">demo:scripted-chat<strong class="rate-date ">Verified 2026-09-18</strong><div class="context">Illustrative demo rates based on openai:gpt-5.6-luna; no provider billing</div></td><td>0.2 USD / 1M tokens<div class="euro">0.174520 EUR / 1M tokens</div></td><td>0.02 USD / 1M tokens<div class="euro">0.017452 EUR / 1M tokens</div></td><td>0.250 USD / 1M tokens<div class="euro">0.218150 EUR / 1M tokens</div></td><td>1.2 USD / 1M tokens<div class="euro">1.047120 EUR / 1M tokens</div></td></tr></tbody></table></div>
+<details><summary>Complete pricing and exchange-rate data</summary><p>Standard online token rates. Verify rates and model access before use. Cache writes with unspecified lifetime use the 5-minute rate unless an explicit cache_write rate is configured. No batch, regional, long-context, tool, or negotiated pricing adjustments are applied.</p><pre>{
+  &#34;refresh_errors&#34;: {},
+  &#34;currency&#34;: &#34;USD&#34;,
+  &#34;exchange&#34;: {
+    &#34;rate&#34;: &#34;0.8726&#34;,
+    &#34;date&#34;: &#34;2026-09-18&#34;,
+    &#34;fetched_at&#34;: &#34;2026-09-18T16:42:45.011974Z&#34;,
+    &#34;source&#34;: &#34;https://api.frankfurter.dev/v2/rate/usd/eur?providers=ecb&#34;,
+    &#34;base&#34;: &#34;USD&#34;,
+    &#34;quote&#34;: &#34;EUR&#34;
+  },
+  &#34;exchange_error&#34;: null,
+  &#34;as_of&#34;: &#34;2026-09-18&#34;,
+  &#34;note&#34;: &#34;Standard online token rates. Verify rates and model access before use. Cache writes with unspecified lifetime use the 5-minute rate unless an explicit cache_write rate is configured. No batch, regional, long-context, tool, or negotiated pricing adjustments are applied.&#34;,
+  &#34;sources&#34;: [
+    &#34;https://developers.openai.com/api/docs/models/gpt-5.5.md&#34;,
+    &#34;https://developers.openai.com/api/docs/models/gpt-5.6-luna.md&#34;,
+    &#34;https://developers.openai.com/api/docs/models/gpt-5.6-sol.md&#34;,
+    &#34;https://platform.claude.com/docs/en/about-claude/pricing&#34;
+  ],
+  &#34;models&#34;: {
+    &#34;openai:gpt-5.5&#34;: {
+      &#34;fetched_at&#34;: &#34;2026-09-18T16:57:21.647481Z&#34;,
+      &#34;based_on&#34;: null,
+      &#34;as_of&#34;: &#34;2026-09-18&#34;,
+      &#34;source&#34;: &#34;https://developers.openai.com/api/docs/models/gpt-5.5.md&#34;,
+      &#34;input&#34;: &#34;5&#34;,
+      &#34;output&#34;: &#34;30&#34;,
+      &#34;cache_read&#34;: &#34;0.5&#34;,
+      &#34;cache_write&#34;: null,
+      &#34;cache_write_5m&#34;: null,
+      &#34;cache_write_1h&#34;: null
+    },
+    &#34;openai:gpt-5.6-luna&#34;: {
+      &#34;fetched_at&#34;: &#34;2026-09-18T16:57:21.648610Z&#34;,
+      &#34;based_on&#34;: null,
+      &#34;as_of&#34;: &#34;2026-09-18&#34;,
+      &#34;source&#34;: &#34;https://developers.openai.com/api/docs/models/gpt-5.6-luna.md&#34;,
+      &#34;input&#34;: &#34;0.2&#34;,
+      &#34;output&#34;: &#34;1.2&#34;,
+      &#34;cache_read&#34;: &#34;0.02&#34;,
+      &#34;cache_write&#34;: &#34;0.250&#34;,
+      &#34;cache_write_5m&#34;: null,
+      &#34;cache_write_1h&#34;: null
+    },
+    &#34;openai:gpt-5.6-sol&#34;: {
+      &#34;fetched_at&#34;: &#34;2026-09-18T16:57:21.648975Z&#34;,
+      &#34;based_on&#34;: null,
+      &#34;as_of&#34;: &#34;2026-09-18&#34;,
+      &#34;source&#34;: &#34;https://developers.openai.com/api/docs/models/gpt-5.6-sol.md&#34;,
+      &#34;input&#34;: &#34;4&#34;,
+      &#34;output&#34;: &#34;20&#34;,
+      &#34;cache_read&#34;: &#34;0.4&#34;,
+      &#34;cache_write&#34;: &#34;5.00&#34;,
+      &#34;cache_write_5m&#34;: null,
+      &#34;cache_write_1h&#34;: null
+    },
+    &#34;anthropic:claude-sonnet-5&#34;: {
+      &#34;fetched_at&#34;: &#34;2026-09-18T16:57:21.663815Z&#34;,
+      &#34;based_on&#34;: null,
+      &#34;as_of&#34;: &#34;2026-09-18&#34;,
+      &#34;source&#34;: &#34;https://platform.claude.com/docs/en/about-claude/pricing&#34;,
+      &#34;input&#34;: &#34;2&#34;,
+      &#34;output&#34;: &#34;10&#34;,
+      &#34;cache_read&#34;: &#34;0.20&#34;,
+      &#34;cache_write&#34;: null,
+      &#34;cache_write_5m&#34;: &#34;2.50&#34;,
+      &#34;cache_write_1h&#34;: &#34;4&#34;
+    },
+    &#34;anthropic:claude-opus-4-8&#34;: {
+      &#34;fetched_at&#34;: &#34;2026-09-18T16:57:21.674755Z&#34;,
+      &#34;based_on&#34;: null,
+      &#34;as_of&#34;: &#34;2026-09-18&#34;,
+      &#34;source&#34;: &#34;https://platform.claude.com/docs/en/about-claude/pricing&#34;,
+      &#34;input&#34;: &#34;5&#34;,
+      &#34;output&#34;: &#34;25&#34;,
+      &#34;cache_read&#34;: &#34;0.50&#34;,
+      &#34;cache_write&#34;: null,
+      &#34;cache_write_5m&#34;: &#34;6.25&#34;,
+      &#34;cache_write_1h&#34;: &#34;10&#34;
+    },
+    &#34;anthropic:claude-fable-5-1&#34;: {
+      &#34;fetched_at&#34;: &#34;2026-09-18T16:57:21.686328Z&#34;,
+      &#34;based_on&#34;: null,
+      &#34;as_of&#34;: &#34;2026-09-18&#34;,
+      &#34;source&#34;: &#34;https://platform.claude.com/docs/en/about-claude/pricing&#34;,
+      &#34;input&#34;: &#34;10&#34;,
+      &#34;output&#34;: &#34;50&#34;,
+      &#34;cache_read&#34;: &#34;0.25&#34;,
+      &#34;cache_write&#34;: null,
+      &#34;cache_write_5m&#34;: &#34;12.50&#34;,
+      &#34;cache_write_1h&#34;: &#34;20&#34;
+    },
+    &#34;demo:scripted-chat&#34;: {
+      &#34;fetched_at&#34;: &#34;2026-09-18T16:57:21.648610Z&#34;,
+      &#34;based_on&#34;: &#34;openai:gpt-5.6-luna&#34;,
+      &#34;as_of&#34;: &#34;2026-09-18&#34;,
+      &#34;source&#34;: &#34;Illustrative demo rates based on openai:gpt-5.6-luna; no provider billing&#34;,
+      &#34;input&#34;: &#34;0.2&#34;,
+      &#34;output&#34;: &#34;1.2&#34;,
+      &#34;cache_read&#34;: &#34;0.02&#34;,
+      &#34;cache_write&#34;: &#34;0.250&#34;,
+      &#34;cache_write_5m&#34;: null,
+      &#34;cache_write_1h&#34;: null
+    }
+  },
+  &#34;aliases&#34;: {
+    &#34;openai:gpt-5.5-2026-04-23&#34;: &#34;openai:gpt-5.5&#34;,
+    &#34;openai:gpt-5.6&#34;: &#34;openai:gpt-5.6-sol&#34;
+  }
+}</pre></details>
+<footer><div>Run 01a0b6e6-9966-75c0-b937-8610be36cddf</div><p>Offline demonstration: actual graph execution with scripted responses. Token counts use message and tool-definition JSON words and punctuation. The simulation retains completed conversation history, including responses, for subsequent cache reads.</p><p>Turn costs sum model calls once. Tool fees are outside this model-token estimate.</p>Only model calls contribute token charges. Reasoning is priced at the output-token rate. Missing usage or prices are never assumed free. Context is framework metadata or application-authored annotations, not inferred private reasoning. Token estimates exclude tool fees, infrastructure, taxes, and discounts. Schema 1.</footer>
+<div id="cost-tooltip" role="tooltip" hidden style="position:fixed;z-index:20;pointer-events:none;background:#173b70;color:white;padding:10px 14px;border-radius:6px;box-shadow:0 3px 12px #0003;white-space:pre-line;font-size:13px;max-width:280px"></div>
+</main><script>
+const costTip = document.getElementById('cost-tooltip');
+/** Show one shared tooltip for either a bar segment or cumulative-cost point. */
+function showCostTip(segment, event) {
+  costTip.textContent = segment.dataset.costTip.split(' | ').join('\n');
+  costTip.hidden = false;
+  const rect = segment.getBoundingClientRect();
+  // Keyboard focus has no pointer coordinates; anchor to the chart element.
+  // Clamp both axes so a tooltip remains readable at viewport boundaries.
+  const x = event.clientX ?? rect.right;
+  const y = event.clientY ?? rect.top;
+  costTip.style.left = Math.max(8, Math.min(x + 14, window.innerWidth - costTip.offsetWidth - 8)) + 'px';
+  costTip.style.top = Math.max(8, Math.min(y + 14, window.innerHeight - costTip.offsetHeight - 8)) + 'px';
+}
+document.querySelectorAll('[data-cost-tip]').forEach(segment => {
+  segment.setAttribute('aria-label', segment.dataset.costTip);
+  segment.addEventListener('pointerenter', event => showCostTip(segment, event));
+  segment.addEventListener('pointermove', event => showCostTip(segment, event));
+  segment.addEventListener('pointerleave', () => costTip.hidden = true);
+  segment.addEventListener('focus', () => showCostTip(segment, {}));
+  segment.addEventListener('blur', () => costTip.hidden = true);
+});
+document.addEventListener('keydown', event => { if (event.key === 'Escape') costTip.hidden = true; });
+
+// Row indices are template-local identifiers, not provider span IDs. Parent
+// indices let visibility follow the execution hierarchy without altering totals.
+const treeRows = Array.from(document.querySelectorAll('.tree-row'));
+const rowByIndex = new Map(treeRows.map(row => [row.dataset.index, row]));
+const expandedRowIndices = new Set(treeRows.map(row => row.dataset.index));
+
+/** Apply ancestor visibility while preserving each descendant's own open state. */
+function refreshTreeVisibility() {
+  for (const row of treeRows) {
+    let parentIndex = row.dataset.parent;
+    let visible = true;
+    // The empty parent is the root sentinel; roots remain visible even when
+    // Collapse all removes every entry from the expanded set.
+    while (parentIndex !== '') {
+      // Any closed ancestor hides the entire branch, not just direct children.
+      if (!expandedRowIndices.has(parentIndex)) {
+        visible = false;
+        break;
+      }
+      parentIndex = rowByIndex.get(parentIndex).dataset.parent;
+    }
+    row.hidden = !visible;
+    const toggleButton = row.querySelector('.toggle');
+    // Leaves have no expansion control. Parents expose the same state to
+    // assistive technology and the visual plus/minus affordance.
+    if (toggleButton) {
+      const isExpanded = expandedRowIndices.has(row.dataset.index);
+      toggleButton.setAttribute('aria-expanded', String(isExpanded));
+      toggleButton.textContent = isExpanded ? '−' : '+';
+    }
+  }
+}
+for (const row of treeRows) {
+  const toggleButton = row.querySelector('.toggle');
+  // Only parent rows have children to hide; leaf rows need no click handler.
+  if (toggleButton) {
+    toggleButton.addEventListener('click', () => {
+      const rowIndex = row.dataset.index;
+      // Toggle only this parent; descendants retain their choices for reopening.
+      if (expandedRowIndices.has(rowIndex)) expandedRowIndices.delete(rowIndex);
+      else expandedRowIndices.add(rowIndex);
+      refreshTreeVisibility();
+    });
+  }
+}
+document.getElementById('expand-all').addEventListener('click', () => {
+  for (const row of treeRows) expandedRowIndices.add(row.dataset.index);
+  refreshTreeVisibility();
+});
+document.getElementById('collapse-all').addEventListener('click', () => {
+  expandedRowIndices.clear();
+  refreshTreeVisibility();
+});
+refreshTreeVisibility();
+// Section controls affect only their own disclosures, leaving the trace tree alone.
+for (const button of document.querySelectorAll('[data-disclosure-target]')) {
+  button.addEventListener('click', () => {
+    const section = document.getElementById(button.dataset.disclosureTarget);
+    for (const detail of section.querySelectorAll('details')) {
+      detail.open = button.dataset.expand === 'true';
+    }
+  });
+}
+// Agent links must also reveal a target nested inside a collapsed caller.
+function revealAgentTarget() {
+  const target = document.getElementById(location.hash.slice(1));
+  if (!target || !target.classList.contains('agent-activity')) return;
+  for (let node = target; node; node = node.parentElement) {
+    if (node.tagName === 'DETAILS') node.open = true;
+  }
+  target.scrollIntoView({block: 'start'});
+}
+window.addEventListener('hashchange', revealAgentTarget);
+document.addEventListener('click', event => {
+  if (event.target.closest('a[href^="#agent-"]')) setTimeout(revealAgentTarget, 0);
+});
+revealAgentTarget();
+</script></body></html>

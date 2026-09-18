@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2026 Martin.Bechard@DevConsult.ca; third-party source excerpts retain their original rights. -->
 # Parent and subagent — local report
 
 ## Purpose
@@ -36,13 +37,16 @@ number of calls. Environment variables override the sample's `.env`.
 
 ## Read the code
 
-- `app.py` owns the parent prompt, specialist specification, tool registration,
-  graph construction, and local reporting boundary.
-- `simulation.py` owns two independent scripted models. Scripts specify model
+- `app.py` selects models, client, and recorder.
+- `src/lg_report/workflows/subagent_chat.py` composes the participating agents.
+- `src/lg_report/agents/delegating_parent.py` owns the agent instructions and registration.
+- `src/lg_report/tools/workflow_reference.py` owns the callable evidence tools.
+- `src/lg_report/agents/workflow_specialist.py` owns the child role and lookup tool.
+- `test_case.py` owns two independent scripted models. Scripts specify model
   responses and tool requests; they do not execute tools or calculate totals.
 - `workflow_reference` is reused from the tool-chat lesson. It is a local fixture
   lookup, not a network search or a vector RAG pipeline.
-- `lg_report.sample_runtime` handles configuration and attaches the local recorder.
+- `lg_report.platform.sample_runtime` handles configuration and attaches the local recorder.
 
 The specialist dictionary explicitly supplies its own system prompt, model, and
 lookup tool. The parent does not have that lookup tool. Its generated `task`
@@ -82,9 +86,16 @@ are illustrative JSON words/punctuation, not provider tokenizer counts. Actual
 provider usage is retained in live mode. All four model calls contribute to the
 turn cost; `task` and the local lookup have no additional model-token charge.
 
-Try changing `DELEGATED_TASK` and `SPECIALIST_SUMMARY` in `simulation.py`. Inspect
+Try changing `DELEGATED_TASK` and `SPECIALIST_SUMMARY` in `test_case.py`. Inspect
 which agent's input grows and where the summary enters the parent's context.
 Keep the tool request's `subagent_type` aligned with the registered specialist.
 
 The [Langfuse variant](../subagent_chat_langfuse/README.md) reuses this exact graph
 and simulation so you can compare the same workflow through two tracing systems.
+
+## Interactive client
+
+Add `--client console --live` to the launch command after configuring this sample's
+`.env`. The shared console accepts prompts and `/attach PATH` text files, `/send`,
+and `/quit`. Both clients use the same workflow and retained conversation history.
+See [component and sequence diagrams](../../docs/chat-composition.md).

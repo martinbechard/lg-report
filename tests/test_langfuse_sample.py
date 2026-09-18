@@ -1,6 +1,12 @@
-"""Verify the real Langfuse callback without contacting a hosted service.
+"""Verify official Langfuse callback behavior without a hosted tracing service.
+
+Keep the real SDK and graph execution, but replace the network exporter with an
+in-memory exporter. Assertions cover trace ancestry, conversation history, usage,
+and failure handling; they do not prove remote ingestion or browser access.
 
 AI attribution: Generated with AI assistance.
+
+Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
 
 import json
@@ -14,8 +20,10 @@ from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
 from opentelemetry.trace import StatusCode
 
-from lg_report import langfuse_runtime as runtime
-from samples.simple_chat.simulation import make_simulated_model
+from lg_report.platform import langfuse_runtime as runtime
+from lg_report.platform.conversation import Request
+from lg_report.platform.static_client import StaticClient
+from samples.simple_chat.test_case import make_simulated_model
 from samples.simple_chat_langfuse import app
 
 
@@ -43,11 +51,11 @@ def test_two_turns_share_trace_and_preserve_usage(capture):
     """Check topology, growing context, usage partitions, and model annotations."""
     client, callback, exporter = capture
     trace_id, history = runtime.run_conversation(
-        app.build_agent(make_simulated_model()),
+        app.build_workflow(make_simulated_model()),
         client,
         callback,
         simulated=True,
-        prompts=app.USER_PROMPTS,
+        chat_client=StaticClient([Request(p) for p in app.USER_PROMPTS]),
         trace_name="simple-chat-langfuse",
     )
     client.flush()
@@ -55,7 +63,7 @@ def test_two_turns_share_trace_and_preserve_usage(capture):
     assert len({s.context.trace_id for s in spans}) == 1
     assert f"{spans[0].context.trace_id:032x}" == trace_id
     root = next(s for s in spans if s.name == "simple-chat-langfuse")
-    assert root.attributes["langfuse.trace.public"] is True
+    assert root.attributes.get("langfuse.trace.public", False) is False
     turns = [s for s in spans if s.name in {"Turn 1", "Turn 2"}]
     assert len(turns) == 2
     assert all(s.parent.span_id == root.context.span_id for s in turns)
@@ -106,7 +114,7 @@ def test_failed_graph_closes_error_spans(capture):
             client,
             callback,
             simulated=True,
-            prompts=app.USER_PROMPTS,
+            chat_client=StaticClient([Request(p) for p in app.USER_PROMPTS]),
             trace_name="simple-chat-langfuse",
         )
     client.flush()
@@ -162,7 +170,7 @@ def test_failed_authentication_stops_before_model_selection(monkeypatch):
 def test_langfuse_delegation_keeps_child_under_task(capture):
     """The actual task tool must propagate one callback into the child's graph."""
     from samples.subagent_chat.app import USER_PROMPTS, create_graph
-    from samples.subagent_chat.simulation import DELEGATED_TASK, SPECIALIST_SUMMARY
+    from samples.subagent_chat.test_case import DELEGATED_TASK, SPECIALIST_SUMMARY
 
     client, callback, exporter = capture
     trace_id, history = runtime.run_conversation(
@@ -170,7 +178,7 @@ def test_langfuse_delegation_keeps_child_under_task(capture):
         client,
         callback,
         simulated=True,
-        prompts=USER_PROMPTS,
+        chat_client=StaticClient([Request(p) for p in USER_PROMPTS]),
         trace_name="subagent-chat-langfuse",
     )
     client.flush()
@@ -205,3 +213,82 @@ def test_langfuse_delegation_keeps_child_under_task(capture):
     assert (
         len(history) == 4
     )  # Only the parent's prompt, task request/result, and answer.
+
+
+def test_console_files_match_untraced_conversation(capture, tmp_path):
+    """Changing recording must not change messages or charge a model call twice."""
+    from lg_report.platform.console_client import ConsoleClient
+    from lg_report.platform.conversation import Conversation
+
+    path = tmp_path / "note.txt"
+    path.write_text("The limit is 42.")
+    entries = iter([f"/attach {path}", "Explain this", "And why?", "/quit"])
+    displayed = []
+    console = ConsoleClient(read=lambda _: next(entries), write=displayed.append)
+    client, callback, exporter = capture
+    _, history = runtime.run_conversation(
+        app.create_graph(False),
+        client,
+        callback,
+        simulated=True,
+        chat_client=console,
+        trace_name="console-test",
+        public_trace=True,
+    )
+    baseline = Conversation(
+        app.create_graph(False),
+        StaticClient(
+            [
+                Request("Explain this\n\nAttached file: note.txt\nThe limit is 42."),
+                Request("And why?"),
+            ]
+        ),
+    ).invoke({}, {})
+    assert [(m.type, m.content) for m in history] == [
+        (m.type, m.content) for m in baseline["messages"]
+    ]
+    client.flush()
+    spans = exporter.get_finished_spans()
+    root = next(s for s in spans if s.name == "console-test")
+    assert root.attributes["langfuse.trace.public"] is True
+    assert "The limit is 42." in root.attributes["langfuse.observation.input"]
+    assert (
+        sum(
+            s.attributes.get("langfuse.observation.type") == "generation" for s in spans
+        )
+        == 2
+    )
+    assert sum(line.startswith("Assistant:") for line in displayed) == 2
+
+
+def test_empty_and_interrupted_sessions(capture):
+    """Neither a user exit nor an approval pause should consume another prompt."""
+    client, callback, exporter = capture
+    _, history = runtime.run_conversation(
+        app.create_graph(False),
+        client,
+        callback,
+        simulated=True,
+        chat_client=StaticClient([]),
+        trace_name="empty",
+    )
+    assert history == []
+    user = StaticClient([Request("first"), Request("do not send")])
+    _, history = runtime.run_conversation(
+        RunnableLambda(lambda _: {"messages": [], "__interrupt__": ["approval"]}),
+        client,
+        callback,
+        simulated=True,
+        chat_client=user,
+        trace_name="pause",
+    )
+    assert history == []
+    assert user.receive().prompt == "do not send"
+    client.flush()
+    spans = exporter.get_finished_spans()
+    for name, expected in [("empty", "incomplete"), ("pause", "interrupted")]:
+        root = next(s for s in spans if s.name == name)
+        assert (
+            root.attributes["langfuse.observation.metadata.session_status"] == expected
+        )
+    assert not any(s.name == "Turn 2" for s in spans)

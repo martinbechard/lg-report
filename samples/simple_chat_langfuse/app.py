@@ -1,51 +1,52 @@
 """Teach Langfuse tracing with a two-turn DeepAgents conversation.
 
-This application owns its graph and invocation boundary. It reuses the baseline
-chat's prompts and simulator so differences in traces come from instrumentation,
-not a different conversation. No local reporting callback is attached.
+This application wires the shared chat_agent to the shared conversation runtime.
+It reuses the baseline chat's prompts and simulator so trace differences come from
+instrumentation, not a different conversation. No local reporting callback is attached.
 
 AI attribution: Generated with AI assistance.
+
+Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
 
-from deepagents import create_deep_agent
-from deepagents.backends import StateBackend
-from langchain_core.language_models import BaseChatModel
 from langgraph.graph.state import CompiledStateGraph
 
-from lg_report.langfuse_runtime import launch
-from lg_report.model_config import configured_model
-from samples.simple_chat.app import SYSTEM_PROMPT, USER_PROMPTS
-from samples.simple_chat.simulation import make_simulated_model
-
-
-def build_agent(model: BaseChatModel) -> CompiledStateGraph:
-    """Build the chat graph around a supplied live or simulated model.
-
-    Construction makes no model calls. The in-memory backend prevents built-in
-    file tools from accessing the developer's workspace. DeepAgents still sends
-    its tool definitions even though the prompt asks for direct answers.
-    """
-    return create_deep_agent(
-        model=model,
-        backend=StateBackend(),
-        subagents=[],
-        name="chat-agent",
-        system_prompt=SYSTEM_PROMPT,
-    )
+from lg_report.platform.conversation import Request
+from lg_report.platform.langfuse_runtime import launch
+from lg_report.platform.model_config import configured_model
+from lg_report.platform.static_client import StaticClient
+from lg_report.workflows.simple_chat import build_workflow
+from samples.simple_chat.test_case import USER_PROMPTS, make_simulated_model
 
 
 def create_graph(live: bool) -> CompiledStateGraph:
-    """Select the explicitly requested model mode and compile this sample's graph."""
-    return build_agent(configured_model()[0] if live else make_simulated_model())
+    """Return a fresh graph for launch after tracing credentials are checked.
+
+    live=True requires configured provider credentials and selects a real model;
+    False uses a new scripted model with an empty context ledger. Missing live
+    configuration raises instead of silently changing the lesson to simulation.
+    This factory constructs the graph without invoking the model.
+    """
+    # The explicit live flag is the only switch to a provider adapter. A missing
+    # credential must raise in that branch, not quietly select a scripted answer.
+    return build_workflow(configured_model()[0] if live else make_simulated_model())
 
 
 def main() -> None:
-    """Launch this sample with its own configuration and shared Langfuse lifecycle."""
+    """Run this directory's configured client and print its Langfuse trace URL.
+
+    launch validates tracing credentials, attaches the official callback once,
+    and flushes observations before shutdown so they are not left buffered.
+    Traces are private unless --public-trace explicitly publishes their content.
+    No local HTML is written; see docs/chat-composition.md for the shared design.
+    """
     launch(
         app_file=__file__,
         description=__doc__,
         create_graph=create_graph,
-        prompts=USER_PROMPTS,
+        make_static_client=lambda: StaticClient(
+            [Request(prompt) for prompt in USER_PROMPTS]
+        ),
         trace_name="simple-chat-langfuse",
     )
 

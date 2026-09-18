@@ -1,0 +1,42 @@
+"""Define chat_agent independently of clients, test cases, and report recording.
+
+The agent owns its instructions and graph. User messages arrive only at invoke;
+it cannot import a predetermined conversation or decide how the client gets input.
+AI attribution: Generated with AI assistance.
+
+Design: docs/chat-composition.md.
+
+Copyright (c) 2026 Martin.Bechard@DevConsult.ca
+"""
+
+from deepagents import create_deep_agent
+from deepagents.backends import StateBackend
+from langchain_core.language_models import BaseChatModel
+from langgraph.graph.state import CompiledStateGraph
+
+# This instruction keeps the first lesson focused on conversation history.
+# It asks the model to avoid tools; it does not remove DeepAgents built-in tools.
+SYSTEM_PROMPT = (
+    "Answer the user's chat question directly and concisely. "
+    "Do not use tools for this simple chat exercise."
+)
+
+
+def build_agent(model: BaseChatModel) -> CompiledStateGraph:
+    """Return an uninvoked graph using the supplied live or simulated model.
+
+    Keeping the model injectable lets the same application teach both a
+    repeatable offline conversation and real provider usage. Compilation does
+    not call the model; callers provide messages and callbacks when invoking it.
+    """
+    # DeepAgents constructs a real LangGraph graph, even with the offline model.
+    # Its built-in tool definitions still occupy input context; that overhead is
+    # deliberately visible, despite this lesson making no tool calls.
+    # StateBackend keeps any built-in file operations in graph state, not on disk.
+    return create_deep_agent(
+        model=model,
+        backend=StateBackend(),
+        subagents=[],
+        name="chat_agent",
+        system_prompt=SYSTEM_PROMPT,
+    )

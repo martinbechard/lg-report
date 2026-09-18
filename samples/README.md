@@ -1,9 +1,11 @@
+<!-- Copyright (c) 2026 Martin.Bechard@DevConsult.ca; third-party source excerpts retain their original rights. -->
 # Training applications
 
 Each directory contains an independently runnable DeepAgents/LangGraph application.
-Start with `app.py`: it owns the graph, system instructions, user prompts, and the
-point where reporting is attached. None of these applications reads an existing
-report to produce its trace.
+Start with each sample README. `app.py` composes a shared workflow with a client
+and recorder. `test_case.py` owns scenario prompts and model fixtures; Langfuse
+variants reuse the corresponding local scenario. No agent knows the test prompts.
+See [composition diagrams](../docs/chat-composition.md).
 
 | Application | What it teaches | Offline execution |
 | --- | --- | --- |
@@ -12,6 +14,10 @@ report to produce its trace.
 | [Simple chat with Langfuse](simple_chat_langfuse/README.md) | Official callback, trace hierarchy, and conversation grouping | 2 model calls; requires Langfuse |
 | [Parent and subagent](subagent_chat/README.md) | Isolated delegation and combined model costs | 4 model calls, 2 tool executions |
 | [Parent and subagent with Langfuse](subagent_chat_langfuse/README.md) | Nested tracing of the same delegation | 4 model calls; requires Langfuse |
+| [RAG with Chroma](rag_chat/README.md) | Retrieve from millions of indexed tokens | 2 model calls, 1 real vector search; ingest first |
+| [MCP RAG](mcp_rag_chat/README.md) | Deep Agents tool discovery and Wikipedia retrieval over stdio MCP | 2 model calls, 1 MCP search; ingest first |
+| [Review loop](review_loop/README.md) | Explicit graph, judge feedback, bounded revisions | 4 model calls, 2 drafts, 1 turn |
+| [Expert dispatcher](expert_dispatch/README.md) | Model-selected delegation to movies, sports, or history | 12 model calls, 3 task executions + 3 retrievals, 3 turns |
 | [Thinking agent](thinking_agent/README.md) | Evidence, reasoning cost, and verification | 7 model calls, 6 tool calls |
 
 Run from the repository root after `uv sync`:
@@ -32,18 +38,19 @@ creating local reports. Its simulated model still requires a Langfuse project.
 
 ## Read the code in this order
 
-1. **`app.py`** — purpose, system/user prompts, graph construction, and entry point.
-2. **`tools.py`**, where present — the actual functions the graph invokes.
-3. **`simulation.py`** — the deterministic model responses used for teaching.
-4. **`lg_report.sample_runtime`** — common configuration and trace attachment.
-5. **`lg_report.runner.record_run`** — raw capture, normalization, pricing snapshot,
-   and HTML rendering. The application does not implement reporting internals.
+1. **`app.py`** selects models, a workflow, a user client, and recording.
+2. **`src/lg_report/workflows/`** composes participants, including single-agent workflows.
+3. **`src/lg_report/agents/`** contains one named role per file, its instructions and graph/specification.
+4. **`src/lg_report/tools/`** contains callable evidence tools, independent of clients.
+5. **`test_case.py`** holds user prompts and scripted decisions; it never executes tools itself.
+6. **`src/lg_report/platform/`** provides the common client loop and tracing lifecycle.
+7. **`src/lg_report/report/`** captures, normalizes, prices, and exports local traces.
 
-The shared runtime never chooses which application to run. Each application's
-`main()` creates its own graph and passes it to the recorder. You can call
-`build_agent(model)` and invoke that graph directly without generating a report.
-The applications share the root Python environment and reporting library; they
-do not require three duplicate dependency installations.
+All applications use `--client static` by default. Use `--client console --live`
+for interactive prompts and UTF-8 text attachments. `/attach PATH` queues a file,
+`/send` submits attachments alone, and `/quit` ends the session. Console mode
+requires a configured provider; static mode can use either simulated or live models.
+There is one client loop, with no older prompt-list adapter or launch aliases.
 
 ## Model selection and configuration
 
@@ -76,9 +83,8 @@ provider's cache implementation. Live mode does not synthesize cache hits or
 reasoning tokens. Content is captured by default; `--metadata-only` omits message
 and tool payloads. Generated reports and `.env` files are excluded from Git.
 
-The current tool sample is a local lookup, not a vector RAG pipeline. A full RAG
-application and a file-editing application with human approval remain later
-lessons; these examples do not claim to implement them.
+The current tool sample is a local lookup, not a vector RAG pipeline. The [Chroma RAG sample](rag_chat/README.md) adds semantic retrieval over a large
+corpus. A file-editing application with human approval remains a later lesson; these examples do not claim to implement them.
 
 The delegation lesson has matching [local](subagent_chat/README.md) and
 [Langfuse](subagent_chat_langfuse/README.md) applications. Both use the same graph

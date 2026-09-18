@@ -1,0 +1,12 @@
+Copyright (c) 2026 Martin.Bechard@DevConsult.ca
+
+Original project code, documentation, configuration, and report presentation are
+licensed under MIT (see LICENSE). This notice also covers machine-readable and
+binary files that cannot carry comments; accompanying .license files identify
+those files without altering their formats.
+
+WikiText dataset and derived Chroma text retain their upstream CC-BY-SA-3.0
+terms and Wikipedia contributor attribution. See data/rag/README.md. Martin's
+copyright applies to packaging and software, not ownership of source content.
+Provider pricing snapshots and quoted source material retain their respective
+owners' rights; this project's MIT license does not relicense those materials.

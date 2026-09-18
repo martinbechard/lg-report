@@ -1,53 +1,49 @@
-"""Lesson 1: a two-turn conversation with no intentional tool use.
+"""Wire the simple-chat workflow to a client and local reporting.
 
-The aim is to see system instructions, user messages, and assistant responses
-accumulate across calls. Start here before studying tool loops or reasoning.
+User prompts and offline answers belong to test_case. The shared platform owns
+console input, history, configuration, and recording lifecycle.
+
+AI attribution: Generated with AI assistance.
+
+Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
 
-from deepagents import create_deep_agent
-from deepagents.backends import StateBackend
-from langchain_core.language_models import BaseChatModel
-from langgraph.graph.state import CompiledStateGraph
+from lg_report.platform.conversation import Request
+from lg_report.platform.model_config import configured_model
+from lg_report.platform.sample_runtime import launch_local
+from lg_report.platform.static_client import StaticClient
+from lg_report.workflows.simple_chat import build_workflow
 
-from lg_report.sample_runtime import execute, select_model, settings_for
-from samples.simple_chat.simulation import make_simulated_model
-
-SYSTEM_PROMPT = (
-    "Answer the user's chat question directly and concisely. "
-    "Do not use tools for this simple chat exercise."
-)
-USER_PROMPTS = [
-    "Explain the main steps in an agent workflow.",
-    "How does a tool observation help the agent answer?",
-]
+from .test_case import USER_PROMPTS, make_simulated_model
 
 
-def build_agent(model: BaseChatModel) -> CompiledStateGraph:
-    # DeepAgents constructs a real LangGraph graph, even with the offline model.
-    # Its built-in tool definitions still occupy input context; that overhead is
-    # deliberately visible, despite this lesson making no tool calls.
-    # StateBackend keeps any built-in file operations in graph state, not on disk.
-    return create_deep_agent(
-        model=model,
-        backend=StateBackend(),
-        subagents=[],
-        name="chat-agent",
-        system_prompt=SYSTEM_PROMPT,
-    )
+def create_run(live: bool):
+    """Build the workflow and return its provider and model name for reporting.
+
+    ``live`` is the explicit CLI choice: True constructs configured API clients;
+    False creates fresh scripted models for this sample's fixed test case. Neither
+    branch invokes an LLM here. Configuration failures propagate to the launcher
+    so a requested provider run cannot quietly become a simulated success.
+    """
+    # Offline fixtures have fixed answers; only --live supports arbitrary user
+    # questions. Both choices still execute the same workflow and tracing path.
+    if live:
+        model, provider, model_name = configured_model()
+    else:
+        model, provider, model_name = make_simulated_model(), "demo", "scripted-chat"
+    return build_workflow(model), provider, model_name
 
 
 def main() -> None:
-    settings = settings_for(__file__, __doc__)
-    model, provider, model_name = select_model(settings, make_simulated_model)
-    graph = build_agent(model)
-    # Recording is an outer concern: the graph can also be invoked without it.
-    execute(
-        graph,
-        USER_PROMPTS,
-        settings,
-        provider=provider,
-        model=model_name,
-        title="Simple chat · two turns",
+    """Run the selected client through the same workflow and recording path."""
+    launch_local(
+        app_file=__file__,
+        description=__doc__,
+        create_run=create_run,
+        make_static_client=lambda: StaticClient(
+            [Request(prompt) for prompt in USER_PROMPTS]
+        ),
+        title="Simple chat",
     )
 
 

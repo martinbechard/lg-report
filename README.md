@@ -1,5 +1,25 @@
 # LG Report
 
+## Project structure
+
+```text
+src/lg_report/
+  platform/   # Shared clients, sessions, model configuration and simulation
+  workflows/  # Compose agents; one workflow even for a single agent
+  agents/     # One agent per file, named after the agent; no test prompts
+  tools/      # Agent-callable application tools
+  report/     # Trace capture, normalized data, prices, HTML and Excel
+samples/
+  simple_chat/  # app.py wiring, test_case.py fixtures, README and configuration
+```
+
+All samples use the same client/conversation architecture. Agent definitions,
+workflow composition, and callable tools live in their shared packages. Sample
+directories contain entry points, test cases, READMEs, and configuration examples.
+Langfuse variants reuse the corresponding workflow and test case. There are no
+old import aliases or separate legacy conversation loops.
+
+
 A single-user Python library that captures LangGraph / DeepAgents execution and produces local HTML and Excel reports of conversations, spans, token usage, and estimated model costs.
 
 ## Training applications
@@ -10,12 +30,15 @@ Requires Python 3.11+ and [uv](https://docs.astral.sh/uv/). Install once:
 uv sync --locked
 ```
 
-Each sample owns its graph, prompts, scripted responses, and README. Run commands from the repository root:
+Each sample wires a workflow to its client and tracing backend; its test case owns prompts and scripted responses. Run commands from the repository root:
 
 | Application | Purpose | Command |
 | --- | --- | --- |
 | [Simple chat](samples/simple_chat/README.md) | Conversation history across two user turns | `uv run python -m samples.simple_chat.app` |
 | [Tool chat](samples/tool_chat/README.md) | Model request → tool → model request, across two turns | `uv run python -m samples.tool_chat.app` |
+| [RAG with Chroma](samples/rag_chat/README.md) | Large-corpus ingestion and cited retrieval | `uv run python -m samples.rag_chat.app` (restores bundled index on first use) |
+| [Review loop](samples/review_loop/README.md) | High-level draft → judge feedback → detailed revision | `uv run python -m samples.review_loop.app` |
+| [Expert dispatcher](samples/expert_dispatch/README.md) | Select movies, sports, or history expert for each question | `uv run python -m samples.expert_dispatch.app` |
 | [Thinking agent](samples/thinking_agent/README.md) | Reasoning costs before and after several tool calls | `uv run python -m samples.thinking_agent.app` |
 
 The [Langfuse variant of simple chat](samples/simple_chat_langfuse/README.md)
@@ -27,7 +50,7 @@ and [Langfuse](samples/subagent_chat_langfuse/README.md) applications.
 
 Start with the [sample catalog](samples/README.md). Default execution uses a real graph with a simulated model and makes no model-provider request. To run live, copy that sample's `.env.example` to its own `.env`, configure the selected provider, and add `--live` to its command. Existing environment variables take precedence. There is no automatic switch between live and simulated execution.
 
-Each application prints its HTML path. `--out` selects a new output directory; existing directories are rejected. Every run writes:
+Each local-report application prints its HTML path. `--out` selects a new output directory; existing directories are rejected. Every run writes:
 
 | File | Purpose |
 | --- | --- |
@@ -82,8 +105,8 @@ The rate means EUR per USD. This is a dated example, not a current rate. The rep
 
 ```python
 from pathlib import Path
-from lg_report.pricing import load_prices
-from lg_report.runner import record_run
+from lg_report.report.pricing import load_prices
+from lg_report.report.recording import record_run
 
 # Wrap the compiled graph at its execution boundary so nested callbacks
 # preserve the graph hierarchy in the report.
@@ -99,19 +122,19 @@ record_run(
 )
 ```
 
-The provider and model identify the configured model when callback metadata does not supply them. Multi-model graphs should emit `ls_provider` and `ls_model_name`. Direct `record_run` calls default to metadata-only capture. `ConversationAgent(agent, [request1, request2])` preserves history and supplies turn metadata when recording multiple user turns.
+The provider and model identify the configured model when callback metadata does not supply them. Multi-model graphs should emit `ls_provider` and `ls_model_name`. Direct `record_run` calls default to metadata-only capture. `Conversation(workflow, StaticClient([Request(prompt1), Request(prompt2)]))` preserves history and supplies turn metadata when recording multiple user turns.
 
 Use `run_name`, tool docstrings, and `report_description` / `report_purpose` metadata to explain operations. Keep descriptions specific to the runnable's purpose: metadata can be inherited by children. See the sample graph definitions for complete examples. Unlisted metadata is not exported.
 
-The current runner supports synchronous graph invocation. Streaming, provider-internal retry accounting, external embedding charges, and durable interrupt/resume workflows remain outside its scope. RAG, file editing with human approval, and CSV export are future samples/features.
+The current runner supports synchronous graph invocation. Streaming, provider-internal retry accounting, external embedding charges, and durable interrupt/resume workflows remain outside its scope. The Chroma RAG sample provides local vector retrieval. File editing with human approval and CSV export remain future samples/features.
 
 ## Excel export
 
 The workbook has Turns, Execution tree, and Reference data sheets. All freeze row 1 and column A. Turns follows the HTML request/context/response/tool sequence. Tokens, EUR, and USD occupy separate columns. Reference data B2 sets executions (default 100,000); projected costs round to zero decimal places only after multiplication. Per-execution values retain precision.
 
 ```sh
-uv run python -m lg_report.excel_data reports/my-run/run.json --out .cache/excel/data.json
-node scripts/export_excel.mjs .cache/excel/data.json outputs/lg-report-excel/report.xlsx
+uv run python -m lg_report.report.excel_data reports/my-run/run.json --out .cache/excel/data.json
+node src/lg_report/report/export_excel.mjs .cache/excel/data.json outputs/lg-report-excel/report.xlsx
 ```
 
 The builder uses the desktop's bundled `@oai/artifact-tool`. Set `LG_EXCEL_RUNTIME` to the directory whose `node_modules` contains it. The exported workbook is independent of that runtime.
@@ -126,3 +149,16 @@ uv build
 ```
 
 Tests execute the documented sample commands with an offline model and a supplied exchange-rate file. Live provider API calls are not part of the suite.
+
+See [Chat composition and tracing](docs/chat-composition.md) for Mermaid diagrams
+and the shared client, agent, conversation, and recording design.
+
+## License and checked-in examples
+
+Copyright (c) 2026 Martin.Bechard@DevConsult.ca. Project software is licensed
+under the [MIT License](LICENSE); third-party content retains its own terms
+(see [NOTICE](NOTICE)).
+
+[Regenerated sample reports](reports/examples/README.md) include HTML and their
+accounting evidence. Other local runs and Langfuse databases/reports are ignored.
+Compressed RAG assets and extraction details are in [data/rag](data/rag/README.md).

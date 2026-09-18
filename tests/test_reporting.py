@@ -1,3 +1,14 @@
+"""Verify trace capture, normalized evidence, and reporting on real local graphs.
+
+Scripted model responses avoid provider calls; fixed tariffs keep arithmetic
+assertions stable. Tests include failed and interrupted execution because missing
+usage or unfinished spans must not be reported as free successful work.
+
+AI attribution: Generated with AI assistance.
+
+Copyright (c) 2026 Martin.Bechard@DevConsult.ca
+"""
+
 import json
 from decimal import Decimal
 from pathlib import Path
@@ -11,14 +22,15 @@ from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.graph import END, START, StateGraph
 from langgraph.types import Command, interrupt
 
-from lg_report.capture import TraceCapture
-from lg_report.normalize import normalize
-from lg_report.pricing import cost, load_prices, summarize
-from lg_report.render import render
-from lg_report.runner import ScriptedChatModel, record_run
-from lg_report.schema import Run, Step, Usage
-from samples.simple_chat.app import build_agent as build_chat_agent
-from samples.simple_chat.simulation import make_simulated_model as make_chat_model
+from lg_report.agents.chat_agent import build_agent as build_chat_agent
+from lg_report.platform.simulated_model import ScriptedChatModel
+from lg_report.report.capture import TraceCapture
+from lg_report.report.normalize import normalize
+from lg_report.report.pricing import cost, load_prices, summarize
+from lg_report.report.recording import record_run
+from lg_report.report.render import render
+from lg_report.report.schema import Run, Step, Usage
+from samples.simple_chat.test_case import make_simulated_model as make_chat_model
 
 
 @pytest.fixture
@@ -136,9 +148,13 @@ def test_html_escapes_all_content(tmp_path, prices):
 
 
 def test_model_tool_model_sequence(tmp_path, prices):
-    @tool
+    @tool(parse_docstring=True)
     def lookup(topic: str) -> str:
-        """Look up a fact in a tiny fixture corpus."""
+        """Look up a fact in a tiny fixture corpus.
+
+        Args:
+            topic: The topic used to label the fixed graph explanation.
+        """
         return f"{topic}: a graph executes connected nodes."
 
     usage = {"input_tokens": 100, "output_tokens": 10, "total_tokens": 110}
@@ -165,8 +181,20 @@ def test_model_tool_model_sequence(tmp_path, prices):
         prices,
         provider="demo",
         model="scripted-chat",
+        include_output=True,
     )
     run = read_run(out)
+    model_steps = [step for step in run.steps if step.kind == "model"]
+    for step in model_steps:
+        lookup_schema = next(
+            item["function"]
+            for item in step.tool_definitions
+            if item.get("function", {}).get("name") == "lookup"
+        )
+        assert lookup_schema["parameters"]["properties"]["topic"]["description"]
+    html = (out / "report.html").read_text()
+    assert '<details class="tool-definitions">' in html
+    assert "The topic used to label the fixed graph explanation." in html
     assert [s.kind for s in run.steps if s.kind != "workflow"] == [
         "model",
         "tool",
@@ -286,6 +314,9 @@ def test_retry_keeps_both_attempts(tmp_path, prices):
 
         def _generate(self, *args, **kwargs):
             self.attempts += 1
+            # Fail only the initial invocation to exercise an actual graph
+            # retry. Later attempts delegate to the model so the trace must
+            # retain both the failed attempt and the successful token usage.
             if self.attempts == 1:
                 raise RuntimeError("transient")
             return super()._generate(*args, **kwargs)
@@ -356,3 +387,60 @@ def test_failure_before_callbacks_is_not_masked(tmp_path, prices):
         )
     assert read_run(out).status == "error"
     assert (out / "report.html").exists()
+
+
+@pytest.mark.parametrize("capture_content", [False, True])
+@pytest.mark.parametrize("provider", ["openai", "anthropic"])
+def test_tool_definition_capture_and_render(
+    tmp_path, prices, capture_content, provider
+):
+    """Preserve provider schemas only with content capture and escape their text."""
+    definition = {
+        "name": "unused_tool",
+        "description": "Private description <script>alert(1)</script>",
+        "parameters": {
+            "type": "object",
+            "properties": {"query": {"type": "string", "description": "Search phrase"}},
+            "required": ["query"],
+        },
+    }
+    if provider == "openai":
+        definitions = [{"type": "function", "function": definition}]
+    else:
+        definition["input_schema"] = definition.pop("parameters")
+        definitions = [definition]
+    path = tmp_path / "spans.jsonl"
+    capture = TraceCapture(path, provider, "fixture", capture_content=capture_content)
+    run_id = uuid4()
+    capture.on_chat_model_start(
+        {},
+        [[]],
+        run_id=run_id,
+        invocation_params={"tools": definitions, "api_key": "do-not-capture"},
+    )
+    capture.close()
+    run = normalize(path, title="Tool definitions")
+    assert run.steps[0].tool_definitions == (definitions if capture_content else None)
+    output = tmp_path / "report.html"
+    render(run, prices, output)
+    html = output.read_text()
+    assert '<details class="tool-definitions">' in html
+    assert "<script>alert(1)</script>" not in html
+    assert "do-not-capture" not in path.read_text()
+    if capture_content:
+        assert "unused_tool" in html and "Search phrase" in html
+        assert "&lt;script&gt;" in html
+    else:
+        assert "Tool definitions were not captured" in html
+        assert "Private description" not in path.read_text() + html
+
+
+def test_empty_and_legacy_tool_definitions(tmp_path, prices):
+    """Explicitly empty bindings differ from absent definitions in older runs."""
+    step = model_step()
+    assert step.tool_definitions is None
+    step.tool_definitions = []
+    run = Run(id="r", title="No tools", status="ok", steps=[step])
+    output = tmp_path / "report.html"
+    render(run, prices, output)
+    assert "No tools were bound to this request." in output.read_text()

@@ -1,24 +1,33 @@
+# Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 [project]
 name = "lg-report"
 version = "0.1.0"
 description = "Local LangGraph and DeepAgents execution, token, and cost reports"
 readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE", "NOTICE"]
 authors = [
     { name = "Martin Bechard", email = "martinbechard@gmail.com" }
 ]
 requires-python = ">=3.11"
 dependencies = [
+    "chromadb>=1.5.9",
     "deepagents>=0.7.15",
+    "fastmcp>=4,<5",
+    "huggingface-hub>=1.32.0",
     "jinja2>=3.1.6",
     "langchain-anthropic>=1.7.2",
     "langchain-core>=1.6.3",
     "langchain-openai>=1.6.2",
+    "langchain[mcp]>=1.4,<2",
     "langfuse>=4,<5",
     "langgraph>=1.2.11",
     "langsmith>=0.12.6",
     "opentelemetry-sdk>=1.44.0",
+    "pyarrow>=25.0.1",
     "pydantic>=2.13.5",
     "python-dotenv>=1.2.3",
+    "tokenizers>=0.23.2",
 ]
 
 [project.scripts]

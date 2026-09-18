@@ -1,50 +1,48 @@
-"""Lesson 3: evidence collection, expensive reasoning, then verification.
+"""Wire investigation_agent to a user client and local reports.
 
-Use this application to distinguish visible output, reasoning-token charges,
-and tool-result input. Tool evidence and checks describe a fictional service;
-they do not inspect or load-test the developer's computer.
+The scenario owns fixed prompts and responses. Console mode uses the same graph
+with a configured provider; tracing and conversation history remain shared.
+
+AI attribution: Generated with AI assistance.
+
+Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
 
-from deepagents import create_deep_agent
-from deepagents.backends import StateBackend
-from langchain_core.language_models import BaseChatModel
-from langgraph.graph.state import CompiledStateGraph
+from lg_report.platform.conversation import Request
+from lg_report.platform.model_config import configured_model
+from lg_report.platform.sample_runtime import launch_local
+from lg_report.platform.static_client import StaticClient
+from lg_report.workflows.thinking_agent import build_workflow
 
-from lg_report.sample_runtime import execute, select_model, settings_for
-from samples.thinking_agent.simulation import make_simulated_model
-from samples.thinking_agent.tools import inspect_service, test_plan
-
-SYSTEM_PROMPT = "Use the fictional service evidence to propose and validate a latency improvement. Inspect traffic, database behavior, and constraints before testing the plan."
-USER_PROMPTS = [
-    "Investigate service latency and validate a plan meeting the constraints."
-]
+from .test_case import USER_PROMPTS, make_simulated_model
 
 
-def build_agent(model: BaseChatModel) -> CompiledStateGraph:
-    # These tools have separate responsibilities: one supplies evidence; the
-    # other supplies fixture results for evaluating a candidate plan. The model
-    # decides when to call each through the normal LangGraph tool loop.
-    # In offline mode the sequence is deterministic. A live model may choose a
-    # different number/order of calls, and its reported token usage is retained.
-    return create_deep_agent(
-        model=model,
-        tools=[inspect_service, test_plan],
-        backend=StateBackend(),
-        system_prompt=SYSTEM_PROMPT,
-        name="investigation-agent",
-    )
+def create_run(live: bool):
+    """Build the workflow and return its provider and model name for reporting.
+
+    ``live`` is the explicit CLI choice: True constructs configured API clients;
+    False creates fresh scripted models for this sample's fixed test case. Neither
+    branch invokes an LLM here. Configuration failures propagate to the launcher
+    so a requested provider run cannot quietly become a simulated success.
+    """
+    # Offline fixtures have fixed answers; only --live supports arbitrary user
+    # questions. Both choices still execute the same workflow and tracing path.
+    if live:
+        model, provider, model_name = configured_model()
+    else:
+        model, provider, model_name = make_simulated_model(), "demo", "scripted-chat"
+    return build_workflow(model), provider, model_name
 
 
 def main() -> None:
-    settings = settings_for(__file__, __doc__)
-    model, provider, model_name = select_model(settings, make_simulated_model)
-    graph = build_agent(model)
-    execute(
-        graph,
-        USER_PROMPTS,
-        settings,
-        provider=provider,
-        model=model_name,
+    """Select a client and record one complete conversation."""
+    launch_local(
+        app_file=__file__,
+        description=__doc__,
+        create_run=create_run,
+        make_static_client=lambda: StaticClient(
+            [Request(prompt) for prompt in USER_PROMPTS]
+        ),
         title="Investigation · reasoning and tools",
     )
 

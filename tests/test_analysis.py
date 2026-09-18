@@ -1,3 +1,14 @@
+"""Verify token accounting, context growth, and report conversation presentation.
+
+Use deterministic graph runs and fixed arithmetic tariffs so provider price
+changes cannot alter expected sums. Checks distinguish cache subsets, reasoning,
+and nested spans to catch double-counting as well as misleading display order.
+
+AI attribution: Generated with AI assistance.
+
+Copyright (c) 2026 Martin.Bechard@DevConsult.ca
+"""
+
 import json
 from datetime import UTC, datetime
 from decimal import Decimal
@@ -6,20 +17,20 @@ from pathlib import Path
 
 import pytest
 
-from lg_report import exchange
-from lg_report.exchange import ExchangeRate, get_exchange_rate
-from lg_report.pricing import breakdown, cost, load_prices
-from lg_report.render import tree_rows
-from lg_report.runner import record_run
-from lg_report.schema import Run, Step, Usage
-from samples.simple_chat.app import build_agent as build_chat_agent
-from samples.simple_chat.simulation import make_simulated_model as make_chat_model
-from samples.thinking_agent.app import build_agent as build_thinking_agent
-from samples.thinking_agent.simulation import (
+from lg_report.agents.chat_agent import build_agent as build_chat_agent
+from lg_report.agents.investigation_agent import build_agent as build_thinking_agent
+from lg_report.agents.reference_chat_agent import build_agent as build_tool_agent
+from lg_report.report import exchange
+from lg_report.report.exchange import ExchangeRate, get_exchange_rate
+from lg_report.report.pricing import breakdown, cost, load_prices
+from lg_report.report.recording import record_run
+from lg_report.report.render import tree_rows
+from lg_report.report.schema import Run, Step, Usage
+from samples.simple_chat.test_case import make_simulated_model as make_chat_model
+from samples.thinking_agent.test_case import (
     make_simulated_model as make_thinking_model,
 )
-from samples.tool_chat.app import build_agent as build_tool_agent
-from samples.tool_chat.simulation import make_simulated_model as make_tool_model
+from samples.tool_chat.test_case import make_simulated_model as make_tool_model
 
 
 @pytest.fixture
@@ -134,7 +145,7 @@ def test_annotated_tool_tree_and_parent_totals(tmp_path, prices):
 
 
 def test_stale_dates_and_explicit_units(tmp_path, prices):
-    from lg_report.render import render
+    from lg_report.report.render import render
 
     prices.as_of = __import__("datetime").date(2000, 1, 1)
     for rate in prices.models.values():
@@ -166,7 +177,7 @@ def test_stale_dates_and_explicit_units(tmp_path, prices):
 
 
 def test_partial_costs_reconcile_with_parent(prices):
-    from lg_report.pricing import summarize
+    from lg_report.report.pricing import summarize
 
     step = Step(
         id="m",
@@ -186,12 +197,15 @@ def test_partial_costs_reconcile_with_parent(prices):
 
 
 def test_complete_multiturn_sample(tmp_path, prices):
-    from lg_report.render import conversation_turns
-    from lg_report.runner import ConversationAgent
+    from lg_report.platform.conversation import Conversation, Request
+    from lg_report.platform.static_client import StaticClient
+    from lg_report.report.render import conversation_turns
 
-    agent = ConversationAgent(
+    agent = Conversation(
         build_tool_agent(make_tool_model()),
-        ["Explain ReAct", "Why do observations help?"],
+        StaticClient(
+            [Request(p) for p in ["Explain ReAct", "Why do observations help?"]]
+        ),
     )
     out = tmp_path / "conversation"
     record_run(
@@ -214,7 +228,7 @@ def test_complete_multiturn_sample(tmp_path, prices):
         "Why do observations help?",
     ]
     assert [len(t["events"]) for t in turns] == [3, 3]
-    from lg_report.demo_meter import message_units
+    from lg_report.platform.demo_meter import message_units
 
     assert models[0].usage.cache_read == 0
     for previous, current in pairwise(models):
@@ -238,7 +252,7 @@ def test_complete_multiturn_sample(tmp_path, prices):
             )
             assert cell["usd"] == sum(e["cells"][index]["usd"] for e in turn["events"])
 
-    from lg_report.pricing import summarize
+    from lg_report.report.pricing import summarize
 
     assert sum(t["total"] for t in turns) == summarize(run, prices)["known_cost"]
     assert all(e["step"].response for t in turns for e in t["events"])
@@ -279,7 +293,9 @@ def test_complete_multiturn_sample(tmp_path, prices):
     )
     assert conversation.count("User prompt ·") == 2
     assert "Call ID:" not in conversation
-    first_call = conversation.split('class="event llm-event')[1].split("</article>")[0]
+    first_call = conversation.split('class="event llm-event')[1].split(
+        '<div class="status">Status:'
+    )[0]
     assert first_call.index("Input token costs") < first_call.index("LLM response")
     assert (
         first_call.index("LLM response")
@@ -298,8 +314,8 @@ def test_complete_multiturn_sample(tmp_path, prices):
 def test_effort_from_provider_invocation(tmp_path):
     from uuid import uuid4
 
-    from lg_report.capture import TraceCapture
-    from lg_report.normalize import normalize
+    from lg_report.report.capture import TraceCapture
+    from lg_report.report.normalize import normalize
 
     path = tmp_path / "trace.jsonl"
     capture = TraceCapture(path, "openai", "test-model")
@@ -313,7 +329,11 @@ def test_effort_from_provider_invocation(tmp_path):
 def test_context_simulation_retains_response_and_tool_result():
     from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 
-    from lg_report.demo_meter import ContextSimulation, message_record, message_units
+    from lg_report.platform.demo_meter import (
+        ContextSimulation,
+        message_record,
+        message_units,
+    )
 
     simulation = ContextSimulation()
     user = message_record(HumanMessage(content="Look it up"))
@@ -339,17 +359,19 @@ def test_context_simulation_retains_response_and_tool_result():
 
 @pytest.mark.parametrize("tool_loop", [False, True])
 def test_every_request_nests_components_under_fresh_input(tmp_path, prices, tool_loop):
-    from lg_report.runner import ConversationAgent
+    from lg_report.platform.conversation import Conversation, Request
+    from lg_report.platform.static_client import StaticClient
 
+    # tool_loop selects the two paths whose fresh-input composition differs:
+    # direct chat adds user messages; the tool graph also adds observations and
+    # a second request per turn. Both must obey the same report nesting rules.
     out = tmp_path / "layout"
     record_run(
-        ConversationAgent(
-            (
-                build_tool_agent(make_tool_model())
-                if tool_loop
-                else build_chat_agent(make_chat_model())
-            ),
-            ["First question", "Follow-up"],
+        Conversation(
+            build_tool_agent(make_tool_model())
+            if tool_loop
+            else build_chat_agent(make_chat_model()),
+            StaticClient([Request(p) for p in ["First question", "Follow-up"]]),
         ),
         {},
         out,
@@ -363,7 +385,7 @@ def test_every_request_nests_components_under_fresh_input(tmp_path, prices, tool
     calls = html.split('class="event llm-event')[1:]
     assert len(calls) == (4 if tool_loop else 2)
     for block in calls:
-        call = block.split("</article>")[0]
+        call = block.split('<div class="status">Status:')[0]
         assert call.count('class="input-detail"') == 1
         fresh = call.index("Fresh input")
         detail = call.index('class="input-detail"')
@@ -375,8 +397,13 @@ def test_every_request_nests_components_under_fresh_input(tmp_path, prices, tool
             "User prompt",
             "Tool result",
         ]:
+            # A request only contains its newly appended components: later
+            # requests need not repeat cached definitions or the system prompt.
+            # Check placement when present rather than requiring every label.
             if label in call:
                 assert detail < call.index(label) < write
+        # The initial request has no retained history. Subsequent requests
+        # show that cached prefix before their new, uncached content.
         if "Conversation history" in call:
             assert call.index("Conversation history") < fresh
 
@@ -427,7 +454,7 @@ def test_thinking_sample_accounts_for_reasoning(tmp_path, prices):
     assert 'class="thinking-preview"' in html
     heavy_html = next(
         block
-        for block in html.split("<article")
+        for block in html.split('<details open class="event')
         if heavy.context["thinking_text"] in block
     )
     assert (

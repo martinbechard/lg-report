@@ -1,0 +1,49 @@
+{
+  "copyright": "Copyright (c) 2026 Martin.Bechard@DevConsult.ca; packaging only, third-party content retains its license.",
+  "archives": {
+    "index": [
+      {
+        "file": "index.tar.xz.part000",
+        "bytes": 50331648,
+        "sha256": "025b5d4c26c4d01fba36a6aad5da96b75cc7266d9ac4883bb8756654236c2a04"
+      },
+      {
+        "file": "index.tar.xz.part001",
+        "bytes": 49403164,
+        "sha256": "9b175023c329ca6ffd233515aa7a16bbb2375151cb5c657468427c06ec5ef36f"
+      }
+    ],
+    "dataset": [
+      {
+        "file": "dataset.tar.xz.part000",
+        "bytes": 50331648,
+        "sha256": "99827ece69e1c3a8537bc0997816ce49d6c701a39929a18ad62ffde173314efd"
+      },
+      {
+        "file": "dataset.tar.xz.part001",
+        "bytes": 50331648,
+        "sha256": "e692ec68a27cad968ee4076118fef96159e261edc0d984c5a45a269102da4104"
+      },
+      {
+        "file": "dataset.tar.xz.part002",
+        "bytes": 50331648,
+        "sha256": "eafbaedca5ea6c1767740231cb6411a9573111ba329d389fa89f2dfe12a67f9d"
+      },
+      {
+        "file": "dataset.tar.xz.part003",
+        "bytes": 50331648,
+        "sha256": "92caf05d665859591c42326fb39b063f65c4faa463e69f034198b571577635b1"
+      },
+      {
+        "file": "dataset.tar.xz.part004",
+        "bytes": 50331648,
+        "sha256": "b57f143b7a100d51d33c92c251c240ed3c1b02e13d8528314a7dbdc323ff4380"
+      },
+      {
+        "file": "dataset.tar.xz.part005",
+        "bytes": 6991936,
+        "sha256": "de85e93a3bbd6947afcefee1490c2c803b686e34086481bb1a1f3ba7f6a9360f"
+      }
+    ]
+  }
+}

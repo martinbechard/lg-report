@@ -1,15 +1,24 @@
-"""Check local delegation accounting and context isolation.
+"""Verify that delegated work is captured once and keeps its own message context.
+
+Execute the real parent/task/specialist graph with separate scripted model
+instances. Assertions ensure the parent receives the specialist summary rather
+than its internal conversation, and that nested model costs reconcile.
 
 AI attribution: Generated with AI assistance.
+
+Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
 
 from pathlib import Path
 
-from lg_report.pricing import cost, load_prices, summarize
-from lg_report.runner import ConversationAgent, record_run
-from lg_report.schema import Run
+from lg_report.platform.conversation import Conversation, Request
+from lg_report.platform.static_client import StaticClient
+from lg_report.report.pricing import cost, load_prices, summarize
+from lg_report.report.recording import record_run
+from lg_report.report.render import agent_activity, conversation_turns
+from lg_report.report.schema import Run
 from samples.subagent_chat.app import USER_PROMPTS, create_graph
-from samples.subagent_chat.simulation import DELEGATED_TASK, SPECIALIST_SUMMARY
+from samples.subagent_chat.test_case import DELEGATED_TASK, SPECIALIST_SUMMARY
 
 
 def test_delegation_context_and_costs(tmp_path):
@@ -17,7 +26,9 @@ def test_delegation_context_and_costs(tmp_path):
     prices = load_prices(Path(__file__).parents[1] / "models.json")
     output = tmp_path / "run"
     record_run(
-        ConversationAgent(create_graph(False), USER_PROMPTS),
+        Conversation(
+            create_graph(False), StaticClient([Request(p) for p in USER_PROMPTS])
+        ),
         {},
         output,
         prices,
@@ -46,3 +57,39 @@ def test_delegation_context_and_costs(tmp_path):
     assert summarize(run, prices)["known_cost"] == sum(
         cost(s, prices)[0] for s in models
     )
+
+    activities = agent_activity(run, prices)["activities"]
+    assert len(activities) == 2
+    assert [a["model_calls"] for a in activities] == [2, 2]
+    assert activities[1]["caller"].id == activities[0]["step"].id
+    assert activities[1]["step"].name == "workflow-specialist"
+    assert sum(a["total"] for a in activities) == summarize(run, prices)["known_cost"]
+    events = [
+        e
+        for t in conversation_turns(run, prices)
+        for e in t["events"]
+        if e["step"].kind == "model"
+    ]
+    assert [e["agent"].id for e in events] == [
+        activities[0]["step"].id,
+        activities[1]["step"].id,
+        activities[1]["step"].id,
+        activities[0]["step"].id,
+    ]
+    html = (output / "report.html").read_text()
+    assert "Agent activity" in html and "Delegation ·" in html
+
+    # Conversation containment follows execution: parent -> task -> specialist.
+    turn = conversation_turns(run, prices)[0]
+    root = turn["conversation_nodes"][0]
+    assert root["step"].id == activities[0]["step"].id
+    task_node = next(n for n in root["children"] if n["step"].name == "task")
+    child_node = task_node["children"][0]
+    assert child_node["step"].id == activities[1]["step"].id
+    assert [n["step"].kind for n in child_node["children"]] == [
+        "model",
+        "tool",
+        "model",
+    ]
+    assert root["children"][-1]["event"]["step"].id == models[-1].id
+    assert "conversation-thread" in html and "conversation-children" in html

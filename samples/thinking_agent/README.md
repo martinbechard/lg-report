@@ -1,3 +1,4 @@
+<!-- Copyright (c) 2026 Martin.Bechard@DevConsult.ca; third-party source excerpts retain their original rights. -->
 # Thinking agent — evidence, reasoning, verification
 
 ## Purpose
@@ -35,12 +36,11 @@ tested against a paid provider merely by running the offline fixture tests.
 
 ## Code and execution flow
 
-- `app.py` owns the instructions and graph. Tool collection and verification are
-  connected through the normal DeepAgents/LangGraph tool loop.
-- `tools.py` contains `inspect_service` and `test_plan`. Both return fictional
-  fixture data. They do not inspect servers, run load tests, or prove a real
-  optimization is correct.
-- `simulation.py` owns the seven scripted LLM responses. It specifies the
+- `app.py` selects models, client, and recorder.
+- `src/lg_report/workflows/thinking_agent.py` composes the participating agents.
+- `src/lg_report/agents/investigation_agent.py` owns the agent instructions and registration.
+- `src/lg_report/tools/service_evidence.py` owns the callable evidence tools.
+- `test_case.py` owns the seven scripted LLM responses. It specifies the
   teaching reasoning counts and illustrative thinking text.
 
 The deterministic sequence is:
@@ -72,10 +72,17 @@ is not appended to visible history or marked as cached response text. Real
 providers may return reasoning text, summaries, redactions, or only token usage;
 the sample must not invent text for a live response.
 
-Try changing the reasoning count in `simulation.py` while leaving the visible
+Try changing the reasoning count in `test_case.py` while leaving the visible
 response unchanged. Its output cost should change, but the subsequent visible
 context should not grow by that hidden reasoning count. Then change a tool
 result and observe fresh-input/context growth instead.
 
 See the [sample catalog](../README.md) for common configuration and the limits
 of the cache simulation. The tools are demonstrations, not a production agent.
+
+## Interactive client
+
+Add `--client console --live` to the launch command after configuring this sample's
+`.env`. The shared console accepts prompts and `/attach PATH` text files, `/send`,
+and `/quit`. Both clients use the same workflow and retained conversation history.
+See [component and sequence diagrams](../../docs/chat-composition.md).

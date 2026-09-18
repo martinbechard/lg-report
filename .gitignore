@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 # Python-generated files
 __pycache__/
 *.py[oc]
@@ -11,7 +12,13 @@ wheels/
 .env
 .env.*
 !.env.example
-reports/
+# Keep local runs private; commit only regenerated sample reports.
+reports/*
+!reports/examples/
+**/*langfuse*/reports/
+**/*langfuse*/data/
+**/*langfuse*/*.db
+**/*langfuse*/*.sqlite*
 .pytest_cache/
 .ruff_cache/
 
@@ -19,3 +26,9 @@ reports/
 
 # Generated workbook exports
 outputs/
+
+# Langfuse runtime state is never a checked-in report example.
+reports/**/*langfuse*/
+**/*langfuse*/volumes/
+.langfuse/
+langfuse-data/

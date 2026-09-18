@@ -1,4 +1,13 @@
-"""Provider page changes must never masquerade as freshly verified prices."""
+"""Verify daily tariff refresh without depending on changing provider pages.
+
+Saved source excerpts exercise strict parsing and units. Controlled fetches test
+cache reuse, authoritative file overrides, and failures that must preserve old
+verification dates rather than falsely advertising fresh prices.
+
+AI attribution: Generated with AI assistance.
+
+Copyright (c) 2026 Martin.Bechard@DevConsult.ca
+"""
 
 from datetime import date, datetime, timedelta
 from decimal import Decimal
@@ -6,13 +15,16 @@ from pathlib import Path
 
 import pytest
 
-from lg_report import price_refresh as refresh
+from lg_report.report import price_refresh as refresh
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = Path(__file__).parent / "fixtures/pricing"
 
 
 def source(url):
+    # OpenAI publishes one page per model, so its last URL segment names the
+    # fixture. Anthropic uses one shared pricing page for all models; its exact
+    # source URL selects that shared fixture instead of a model-specific file.
     return (
         FIXTURES
         / (url.rsplit("/", 1)[-1] if url != refresh.ANTHROPIC else "anthropic.html")
