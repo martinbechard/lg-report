@@ -17,7 +17,10 @@ from lg_report.report.schema import Run, Step, Usage
 
 
 def timestamp_ns(value: str) -> int:
-    """Convert an exported ISO timestamp to Unix nanoseconds at datetime precision."""
+    """Give report steps comparable clock values for ordering and elapsed time.
+
+    ``value`` is an exported ISO timestamp. Return Unix nanoseconds limited to
+    datetime's microsecond precision; malformed timestamps raise ValueError."""
     timestamp = datetime.fromisoformat(value)
     return int(timestamp.timestamp()) * 1_000_000_000 + timestamp.microsecond * 1_000
 
@@ -25,7 +28,11 @@ def timestamp_ns(value: str) -> int:
 def normalize(
     path: Path, *, title: str, demo: bool = False, status="ok", output=None
 ) -> Run:
-    """Read a complete capture file without network access or cost calculations.
+    """Prepare captured execution evidence for every exporter to interpret consistently.
+
+    ``path`` is the completed JSONL file from TraceCapture. Return a validated
+    Run containing chronologically ordered Steps and inclusive Usage records;
+    pricing is a later operation, so this conversion requires no network calls.
 
     title/demo/status/output describe the invocation supplied by its recorder.
     A supplied failure status is retained; an apparently successful invocation

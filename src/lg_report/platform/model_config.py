@@ -14,15 +14,21 @@ import os
 
 
 def configured_model():
-    """Build a LangChain adapter and return it with its provider and model ID.
+    """Give a live sample its configured model and matching accounting identity.
 
-    Read LG_PROVIDER (openai/anthropic), LG_MODEL, the matching API key, positive
+    Return ``(model_adapter, provider, model_id)`` for graph construction and
+    reporting; obtaining this tuple does not generate an answer.
+
+    Read ``LG_PROVIDER`` (``openai``/``anthropic``), ``LG_MODEL``, the matching API key, positive
     LG_MAX_TOKENS, and optional LG_EFFORT from the environment already loaded by
     the sample entry point. Model access and supported effort values remain the
     provider's responsibility. Missing keys or invalid local settings raise
     ValueError; adapter validation errors also propagate. No request is sent here.
 
     Each call creates a separate adapter using the same configured model ID.
+    The adapter is lazy with respect to network generation: credentials are
+    checked locally, but provider-side model/effort validation may still occur
+    only when the adapter is first used.
     Different expert roles therefore do not imply different foundation models:
     their system instructions and available tools supply the specialization.
     The returned adapter can be injected into graph construction; the provider

@@ -22,6 +22,8 @@ from samples.subagent_chat.test_case import DELEGATED_TASK, SPECIALIST_SUMMARY
 
 
 def test_delegation_context_and_costs(tmp_path):
+    # Parent, task, and specialist spans must preserve isolated
+    # prompts while their nested model costs reconcile with rendered activity.
     """Child work is billed once, nested under task, and summarized to the parent."""
     prices = load_prices(Path(__file__).parents[1] / "models.json")
     output = tmp_path / "run"
@@ -50,6 +52,9 @@ def test_delegation_context_and_costs(tmp_path):
             node = by_id[node.parent_id]
     assert models[1].request[-1]["content"] == DELEGATED_TASK
     assert USER_PROMPTS[0] not in str(models[1].request)
+    # The task tool executes the child graph and returns its summary. That
+    # tool result becomes the final parent model request, while the child
+    # lookup messages remain inside the specialist conversation.
     assert models[3].request[-1]["content"] == SPECIALIST_SUMMARY
     assert "specialist-lookup-1" not in str(models[3].request)
     assert models[0].usage.cache_read == models[1].usage.cache_read == 0

@@ -21,7 +21,9 @@ class Review(BaseModel):
 
     verdict chooses an edge. rationale explains the assessment to the reader.
     feedback lists corrections sent to the author. This checks structure and
-    consistency, not whether the assessment itself is factually correct.
+    consistency, not whether the assessment itself is factually correct. The
+    workflow owns retry limits; this value object only rejects contradictory or
+    unusable decisions before routing.
     """
 
     # Forbid unrecognized fields so a changed/misspelled output contract fails
@@ -33,7 +35,12 @@ class Review(BaseModel):
 
     @model_validator(mode="after")
     def validate_feedback(self):
-        """Reject unusable verdicts rather than silently approving malformed output."""
+        """Reject unusable verdicts rather than silently approving malformed output.
+
+        Construction is synchronous and side-effect free. Callers should treat
+        a validation error as a failed judge response and apply the workflow's
+        bounded failure policy.
+        """
         # This runs after Pydantic has checked field types and allowed verdicts.
         # At least one nonblank feedback item is needed to drive another draft;
         # structural validation cannot prove that the text is genuinely actionable.
@@ -71,15 +78,27 @@ SYSTEM_PROMPT = (
 
 
 def build_agent(model):
-    """Return a named role runnable around the supplied shared model.
+    """Prepare an evidence reviewer so the workflow can decide whether to revise.
 
-    messages is supplied later by the workflow and contains judge history plus
+    ``model`` is the configured provider or deterministic fixture. ``messages``
+    is supplied later by the workflow and contains judge history plus
     the current draft/request. Return the untouched AIMessage so tracing records
     the actual judge output, including invalid JSON. Parsing at the workflow
     boundary keeps interpretation/routing separate from model generation.
+    Provider exceptions propagate so recording and the workflow can preserve the
+    failed call instead of silently approving it.
     """
 
     def review(messages):
+        """Assess the current draft so the workflow receives a reasoned verdict.
+
+        ``messages`` is the judge context assembled by the workflow, including
+        the request, evidence, and current draft. One model call returns a
+        LangChain AIMessage containing proposed verdict text. The workflow then
+        parses that text with Review; this function does not approve or route.
+        """
+        # SystemMessage is LangChain's instruction container. Creating it makes
+        # no request; model.invoke sends it alongside the workflow's messages.
         # Prepend the judge rubric afresh for each call; do not append it to the
         # stored history or it would be duplicated on every revision. Sharing the
         # model with the author does not share either role's system instruction.

@@ -3,6 +3,8 @@
 An in-process FastMCP fixture exercises protocol adaptation and real Deep Agent
 routing. Separate server tests and the standalone smoke run cover stdio transport.
 
+AI attribution: Modified with AI assistance.
+
 Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
 
@@ -30,9 +32,13 @@ class Collection:
     """Return one labelled passage so reports can prove evidence propagation."""
 
     def count(self):
+        # Advertise one available passage so the server will attempt retrieval.
         return 1
 
     def query(self, **kwargs):
+        # Supply recognizable evidence for protocol/report propagation checks.
+        # Ignore Chroma query kwargs: these tests check transport and result handling,
+        # not ranking. Nested lists represent one query with one returned passage.
         return {
             "ids": [["fixture-raven"]],
             "documents": [["The raven adapts to urban habitats."]],
@@ -41,11 +47,17 @@ class Collection:
         }
 
 
+# Replace only the agent lifetime boundary with a deterministic local
+# server, then verify evidence, accounting, and cleanup reach the report.
 def test_sample_records_mcp_evidence(tmp_path, monkeypatch):
     lifecycle = []
 
     @asynccontextmanager
     async def open_fixture(model):
+        # Keep an MCP session alive while the synchronous bridge uses its agent.
+        # `model` is the scripted model passed by the workflow. Yield a real Deep
+        # Agent configured with discovered tools; finally records context exit even
+        # when the caller raises. The transport is in-process, not stdio.
         async with MCPAdapter(build_server(Collection())) as adapter:
             lifecycle.append("opened")
             try:
@@ -75,6 +87,8 @@ def test_sample_records_mcp_evidence(tmp_path, monkeypatch):
     models = sorted(
         [s for s in run.steps if s.kind == "model"], key=lambda s: s.start_ns
     )
+    # These are recorded executions, not the model proposed tool_calls. The
+    # second model request must include evidence returned by the MCP tool.
     tools = [s for s in run.steps if s.kind == "tool"]
     assert len(models) == 2
     assert len(tools) == 1 and tools[0].name == "search_wikipedia"
@@ -84,17 +98,25 @@ def test_sample_records_mcp_evidence(tmp_path, monkeypatch):
     assert lifecycle == ["opened", "closed"]
 
 
+# A failed agent call must still close the async MCP-backed lifetime;
+# this guards resource cleanup independently from successful reporting.
 def test_bridge_closes_on_failure(monkeypatch):
     lifecycle = []
 
     class BrokenAgent:
         async def ainvoke(self, inputs, config):
+            # Fail after checking that the bridge forwards history and tracing config.
+            # This async replacement returns no result; the surrounding context manager
+            # must close when the exception propagates.
             assert config["metadata"]["report_turn"] == 2
             assert inputs["messages"] == ["prior history"]
             raise ValueError("agent failed")
 
     @asynccontextmanager
     async def open_fixture(model):
+        # Exercise the bridge cleanup path with an agent that always fails.
+        # Accept the workflow model argument for interface compatibility; yield the
+        # failure stub and record cleanup when the async context is exited.
         try:
             yield BrokenAgent()
         finally:

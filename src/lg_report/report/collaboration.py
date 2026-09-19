@@ -4,6 +4,8 @@ Each invocation owns a lane, including repeated agents and concurrent children.
 Arrows require recorded caller relationships; chronological proximity alone is
 not evidence of a handoff. This projection never changes run data or accounting.
 
+AI attribution: Modified with AI assistance.
+
 Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
 
@@ -11,7 +13,13 @@ from textwrap import wrap
 
 
 def collaboration_diagrams(run, agents, turns):
-    """Return per-turn lanes and timestamp-ordered activity for the HTML template.
+    """Help readers follow who called whom during each recorded conversation turn.
+
+    Return diagram dictionaries consumed by the HTML template: lanes identify
+    agent invocations and events describe observed work or handoffs. ``run`` is
+    normalized trace evidence, ``agents`` supplies resolved activities/callers,
+    and ``turns`` supplies the renderer's grouped model/tool events. These are
+    display projections, not live agents or executable scheduling instructions.
 
     Successful return arrows require both a completed child and completed task.
     Failed, interrupted, or unfinished invocations retain their observed status.
@@ -48,6 +56,18 @@ def collaboration_diagrams(run, agents, turns):
             events=events,
             by_id=by_id,
         ):
+            """Represent an observed action or handoff at the correct place in the diagram.
+
+            The caller supplies the observed ``timestamp`` in Unix nanoseconds,
+            display ``label``, and recorded ``status``. This returns None after
+            appending the event; rendering happens later in the HTML template.
+
+            ``source`` and ``target`` must be IDs present in ``by_id``; the
+            self-target form is intentional for local work such as model/tool
+            activity. ``order`` is a stable tie-breaker for equal timestamps,
+            so diagram ordering never invents precision that the trace lacks.
+            The helper mutates only this diagram's temporary ``events`` list.
+            """
             events.append(
                 {
                     "timestamp": timestamp,
@@ -66,6 +86,9 @@ def collaboration_diagrams(run, agents, turns):
             step = activity["step"]
             caller = activity["caller"]
             task = activity["delegation"]
+            # Draw a cross-lane call only when this turn contains the recorded
+            # caller. A missing caller lane becomes a local start marker, never
+            # a guessed link to the preceding chronological agent.
             if caller and caller.id in by_id:
                 add(
                     step.start_ns,
@@ -123,6 +146,9 @@ def collaboration_diagrams(run, agents, turns):
                     step.status,
                     1,
                 )
+        # Each event dictionary carries its clock time and phase order: calls
+        # precede local work, which precedes returns at an identical timestamp.
+        # This sorting lambda only selects that key; it does not run an action.
         events.sort(key=lambda event: (event["timestamp"], event["order"]))
         y = header_height + 30
         for event in events:

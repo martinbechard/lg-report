@@ -30,6 +30,9 @@ from samples.simple_chat_langfuse import app
 @pytest.fixture
 def capture():
     """Keep the production SDK/callback; replace only its network exporter."""
+    # A distinct key isolates SDK client lookup across tests. Yield returns
+    # the SDK client, its callback, and the local exporter to the test; pytest
+    # re-enters the fixture after the test so finally shuts down the client.
     key = f"pk-lf-test-{uuid4().hex}"
     exporter = InMemorySpanExporter()
     client = Langfuse(
@@ -47,6 +50,8 @@ def capture():
         client.shutdown()
 
 
+# Two turns should share one trace while retaining per-turn usage and
+# conversation ancestry in the in-memory exporter.
 def test_two_turns_share_trace_and_preserve_usage(capture):
     """Check topology, growing context, usage partitions, and model annotations."""
     client, callback, exporter = capture
@@ -101,11 +106,15 @@ def test_two_turns_share_trace_and_preserve_usage(capture):
     )
 
 
+# Graph failure must close exported spans with error status so a
+# hosted exporter would not receive an open or falsely successful trace.
 def test_failed_graph_closes_error_spans(capture):
     """Partial failures must remain observable and must not start a second turn."""
     client, callback, exporter = capture
 
     def fail(_):
+        # Force graph failure after tracing has started to exercise span cleanup.
+        # RunnableLambda supplies the graph input as `_`; its content is irrelevant.
         raise RuntimeError("deliberate test failure")
 
     with pytest.raises(RuntimeError, match="deliberate test failure"):
@@ -126,6 +135,8 @@ def test_failed_graph_closes_error_spans(capture):
         assert span.status.status_code == StatusCode.ERROR
 
 
+# Missing Langfuse configuration is a startup error and must prevent
+# client construction, avoiding a misleading partially initialized runtime.
 def test_missing_configuration_fails_before_client_creation(
     monkeypatch, tmp_path, capsys
 ):
@@ -139,6 +150,8 @@ def test_missing_configuration_fails_before_client_creation(
     assert "LANGFUSE_PUBLIC_KEY" in capsys.readouterr().err
 
 
+# Authentication failure must stop before model selection, preserving
+# the documented initialization order and avoiding provider work.
 def test_failed_authentication_stops_before_model_selection(monkeypatch):
     """The CLI checks project access before constructing any live provider model."""
     for name, value in {
@@ -152,9 +165,13 @@ def test_failed_authentication_stops_before_model_selection(monkeypatch):
 
     class UnauthenticatedClient:
         def auth_check(self):
+            # Simulate denied project access before any provider work can begin.
+            # Return the SDK authentication check boolean without contacting Langfuse.
             return False
 
         def shutdown(self):
+            # Record cleanup after authentication failure so a failed startup cannot
+            # silently leave the constructed client running.
             shutdown.append(True)
 
     monkeypatch.setattr(runtime, "Langfuse", lambda **kwargs: UnauthenticatedClient())
@@ -167,6 +184,8 @@ def test_failed_authentication_stops_before_model_selection(monkeypatch):
     assert shutdown == [True]
 
 
+# Delegated child spans must remain under the task span in exported
+# trace ancestry so ownership and cost reports agree.
 def test_langfuse_delegation_keeps_child_under_task(capture):
     """The actual task tool must propagate one callback into the child's graph."""
     from samples.subagent_chat.app import USER_PROMPTS, create_graph
@@ -215,6 +234,8 @@ def test_langfuse_delegation_keeps_child_under_task(capture):
     )  # Only the parent's prompt, task request/result, and answer.
 
 
+# Console file attachments must produce the same conversation content
+# with and without tracing; instrumentation cannot alter user-visible inputs.
 def test_console_files_match_untraced_conversation(capture, tmp_path):
     """Changing recording must not change messages or charge a model call twice."""
     from lg_report.platform.console_client import ConsoleClient
@@ -261,6 +282,8 @@ def test_console_files_match_untraced_conversation(capture, tmp_path):
     assert sum(line.startswith("Assistant:") for line in displayed) == 2
 
 
+# Empty and interrupted sessions exercise terminal lifecycle edges;
+# both must close cleanly and retain truthful trace statuses.
 def test_empty_and_interrupted_sessions(capture):
     """Neither a user exit nor an approval pause should consume another prompt."""
     client, callback, exporter = capture
@@ -275,6 +298,8 @@ def test_empty_and_interrupted_sessions(capture):
     assert history == []
     user = StaticClient([Request("first"), Request("do not send")])
     _, history = runtime.run_conversation(
+        # Ignore runnable input and return synthetic pause-shaped graph state.
+        # This tests driver lifecycle reporting, not LangGraph replay itself.
         RunnableLambda(lambda _: {"messages": [], "__interrupt__": ["approval"]}),
         client,
         callback,

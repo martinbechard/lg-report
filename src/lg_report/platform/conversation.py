@@ -23,7 +23,11 @@ from typing import Protocol
 
 @dataclass(frozen=True)
 class Attachment:
-    """An explicitly supplied UTF-8 text file, already read by the client."""
+    """An explicitly supplied UTF-8 text file, already read by the client.
+
+    ``name`` is display/context metadata and ``content`` is the captured text.
+    This value does not grant the graph permission to reopen the named path.
+    """
 
     name: str
     content: str
@@ -31,7 +35,12 @@ class Attachment:
 
 @dataclass(frozen=True)
 class Request:
-    """One user turn; attachments become input context, not filesystem permissions."""
+    """One user turn; attachments become input context, not filesystem permissions.
+
+    ``prompt`` may be empty when a client intentionally submits attachments
+    alone. ``files`` is an immutable ordered tuple so clients cannot change a
+    request after tracing or graph invocation begins.
+    """
 
     prompt: str
     files: tuple[Attachment, ...] = ()
@@ -51,9 +60,10 @@ class Request:
 class ChatClient(Protocol):
     """User-side boundary shared by console, static test, or a future avatar agent.
 
-    receive returns the next Request, or None to end the conversation. respond
-    receives the full graph result before the next receive, allowing an avatar
-    to choose its next prompt from the answer instead of a predetermined list.
+    ``receive`` returns the next ``Request``, or ``None`` to end the conversation.
+    ``respond`` receives the full graph result before the next receive, allowing
+    an avatar to choose its next prompt from the answer instead of a predetermined
+    list. Implementations should preserve their own fixture/input ownership.
     """
 
     def receive(self) -> Request | None:
@@ -89,11 +99,15 @@ class Conversation:
         self.turn_scope = turn_scope
 
     def invoke(self, inputs, config):
-        """Drive the client until it ends or the graph requests external approval.
+        """Let a client conduct a complete conversation with retained agent context.
 
-        inputs is unused; requests arrive through the client. Callbacks and other
-        recorder configuration are preserved on every turn. Graph errors propagate
-        to the recorder so the partial trace can still become a diagnostic report.
+        ``inputs`` is unused; requests arrive through the client. ``config`` is
+        copied on every turn, preserving callbacks and other recorder settings
+        while adding the one-based ``report_turn`` metadata. Graph and scope
+        errors propagate to the recorder so partial traces can remain diagnostic.
+        The return is the final graph result, or ``None`` when no request was
+        submitted; an interrupt result ends this client because resumption is an
+        explicit client responsibility.
         """
         history = []
         result = None
@@ -110,9 +124,16 @@ class Conversation:
             scope = (
                 self.turn_scope(turn, request)
                 if self.turn_scope is not None
+                # The no-op callback accepts the complete graph result, just
+                # like a tracing hook, and intentionally records nothing.
                 else nullcontext(lambda result: None)
             )
             with scope as complete:
+                # LangChain accepts these role/content dictionaries as user
+                # messages. invoke executes the entire agent graph, potentially
+                # including model requests and tools, and returns a state mapping.
+                # Tool outputs live inside its message history; result itself is
+                # the outcome of the graph invocation, not one tool's output.
                 result = self.graph.invoke(
                     {
                         "messages": [

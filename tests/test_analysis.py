@@ -35,14 +35,20 @@ from samples.tool_chat.test_case import make_simulated_model as make_tool_model
 
 @pytest.fixture
 def prices():
+    # Every accounting test uses a fixed local tariff table so assertions
+    # measure normalization behavior rather than live provider price drift.
     return load_prices(Path(__file__).parent / "fixtures/accounting_prices.json")
 
 
+# A same-day rate lookup should read the verified cache and avoid a
+# second network call, protecting deterministic accounting in repeated runs.
 def test_daily_cache_avoids_second_fetch(tmp_path, monkeypatch):
     calls = []
     rate = ExchangeRate(rate="0.871", date="2026-09-17", fetched_at=datetime.now(UTC))
 
     def fetch():
+        # Observe cache misses without network access. Return the same fixed rate
+        # on each fetch so only the number of calls distinguishes reuse from refresh.
         calls.append(1)
         return rate
 
@@ -53,11 +59,15 @@ def test_daily_cache_avoids_second_fetch(tmp_path, monkeypatch):
     assert (tmp_path / f"{datetime.now().astimezone().date()}.json").exists()
 
 
+# An explicit rates file is the offline authority and must bypass
+# network access entirely.
 def test_supplied_file_is_offline(tmp_path, monkeypatch):
     path = tmp_path / "provided.json"
     path.write_text('{"rate":"0.88","date":"2026-09-16"}')
 
     def forbidden():
+        # Fail immediately if the explicit-file path attempts a network fallback.
+        # The replacement needs no arguments because fetch_exchange_rate takes none.
         pytest.fail("A supplied file must not trigger a network lookup")
 
     monkeypatch.setattr(exchange, "fetch_exchange_rate", forbidden)
@@ -65,6 +75,8 @@ def test_supplied_file_is_offline(tmp_path, monkeypatch):
     assert result.rate == Decimal("0.88") and result.source == str(path)
 
 
+# Yesterday's cache cannot silently stand in for today's rates; this
+# keeps freshness metadata honest when refresh is required.
 def test_old_cache_does_not_replace_today(tmp_path, monkeypatch):
     (tmp_path / "2000-01-01.json").write_text('{"rate":"0.1","date":"2000-01-01"}')
     rate = ExchangeRate(rate="0.9", date="2026-09-17")
@@ -79,6 +91,8 @@ def test_old_cache_does_not_replace_today(tmp_path, monkeypatch):
         {"rate": "0.8", "date": "2026-09-17", "base": "EUR", "quote": "USD"},
     ],
 )
+# Malformed pricing input must fail at the boundary instead of
+# producing partially trusted accounting values.
 def test_bad_rate_file_rejected(tmp_path, data):
     path = tmp_path / "bad.json"
     path.write_text(json.dumps(data))
@@ -86,6 +100,8 @@ def test_bad_rate_file_rejected(tmp_path, data):
         get_exchange_rate(path)
 
 
+# Provider usage fields may overlap or omit columns; these assertions
+# protect normalization from double counting while preserving reconciliation.
 def test_disjoint_token_columns_reconcile(prices):
     step = Step(
         id="1",
@@ -112,6 +128,8 @@ def test_disjoint_token_columns_reconcile(prices):
     assert sum(p["usd"] for p in parts) == cost(step, prices)[0]
 
 
+# A real tool call must retain schema descriptions, parentage, and
+# aggregate totals across the rendered report.
 def test_annotated_tool_tree_and_parent_totals(tmp_path, prices):
     out = tmp_path / "run"
     prices.exchange = ExchangeRate(rate="0.871", date="2026-09-17")
@@ -144,6 +162,8 @@ def test_annotated_tool_tree_and_parent_totals(tmp_path, prices):
     assert "Fresh input" in html and "Reasoning" in html
 
 
+# Reporting must expose stale verification and explicit units so a
+# reader can distinguish known costs from unsupported conversions.
 def test_stale_dates_and_explicit_units(tmp_path, prices):
     from lg_report.report.render import render
 
@@ -176,6 +196,8 @@ def test_stale_dates_and_explicit_units(tmp_path, prices):
     assert tree_rows(run, prices)[0]["stale_prices"]
 
 
+# Unknown child pricing must remain visible as partial knowledge while
+# known subtotals still reconcile to their parent activity.
 def test_partial_costs_reconcile_with_parent(prices):
     from lg_report.report.pricing import summarize
 
@@ -196,6 +218,8 @@ def test_partial_costs_reconcile_with_parent(prices):
     assert row["total"] == summarize(run, prices)["known_cost"]
 
 
+# The documented multi-turn sample protects context growth and report
+# ordering over more than one user request.
 def test_complete_multiturn_sample(tmp_path, prices):
     from lg_report.platform.conversation import Conversation, Request
     from lg_report.platform.static_client import StaticClient
@@ -311,6 +335,8 @@ def test_complete_multiturn_sample(tmp_path, prices):
     assert "Prices 20" not in conversation and "FX 20" not in conversation
 
 
+# Provider invocation metadata is the source of truth for effort and
+# must be preserved in normalized steps and the generated report.
 def test_effort_from_provider_invocation(tmp_path):
     from uuid import uuid4
 
@@ -326,6 +352,8 @@ def test_effort_from_provider_invocation(tmp_path):
     assert normalize(path, title="effort").steps[0].effort == "low"
 
 
+# Simulated context must include prior model output and tool results;
+# dropping either would make later token estimates misleading.
 def test_context_simulation_retains_response_and_tool_result():
     from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 
@@ -336,6 +364,9 @@ def test_context_simulation_retains_response_and_tool_result():
     )
 
     simulation = ContextSimulation()
+    # LangChain message objects carry conversation data: HumanMessage is user
+    # input, AIMessage carries assistant output/proposed tool calls, and
+    # ToolMessage carries the execution result tied to a tool-call id.
     user = message_record(HumanMessage(content="Look it up"))
     response = message_record(
         AIMessage(content="", tool_calls=[{"name": "lookup", "args": {}, "id": "a"}])
@@ -358,6 +389,8 @@ def test_context_simulation_retains_response_and_tool_result():
 
 
 @pytest.mark.parametrize("tool_loop", [False, True])
+# Each request needs a fresh root while its model/tool components stay
+# nested under that request for turn-level attribution.
 def test_every_request_nests_components_under_fresh_input(tmp_path, prices, tool_loop):
     from lg_report.platform.conversation import Conversation, Request
     from lg_report.platform.static_client import StaticClient
@@ -408,6 +441,8 @@ def test_every_request_nests_components_under_fresh_input(tmp_path, prices, tool
             assert call.index("Conversation history") < fresh
 
 
+# When only a five-minute cache rate exists, unspecified cache-write
+# duration must use that rate rather than becoming unpriced by accident.
 def test_unspecified_cache_write_uses_five_minute_rate(prices):
     from decimal import Decimal
 
@@ -429,6 +464,8 @@ def test_unspecified_cache_write_uses_five_minute_rate(prices):
     assert cost(step, prices)[0] == Decimal("0.0075")
 
 
+# Reasoning tokens are a billed subset of model output and must survive
+# the thinking sample's normalization and summary path.
 def test_thinking_sample_accounts_for_reasoning(tmp_path, prices):
 
     out = tmp_path / "thinking"

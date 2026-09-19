@@ -21,14 +21,20 @@ SYSTEM_PROMPT = (
     "Do not use tools for this simple chat exercise."
 )
 
+# This public prompt is a reviewable role contract. Keeping it as data lets
+# samples inspect the lesson's instructions without constructing a graph.
+
 
 def build_agent(model: BaseChatModel) -> CompiledStateGraph:
-    """Return an uninvoked graph using the supplied live or simulated model.
+    """Prepare a conversational assistant so clients can answer successive user turns.
 
     Keeping the model injectable lets the same application teach both a
     repeatable offline conversation and real provider usage. Compilation does
     not call the model; callers provide messages and callbacks when invoking it.
     """
+    # Invoking the returned graph later accepts a state mapping with messages
+    # and returns updated state. Its last AIMessage carries the chat answer;
+    # the whole graph result is not a tool result or a single model message.
     # DeepAgents constructs a real LangGraph graph, even with the offline model.
     # Its built-in tool definitions still occupy input context; that overhead is
     # deliberately visible, despite this lesson making no tool calls.

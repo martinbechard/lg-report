@@ -23,15 +23,30 @@ SYSTEM_PROMPT = (
     "proposals versus observed facts and acknowledge missing evidence."
 )
 
+# The stable prompt carries role rules only. The workflow appends the current
+# request, evidence, and judge feedback so each revision remains auditable.
+
 
 def build_agent(model):
-    """Return an author runnable using the shared LLM without invoking it yet.
+    """Prepare an author so the review workflow can draft and improve an answer.
 
     Input is this role's message history, assembled by the workflow. Output is
     the model's AIMessage; provider errors propagate to recording unchanged.
+    The runnable has no draft persistence of its own, so callers retain returned
+    messages when a later judge or revision needs them.
     """
 
     def write(messages):
+        """Produce the draft the workflow needs for its next review round.
+
+        ``messages`` carries the user request/evidence and, on later rounds,
+        the author's history plus requested corrections. Return one LangChain
+        AIMessage with the model's draft and any usage metadata. The workflow
+        retains that message and passes its text to the judge after this returns.
+        """
+        # SystemMessage is a LangChain message container identifying instruction
+        # text. Only model.invoke executes the request; this is a single model
+        # response, not the state dictionary returned by a compiled agent graph.
         # The workflow owns message history; this function only supplies the
         # author's stable instructions and invokes the already-configured LLM.
         # The same model object is used by the judge with a different system message.

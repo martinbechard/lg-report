@@ -50,11 +50,11 @@ summary::-webkit-details-marker{display:none}
 {# Summary: EUR requires recorded FX; missing pricing switches the USD label to known subtotal, never all-calls-priced. #}<div class="cards"><div class="card"><span>Estimated model cost</span><strong>{% if prices.exchange %}{{ '%.6f'|format(summary.known_cost * prices.exchange.rate) }} EUR{% else %}EUR unavailable{% endif %}</strong><small>{{ '%.6f'|format(summary.known_cost) }} USD · {{ 'known subtotal' if summary.unpriced_calls else 'all calls priced' }}</small></div><div class="card"><span>Input tokens · including cache</span><strong>{{ '{:,}'.format(summary.input_tokens) }}</strong></div><div class="card"><span>Output tokens · including reasoning</span><strong>{{ '{:,}'.format(summary.output_tokens) }}</strong></div><div class="card"><span>Model calls / elapsed</span><strong>{{ summary.model_calls }} / {{ '%.2f'|format(summary.duration_ms / 1000) }}s</strong></div></div>
 
 {# Missing-data notice: any unpriced call means subtotals cannot represent the full run; missing usage is reported separately. #}{% if summary.unpriced_calls %}<p class="notice">{{ summary.unpriced_calls }} model call(s) could not be priced; {{ summary.missing_usage }} have unknown token usage. Known subtotals are incomplete.</p>{% endif %}
-{# Money: only available FX permits conversion; an older reference marks EUR stale. show_date currently gates an empty block and adds no output. #}{% macro money(usd, show_date=true) %}<div class="euro {{ 'stale' if prices.exchange and prices.exchange.date < today else '' }}">{% if prices.exchange %}{{ '%.6f'|format(usd * prices.exchange.rate) }} EUR{% else %}EUR unknown{% endif %}</div>{% if prices.exchange and show_date %}{% endif %}<div class="dollar">{{ '%.6f'|format(usd) }} USD</div>{% endmacro %}
-{# Token cells: show only selected categories. No model descendants means no usage cell; partial values display a known-subtotal marker. Old tariff dates mark cells stale independently of FX. #}{% macro token_cells(metrics, show_date=true) %}{% for cell in metrics.cells %}{% if loop.index0 in visible_token_indices %}<td class="{{ 'stale' if metrics.stale_prices else '' }}">{% if metrics.has_usage %}<div class="tokens">{{ '{:,}'.format(cell.tokens) }} <small>tokens</small>{% if cell.partial %}*{% endif %}</div>{{ money(cell.usd, show_date) }}{% if cell.partial %}<div class="partial">Known only / unknown remainder</div>{% endif %}{% else %}—{% endif %}</td>{% endif %}{% endfor %}{% endmacro %}
-{% macro token_headers() %}{% for key,label in categories %}<th>{{ label }}</th>{% endfor %}{% endmacro %}
-{# Counts: None means unreported, whereas zero is an actual recorded count and must remain visible. #}{% macro count(value) %}{{ value ~ ' tokens' if value is not none else 'tokens unreported' }}{% endmacro %}
-{# Category lines: require a selected category and either nonzero tokens or incomplete data; known zeros add no clutter. Output with tool calls includes their JSON. Partial amounts retain an incomplete label. #}{% macro category_costs(event, indices) %}{% for cell in event.cells %}{% if loop.index0 in indices and (cell.tokens or cell.partial) %}<div class="cost-line"><strong>{{ 'Output · including tool calls' if loop.index0 == 5 and event.has_tool_calls else all_categories[loop.index0][1] }} · {{ count(cell.tokens) }}</strong>{{ money(cell.usd, false) }}{% if cell.partial %}<span>Incomplete</span>{% endif %}</div>{% endif %}{% endfor %}{% endmacro %}
+{# Present a known USD amount alongside its available EUR conversion. usd is the accounting subtotal; this macro emits markup only and does not decide whether that subtotal is complete. Money: only available FX permits conversion; an older reference marks EUR stale. show_date currently gates an empty block and adds no output. #}{% macro money(usd, show_date=true) %}<div class="euro {{ 'stale' if prices.exchange and prices.exchange.date < today else '' }}">{% if prices.exchange %}{{ '%.6f'|format(usd * prices.exchange.rate) }} EUR{% else %}EUR unknown{% endif %}</div>{% if prices.exchange and show_date %}{% endif %}<div class="dollar">{{ '%.6f'|format(usd) }} USD</div>{% endmacro %}
+{# Give tree rows comparable token/cost columns from their projected metrics. metrics contains ordered cells plus usage, partial, and tariff-date flags; show_date is forwarded to money. Token cells: show only selected categories. No model descendants means no usage cell; partial values display a known-subtotal marker. Old tariff dates mark cells stale independently of FX. #}{% macro token_cells(metrics, show_date=true) %}{% for cell in metrics.cells %}{% if loop.index0 in visible_token_indices %}<td class="{{ 'stale' if metrics.stale_prices else '' }}">{% if metrics.has_usage %}<div class="tokens">{{ '{:,}'.format(cell.tokens) }} <small>tokens</small>{% if cell.partial %}*{% endif %}</div>{{ money(cell.usd, show_date) }}{% if cell.partial %}<div class="partial">Known only / unknown remainder</div>{% endif %}{% else %}—{% endif %}</td>{% endif %}{% endfor %}{% endmacro %}
+{# Keep table headings aligned with selected token columns. categories is supplied by render(); this macro emits one heading per visible category. #}{% macro token_headers() %}{% for key,label in categories %}<th>{{ label }}</th>{% endfor %}{% endmacro %}
+{# Help readers distinguish a measured zero from absent evidence. value is an optional token count and the return is display text. Counts: None means unreported, whereas zero is an actual recorded count and must remain visible. #}{% macro count(value) %}{{ value ~ ' tokens' if value is not none else 'tokens unreported' }}{% endmacro %}
+{# Explain the billed categories within one model event. event contains projected cells and indices selects positions in all_categories; emit only relevant cost lines. Category lines: require a selected category and either nonzero tokens or incomplete data; known zeros add no clutter. Output with tool calls includes their JSON. Partial amounts retain an incomplete label. #}{% macro category_costs(event, indices) %}{% for cell in event.cells %}{% if loop.index0 in indices and (cell.tokens or cell.partial) %}<div class="cost-line"><strong>{{ 'Output · including tool calls' if loop.index0 == 5 and event.has_tool_calls else all_categories[loop.index0][1] }} · {{ count(cell.tokens) }}</strong>{{ money(cell.usd, false) }}{% if cell.partial %}<span>Incomplete</span>{% endif %}</div>{% endif %}{% endfor %}{% endmacro %}
 <h2>LLM costs by request</h2>
 {# Chart: absence means no FX conversion was possible; partial chart values remain explicitly known-only. Rectangles require nonzero EUR to avoid invisible interactive segments. #}{% if chart %}<p>EUR per LLM invocation, including its response. The line shows cumulative cost on the same EUR scale. Hover or focus for details.</p>{% if chart.partial %}<p class="partial">Known costs only; some usage or prices are unavailable.</p>{% endif %}
 <div style="display:flex;gap:18px;flex-wrap:wrap">{% for item in chart.legend %}<span><span style="display:inline-block;width:12px;height:12px;background:{{ item.color }};margin-right:6px"></span>{{ item.label }}</span>{% endfor %}<span><span style="display:inline-block;width:20px;border-top:3px solid #912c42;margin-right:6px"></span>Cumulative total</span></div>
@@ -66,7 +66,7 @@ summary::-webkit-details-marker{display:none}
 
 <h2>Agent activity</h2>
 <p>Agents are identified by the named execution scopes enclosing model calls in the trace. Each entry is one invocation; times are relative to the run start. Costs include only that agent’s own model calls, excluding delegated agents.</p>
-{% macro activity_nodes(nodes) %}{% for activity in nodes %}{% set agent=activity.step %}
+{# Make agent ownership and delegation inspectable as nested disclosures. nodes is the projected activity tree; emit each activity then recursively render its children, without adding their subtotals to the caller. #}{% macro activity_nodes(nodes) %}{% for activity in nodes %}{% set agent=activity.step %}
 <details open class="agent-activity" id="agent-{{ agent.id }}">
 <summary><strong>{{ agent.name }}</strong> · Turn {{ agent.context.get('report_turn', 1) }} · {{ agent.status }}</summary>
 <div>{% if activity.caller %}{{ 'Delegated by' if activity.delegation else 'Called by' }} <a href="#agent-{{ activity.caller.id }}">{{ activity.caller.name }}</a>{% else %}Top-level agent{% endif %}{% if activity.delegation %} · via task{% endif %} · Turn {{ agent.context.get('report_turn', 1) }}</div>
@@ -115,7 +115,7 @@ summary::-webkit-details-marker{display:none}
 
 <h2>Conversation</h2>
 <div class="toolbar"><button type="button" data-disclosure-target="conversation-list" data-expand="true">Expand all conversation</button><button type="button" data-disclosure-target="conversation-list" data-expand="false">Collapse all conversation</button></div>
-{# Events: model spans use LLM styling and global request labels; tools use neutral styling. Only actual errors get error styling. Model/effort appear only when recorded; tool events instead show arguments. #}{% macro conversation_nodes(nodes, turn) %}{% for node in nodes %}{% set step=node.step %}{% if node.event is not defined %}<details open class="conversation-agent" aria-label="Agent {{ step.name }}"><summary class="agent-label">Agent · {{ step.name }} · {{ step.status }}</summary>{{ conversation_nodes(node.children, turn) }}</details>{% else %}{% set event=node.event %}<details open class="event {{ 'llm-event' if step.kind == 'model' else 'tool-event' }} {{ 'error-event' if step.status == 'error' else '' }}"><summary class="event-heading"><strong>{% if step.kind == 'model' %}{{ event.request_label }} · LLM request · {{ count(event.growth.input_tokens) }}{% else %}Tool · {{ step.name }}{% endif %}</strong>{% if step.model %} · {{ step.model }}{% if step.effort %}-{{ step.effort }}{% endif %}{% endif %}<span class="status">· {{ step.status }}{% if event.partial %} · incomplete cost{% endif %}</span><span class="span-id">{{ step.id }}</span></summary>{% if event.agent %}<div class="agent-label">Agent · <a href="#agent-{{ event.agent.id }}">{{ event.agent.name }}</a></div>{% endif %}{% if event.delegated_agents %}<div class="agent-label">Delegation · {% for child in event.delegated_agents %}<a href="#agent-{{ child.id }}">{{ child.name }}</a>{{ ', ' if not loop.last else '' }}{% endfor %}</div>{% endif %}{% if step.kind == 'model' %}
+{# Let readers follow recorded requests and responses within their execution ancestry. The recursive macro consumes projected conversation nodes plus the enclosing turn; captured messages are displayed as evidence, not invoked as model or tool operations. Events: model spans use LLM styling and global request labels; tools use neutral styling. Only actual errors get error styling. Model/effort appear only when recorded; tool events instead show arguments. #}{% macro conversation_nodes(nodes, turn) %}{% for node in nodes %}{% set step=node.step %}{% if node.event is not defined %}<details open class="conversation-agent" aria-label="Agent {{ step.name }}"><summary class="agent-label">Agent · {{ step.name }} · {{ step.status }}</summary>{{ conversation_nodes(node.children, turn) }}</details>{% else %}{% set event=node.event %}<details open class="event {{ 'llm-event' if step.kind == 'model' else 'tool-event' }} {{ 'error-event' if step.status == 'error' else '' }}"><summary class="event-heading"><strong>{% if step.kind == 'model' %}{{ event.request_label }} · LLM request · {{ count(event.growth.input_tokens) }}{% else %}Tool · {{ step.name }}{% endif %}</strong>{% if step.model %} · {{ step.model }}{% if step.effort %}-{{ step.effort }}{% endif %}{% endif %}<span class="status">· {{ step.status }}{% if event.partial %} · incomplete cost{% endif %}</span><span class="span-id">{{ step.id }}</span></summary>{% if event.agent %}<div class="agent-label">Agent · <a href="#agent-{{ event.agent.id }}">{{ event.agent.name }}</a></div>{% endif %}{% if event.delegated_agents %}<div class="agent-label">Delegation · {% for child in event.delegated_agents %}<a href="#agent-{{ child.id }}">{{ child.name }}</a>{{ ', ' if not loop.last else '' }}{% endfor %}</div>{% endif %}{% if step.kind == 'model' %}
 {# History: a prior context or nonzero cache read warrants the history line; missing usage stays unreported and partial pricing stays incomplete. #}{% if event.growth.previous_tokens is not none or (step.usage and step.usage.cache_read) %}<div class="cost-line"><strong>Conversation history · cache read · {{ count(step.usage.cache_read if step.usage else none) }}</strong>{{ money(event.cells[1].usd, false) }}{% if event.cells[1].partial %}<span>Incomplete</span>{% endif %}</div>{% endif %}
 <div class="request-costs" aria-label="Input token costs">{{ category_costs(event, [0,4]) }}</div>
 <div class="input-detail">
@@ -160,7 +160,7 @@ summary::-webkit-details-marker{display:none}
 </main><script>
 const costTip = document.getElementById('cost-tooltip');
 /** Show one shared tooltip for either a bar segment or cumulative-cost point. */
-function showCostTip(segment, event) {
+{# Explain a chart amount when a reader points to or focuses its element. segment is the chart DOM element holding display text; event supplies pointer coordinates or an empty object for keyboard focus. Update the shared tooltip immediately; no accounting is recomputed. #}function showCostTip(segment, event) {
   costTip.textContent = segment.dataset.costTip.split(' | ').join('\n');
   costTip.hidden = false;
   const rect = segment.getBoundingClientRect();
@@ -188,7 +188,7 @@ const rowByIndex = new Map(treeRows.map(row => [row.dataset.index, row]));
 const expandedRowIndices = new Set(treeRows.map(row => row.dataset.index));
 
 /** Apply ancestor visibility while preserving each descendant's own open state. */
-function refreshTreeVisibility() {
+{# Make expansion choices visible after initialization or a tree-control click. Read the shared expandedRowIndices set, then update row visibility and accessibility labels in place; collapsing an ancestor preserves descendants own choices for reopening. #}function refreshTreeVisibility() {
   for (const row of treeRows) {
     let parentIndex = row.dataset.parent;
     let visible = true;
@@ -226,11 +226,11 @@ for (const row of treeRows) {
     });
   }
 }
-document.getElementById('expand-all').addEventListener('click', () => {
+{# Restore every execution-tree branch when Expand all is clicked, then recompute visible rows from the updated set. #}document.getElementById('expand-all').addEventListener('click', () => {
   for (const row of treeRows) expandedRowIndices.add(row.dataset.index);
   refreshTreeVisibility();
 });
-document.getElementById('collapse-all').addEventListener('click', () => {
+{# Show only execution-tree roots when Collapse all is clicked; the visibility pass also synchronizes each toggle label. #}document.getElementById('collapse-all').addEventListener('click', () => {
   expandedRowIndices.clear();
   refreshTreeVisibility();
 });
@@ -245,7 +245,7 @@ for (const button of document.querySelectorAll('[data-disclosure-target]')) {
   });
 }
 // Agent links must also reveal a target nested inside a collapsed caller.
-function revealAgentTarget() {
+{# Bring a linked agent into view even when its callers are collapsed. On initial load, hashchange, or a deferred agent-link click, read location.hash, open ancestor disclosures, and scroll to the target. Missing/non-agent targets return immediately. #}function revealAgentTarget() {
   const target = document.getElementById(location.hash.slice(1));
   if (!target || !target.classList.contains('agent-activity')) return;
   for (let node = target; node; node = node.parentElement) {
@@ -254,7 +254,7 @@ function revealAgentTarget() {
   target.scrollIntoView({block: 'start'});
 }
 window.addEventListener('hashchange', revealAgentTarget);
-document.addEventListener('click', event => {
+{# event is the browser click event. Defer revealing an agent until the link default action has updated location.hash; this also handles clicking an already-current anchor. #}document.addEventListener('click', event => {
   if (event.target.closest('a[href^="#agent-"]')) setTimeout(revealAgentTarget, 0);
 });
 revealAgentTarget();

@@ -34,7 +34,14 @@ class ScriptedChatModel(FakeMessagesListChatModel):
     """
 
     def bind_tools(self, tools, *, tool_choice=None, **kwargs):
-        """Expose bound schemas to callbacks; scripted responses own tool choices."""
+        """Expose bound schemas to callbacks while scripts own tool choices.
+
+        ``tools`` is converted to the OpenAI-compatible schema consumed by the
+        meter and callback metadata. Binding never selects or synthesizes a tool
+        call; each scripted response must author that decision explicitly.
+        ``tool_choice`` and other options are accepted for framework compatibility
+        but ignored here; return a runnable binding, without invoking it.
+        """
         from langchain_core.utils.function_calling import convert_to_openai_tool
 
         return self.bind(
@@ -42,6 +49,13 @@ class ScriptedChatModel(FakeMessagesListChatModel):
         )
 
     def _get_ls_params(self, stop=None, **kwargs):
+        """Identify this deterministic fixture to LangSmith-compatible callbacks.
+
+        The labels intentionally describe a demo provider/model, preventing a
+        report from presenting scripted output as a live provider generation.
+        Return callback metadata only; ``stop`` and extra generation settings
+        are unused because they cannot alter this fixture's provider identity.
+        """
         return {
             "ls_provider": "demo",
             "ls_model_name": "scripted-chat",
@@ -62,11 +76,13 @@ class MeteredDemoModel(ScriptedChatModel):
     _tools: list[dict] = PrivateAttr(default_factory=list)
 
     def bind_tools(self, tools, *, tool_choice=None, **kwargs):
-        """Retain tool schemas for accounting; the fixture still chooses tool calls.
+        """Include available tools in offline usage so input accounting is complete.
 
         This stores definitions for metering and returns a callback-visible binding.
         A separate scripted adapter per agent is essential: sharing one would
         overwrite both the available schemas and the sequence of fixed answers.
+        The returned binding carries the same definitions into ``_generate`` while
+        the model instance keeps one simulation and response cursor per agent.
         """
         from langchain_core.utils.function_calling import convert_to_openai_tool
 
@@ -74,6 +90,15 @@ class MeteredDemoModel(ScriptedChatModel):
         return self.bind(tool_definitions=self._tools)
 
     def _generate(self, messages, *args, **kwargs):
+        """Produce a scripted model turn with usage the reporter can inspect.
+
+        LangChain calls this hook with the request transcript in ``messages``;
+        remaining arguments pass to its fake-model implementation. The returned
+        ChatResult holds a generation containing an AIMessage. Its tool_calls
+        are authored proposals for the graph to execute, not tool output.
+        Metering advances this instance's simulated context and may reject a
+        transcript that dropped earlier messages. No provider is contacted.
+        """
         result = super()._generate(messages, *args, **kwargs)
         # FakeMessagesListChatModel can reuse its response objects. Meter a copy
         # so usage from this call cannot mutate the authored scenario fixtures.
@@ -84,11 +109,16 @@ class MeteredDemoModel(ScriptedChatModel):
 
 
 def meter_response(response, simulation, tool_definitions, messages):
-    """Attach the common simulated usage shape to an already-copied response.
+    """Let all offline model fixtures report usage under the same counting rules.
 
-    simulation belongs to one conversation; tool_definitions are this request's
-    bound schemas. Keeping accounting here ensures a shared model and older
-    per-agent fixtures use identical token and cost semantics.
+    Return the supplied LangChain AIMessage with simulated usage attached.
+    ``response`` is copied by callers before metering; ``simulation`` owns the
+    append-only context invariant; and ``tool_definitions``/``messages`` are the
+    exact request representation to count. The function mutates only the supplied
+    response metadata and usage fields, never the authored scenario fixture.
+    ``simulation`` belongs to one conversation; ``tool_definitions`` are this
+    request bound schemas. Keeping accounting here ensures a shared model and
+    older per-agent fixtures use identical token and cost semantics.
     """
     usage_entry, role_token_counts = simulation.record(
         tool_definitions,

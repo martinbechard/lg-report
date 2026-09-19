@@ -27,6 +27,9 @@ def main() -> None:
         app_file=__file__,
         description=__doc__,
         create_graph=create_graph,
+        # The launcher calls this zero-argument factory only for static input.
+        # Request holds one user turn; StaticClient supplies these turns in order.
+        # Creating the client does not invoke the graph or supply model answers.
         make_static_client=lambda: StaticClient(
             [Request(prompt) for prompt in USER_PROMPTS]
         ),

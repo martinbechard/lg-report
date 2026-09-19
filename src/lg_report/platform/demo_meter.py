@@ -23,12 +23,16 @@ import re
 
 
 def message_record(message):
-    """Retain message content and tool linkage without SDK implementation fields.
+    """Give capture and simulated accounting the same message representation.
 
-    Used by both capture and simulation so displayed messages and measured
+    ``message`` is a LangChain message-like object. Used by both capture and
+    simulation so displayed messages and measured
     simulated context share a representation. Tool-call JSON counts as model
     output; its matching tool result is a separate message in the next request.
     """
+    # AIMessage.tool_calls contains proposed tool names and arguments. A later
+    # ToolMessage carries executed output in content and links it through
+    # tool_call_id; keeping both avoids treating the proposal as a tool result.
     return {
         "role": message.type,
         "content": message.content,
@@ -38,8 +42,11 @@ def message_record(message):
 
 
 def units(value):
-    """Return deterministic words/punctuation, including JSON message framing.
+    """Make offline context size repeatable without a provider tokenizer.
 
+    Return a list of word/punctuation units, including JSON message framing.
+
+    ``value`` may be any JSON-serializable representation used by the fixtures.
     These are teaching units, not a provider tokenizer. Stable key ordering lets
     successive calls compare context prefixes despite dictionary insertion order.
     """
@@ -49,7 +56,7 @@ def units(value):
 
 
 def message_units(record):
-    """Apply the same counting rule to incoming messages and outgoing responses."""
+    """Keep message accounting consistent by returning units for one record."""
     return units(record)
 
 
@@ -72,9 +79,10 @@ class ContextSimulation:
         self.ledger = []
 
     def record(self, definitions, messages, response):
-        """Account for a request and append its response to this agent's cache.
+        """Explain an offline call's context growth and idealized cache reuse.
 
-        definitions are bound tool schemas; messages/response use message_record.
+        ``definitions`` are bound tool schemas; ``messages`` and ``response`` use
+        ``message_record``. The returned tuple is ``(usage_entry, role_counts)``.
         All earlier visible context must be retained, or ValueError exposes a
         simulation that no longer matches its append-only teaching assumption.
         Cache-write ledger entries describe context movement, not provider-billed
@@ -108,6 +116,9 @@ class ContextSimulation:
             "response_tokens": len(response_units),
             "context_after_response_tokens": len(request_units) + len(response_units),
         }
+        # Only a successful prefix check advances the simulation. The completed
+        # visible exchange becomes both next-call context and immediately cached
+        # content; no provider cache service is contacted or confirmed.
         self.context = request_units + response_units
         self.cached = self.context.copy()
         self.ledger.append(usage_entry)

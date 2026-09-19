@@ -40,12 +40,19 @@ class JsonlExporter(SpanExporter):
     """
 
     def __init__(self, path: Path):
-        """Open a fresh UTF-8 trace file; existing files and I/O failures raise."""
+        """Protect earlier evidence while preparing a destination for this run's spans.
+
+        ``path`` must name a new file; opening it starts I/O immediately. Existing
+        files and other I/O failures raise rather than overwrite prior evidence."""
         self.file = path.open("x", encoding="utf-8")
         self.lock = RLock()
 
     def export(self, spans):
-        """Flush completed SDK spans to disk; write errors propagate to the caller."""
+        """Make completed operations survive a later application failure.
+
+        The OTel span processor supplies ``spans``, its batch of finished spans.
+        Append and flush JSONL, then return the SDK success sentinel. Write
+        failures propagate rather than claiming the evidence was saved."""
         with self.lock:
             for span in spans:
                 self.file.write(span.to_json(indent=None) + "\n")
@@ -53,7 +60,10 @@ class JsonlExporter(SpanExporter):
         return SpanExportResult.SUCCESS
 
     def shutdown(self):
-        """Release the file when its owning tracer provider shuts down."""
+        """Finish the exporter's lifetime so its trace file is no longer held open.
+
+        The owning tracer provider calls this during shutdown; it closes the
+        file under the same lock used by export and returns None."""
         with self.lock:
             self.file.close()
 
@@ -66,6 +76,13 @@ class TraceCapture(BaseCallbackHandler):
     model callbacks can supply their actual identity. capture_content=True also
     saves prompts, responses, tool definitions and payloads, which may contain private data.
 
+    LangChain invokes on_* methods as lifecycle notifications, not graph nodes.
+    Each receives a run_id identifying that operation; start callbacks also
+    receive its parent_run_id (None for a root), serialized SDK definition, and
+    optional kwargs such as name/metadata. Callback return values are None: they
+    update trace evidence, not the agent's result or graph state. Error callbacks
+    receive the original exception; _end stores its type rather than its text.
+
     This owns a private tracer provider rather than changing global OTel state.
     Explicit callback parent IDs preserve ancestry across nested/worker execution;
     a thread's ambient current span is not a reliable graph parent.
@@ -76,7 +93,12 @@ class TraceCapture(BaseCallbackHandler):
     raise_error = True
 
     def __init__(self, path: Path, provider: str, model: str, capture_content=False):
-        """Create a local exporter and isolated span registry for this invocation."""
+        """Prepare to observe one invocation without altering the application's graph.
+
+        ``path`` receives a new JSONL trace; ``provider``/``model`` are fallback
+        identities. ``capture_content`` opts into message/tool payloads. This
+        opens output and registers a synchronous exporter; it does not invoke
+        the agent. Attach this handler to callbacks before executing the agent."""
         self.capture_content = capture_content
         self.provider_name = provider
         self.model_name = model
@@ -89,7 +111,11 @@ class TraceCapture(BaseCallbackHandler):
         self.lock = RLock()
 
     def _start(self, kind, serialized, run_id, parent_run_id, **kwargs):
-        """Open one SDK operation using callback ancestry, not thread ancestry.
+        """Preserve who started an operation so reports can reconstruct nested work.
+
+        ``kind`` selects its reporting category; ``serialized`` supplies SDK
+        definition metadata and kwargs carries callback configuration. Starting
+        a span records timing now; it does not execute a model, tool, or graph.
 
         run_id is LangChain's identifier; the OTel span has its own identity.
         Keep the callback ID as an attribute so normalization can reconstruct
@@ -183,7 +209,10 @@ class TraceCapture(BaseCallbackHandler):
                     self._payload(run_id, "tool_definitions", definitions)
 
     def _end(self, run_id, error=None, usage=None, model=None, interrupted=False):
-        """Finish an active callback operation without estimating missing usage.
+        """Make an operation's observed outcome available for normalization and billing.
+
+        Locate the active span by ``run_id``, attach available completion facts,
+        and end it; the synchronous span processor then exports it to JSONL.
 
         usage is the SDK record for this call, model is its returned identifier,
         and interrupted marks a recoverable approval pause rather than failure.
@@ -224,13 +253,20 @@ class TraceCapture(BaseCallbackHandler):
     def on_chain_start(
         self, serialized, inputs, *, run_id, parent_run_id=None, **kwargs
     ):
-        """Track workflow structure even when it has no directly billable usage."""
+        """Preserve the workflow hierarchy around billable model operations.
+
+        LangChain supplies ``inputs`` for the starting chain, but this handler
+        records only its span/ancestry; workflow inputs are not saved here."""
         self._start("workflow", serialized, run_id, parent_run_id, **kwargs)
 
     def on_chat_model_start(
         self, serialized, messages, *, run_id, parent_run_id=None, **kwargs
     ):
-        """Capture one model request; content is opt-in but role counts remain available."""
+        """Explain what context a chat model received for this particular request.
+
+        ``messages`` is LangChain's batch of message lists, not tool results
+        returned by the whole agent. Start the span and record role/count
+        metadata; serialize message contents only when capture was enabled."""
         self._start("model", serialized, run_id, parent_run_id, **kwargs)
         # Prompts may contain private data; save them only when content capture
         # was explicitly enabled. Role/count metadata below remains available.
@@ -251,7 +287,11 @@ class TraceCapture(BaseCallbackHandler):
     _message = staticmethod(message_record)
 
     def _payload(self, run_id, field, value):
-        """Serialize content after the caller has enforced capture permission.
+        """Retain opted-in content so normalization can reconstruct readable evidence.
+
+        ``run_id`` identifies an existing span, ``field`` names its payload
+        attribute, and ``value`` is the caller's message/schema data. This helper
+        assumes the caller checked content permission; it does not check again.
 
         OTel attributes cannot store nested message dictionaries directly. JSON
         preserves their shape for normalize instead of flattening away tool IDs.
@@ -262,7 +302,10 @@ class TraceCapture(BaseCallbackHandler):
             )
 
     def _annotate(self, run_id, values):
-        """Merge late response metadata with the context saved at operation start.
+        """Keep response facts alongside the request's original report annotations.
+
+        ``run_id`` selects an existing operation; ``values`` contains late
+        metadata to merge, replacing duplicate keys while retaining others.
 
         The complete JSON attribute is replaced because OTel has no nested merge;
         replacing it with values alone would lose turn and purpose annotations.
@@ -276,13 +319,20 @@ class TraceCapture(BaseCallbackHandler):
     def on_llm_start(
         self, serialized, prompts, *, run_id, parent_run_id=None, **kwargs
     ):
-        """Support non-chat model lifecycle spans without inventing message records."""
+        """Keep non-chat model requests visible in execution timing and ancestry.
+
+        LangChain supplies text ``prompts``; this callback only starts the model
+        span and does not convert those strings into fabricated chat messages."""
         self._start("model", serialized, run_id, parent_run_id, **kwargs)
 
     def on_tool_start(
         self, serialized, input_str, *, run_id, parent_run_id=None, **kwargs
     ):
-        """Keep tool execution distinct from the model output that requested it."""
+        """Show when a requested tool actually begins executing.
+
+        ``input_str`` is the SDK's serialized tool input, not a model response.
+        Start a tool span and optionally retain the arguments as request content;
+        the framework, not this callback, executes the tool."""
         self._start("tool", serialized, run_id, parent_run_id, **kwargs)
         # Tool arguments can expose the same private information as prompts;
         # the content opt-in applies to them as well as model messages.
@@ -294,12 +344,21 @@ class TraceCapture(BaseCallbackHandler):
     def on_retriever_start(
         self, serialized, query, *, run_id, parent_run_id=None, **kwargs
     ):
-        """Preserve retrieval timing and ancestry without saving document content."""
+        """Make document lookup visible as an operation in the requesting workflow.
+
+        ``query`` is the retriever's search input; it is not recorded here. Start
+        a retrieval span now and let the framework perform the actual lookup."""
         self._start("retriever", serialized, run_id, parent_run_id, **kwargs)
 
     def on_llm_end(self, response, *, run_id, **kwargs):
         # A chat callback represents one request. Never sum parent graph state messages.
-        """Record this request's SDK usage once; missing usage stays unknown."""
+        """Support accurate per-request accounting when a model finishes generating.
+
+        ``response`` is LangChain's LLMResult for this model invocation. Its
+        generations contain candidate outputs; chat generations wrap AIMessage
+        objects carrying content, proposed tool calls, and provider metadata.
+        These are model outputs, not executed tool results or the final graph
+        state. Extract reported usage and end this request's span exactly once."""
         messages = [
             getattr(g, "message", None) for row in response.generations for g in row
         ]
@@ -367,7 +426,11 @@ class TraceCapture(BaseCallbackHandler):
         self._end(run_id, usage=usage, model=model)
 
     def on_chain_end(self, outputs, *, run_id, **kwargs):
-        """Preserve an explicit graph interruption as a pause rather than a failure."""
+        """Record whether a workflow finished normally or paused for external input.
+
+        ``outputs`` is that chain's returned value, possibly graph state carrying
+        __interrupt__. End its span with the observed pause marker; this callback
+        does not answer the interruption or resume the graph."""
         # Only dictionary graph state supports the interrupt key; a nonempty
         # value proves a pause. Other outputs or empty markers mean normal end.
         self._end(
@@ -377,7 +440,11 @@ class TraceCapture(BaseCallbackHandler):
         )
 
     def on_tool_end(self, output, *, run_id, **kwargs):
-        """Record tool observations when enabled and surface handled tool errors."""
+        """Show what an executed tool returned and whether it reported a handled error.
+
+        ``output`` is this tool's result, possibly a LangChain ToolMessage linking
+        an observation to its tool-call ID. It is not the entire agent result.
+        Optionally save its content, then finish the tool span with its status."""
         # Tool results are also opt-in content. SDK message objects expose a
         # type and preserve linkage through _message; plain tool return values
         # use a text wrapper instead because they have no message interface.
@@ -402,7 +469,10 @@ class TraceCapture(BaseCallbackHandler):
         )
 
     def on_retriever_end(self, documents, *, run_id, **kwargs):
-        """Close retrieval without adding model-token charges for returned documents."""
+        """Mark document lookup complete so its elapsed time is available to reports.
+
+        ``documents`` is the retriever's returned collection; this callback ends
+        the span without retaining documents or assigning model token usage."""
         self._end(run_id)
 
     def on_chain_error(self, error, *, run_id, **kwargs):
@@ -422,7 +492,10 @@ class TraceCapture(BaseCallbackHandler):
         self._end(run_id, error=error)
 
     def close(self):
-        """Mark still-open operations incomplete, flush their spans, and close I/O.
+        """Preserve partial evidence when invocation ends before all callbacks finish.
+
+        The recorder calls this during final cleanup. End any active spans with
+        an incomplete marker, then shut down the provider and its file exporter.
 
         Missing end callbacks must not become successful operations just because
         the caller is cleaning up. Call once after graph execution has stopped.

@@ -21,7 +21,11 @@ from lg_report.report.schema import Run
 
 
 def workbook_data(run, prices):
-    """Project a run and its price snapshot for the JavaScript workbook writer.
+    """Give the workbook writer the same interpretation of a run as the HTML report.
+
+    ``run`` is a normalized recording and ``prices`` its saved tariff/FX record.
+    Return an interchange dictionary with event details, tree rows, and a
+    known-cost subtotal used by the workbook's accounting comparison.
 
     Reuse HTML's request numbering, event ordering, and accounting instead of
     implementing another interpretation of the trace. Return raw precision and
@@ -82,6 +86,8 @@ def main():
     parser.add_argument("run", type=Path)
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
+    # Pydantic restores the recorded schema before any exporter projection;
+    # malformed evidence must fail rather than create a plausible workbook.
     run = Run.model_validate_json(args.run.read_text())
     prices = load_prices(args.run.with_name("prices.json"))
     args.out.parent.mkdir(parents=True, exist_ok=True)

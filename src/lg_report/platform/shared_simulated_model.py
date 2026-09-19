@@ -36,15 +36,31 @@ class SharedSimulatedModel(ScriptedChatModel):
     _lock: Lock = PrivateAttr(default_factory=Lock)
 
     def bind_tools(self, tools, *, tool_choice=None, **kwargs):
-        """Return a binding without changing the shared LLM's tool configuration.
+        """Give each agent its own tool binding while sharing one scripted model.
 
         Each graph retains its own binding. Mutating the shared model here would
-        let the last expert overwrite the dispatcher's available task tool.
+        let the last expert overwrite the dispatcher available task tool.
+        ``tools`` is converted into the callback-visible OpenAI schema; the
+        ``tool_choice`` and other keyword options remain fixture-ignored because
+        authored responses, rather than provider selection, control this fake.
         """
         schemas = [convert_to_openai_tool(tool) for tool in tools]
         return self.bind(tool_definitions=schemas)
 
     def _generate(self, messages, stop=None, run_manager=None, **kwargs):
+        """Answer one offline agent turn using that role's authored response script.
+
+        ``messages`` is the current LangChain transcript. Bound tool schemas
+        arrive through ``kwargs``; ``stop`` and ``run_manager`` are framework
+        parameters unused by this fixture. Return a LangChain ChatResult whose
+        generation wraps an AIMessage, possibly proposing a tool call. The graph
+        executes any proposed tool after this model method returns.
+
+        A one-tool binding is keyed by its function name; a tool-free binding is
+        keyed by its first system instruction. Position, context, and exhaustion
+        are protected by one lock so concurrent graph calls cannot reuse a script
+        item. Unknown keys and exhausted scripts raise explicitly.
+        """
         schemas = kwargs.get("tool_definitions", [])
         if schemas:
             # Tool-based examples have exactly one tool per role; reject ambiguous
@@ -62,6 +78,8 @@ class SharedSimulatedModel(ScriptedChatModel):
             # Exhaustion is a broken scenario, not permission to replay answers.
             if position >= len(script):
                 raise ValueError(f"No scripted response left for {script_key}")
+            # Copy the AIMessage fixture so per-call usage cannot contaminate
+            # the authored answer shared by later test runs.
             response = script[position].model_copy(deep=True)
             context = self._contexts.setdefault(script_key, ContextSimulation())
             response = meter_response(response, context, schemas, messages)

@@ -35,13 +35,21 @@ from samples.simple_chat.test_case import make_simulated_model as make_chat_mode
 
 @pytest.fixture
 def prices():
+    # Keep report arithmetic tied to the repository fixture so provider
+    # tariff changes cannot alter regression expectations.
     return load_prices(Path(__file__).parent / "fixtures/accounting_prices.json")
 
 
+# Centralize run parsing so every report test validates the persisted
+# schema rather than relying on an in-memory implementation detail.
 def read_run(directory):
+    # Return the validated Run from the output directory supplied by the test.
+    # Reading run.json checks what a later report consumer actually receives.
     return Run.model_validate_json((directory / "run.json").read_text())
 
 
+# Run the production Deep Agent path with a scripted model to prove
+# normalized spans, privacy filtering, pricing, and HTML output agree.
 def test_real_deepagents_offline_pipeline(tmp_path, prices):
     out = tmp_path / "run"
     record_run(
@@ -83,7 +91,11 @@ def test_real_deepagents_offline_pipeline(tmp_path, prices):
     assert load_prices(out / "prices.json") == prices
 
 
+# Construct the smallest valid model span for focused pricing and
+# schema tests, leaving unrelated capture machinery out of those cases.
 def model_step(**kwargs):
+    # Return a model span with fixed identity/timing and caller-supplied fields.
+    # kwargs adds optional schema fields such as usage, not duplicate base fields.
     return Step(
         id="m",
         name="model",
@@ -97,6 +109,8 @@ def model_step(**kwargs):
     )
 
 
+# Cache reads are an input subset and reasoning is an output subset; an
+# unknown cache-write tariff must make the total explicitly unpriced.
 def test_cache_and_reasoning_are_subsets(prices):
     step = model_step(
         usage=Usage(input_tokens=1000, output_tokens=100, cache_read=500, reasoning=50)
@@ -108,6 +122,8 @@ def test_cache_and_reasoning_are_subsets(prices):
     assert cost(step, prices)[0] == Decimal("0.00042")
 
 
+# Missing usage or model pricing is uncertainty, not zero cost; only
+# an explicit zero-token usage record may produce a zero subtotal.
 def test_unknown_tokens_and_model_are_not_free(prices):
     step = model_step()
     assert cost(step, prices)[0] is None
@@ -117,6 +133,8 @@ def test_unknown_tokens_and_model_are_not_free(prices):
     assert cost(step, prices)[0] is None
 
 
+# Reject impossible token relationships and self-parenting traces at
+# schema validation so downstream reports cannot normalize invalid structure.
 def test_schema_rejects_invalid_counts_and_cycles():
     with pytest.raises(ValueError):
         Usage(input_tokens=10, output_tokens=1, cache_read=11)
@@ -128,6 +146,8 @@ def test_schema_rejects_invalid_counts_and_cycles():
         Run(id="r", title="bad", status="ok", steps=[step])
 
 
+# User and model content is untrusted HTML input; escaping must hold
+# for titles, step names, and output while preserving the report shell.
 def test_html_escapes_all_content(tmp_path, prices):
     step = model_step()
     step.name = '<img src=x onerror="alert(1)">'
@@ -147,9 +167,14 @@ def test_html_escapes_all_content(tmp_path, prices):
     assert "could not be priced" in html
 
 
+# A real model-tool-model graph protects ordering, tool schema capture,
+# and per-call arithmetic in the report pipeline.
 def test_model_tool_model_sequence(tmp_path, prices):
     @tool(parse_docstring=True)
     def lookup(topic: str) -> str:
+        # Provide a real executable tool for the model-tool-model recording test.
+        # The docstring below is parsed into the tool schema and must stay stable.
+        # The return is the executed tool result; AIMessage.tool_calls only requests it.
         """Look up a fact in a tiny fixture corpus.
 
         Args:
@@ -204,8 +229,12 @@ def test_model_tool_model_sequence(tmp_path, prices):
     assert summarize(run, prices)["known_cost"] == Decimal("0.000112")
 
 
+# Runtime failure must preserve a report and sanitized trace evidence
+# so diagnosis remains possible without leaking exception content.
 def test_failure_preserves_partial_report(tmp_path, prices):
     def fail(state):
+        # Exercise failure reporting from inside a graph node.
+        # LangGraph supplies state, but its contents do not affect the deliberate error.
         raise RuntimeError("secret exception content")
 
     graph = StateGraph(dict)
@@ -224,6 +253,8 @@ def test_failure_preserves_partial_report(tmp_path, prices):
     assert (out / "report.html").exists()
 
 
+# Closing an unfinished callback must produce an incomplete run state,
+# preventing an abandoned span from being presented as successful work.
 def test_unfinished_callback_is_marked_incomplete(tmp_path):
     path = tmp_path / "spans.jsonl"
     capture = TraceCapture(path, "demo", "scripted-chat")
@@ -233,14 +264,24 @@ def test_unfinished_callback_is_marked_incomplete(tmp_path):
     assert run.status == "incomplete"
 
 
+# Interrupt and resume are separate accounting invocations; both must
+# retain truthful statuses around the approval boundary.
 def test_interrupt_and_resume_separate_invocations(tmp_path, prices):
     def approval(state):
+        # Create an approval boundary so pause and completion get separate reports.
+        # On the first call interrupt exits this node through GraphInterrupt; the
+        # graph handles it and returns the pending question. Command(resume=True)
+        # re-enters this node from its beginning on the same checkpoint thread.
+        # The repeated interrupt returns True, allowing the partial state update
+        # below to reach the graph. No suspended Python stack is restored.
         return {"approved": interrupt("Approve this action?")}
 
     graph = StateGraph(dict)
     graph.add_node("approval", approval)
     graph.add_edge(START, "approval")
     graph.add_edge("approval", END)
+    # This saver retains checkpoints only in this process. Both record_run
+    # calls below use the same compiled graph and thread id to resume its pause.
     agent = graph.compile(checkpointer=InMemorySaver())
     config = {"configurable": {"thread_id": "test"}}
     record_run(
@@ -265,6 +306,8 @@ def test_interrupt_and_resume_separate_invocations(tmp_path, prices):
     assert read_run(tmp_path / "resume").status == "ok"
 
 
+# Existing output is protected from accidental overwrite so reruns do
+# not destroy prior evidence or mix two accounting sessions.
 def test_existing_directory_is_not_overwritten(tmp_path, prices):
     with pytest.raises(FileExistsError):
         record_run(
@@ -277,6 +320,8 @@ def test_existing_directory_is_not_overwritten(tmp_path, prices):
         )
 
 
+# Anthropic cache lifetime fields map to the correct pricing buckets;
+# this catches provider-specific usage regressions without a live API.
 def test_anthropic_cache_lifetime_usage(tmp_path, prices):
     from langchain_core.outputs import ChatGeneration, LLMResult
 
@@ -306,6 +351,8 @@ def test_anthropic_cache_lifetime_usage(tmp_path, prices):
     assert cost(run.steps[0], prices)[0] == Decimal("0.00528")
 
 
+# Retry attempts are separate model spans and both remain visible so
+# cost and failure history cannot be collapsed into a misleading success.
 def test_retry_keeps_both_attempts(tmp_path, prices):
     from langgraph.types import RetryPolicy
 
@@ -313,6 +360,9 @@ def test_retry_keeps_both_attempts(tmp_path, prices):
         attempts: int = 0
 
         def _generate(self, *args, **kwargs):
+            # Make the first model attempt fail so retry accounting retains both spans.
+            # Forward LangChain generation arguments unchanged on subsequent attempts;
+            # the successful return is the parent scripted model generation result.
             self.attempts += 1
             # Fail only the initial invocation to exercise an actual graph
             # retry. Later attempts delegate to the model so the trace must
@@ -336,6 +386,9 @@ def test_retry_keeps_both_attempts(tmp_path, prices):
     graph = StateGraph(dict)
     graph.add_node(
         "model",
+        # This node ignores its graph state: each attempt invokes the same
+        # model with a fixed prompt and returns its AIMessage as an answer
+        # state update. RetryPolicy reruns the node after RuntimeError.
         lambda state: {"answer": model.invoke("hi")},
         retry_policy=RetryPolicy(
             max_attempts=2, initial_interval=0.001, jitter=False, retry_on=RuntimeError
@@ -358,6 +411,8 @@ def test_retry_keeps_both_attempts(tmp_path, prices):
     assert summarize(run, prices)["missing_usage"] == 1
 
 
+# A handled tool error is part of conversation evidence and must
+# remain visible even when the graph continues to a final response.
 def test_handled_tool_error_is_visible(tmp_path):
     from langchain_core.messages import ToolMessage
 
@@ -375,9 +430,13 @@ def test_handled_tool_error_is_visible(tmp_path):
     assert "sensitive failure" not in path.read_text()
 
 
+# Failure before callback initialization must still surface the real
+# exception and leave a truthful failed report.
 def test_failure_before_callbacks_is_not_masked(tmp_path, prices):
     class BrokenAgent:
         def invoke(self, inputs, config):
+            # Exercise failure before an agent has emitted any tracing callbacks.
+            # Accept the recorder inputs/config contract but raise before using either.
             raise RuntimeError("original failure")
 
     out = tmp_path / "early-failure"

@@ -16,7 +16,9 @@ from lg_report.agents.reference_chat_agent import build_agent
 
 
 def build_workflow(model: BaseChatModel) -> CompiledStateGraph:
-    """Return the uninvoked reference lookup graph using the supplied model.
+    """Let the application answer questions with the reference lookup agent.
+
+    Return a compiled graph ready for later conversation turns.
 
     model is an LLM adapter (live provider or scripted test model), not a list
     of messages. The graph retains it for later requests. The platform supplies

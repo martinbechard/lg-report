@@ -21,7 +21,9 @@ URL = "https://api.frankfurter.dev/v2/rate/usd/eur?providers=ecb"
 
 
 class ExchangeRate(Record):
-    """Conversion provenance: rate is EUR received for one USD.
+    """Keep converted report costs traceable to their exchange-rate evidence.
+
+    rate is EUR received for one USD.
 
     For example, ExchangeRate(rate="0.87", date="2026-09-18") converts USD
     charges by multiplication. date identifies publication; fetched_at identifies
@@ -37,7 +39,10 @@ class ExchangeRate(Record):
 
 
 def fetch_exchange_rate() -> ExchangeRate:
-    """Fetch the latest published USD/EUR quote with a ten-second timeout.
+    """Supply report conversion with the latest published USD-to-EUR reference.
+
+    Return a validated ExchangeRate with retrieval provenance after executing
+    an HTTP request with a ten-second timeout.
 
     Network, decoding, and validation failures propagate. Reject wrong currency
     direction and future reference dates rather than producing plausible but
@@ -69,7 +74,10 @@ def fetch_exchange_rate() -> ExchangeRate:
 def get_exchange_rate(
     file: Path | None = None, cache_dir: Path = Path(".cache/lg-report/fx")
 ) -> ExchangeRate:
-    """A supplied file bypasses the network; otherwise reuse today's successful lookup.
+    """Provide a reusable conversion basis for reports started on the same day.
+
+    Return a validated ExchangeRate from the supplied snapshot or daily cache;
+    when neither exists, fetch and save a reference before returning it.
 
     Cache names use the machine's local calendar date, independently of the ECB's
     publication date, so weekend starts also perform at most one successful lookup.

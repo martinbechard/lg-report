@@ -25,7 +25,10 @@ from lg_report.report.schema import Run
 
 
 def model_metrics(models, prices: Prices) -> dict:
-    """Sum a collection of model calls using one saved tariff snapshot.
+    """Give a report group its token totals, known costs, and completeness flags.
+
+    ``models`` contains recorded model Steps selected for that group; ``prices``
+    supplies tariffs. Return a metrics dictionary shared by table and chart views.
 
     Callers must pass each model once within this collection. Unknown values
     contribute no known amount but set partial=True, which consumers must retain;
@@ -76,7 +79,10 @@ def model_metrics(models, prices: Prices) -> dict:
 
 
 def tree_rows(run: Run, prices: Prices) -> list[dict]:
-    """Return parent-before-child rows with subtree costs for drill-down views.
+    """Let readers inspect where work occurred and what each subtree cost.
+
+    ``run`` is a validated recording and ``prices`` its tariff snapshot. Return
+    parent-before-child display rows with descendant model metrics attached.
 
     Parent totals describe containment, not additional billing: summing every row
     would count the same model repeatedly. Row indices and parent indices support
@@ -88,7 +94,11 @@ def tree_rows(run: Run, prices: Prices) -> list[dict]:
     rows = []
 
     def visit(step, depth, parent):
-        """Append a display row and return the billable descendants it contains.
+        """Keep a subtree visible in execution order and attribute its contained costs.
+
+        ``step`` is the current recorded span; ``depth`` determines indentation.
+        Append its display row before visiting children, then return the model
+        spans collected below it so its caller can aggregate ancestor metrics.
 
         parent is the containing row's index, not the callback span identifier.
         Returning model steps lets ancestors reuse the same evidence without
@@ -119,7 +129,10 @@ def tree_rows(run: Run, prices: Prices) -> list[dict]:
 
 
 def agent_activity(run: Run, prices: Prices) -> dict:
-    """Identify execution scopes from saved model ancestry, including delegation.
+    """Show which agents performed recorded work and assign each call one owner.
+
+    ``run`` supplies validated span ancestry; ``prices`` prices owned calls.
+    Return flat activities, a caller tree, scope lookup, and per-span owners.
 
     Named enclosing runnables identify agents; graph nodes such as model/tools
     are implementation steps, not separate agents. This also works on older
@@ -129,6 +142,16 @@ def agent_activity(run: Run, prices: Prices) -> dict:
     by_id = {step.id: step for step in run.steps}
 
     def ancestors(step):
+        """Find the enclosing agent or delegation responsible for a recorded step.
+
+        ``step`` is a span in the enclosing run. Iteration yields parents nearest
+        first; each yield returns control to the consuming ownership search.
+
+        ``Run.check_tree`` has already rejected missing and cyclic parents, so
+        this walk can focus on ownership projection. It yields schema objects
+        rather than copying them, allowing callers to preserve the exact span
+        status and metadata shown elsewhere in the report.
+        """
         parent = step.parent_id
         while parent:
             ancestor = by_id[parent]
@@ -136,6 +159,16 @@ def agent_activity(run: Run, prices: Prices) -> dict:
             parent = ancestor.parent_id
 
     def is_scope(step):
+        """Decide whether a recorded span should identify an agent in the report.
+
+        ``step`` is a normalized span. Return a Boolean used while selecting
+        the nearest owner; this predicate does not run an agent.
+
+        Graph step wrappers are filtered because they describe framework
+        plumbing around a runnable. A named workflow or delegated invocation
+        remains visible even when it has no model child, preserving failed or
+        interrupted work in the activity view.
+        """
         return (
             step.kind == "workflow"
             and (
@@ -206,7 +239,10 @@ def agent_activity(run: Run, prices: Prices) -> dict:
 
 
 def tool_request_tokens(content):
-    """Estimate a simulated tool argument's size, not a separate tool charge.
+    """Explain argument size in demo reports where provider telemetry is absent.
+
+    ``content`` is captured argument data; return a simulator unit count for
+    display, not an additional monetary charge.
 
     Captured arguments may be a Python-literal string; literal_eval normalizes
     that representation without executing code. Unparseable strings are counted
@@ -223,7 +259,11 @@ def tool_request_tokens(content):
 
 
 def conversation_turns(run: Run, prices: Prices) -> list[dict]:
-    """Build turn events for both exports without changing recorded messages.
+    """Let HTML and Excel tell the same chronological request-and-response story.
+
+    ``run`` supplies normalized spans and ``prices`` their tariff snapshot.
+    Return turn dictionaries containing display events, context comparisons,
+    nested conversation nodes, and model-cost subtotals.
 
     Events follow span start time; model request numbers stay unique across turns.
     Each turn's cost includes its model calls exactly once, including subagents.
@@ -444,7 +484,10 @@ def conversation_turns(run: Run, prices: Prices) -> list[dict]:
 
 
 def cost_chart(turns, prices):
-    """Build stacked per-request EUR costs and their cumulative cost line.
+    """Help readers see which requests drive cost and how costs accumulate.
+
+    ``turns`` is the conversation projection; ``prices`` provides recorded FX.
+    Return SVG geometry and labels for the template, or None without conversion.
 
     Each bar includes one model request and its response, split by billed token
     category; tools have no independent bar. Both bars and line use the same EUR
@@ -552,7 +595,10 @@ def cost_chart(turns, prices):
 
 
 def render(run: Run, prices: Prices, destination: Path):
-    """Write a self-contained HTML report from a normalized run and saved prices.
+    """Make a recorded run inspectable in a browser with its accounting evidence.
+
+    ``run`` is the normalized recording, ``prices`` supplies saved tariffs/FX,
+    and ``destination`` receives the completed HTML file. Return no value.
 
     destination is overwritten and its parent must already exist. Reject a
     non-USD price table because conversion assumes USD→EUR. Autoescaping keeps

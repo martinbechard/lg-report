@@ -17,8 +17,13 @@ from lg_report.workflows.simple_chat import build_workflow
 from .test_case import USER_PROMPTS, make_simulated_model
 
 
+# This adapter is intentionally small: it exposes the shared runtime's client,
+# model-selection, and recording seams so the lesson can be compared directly
+# with the tool, review, and delegation samples.
 def create_run(live: bool):
-    """Build the workflow and return its provider and model name for reporting.
+    """Prepare a direct-answer conversation for the shared sample launcher.
+
+    Return the workflow and its provider/model labels for report accounting.
 
     ``live`` is the explicit CLI choice: True constructs configured API clients;
     False creates fresh scripted models for this sample's fixed test case. Neither
@@ -40,6 +45,9 @@ def main() -> None:
         app_file=__file__,
         description=__doc__,
         create_run=create_run,
+        # The launcher calls this zero-argument factory only for static input.
+        # Request holds one user turn; StaticClient supplies these turns in order.
+        # Creating the client does not invoke the graph or supply model answers.
         make_static_client=lambda: StaticClient(
             [Request(prompt) for prompt in USER_PROMPTS]
         ),

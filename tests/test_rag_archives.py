@@ -1,6 +1,8 @@
 """Verify first-use archive restoration and rejection of damaged or unsafe data.
 
 Small local archives exercise the production extractor without network access.
+
+AI attribution: Modified with AI assistance.
 Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
 
@@ -14,7 +16,12 @@ import pytest
 from lg_report.platform import rag_archives
 
 
+# Build a controlled archive with real tar metadata so extraction
+# tests exercise the same file format and path-safety checks as production.
 def bundle(tmp_path, monkeypatch, name, files):
+    # files maps archive member paths to bytes; name selects the manifest key
+    # requested by the restore call. Splitting this tiny tar stream exercises
+    # ordered part assembly and checksums without packaging a live Chroma DB.
     archive = tmp_path / "bundle.tar.xz"
     with tarfile.open(archive, "w:xz") as output:
         for path, content in files.items():
@@ -37,6 +44,8 @@ def bundle(tmp_path, monkeypatch, name, files):
     monkeypatch.setattr(rag_archives, "ARCHIVE_DIRECTORY", tmp_path)
 
 
+# The first restore should publish the verified dataset and later
+# calls should reuse it without repeating extraction work.
 def test_default_restore_and_reuse(tmp_path, monkeypatch):
     bundle(
         tmp_path,
@@ -59,6 +68,8 @@ def test_default_restore_and_reuse(tmp_path, monkeypatch):
 
 
 @pytest.mark.parametrize("damage", ["checksum", "missing", "traversal"])
+# Corrupt, missing, and traversal archives must leave no partially
+# published index that a later run could mistake for complete data.
 def test_failed_restore_does_not_publish(tmp_path, monkeypatch, damage):
     files = {"dataset/shard": b"corpus"}
     if damage == "traversal":
@@ -75,6 +86,8 @@ def test_failed_restore_does_not_publish(tmp_path, monkeypatch, damage):
     assert not (tmp_path / "escaped").exists()
 
 
+# Verify the configured bundled source is selected before any network
+# download, while still exercising the production builder's next dependency.
 def test_build_uses_bundled_dataset(tmp_path, monkeypatch):
     from lg_report.platform import rag_index
 
@@ -90,6 +103,9 @@ def test_build_uses_bundled_dataset(tmp_path, monkeypatch):
     downloads = []
 
     def download(*args, filename, **kwargs):
+        # Stop once ingestion requests a tokenizer, proving it skipped corpus download.
+        # Record the requested filename and deliberately abort before tokenization or
+        # embedding; this test does not build a usable index.
         downloads.append(filename)
         raise RuntimeError("Reached tokenizer download")
 

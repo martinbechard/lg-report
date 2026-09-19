@@ -16,7 +16,9 @@ from lg_report.agents.investigation_agent import build_agent
 
 
 def build_workflow(model: BaseChatModel) -> CompiledStateGraph:
-    """Return the uninvoked service investigation graph using the supplied model.
+    """Let the application investigate service problems with its investigation agent.
+
+    Return a compiled graph ready for later conversation turns.
 
     model is an LLM adapter (live provider or scripted test model), not a list
     of messages. The graph retains it for later requests. The platform supplies

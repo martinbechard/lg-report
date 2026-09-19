@@ -18,11 +18,25 @@ from .test_case import USER_PROMPTS, make_simulated_model
 
 
 def create_run(live):
-    """Configure one LLM and share it across the dispatcher and all experts.
+    """Prepare a dispatch lesson so questions can reach the appropriate expert.
+
+    Share one LLM across the dispatcher and all experts.
 
     live=True selects the provider adapter; False selects the test simulator.
     Only the explicit live flag enables provider calls. Configuration failures
-    propagate instead of silently substituting simulated answers.
+    propagate instead of silently substituting simulated answers. The returned
+    identity values let the common recorder label usage without creating a
+    second model or changing the dispatcher/expert graph.
+
+    Args:
+        live: Whether to construct the configured provider model.
+
+    Returns:
+        The workflow plus provider and model labels consumed by launch_local.
+
+    Side effects:
+        The live branch reads provider configuration. Model invocation is left
+        to launch_local so construction itself remains easy to inspect.
     """
     if live:
         model, provider, name = configured_model()
@@ -33,11 +47,19 @@ def create_run(live):
 
 
 def main():
-    """Record the entire session, including nested expert calls, exactly once."""
+    """Record one complete dispatcher session, including nested expert calls.
+
+    launch_local owns input selection, conversation history, accounting, and
+    HTML output. The static client is a repeatable teaching scenario; console
+    mode can exercise the same routing graph with a human question.
+    """
     launch_local(
         app_file=__file__,
         description=__doc__,
         create_run=create_run,
+        # The launcher calls this zero-argument factory only for static input.
+        # Request holds one user turn; StaticClient supplies these turns in order.
+        # Creating the client does not invoke the graph or supply model answers.
         make_static_client=lambda: StaticClient([Request(p) for p in USER_PROMPTS]),
         title="Dispatcher · movies, sports, and history",
     )

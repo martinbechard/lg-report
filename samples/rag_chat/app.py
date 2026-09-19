@@ -17,7 +17,20 @@ from .test_case import USER_PROMPTS, make_simulated_model
 
 
 def create_run(live):
-    """Choose the LLM; the Wikipedia agent opens its own fixed knowledge source."""
+    """Prepare a Wikipedia conversation grounded in the prebuilt local index.
+
+    Args:
+        live: Whether to use configured provider calls instead of the offline
+            fixture.
+
+    Returns:
+        The retrieval workflow and report identity labels.
+
+    Side effects:
+        The live branch reads provider configuration. The offline fixture opens
+        the index and searches now to prepare its canned excerpt. Later, both
+        modes execute the agent's own search through the workflow tool.
+    """
     if live:
         # Only explicit live mode can make paid chat requests; embedding stays local.
         model, provider, model_name = configured_model()
@@ -31,11 +44,19 @@ def create_run(live):
 
 
 def main():
-    """Use the shared conversation loop so retrieval tokens appear in the report."""
+    """Run one RAG conversation through the shared accounting boundary.
+
+    The static client makes the lesson repeatable after explicit ingestion;
+    starting chat does not download or rebuild the corpus. The workflow owns
+    retrieval and the launcher records model/tool exchanges in HTML.
+    """
     launch_local(
         app_file=__file__,
         description=__doc__,
         create_run=create_run,
+        # The launcher calls this zero-argument factory only for static input.
+        # Request holds one user turn; StaticClient supplies these turns in order.
+        # Creating the client does not invoke the graph or supply model answers.
         make_static_client=lambda: StaticClient(
             [Request(prompt) for prompt in USER_PROMPTS]
         ),

@@ -21,8 +21,11 @@ from lg_report.report.render import render
 from lg_report.report.schema import Run
 
 
+# Let a command-line user turn saved evidence into a portable run or readable
+# report. This entry point selects one path, writes its artifact, and exits;
+# arguments come from the process rather than function parameters.
 def main():
-    """Process CLI arguments and overwrite the explicitly selected output file.
+    """Process CLI arguments and write the selected or default output file.
 
     ``normalize`` accepts this application's OTel SDK JSONL, not arbitrary OTLP.
     ``render`` reads a normalized run and adjacent pricing snapshot (or --prices),
@@ -42,19 +45,43 @@ def main():
     )
     commands = parser.add_subparsers(dest="command", required=True)
     command_parser = commands.add_parser("render")
-    command_parser.add_argument("run", type=Path)
+    command_parser.add_argument(
+        "run",
+        type=Path,
+        nargs="?",
+        default=Path("run.json"),
+        help="Saved run (default: ./run.json)",
+    )
     command_parser.add_argument(
         "--prices",
         type=Path,
         help="Defaults to the run's adjacent prices.json snapshot",
     )
-    command_parser.add_argument("--out", type=Path, required=True)
+    command_parser.add_argument(
+        "--out", type=Path, help="Output HTML (default: report.html beside input)"
+    )
     command_parser = commands.add_parser("normalize")
-    command_parser.add_argument("spans", type=Path)
+    command_parser.add_argument(
+        "spans",
+        type=Path,
+        nargs="?",
+        default=Path("spans.jsonl"),
+        help="Saved trace (default: ./spans.jsonl)",
+    )
     command_parser.add_argument("--title", default="Imported agent run")
     command_parser.add_argument("--demo", action="store_true")
-    command_parser.add_argument("--out", type=Path, required=True)
+    command_parser.add_argument(
+        "--out", type=Path, help="Output JSON (default: run.json beside input)"
+    )
     args = parser.parse_args()
+    # A supplied input keeps its derived output beside the same run's evidence.
+    # With no arguments both commands operate in the working directory.
+    if args.out is None:
+        args.out = (
+            args.run.with_name("report.html")
+            if args.command == "render"
+            else args.spans.with_name("run.json")
+        )
     load_dotenv(args.env_file, override=False)
     try:
         exchange = None

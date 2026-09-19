@@ -19,8 +19,12 @@ from lg_report.workflows.simple_chat import build_workflow
 from samples.simple_chat.test_case import USER_PROMPTS, make_simulated_model
 
 
+# This variant changes the observation backend only. Reusing the baseline
+# workflow and fixture isolates Langfuse callback behavior from graph behavior.
 def create_graph(live: bool) -> CompiledStateGraph:
-    """Return a fresh graph for launch after tracing credentials are checked.
+    """Prepare the baseline chat lesson for comparison through Langfuse traces.
+
+    Return a fresh graph to the tracing launcher.
 
     live=True requires configured provider credentials and selects a real model;
     False uses a new scripted model with an empty context ledger. Missing live
@@ -44,6 +48,9 @@ def main() -> None:
         app_file=__file__,
         description=__doc__,
         create_graph=create_graph,
+        # The launcher calls this zero-argument factory only for static input.
+        # Request holds one user turn; StaticClient supplies these turns in order.
+        # Creating the client does not invoke the graph or supply model answers.
         make_static_client=lambda: StaticClient(
             [Request(prompt) for prompt in USER_PROMPTS]
         ),

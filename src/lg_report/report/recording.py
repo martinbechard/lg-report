@@ -7,7 +7,8 @@ inherit callbacks so subagent work can be inspected in the same trace.
 
 Cleanup attempts to save partial evidence even when execution fails; a report
 file is not proof of success. Content capture requires explicit opt-in, output
-directories must be new, and ambient hosted LangSmith tracing is disabled here.
+directories must be new unless replacement is requested, and ambient hosted
+LangSmith tracing is disabled here.
 
 AI attribution: Generated with AI assistance.
 
@@ -39,12 +40,18 @@ def record_run(
     demo=False,
     include_output=False,
     config=None,
+    overwrite=False,
 ):
-    """Invoke an agent and preserve raw trace, normalized data, prices, and HTML.
+    """Make one execution inspectable and reproducible through a local report bundle.
+
+    Call this at the application boundary to run an invokable agent/graph while
+    retaining evidence for later analysis, including when execution fails.
 
     agent must support invoke(inputs, config=...); inputs/config follow that
     agent's contract. directory must be new, protecting prior run evidence from
-    accidental overwrite. prices is the snapshot used by this run; provider/model
+    accidental overwrite unless overwrite=True explicitly permits replacement of
+    the four report files in an existing directory. Other files are untouched.
+    prices is the snapshot used by this run; provider/model
     are identity defaults when callback metadata is absent. include_output opts
     into saving message/tool content, which can contain sensitive information.
 
@@ -53,7 +60,12 @@ def record_run(
     errors also propagate. The captured trace stays local even if the environment
     normally enables LangSmith tracing.
     """
-    directory.mkdir(parents=True, exist_ok=False)
+    directory.mkdir(parents=True, exist_ok=overwrite)
+    if overwrite:
+        # Clear only this bundle, including derived files, so a failed export
+        # cannot leave an old HTML report beside a newly captured trace.
+        for name in ("spans.jsonl", "run.json", "prices.json", "report.html"):
+            (directory / name).unlink(missing_ok=True)
     capture = TraceCapture(
         directory / "spans.jsonl", provider, model, capture_content=include_output
     )
@@ -71,6 +83,10 @@ def record_run(
         # This command owns local capture. Do not inherit ambient hosted tracing settings.
         with tracing_context(enabled=False):
             result = agent.invoke(inputs, config=run_config)
+        # invoke executes now and returns the entire invocation result according
+        # to this agent's contract. This is not an individual tool observation;
+        # those are recorded separately by tool lifecycle callbacks. The pending
+        # return below still runs finally before the caller receives this result.
         # Only dictionary graph state can carry the LangGraph interrupt marker.
         # A nonempty marker means execution paused for external input, even
         # though invoke returned normally; other result shapes remain successful.

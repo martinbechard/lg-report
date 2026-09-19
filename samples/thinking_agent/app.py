@@ -17,8 +17,13 @@ from lg_report.workflows.thinking_agent import build_workflow
 from .test_case import USER_PROMPTS, make_simulated_model
 
 
+# The app exposes the same graph through offline and provider-backed clients.
+# It does not infer or fabricate reasoning usage; the fixture metadata is a
+# teaching input and the shared recorder reports the resulting accounting.
 def create_run(live: bool):
-    """Build the workflow and return its provider and model name for reporting.
+    """Prepare an investigation lesson that makes reasoning and tool costs visible.
+
+    Return the workflow and its provider/model labels for report accounting.
 
     ``live`` is the explicit CLI choice: True constructs configured API clients;
     False creates fresh scripted models for this sample's fixed test case. Neither
@@ -35,11 +40,14 @@ def create_run(live: bool):
 
 
 def main() -> None:
-    """Select a client and record one complete conversation."""
+    """Run the investigation lesson and save its model/tool accounting report."""
     launch_local(
         app_file=__file__,
         description=__doc__,
         create_run=create_run,
+        # The launcher calls this zero-argument factory only for static input.
+        # Request holds one user turn; StaticClient supplies these turns in order.
+        # Creating the client does not invoke the graph or supply model answers.
         make_static_client=lambda: StaticClient(
             [Request(prompt) for prompt in USER_PROMPTS]
         ),

@@ -16,7 +16,11 @@ from collections import Counter
 
 
 def context_change(step, previous):
-    """Describe visible request changes, without inferring provider cache hits.
+    """Help report readers understand why the next model request grew or changed.
+
+    Return display-ready message additions and measured token differences for
+    ``step``, the current normalized model Step. This is a comparison of visible
+    inputs, not an explanation of provider internals or proof of cache hits.
 
     previous must be the prior model step on the same conversation path (or
     None), not simply the preceding model call from another subagent. Equality

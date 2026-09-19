@@ -9,6 +9,8 @@ AI attribution: Generated with AI assistance.
 Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
 
+# LangChain's AIMessage holds an assistant response; constructing it runs nothing.
+# Its tool_calls, when present, are proposed names/arguments, not tool results.
 from langchain_core.messages import AIMessage
 
 from lg_report.platform.simulated_model import MeteredDemoModel
@@ -20,9 +22,15 @@ USER_PROMPTS = [
     "How does a tool observation help the agent answer?",
 ]
 
+# These prompts are client fixtures rather than agent instructions. Keeping them
+# here makes the offline conversation reproducible while leaving the workflow
+# capable of receiving arbitrary console input in live mode.
+
 
 def make_simulated_model() -> MeteredDemoModel:
-    """Return a new two-answer fixture with an empty context/cache ledger.
+    """Make a two-turn chat reproducible so learners can inspect growing context.
+
+    Return a new two-answer fixture with an empty context/cache ledger.
 
     Create one instance per conversation, then reuse it across its turns.
     Responses are predetermined, but input usage is measured from the messages

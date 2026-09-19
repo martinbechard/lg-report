@@ -19,7 +19,10 @@ from lg_report.agents.workflow_specialist import build_agent as build_specialist
 def build_workflow(
     parent_model: BaseChatModel, specialist_model: BaseChatModel
 ) -> CompiledStateGraph:
-    """Return an uninvoked parent graph with one registered specialist role.
+    """Enable a parent agent to delegate workflow questions to its specialist.
+
+    Return a compiled parent graph that can use its task tool when invoked;
+    registering the specialist here does not execute a delegated request.
 
     Both arguments are LLM adapters, not agents or message collections. The
     application provides separate instances so scripted response positions and

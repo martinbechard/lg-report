@@ -16,6 +16,8 @@ from langgraph.graph.state import CompiledStateGraph
 from lg_report.tools.domain_reference import search_history_reference
 
 NAME = "history_expert"
+# Names and descriptions are public registration metadata consumed by the
+# dispatcher. They do not expose reference contents or another expert's state.
 DESCRIPTION = (
     "Specialist for questions about history, with its own local reference lookup."
 )
@@ -30,12 +32,16 @@ SYSTEM_PROMPT = (
 
 
 def build_agent(model: BaseChatModel) -> CompiledStateGraph:
-    """Bind this role's instructions and retrieval tool to the supplied LLM.
+    """Prepare a history specialist to answer delegated questions with local evidence.
 
     model is a provider adapter or scripted test model, not domain documents.
     Construction invokes neither model nor tool; the graph runs on an assignment
     from the dispatcher. Its tool result becomes input to the next model request.
     """
+    # During invocation the graph executes proposed lookup calls, adds their
+    # strings as ToolMessages, and calls the model again to compose an answer.
+    # ToolMessage is LangChain's observation container; the graph's own return
+    # is a state dictionary with message history, including the final AIMessage.
     # Only the domain-specific lookup is registered. Using the same underlying
     # model across experts does not grant access to another expert's tools/context.
     return create_agent(

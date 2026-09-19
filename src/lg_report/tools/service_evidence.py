@@ -12,6 +12,10 @@ Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 
 from langchain_core.tools import tool
 
+# These tools intentionally expose a finite fixture contract. Keeping the
+# dictionaries inside each function prevents shared mutation and makes unknown
+# keys fail loudly rather than returning guessed evidence.
+
 
 # The docstrings below are tool descriptions sent to the model, so keep
 # implementation guidance here rather than expanding the model-facing prompt.
@@ -25,6 +29,11 @@ def inspect_service(section: str) -> str:
         section: Evidence section to retrieve: traffic, database, or constraints.
             Use one of these exact lowercase names.
     """
+    # The investigator calls this to obtain the selected evidence category
+    # before proposing a plan. Its returned string is the tool observation the
+    # next model request receives, rather than the investigator's final answer.
+    # No network client, clock, or service handle is consulted here. The fixed
+    # values teach the tool-call boundary while keeping reports reproducible.
     evidence_by_section = {
         "traffic": "Peak 240 requests/s; p95 1.8s; 12 workers. Latency rises during database bursts.",
         "database": "Pool limit 12. Median query 80ms; p95 900ms. Duplicate account lookups appear per request.",
@@ -44,6 +53,11 @@ def test_plan(check: str) -> str:
         check: Check result to retrieve: load, freshness, or rollback.
             Use one of these exact lowercase names.
     """
+    # The investigator calls this after considering a plan so it can discuss
+    # the lesson's verification outcomes. `check` selects a scenario result;
+    # no candidate plan is accepted or evaluated by this function.
+    # A PASS records the sample fixture's expected result; it is not a claim
+    # that this machine ran a benchmark or changed a rollback flag.
     results_by_check = {
         "load": "PASS: deduplicated lookups plus 30s cache yield p95 410ms at 240 requests/s; pool occupancy 65%.",
         "freshness": "PASS: account changes invalidate cached values; maximum fallback age is 30s.",

@@ -48,7 +48,7 @@ uv sync --locked
 uv run python -m samples.review_loop.app
 ```
 
-This prints a new HTML report under `reports/review_loop/<run>/` and saves the
+This prints a new HTML report at `./report.html` in the current working directory (replacing the previous default run) and saves the
 raw spans, normalized run, and price snapshot. Expect four model calls, no tool
 calls, and one user turn. The report includes both drafts and both judge responses;
 only the final answer is returned to the chat client.

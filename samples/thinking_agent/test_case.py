@@ -9,13 +9,17 @@ AI attribution: Generated with AI assistance.
 Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
 
+# LangChain's AIMessage holds an assistant response; constructing it runs nothing.
+# Its tool_calls, when present, are proposed names/arguments, not tool results.
 from langchain_core.messages import AIMessage
 
 from lg_report.platform.simulated_model import MeteredDemoModel
 
 
 def make_simulated_model() -> MeteredDemoModel:
-    """Return a fresh seven-response fixture with a deliberate reasoning peak.
+    """Make the cost of a large reasoning step visible in a repeatable investigation.
+
+    Return a fresh seven-response fixture with a deliberate reasoning peak.
 
     Three evidence calls precede three verification calls and the final answer.
     This predictable sequence lets a learner correlate report request numbers

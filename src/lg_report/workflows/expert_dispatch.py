@@ -22,7 +22,11 @@ from lg_report.agents import (
 
 
 def build_workflow(model: BaseChatModel) -> CompiledStateGraph:
-    """Build all four agents with one shared LLM.
+    """Give the application a dispatcher that can consult three domain experts.
+
+    Return the compiled dispatcher graph with movie, sports, and history roles
+    available through its task tool. The dispatcher chooses delegation during
+    execution; building the expert graphs does not ask them a question.
 
     model is the single configured provider adapter or offline simulator. Each
     agent combines it with its own instructions, tools, and graph-owned message

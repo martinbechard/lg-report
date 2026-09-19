@@ -9,6 +9,8 @@ AI attribution: Generated with AI assistance.
 Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
 
+# LangChain's AIMessage holds an assistant response; constructing it runs nothing.
+# Its tool_calls, when present, are proposed names/arguments, not tool results.
 from langchain_core.messages import AIMessage
 
 from lg_report.platform.shared_simulated_model import SharedSimulatedModel
@@ -32,13 +34,28 @@ CASES = [
 ]
 USER_PROMPTS = [question for _, question, _ in CASES]
 
+# CASES is the complete offline contract for this lesson. Keeping questions,
+# expected answers, and expert names together makes each scripted dispatch
+# auditable; live mode deliberately replaces the model while retaining the
+# same workflow and tool boundary.
+
 
 def make_simulated_model():
-    """Return one offline LLM with role-specific scripts keyed by available tool.
+    """Demonstrate routing to all three experts without relying on live model judgment.
+
+    Return one offline LLM with role-specific scripts keyed by available tool.
 
     The shared model receives each graph's own messages and tools. Script state
     stays separate so a specialist neither consumes dispatcher answers nor gains
-    its cached history. Actual task and retrieval tools still run in LangGraph.
+    its cached history. Actual task and retrieval tools still run in LangGraph;
+    this fixture only supplies deterministic model decisions and final text.
+
+    Returns:
+        A simulator containing one dispatcher script and one script per expert.
+
+    Side effects:
+        None during construction. Tool execution and report accounting happen
+        only when the workflow invokes the returned model.
     """
     dispatcher_responses = []
     scripts = {}
@@ -47,6 +64,9 @@ def make_simulated_model():
         "sports_expert": "search_sports_reference",
         "history_expert": "search_history_reference",
     }
+    # Each user question consumes a dispatcher task proposal and final answer.
+    # The selected expert separately proposes retrieval before its own answer;
+    # the graph executes these tools between scripted model responses.
     for number, (expert, question, answer) in enumerate(CASES, 1):
         dispatcher_responses.extend(
             [

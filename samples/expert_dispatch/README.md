@@ -36,7 +36,7 @@ uv run python -m samples.expert_dispatch.app
 The default test case asks three questions in one conversation, one per domain.
 Expect twelve model requests (dispatcher, expert retrieval request, expert answer,
 dispatcher answer per turn), three task executions plus three reference lookups, and one final user-facing answer per turn. The command prints the HTML
-path under `reports/expert_dispatch/<run>/` with raw spans, run.json, and prices.json.
+path at `./report.html` in the current working directory (replacing the previous default run) with raw spans, run.json, and prices.json.
 Use `--prices models.json --fx-file /path/to/rate.json` for offline reference data.
 Pricing and FX can otherwise use their free daily lookups.
 

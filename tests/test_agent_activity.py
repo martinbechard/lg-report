@@ -3,6 +3,8 @@
 No provider calls are required. Nested and overlapping invocations must retain
 separate identities, and missing usage must remain an incomplete subtotal.
 
+AI attribution: Modified with AI assistance.
+
 Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
 
@@ -15,10 +17,15 @@ from lg_report.report.render import agent_activity, conversation_turns, render
 from lg_report.report.schema import Run, Step, Usage
 
 
+# Use hand-built spans to protect ownership, partial-cost, escaping,
+# and collaboration-diagram behavior without requiring a provider or network.
 def test_nested_agents_with_shared_model_and_omitted_content(tmp_path):
     prices = load_prices(Path(__file__).parent / "fixtures/accounting_prices.json")
 
     def step(id, parent, name, kind="workflow", start=1, status="ok", usage=None):
+        # Make trace ownership testable without running agents.
+        # `id` and `parent` define ancestry; `start` controls ordering. A missing
+        # usage value deliberately models an unmetered call, not a free call.
         return Step(
             id=id,
             parent_id=parent,
@@ -111,6 +118,8 @@ def test_nested_agents_with_shared_model_and_omitted_content(tmp_path):
     )
 
 
+# A standalone model span must remain visible as an event while not
+# acquiring an imaginary agent identity from incomplete trace metadata.
 def test_bare_model_has_no_invented_agent():
     prices = load_prices(Path(__file__).parent / "fixtures/accounting_prices.json")
     run = Run(
@@ -125,6 +134,8 @@ def test_bare_model_has_no_invented_agent():
     assert conversation_turns(run, prices)[0]["events"][0]["agent"] is None
 
 
+# Parse the emitted HTML directly so disclosure nesting and default
+# open/closed states remain covered even when no browser runtime is available.
 def test_collapsible_sections_preserve_nested_agents(tmp_path):
     from html.parser import HTMLParser
 
@@ -132,11 +143,17 @@ def test_collapsible_sections_preserve_nested_agents(tmp_path):
         """Check native disclosure structure without requiring a browser runtime."""
 
         def __init__(self):
+            # Start a fresh HTML nesting observation for this report.
+            # The stack tracks open non-void elements; details stores each disclosure
+            # and the ancestor disclosures present when it opened.
             super().__init__()
             self.stack = []
             self.details = []
 
         def handle_starttag(self, tag, attrs):
+            # Catch malformed disclosure placement as the HTML parser visits a tag.
+            # `attrs` is the parser-provided name/value sequence, not a DOM node;
+            # record its ancestors before pushing this element onto the open stack.
             attrs = dict(attrs)
             if tag == "details":
                 self.details.append(
@@ -152,6 +169,9 @@ def test_collapsible_sections_preserve_nested_agents(tmp_path):
                 self.stack.append((tag, attrs))
 
         def handle_endtag(self, tag):
+            # Require closing tags to balance the emitted nesting.
+            # The parser supplies the tag name; an unexpected close fails immediately
+            # instead of allowing later ancestry checks to use a corrupted stack.
             assert self.stack[-1][0] == tag
             self.stack.pop()
 
@@ -227,6 +247,8 @@ def test_collapsible_sections_preserve_nested_agents(tmp_path):
     )
 
 
+# Repeated role names and temporal overlap must not create invented
+# approvals or communication edges in the collaboration view.
 def test_collaboration_keeps_repeated_and_overlapping_invocations_separate():
     steps = [
         Step(id="a", name="author", kind="workflow", start_ns=1, end_ns=8, status="ok"),

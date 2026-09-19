@@ -18,7 +18,7 @@ uv run python -m samples.subagent_chat.app
 ```
 
 The command prints the HTML path and creates `spans.jsonl`, `run.json`,
-`prices.json`, and `report.html` under `reports/subagent_chat/<run>/`.
+`prices.json`, and `report.html` in the current working directory, replacing the previous default run.
 `--out` selects a new directory; existing directories are rejected.
 `--fx-file` supplies a local USD/EUR rate; otherwise the shared daily lookup/cache
 is used. No Langfuse service or credentials are involved.

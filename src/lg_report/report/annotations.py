@@ -12,7 +12,11 @@ Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 
 
 def describe(kind: str, name: str, metadata: dict, serialized: dict) -> str:
-    """Explain an operation using application intent before generic framework roles.
+    """Help a report reader understand why a captured operation belongs in the run.
+
+    Return one display description for the captured ``kind`` and runtime ``name``.
+    ``metadata`` comes from callback configuration; ``serialized`` is the SDK
+    definition, which can supply a tool description. Neither is executed here.
 
     report_description is the application's annotation; serialized description
     commonly comes from a tool definition. Generic descriptions explain the

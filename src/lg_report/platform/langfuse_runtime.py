@@ -37,15 +37,19 @@ def run_conversation(
     trace_name: str,
     public_trace: bool = False,
 ) -> tuple[str, list[BaseMessage]]:
-    """Observe the shared conversation loop with one root and one scope per turn.
+    """Make a conversation inspectable in Langfuse, including its individual turns.
 
-    graph is the compiled workflow containing its agents and model adapters.
+    ``graph`` is the compiled workflow containing its agents and model adapters.
     client is the Langfuse SDK connection, while chat_client is the user-facing
     input/output channel. callback forwards graph/model events to that SDK.
-    chat_client supplies requests dynamically; no prompt list is required here.
+    ``chat_client`` supplies requests dynamically; no prompt list is required here.
+    ``simulated`` and ``trace_name`` label the root observation, while
+    ``public_trace`` explicitly controls publication of captured content.
     The caller owns SDK flush/shutdown. Content is sent to the configured endpoint,
     including in simulation. Publishing requires explicit public_trace=True.
-    Return trace ID and final history, or an empty history for no submitted turns.
+    Return the root trace ID and final history, or an empty history for no
+    submitted turns. The function updates observations as each turn completes;
+    graph/client/SDK exceptions propagate so the trace records failure state.
     See docs/chat-composition.md for ownership, lifecycle, and failure semantics.
     """
     submitted_requests = []
@@ -66,7 +70,14 @@ def run_conversation(
 
         @contextmanager
         def turn_scope(number: int, request: Request):
-            """Record actual submitted input, and let scope exit record failures."""
+            """Give one submitted turn a trace span enclosing its graph execution.
+
+            Conversation supplies the one-based ``number`` and user Request.
+            Entering this context records input and yields a completion callback;
+            Conversation calls it with the full graph result before leaving.
+            On graph failure the callback is skipped and the exception unwinds
+            through this context so the SDK can observe failure on scope exit.
+            """
             submitted_requests.append(request.content())
             root.update(input=list(submitted_requests))
             with client.start_as_current_observation(
@@ -77,6 +88,14 @@ def run_conversation(
             ) as turn:
 
                 def complete(result):
+                    """Finish this turn's trace with its visible outcome.
+
+                    ``result`` is the complete graph state, not a model message
+                    or individual tool result. Its final LangChain message
+                    supplies display content; the interrupt flag independently
+                    records whether execution needs further human input.
+                    Updating the SDK observation does not resume the workflow.
+                    """
                     # Paused/empty results need no fabricated assistant answer.
                     messages = result.get("messages", [])
                     turn.update(
@@ -87,6 +106,9 @@ def run_conversation(
                         },
                     )
 
+                # Yield transfers control to Conversation's with-block. When
+                # that block ends, execution returns here and closes the span;
+                # this is ordinary context-manager flow, not a graph interrupt.
                 yield complete
 
         result = Conversation(graph, chat_client, turn_scope=turn_scope).invoke(
@@ -131,15 +153,17 @@ def launch(
     make_static_client: Callable[[], ChatClient],
     trace_name: str,
 ) -> None:
-    """Select a user client, authenticate tracing, then run and flush one session.
+    """Run a sample with Langfuse evidence ready for later trace inspection.
 
-    create_graph(live) constructs the executable workflow after access is
+    ``create_graph(live)`` constructs the executable workflow after access is
     verified; live selects real model adapters instead of scripted test adapters.
     app_file locates this application's .env, description labels CLI help, and
     trace_name identifies the session in Langfuse.
     make_static_client supplies scenario requests; console input is shared across
     samples. CLI parsing owns invalid combinations. No local report is generated.
     SDK shutdown runs on success and failure, including interactive interruption.
+    Authentication is checked before graph construction to avoid paid model work
+    when trace delivery is unavailable; credential values are never printed.
     """
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument(

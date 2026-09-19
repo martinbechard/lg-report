@@ -18,7 +18,7 @@ uv run python -m samples.tool_chat.app
 ```
 
 Each run writes raw spans, normalized data, the pricing snapshot, and HTML under
-`reports/tool_chat/<timestamp>-<id>/`. Use `--out reports/my-tool-run` to select
+the current working directory, replacing the previous default run. Use `--out reports/my-tool-run` to select
 a fresh directory.
 
 For a real model, copy `samples/tool_chat/.env.example` to

@@ -33,6 +33,8 @@ from samples.review_loop.test_case import (
 )
 
 
+# Rejection feedback must cause a real second review round and remain
+# traceable in the generated report.
 def test_feedback_drives_real_second_round_and_report(tmp_path):
     client = StaticClient([Request(USER_PROMPTS[0])])
     graph = build_workflow(make_simulated_model(), first_draft_high_level=True)
@@ -80,6 +82,9 @@ def test_feedback_drives_real_second_round_and_report(tmp_path):
 
 def model_with_reviews(reviews):
     """Keep author responses available for exactly as many evaluations as requested."""
+    # reviews supplies ordered verdict dictionaries, serialized as assistant
+    # message text for the real judge parser. Matching author responses let
+    # routing consume one draft per verdict; no live judgment occurs here.
     return SharedSimulatedModel(
         scripts={
             review_author.SYSTEM_PROMPT: [
@@ -92,6 +97,8 @@ def model_with_reviews(reviews):
     )
 
 
+# Approval on the first judge response must stop iteration immediately
+# and avoid fabricating a later draft.
 def test_first_round_can_be_approved():
     result = build_workflow(
         model_with_reviews([FINAL_REVIEW]), first_draft_high_level=True
@@ -99,6 +106,8 @@ def test_first_round_can_be_approved():
     assert result["round"] == 1 and result["outcome"] == "approved"
 
 
+# Persistent rejection must honor the round limit and never be
+# rewritten as approval merely because execution ended.
 def test_rejection_stops_at_limit_without_claiming_approval():
     result = build_workflow(
         model_with_reviews([FIRST_REVIEW] * 3), max_rounds=3
@@ -108,6 +117,8 @@ def test_rejection_stops_at_limit_without_claiming_approval():
     assert FIRST_REVIEW["feedback"][0] in result["messages"][-1].content
 
 
+# Invalid judge output is a contract failure, not an approval signal;
+# the workflow must surface that distinction.
 def test_invalid_judge_output_is_not_approval():
     model = SharedSimulatedModel(
         scripts={
@@ -126,11 +137,15 @@ def test_invalid_judge_output_is_not_approval():
 
 
 @pytest.mark.parametrize("limit", [0, -1, True, 1.5])
+# Reject invalid configuration before graph execution so bounded
+# review behavior is guaranteed by construction.
 def test_invalid_round_limit(limit):
     with pytest.raises(ValueError):
         build_workflow(make_simulated_model(), max_rounds=limit)
 
 
+# A new user turn starts a new review cycle rather than reusing the
+# prior turn's draft or verdict state.
 def test_new_user_turn_starts_new_review_cycle():
     # A global response sequence suffices here: this check is about graph-state
     # reset, not simulated cache accounting across separate review sessions.

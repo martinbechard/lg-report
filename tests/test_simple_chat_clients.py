@@ -18,6 +18,8 @@ from lg_report.platform.static_client import StaticClient
 from samples.simple_chat.test_case import make_simulated_model
 
 
+# Static requests must attach file context only to the intended turn
+# while retaining assistant history for the follow-up request.
 def test_static_file_context_and_follow_up():
     client = StaticClient(
         [
@@ -35,6 +37,8 @@ def test_static_file_context_and_follow_up():
     )
 
 
+# Console command parsing must carry attachments into the next model
+# request without leaking them into unrelated commands.
 def test_console_commands_keep_attachments_for_next_turn(tmp_path):
     note = tmp_path / "my note.txt"
     note.write_text("Some evidence", encoding="utf-8")
@@ -60,12 +64,17 @@ def test_console_commands_keep_attachments_for_next_turn(tmp_path):
     assert any("Cannot attach" in line for line in output)
 
 
+# File-only input and EOF are valid terminal paths and must terminate
+# cleanly without making an unnecessary model call.
 def test_console_file_only_and_eof(tmp_path):
     note = tmp_path / "note.txt"
     note.write_text("Input data")
     entries = iter([f"/attach {note}", "/send"])
 
     def read(_):
+        # Make an exhausted scripted terminal behave like the user closing stdin.
+        # Ignore the input prompt and return the next entry; convert iterator exhaustion
+        # to EOFError because that is the console client termination contract.
         try:
             return next(entries)
         except StopIteration:
@@ -76,9 +85,14 @@ def test_console_file_only_and_eof(tmp_path):
     assert client.receive() is None
 
 
+# Response order and approval interruption define the session contract;
+# this guards against consuming the next request too early.
 def test_respond_before_next_request_and_interrupt_stops_session():
     class Graph:
         def invoke(self, inputs, config):
+            # Return a synthetic pause to test the conversation driver stopping rule.
+            # Validate config forwarding, then supply graph-shaped messages/interrupt data.
+            # This stub does not test actual LangGraph checkpoint or replay behavior.
             assert config["metadata"]["report_turn"] == 1
             assert config["metadata"]["custom"] == "preserved"
             assert config["callbacks"] == ["capture"]
@@ -96,10 +110,14 @@ def test_respond_before_next_request_and_interrupt_stops_session():
     assert client.receive().prompt == "Never sent"
 
 
+# An empty scripted client represents a no-op session and must not
+# invoke the graph or fabricate a response.
 def test_empty_static_client_makes_no_model_call():
     assert Conversation(None, StaticClient([])).invoke({}, {}) is None
 
 
+# Console and static clients must share one real graph session so
+# client choice does not change workflow state semantics.
 def test_console_uses_same_real_graph_session():
     entries = iter(["Explain the workflow", "And the observation?", "/quit"])
     displayed = []

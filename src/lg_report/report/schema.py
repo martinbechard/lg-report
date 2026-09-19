@@ -36,6 +36,9 @@ class Usage(Record):
     cache_write_1h: int = Field(default=0, ge=0)
     reasoning: int = Field(default=0, ge=0)
 
+    # Pydantic calls this after parsing fields so all exporters can rely on
+    # internally consistent token accounting. self is the parsed Usage; return
+    # it unchanged on success, or raise to reject the whole invalid record.
     @model_validator(mode="after")
     def check_subsets(self):
         """Reject impossible subset totals before exporters calculate charges."""
@@ -81,6 +84,9 @@ class Step(Record):
     tool_definitions: list[dict] | None = None
     context: dict[str, str | int | list[str]] = Field(default_factory=dict)
 
+    # Pydantic calls this on the parsed Step to keep latency calculations
+    # meaningful. A valid instance is returned unchanged; reversed times reject
+    # the record instead of being silently corrected.
     @model_validator(mode="after")
     def check_time(self):
         """Reject negative elapsed time rather than presenting a plausible duration."""
@@ -89,6 +95,8 @@ class Step(Record):
             raise ValueError("Step ends before it starts")
         return self
 
+    # Renderers read this property for a human-scale duration. It derives a
+    # float from this Step's timestamps without replacing the original evidence.
     @property
     def duration_ms(self) -> float:
         """Expose elapsed milliseconds without discarding stored timestamp precision."""
@@ -111,6 +119,9 @@ class Run(Record):
     steps: list[Step]
     output: str | None = None
 
+    # Pydantic invokes this on the parsed Run before reporting can traverse its
+    # steps. It establishes structural ancestry only, not semantic correctness
+    # of agent actions. Return self unchanged or reject the entire invalid run.
     @model_validator(mode="after")
     def check_tree(self):
         """Require unique IDs and resolvable, acyclic ancestry for safe traversal."""

@@ -41,13 +41,18 @@ _REFERENCES = {
     ],
 }
 
+# The mapping is a private, read-only-by-convention corpus boundary. Wrappers
+# choose the domain, so a model argument cannot broaden one expert's capability.
+
 
 def _retrieve(domain: str, query: str) -> str:
-    """Return matching reference passages and their sources, or an explicit miss.
+    """Supply an expert with relevant local evidence and traceable source labels.
 
     domain is fixed by each tool wrapper; the model cannot select another corpus
     through an argument. Matching aliases within a query makes the small example
     usable with either a topic phrase or a full question, without a search service.
+    The helper assumes a known key from a wrapper; an invalid internal key raises
+    normally so programming errors are not disguised as retrieval misses.
     """
     normalized_query = query.casefold().strip()
     matches = []
@@ -73,6 +78,9 @@ def search_movie_reference(query: str) -> str:
         query: A movie topic or question containing a title or name to match.
             The small teaching collection covers Spirited Away and Miyazaki.
     """
+    # Supply this expert's evidence before it composes an answer. The wrapper
+    # fixes the corpus; query comes from the model's proposed search arguments.
+    # Return passage text for the graph to carry as the tool observation.
     return _retrieve("movies", query)
 
 
@@ -84,6 +92,9 @@ def search_sports_reference(query: str) -> str:
         query: A sports topic or question containing a phrase to match.
             The small teaching collection covers standard basketball team size.
     """
+    # Supply this expert's evidence before it composes an answer. The wrapper
+    # fixes the corpus; query comes from the model's proposed search arguments.
+    # Return passage text for the graph to carry as the tool observation.
     return _retrieve("sports", query)
 
 
@@ -95,4 +106,7 @@ def search_history_reference(query: str) -> str:
         query: A historical topic or question containing a phrase to match.
             The small teaching collection covers the Berlin Wall opening.
     """
+    # Supply this expert's evidence before it composes an answer. The wrapper
+    # fixes the corpus; query comes from the model's proposed search arguments.
+    # Return passage text for the graph to carry as the tool observation.
     return _retrieve("history", query)

@@ -16,8 +16,13 @@ from lg_report.workflows.review_loop import build_workflow
 from .test_case import USER_PROMPTS, make_simulated_model
 
 
+# This file assembles the lesson's author/judge graph and launcher policy. It
+# does not decide whether a draft is correct; the workflow's judge node owns
+# that decision and the fixture merely supplies repeatable model messages.
 def create_run(live):
-    """Return (workflow, provider, model_name) for the shared sample launcher.
+    """Prepare the revision lesson so judge feedback can improve an initial draft.
+
+    Return (workflow, provider, model_name) for the shared sample launcher.
 
     live is the CLI choice, not a connectivity check: False uses a deterministic
     test fixture; True loads the configured provider. The identity strings label
@@ -49,6 +54,9 @@ def main():
         create_run=create_run,
         # A fresh client consumes the scenario once per run. Human console input
         # replaces this client without changing the review graph or its budget.
+        # The launcher calls this zero-argument factory only for static input.
+        # Request holds one user turn; StaticClient supplies these turns in order.
+        # Creating the client does not invoke the graph or supply model answers.
         make_static_client=lambda: StaticClient(
             [Request(prompt) for prompt in USER_PROMPTS]
         ),

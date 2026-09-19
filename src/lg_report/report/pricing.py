@@ -58,7 +58,10 @@ class Prices(Record):
 
 
 def load_prices(path: Path) -> Prices:
-    """Read and validate a saved snapshot without network access.
+    """Restore the tariff basis of an earlier run so exports remain reproducible.
+
+    ``path`` identifies the JSON snapshot; return its validated Prices record
+    for shared accounting and rendering, without looking up newer prices.
 
     Missing files, invalid JSON, and invalid tariffs propagate to the caller;
     silently replacing a requested file would undermine reproducible estimates.
@@ -80,7 +83,10 @@ CATEGORIES = [
 
 
 def breakdown(step: Step, prices: Prices) -> list[dict]:
-    """Split one call into non-overlapping token counts and exact USD charges.
+    """Explain what each token category contributes to a recorded call's price.
+
+    Return ordered category dictionaries for the accounting and export layers,
+    keeping unknown amounts explicit so a partial estimate stays recognizable.
 
     Callers supply a normalized step and a saved price snapshot. A missing count
     or applicable rate produces None; a known zero count costs zero when the
@@ -136,7 +142,10 @@ def breakdown(step: Step, prices: Prices) -> list[dict]:
 
 
 def cost(step: Step, prices: Prices) -> tuple[Decimal | None, str | None]:
-    """Return one model call's USD charge, or None with an accounting reason.
+    """Determine whether a recorded call has enough evidence for a full price.
+
+    ``step`` is a captured span and ``prices`` is its selected tariff snapshot.
+    Return (USD amount, None) when fully priced, or (None, reason) when unknown.
 
     Non-model spans return (None, None): tool execution is not itself a token
     charge. A tool request's JSON is charged in the model response that emitted
@@ -163,7 +172,10 @@ def cost(step: Step, prices: Prices) -> tuple[Decimal | None, str | None]:
 
 
 def summarize(run: Run, prices: Prices) -> dict:
-    """Build run totals from model spans only, with missing-data counts.
+    """Give report readers a run-level estimate and identify gaps in that estimate.
+
+    ``run`` supplies recorded spans; ``prices`` supplies the tariff snapshot.
+    Return summary fields for export, including per-span costs keyed by span ID.
 
     known_cost is a subtotal of priced categories, not a promise that the entire
     run was priced. Consumers must show unpriced_calls/missing_usage alongside

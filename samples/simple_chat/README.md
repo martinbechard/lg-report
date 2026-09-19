@@ -81,7 +81,7 @@ with the default static client.
 ## Reports and checks
 
 The command prints its HTML report path and saves `spans.jsonl`, `run.json`,
-`prices.json`, and `report.html` under a fresh `reports/simple_chat/` directory.
+`prices.json`, and `report.html` in the current working directory (replacing the previous default run).
 `--out` selects a new directory. Reports are finalized when the session ends;
 quitting before any request produces an incomplete report with no model spans.
 

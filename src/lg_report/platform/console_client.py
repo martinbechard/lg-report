@@ -22,7 +22,7 @@ class ConsoleClient:
     """
 
     def __init__(self, read=input, write=print):
-        """Use terminal I/O by default; injected callables support automated tests.
+        """Prepare an interactive user client, with replaceable I/O for tests.
 
         read receives the prompt label and returns one line. write displays one
         string. Attachments stay queued until a request is actually submitted.
@@ -32,7 +32,14 @@ class ConsoleClient:
         self.files = []
 
     def receive(self) -> Request | None:
-        """Collect commands until there is a prompt to send or the user finishes."""
+        """Collect commands until a request is ready or the user finishes.
+
+        Returns a ``Request`` for a prompt (possibly with queued attachments),
+        or ``None`` for explicit quit/EOF/Ctrl-C. Blank input and ``/send`` with
+        no files do not create turns. Attachment I/O errors are reported through
+        ``write`` and leave previously queued files available; non-UTF-8 files
+        are rejected because the conversation boundary accepts text only.
+        """
         while True:
             try:
                 line = self.read("User: ")
@@ -41,7 +48,7 @@ class ConsoleClient:
                 # the recorder close spans and generate the session report.
                 return None
             command = line.strip()
-            # Explicit exit discards unsent attachments; attaching a file alone
+            # Explicit exit leaves queued attachments unsent; attaching a file alone
             # is not permission to submit its contents to the model.
             if command == "/quit":
                 return None
@@ -71,9 +78,18 @@ class ConsoleClient:
             return request
 
     def respond(self, result: dict) -> None:
-        """Display the latest answer; the session retains the complete history."""
+        """Display the latest answer and surface an unsupported pause boundary.
+
+        ``result`` is the complete graph result. The final message is shown when
+        present; an interrupt is reported separately because this client has no
+        resume protocol. No result data is discarded or mutated, so the caller's
+        recorder can retain the full transcript.
+        """
         # A workflow may pause before producing any message. Only display
         # content when the returned transcript actually has a final element.
+        # This reads a LangChain message from the whole graph result. It does
+        # not execute or extract a tool call; the final message need not be an
+        # assistant answer if execution paused partway through the graph.
         if result.get("messages"):
             self.write(f"Assistant: {result['messages'][-1].content}")
         # Interrupts require a resume protocol this client does not implement;

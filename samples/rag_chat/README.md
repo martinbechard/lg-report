@@ -155,3 +155,7 @@ The real-embedding smoke query retrieved four Australian raven passages.
 The offline chat report recorded two model requests and one Chroma tool call;
 retrieved passages enter the second model request, rather than sending the
 millions of indexed units to the chat model. No paid model calls were made.
+
+Local reports default to `report.html`, `run.json`, `spans.jsonl`, and
+`prices.json` in the current working directory. The next default run replaces
+these files. Use `--out reports/saved-run` with a new directory to keep a run.

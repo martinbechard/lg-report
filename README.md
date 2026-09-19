@@ -39,6 +39,8 @@ Each sample wires a workflow to its client and tracing backend; its test case ow
 | [RAG with Chroma](samples/rag_chat/README.md) | Large-corpus ingestion and cited retrieval | `uv run python -m samples.rag_chat.app` (restores bundled index on first use) |
 | [Review loop](samples/review_loop/README.md) | High-level draft → judge feedback → detailed revision | `uv run python -m samples.review_loop.app` |
 | [Expert dispatcher](samples/expert_dispatch/README.md) | Select movies, sports, or history expert for each question | `uv run python -m samples.expert_dispatch.app` |
+| [File approval](samples/file_approval/README.md) | Read/write with autoapprove or approval for each modification | See sample README for source/target arguments |
+| [Quote request](samples/quote_request/README.md) | LLM-directed human clarification and cancellation | `uv run python -m samples.quote_request.app` |
 | [Thinking agent](samples/thinking_agent/README.md) | Reasoning costs before and after several tool calls | `uv run python -m samples.thinking_agent.app` |
 
 The [Langfuse variant of simple chat](samples/simple_chat_langfuse/README.md)
@@ -50,27 +52,115 @@ and [Langfuse](samples/subagent_chat_langfuse/README.md) applications.
 
 Start with the [sample catalog](samples/README.md). Default execution uses a real graph with a simulated model and makes no model-provider request. To run live, copy that sample's `.env.example` to its own `.env`, configure the selected provider, and add `--live` to its command. Existing environment variables take precedence. There is no automatic switch between live and simulated execution.
 
-Each local-report application prints its HTML path. `--out` selects a new output directory; existing directories are rejected. Every run writes:
+### Run all local samples and export Excel
 
-| File | Purpose |
+```sh
+uv run scripts/run_samples.py
+open reports/batch/index.html
+```
+
+One command runs all ten local samples and generates **HTML and standalone Excel
+workbooks**, with a clickable index. Langfuse samples are excluded. Models and
+human responses are scripted; no provider keys or interactive input are needed.
+RAG and MCP RAG still execute real local retrieval and restore the bundled index
+on first use. The file-approval lesson writes only its own `edited-summary.txt`.
+
+Outputs default to `reports/batch/<sample>/report.html` and `report.xlsx`, relative
+to your working directory. Each folder also contains the run evidence,
+`excel-data.json`, workbook previews, and `run.log`. Repeating the command refreshes
+these outputs. Use `--out reports/another-batch` to keep a separate batch.
+Failures are listed in the index, remaining samples still run, and the command
+exits nonzero if any sample or export fails. Checked-in `reports/examples/` is
+protected from batch replacement.
+
+The runner uses the checked-in pricing catalog without fetching prices. FX uses
+the daily cache/service; `--fx-file path/to/rate.json` supplies a reference without
+a lookup. `--prices path/to/models.json` overrides the catalog. The first RAG
+execution may need the local embedding model downloaded if it is not cached.
+
+Excel generation uses the existing `@oai/artifact-tool` exporter. The runner
+finds the standard Codex desktop runtime automatically. On another installation,
+set `LG_EXCEL_RUNTIME` to the directory containing its `node_modules`, with Node.js
+on `PATH`. Dependencies are checked before samples start; nothing is installed
+automatically. The generated HTML and `.xlsx` files can be opened independently
+of Python, Node.js, Codex, and Langfuse.
+
+### Where files go
+
+Local-report samples automatically generate **`./report.html` in your current
+working directory**, plus the three supporting files below. No separate render
+command is needed. For example, from the repository root:
+
+```sh
+uv run python -m samples.simple_chat.app
+open report.html  # macOS; otherwise open this file in your browser
+```
+
+Every default run replaces these four files, including when you switch samples.
+The command prints the absolute output directory and HTML path. To retain a run,
+choose a new directory: `uv run python -m samples.simple_chat.app --out reports/first-chat`.
+Explicit `--out` directories must not already exist. Relative paths are relative
+to your working directory, not the sample's source directory.
+
+| Run output | Purpose |
 | --- | --- |
-| `spans.jsonl` | Raw local OpenTelemetry SDK spans |
-| `run.json` | Validated, provider-independent report data |
-| `prices.json` | Exact pricing and exchange-rate snapshot |
-| `report.html` | Self-contained report with chart, conversation, execution tree, and references |
+| `report.html` | The finished, self-contained report to open |
+| `run.json` | Normalized execution data used to rebuild HTML or export Excel |
+| `spans.jsonl` | Raw captured trace; input to `normalize` |
+| `prices.json` | This run's saved pricing and exchange-rate snapshot |
+
+These four files belong together. They describe one execution and are replaced
+as a bundle on the next default sample run. Langfuse samples instead send their
+traces to Langfuse and print a trace URL; they do not create this local bundle.
+
+### Reference files versus run outputs
+
+| Reference/configuration | Role |
+| --- | --- |
+| `models.json` | Shared pricing catalog used when starting runs; not a run result |
+| `samples/<sample>/.env` | Provider configuration for that sample |
+| `samples/<sample>/test_case.py` | Authored prompts and scripted model fixtures |
+| `.cache/lg-report/prices/` and `.cache/lg-report/fx/` | Downloaded, reusable reference data; created dynamically, not execution reports |
+| `data/rag/` and `.cache/lg-report/rag/` | Bundled reference corpus/index archives and the restored retrieval index |
+| `reports/examples/` | Checked-in example runs for inspection; your commands do not update them |
+
+The samples keep their catalog, default caches, and `.env` relative to the
+repository/sample even when launched elsewhere. Output files go to your working
+directory. `prices.json` is a per-run snapshot of reference data, whereas
+`models.json` and the caches are reusable inputs.
 
 The samples capture message and tool content by default. `--metadata-only` omits those payloads. Exception messages are omitted; exception types identify failures. `.env` files and generated reports are ignored by Git. Reporting uses a local exporter and disables inherited LangSmith tracing for the invocation; live prompts still go to the selected model provider.
 
 ## Report commands
 
-The reporting CLI processes saved data. Applications launch through their own modules.
+The sample has already produced HTML. Use these commands only to rebuild saved
+outputs; neither command runs the agent:
 
 ```sh
-uv run lg-report render reports/my-run/run.json --out reports/my-run/report.html
-uv run lg-report normalize reports/my-run/spans.jsonl --title "Imported run" --out reports/my-run/rebuilt.json
+uv run lg-report render                   # ./run.json → ./report.html
+uv run lg-report normalize --demo         # ./spans.jsonl → ./run.json (simulated trace)
+uv run lg-report render                   # render the rebuilt run.json
 ```
 
-`render` uses the adjacent `prices.json`; `--prices models.json` explicitly selects another table. It obtains the current daily exchange rate. `normalize` accepts this application's OTel SDK JSONL format, not arbitrary OTLP collector JSON. Use its `--demo` flag when importing a simulated trace. Both commands replace their specified output file. `run.json` is the portable report boundary.
+For a retained run created with `--out reports/first-chat`:
+
+```sh
+uv run lg-report render reports/first-chat/run.json
+uv run lg-report normalize reports/first-chat/spans.jsonl --demo --title "Imported run"
+```
+
+Input filenames are optional; the defaults are `run.json` and `spans.jsonl` in
+the working directory. Output defaults to `report.html` or `run.json` **beside
+the input file**. `--out PATH` overrides the output filename. These commands
+replace their output file.
+
+`render` reads the adjacent `prices.json`; `--prices models.json` explicitly
+selects another table. It obtains the current daily exchange rate. `normalize`
+accepts this application's OTel SDK JSONL format, not arbitrary OTLP collector
+JSON. Use `--demo` only for simulated traces; omit it for live traces.
+Normalization rebuilds execution data from spans; it does not rerun the agent
+or preserve all original run-level metadata such as the title and final output.
+`run.json` is the portable report boundary.
 
 ## Collection and accounting
 
@@ -126,14 +216,14 @@ The provider and model identify the configured model when callback metadata does
 
 Use `run_name`, tool docstrings, and `report_description` / `report_purpose` metadata to explain operations. Keep descriptions specific to the runnable's purpose: metadata can be inherited by children. See the sample graph definitions for complete examples. Unlisted metadata is not exported.
 
-The current runner supports synchronous graph invocation. Streaming, provider-internal retry accounting, external embedding charges, and durable interrupt/resume workflows remain outside its scope. The Chroma RAG sample provides local vector retrieval. File editing with human approval and CSV export remain future samples/features.
+The current runner supports synchronous graph invocation. Streaming, provider-internal retry accounting, external embedding charges, and durable interrupt/resume workflows remain outside its scope. The Chroma RAG sample provides local vector retrieval. The file-approval and quote-request samples support in-process human interrupt/resume; quote clarification uses an LLM in live mode. CSV export remains a future feature.
 
 ## Excel export
 
 The workbook has Turns, Execution tree, and Reference data sheets. All freeze row 1 and column A. Turns follows the HTML request/context/response/tool sequence. Tokens, EUR, and USD occupy separate columns. Reference data B2 sets executions (default 100,000); projected costs round to zero decimal places only after multiplication. Per-execution values retain precision.
 
 ```sh
-uv run python -m lg_report.report.excel_data reports/my-run/run.json --out .cache/excel/data.json
+uv run python -m lg_report.report.excel_data run.json --out .cache/excel/data.json
 node src/lg_report/report/export_excel.mjs .cache/excel/data.json outputs/lg-report-excel/report.xlsx
 ```
 

@@ -22,14 +22,23 @@ class StaticClient:
     """
 
     def __init__(self, requests):
-        """Consume supplied Requests once; no sample-specific defaults live here."""
+        """Prepare a reproducible user conversation from caller-supplied requests.
+
+        ``requests`` may be any iterable; it is converted to an iterator so the
+        client cannot recycle prompts after exhaustion. Results are retained in
+        submission order for assertions and later report inspection.
+        """
         self.requests = iter(requests)
         self.results = []
 
     def receive(self) -> Request | None:
-        """End when the fixture is exhausted, without recycling old prompts."""
+        """Advance the test conversation; return its next Request or None to end it."""
         return next(self.requests, None)
 
     def respond(self, result: dict) -> None:
-        """Save the full result so a test can assert history, tools, or output."""
+        """Save the full result so a test can assert history, tools, or output.
+
+        The result is stored by reference, matching the graph client handoff and
+        preserving interrupt/status fields for assertions.
+        """
         self.results.append(result)

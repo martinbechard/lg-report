@@ -32,3 +32,9 @@ reports/**/*langfuse*/
 **/*langfuse*/volumes/
 .langfuse/
 langfuse-data/
+
+# Default latest-run bundle in the working directory.
+/report.html
+/run.json
+/spans.jsonl
+/prices.json

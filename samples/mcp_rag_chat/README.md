@@ -19,7 +19,7 @@ uv run python -m samples.mcp_rag_chat.app
 
 No separately running server is needed. The workflow launches and closes the MCP
 subprocess for each turn, using the same Python environment. The printed HTML
-path defaults to `reports/mcp_rag_chat/<timestamp>-<id>/report.html`.
+path defaults to `./report.html` in the current working directory, replacing the previous default run.
 
 The default uses a scripted model with **real MCP transport and vector retrieval**.
 It makes two simulated model calls and one real `search_wikipedia` call. The final

@@ -28,11 +28,15 @@ SYSTEM_PROMPT = (
     "subjects without delegating. Never choose an expert merely to force a match."
 )
 
+# The dispatcher prompt defines a closed routing policy. Expert descriptions
+# arrive through middleware, so registration metadata can be reviewed separately
+# from the model-facing policy text.
+
 
 def build_agent(
     model: BaseChatModel, experts: list[CompiledSubAgent]
 ) -> CompiledStateGraph:
-    """Register the workflow's compiled experts with native isolated delegation.
+    """Prepare a dispatcher so domain questions can reach the appropriate expert.
 
     model is the dispatcher LLM adapter. experts contains registration records
     with a routing name, capability description, and already-compiled runnable
@@ -43,6 +47,11 @@ def build_agent(
     summary, not its private history. No manual child invoke or routing table
     based on question text is hidden in this function.
     """
+    # The parent model selects a task name at runtime. Middleware executes the
+    # corresponding child graph and makes its summary a ToolMessage in the
+    # parent's history. The final parent invocation returns graph state, so a
+    # caller reads the last answer from its messages rather than treating that
+    # entire result as the child's tool output.
     # Register only the workflow's explicit children. Using the subagent
     # middleware directly avoids adding the general-purpose child and unrelated
     # tools that create_deep_agent would otherwise provide by default.

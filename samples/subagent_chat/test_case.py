@@ -7,6 +7,8 @@ AI attribution: Generated with AI assistance.
 Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
 
+# LangChain's AIMessage holds an assistant response; constructing it runs nothing.
+# Its tool_calls, when present, are proposed names/arguments, not tool results.
 from langchain_core.messages import AIMessage
 
 from lg_report.platform.simulated_model import MeteredDemoModel
@@ -21,7 +23,9 @@ FINAL_ANSWER = "The specialist confirmed that ReAct repeats a decision, a tool a
 
 
 def make_simulated_models() -> tuple[MeteredDemoModel, MeteredDemoModel]:
-    """Return (parent_model, specialist_model), each with two responses and its own ledger.
+    """Make delegation reproducible while keeping parent and specialist usage separate.
+
+    Return (parent_model, specialist_model), each with its own response ledger.
 
     Create a new pair for each run. Sharing one object would let the child consume
     the parent's next answer and incorrectly treat separate contexts as one cache.
@@ -78,3 +82,6 @@ def make_simulated_models() -> tuple[MeteredDemoModel, MeteredDemoModel]:
 USER_PROMPTS = [
     "Explain ReAct and how a specialist's tool observations help a parent agent answer."
 ]
+
+# The client owns the question. The parent sees it first, while only the
+# delegated task and specialist summary cross the explicit handoff boundary.

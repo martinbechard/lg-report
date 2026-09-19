@@ -13,9 +13,7 @@ Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 import argparse
 import os
 from dataclasses import dataclass
-from datetime import UTC, datetime
 from pathlib import Path
-from uuid import uuid4
 
 from dotenv import load_dotenv
 
@@ -32,16 +30,21 @@ class Settings:
     """Carry one run's configuration and price snapshot into the reporting wrapper.
 
     ``live=False`` selects scripted responses; ``capture_content=False`` omits
-    captured request/response bodies, not token usage. ``output`` must be a new
-    directory when recording begins. For example, Settings(False, out, prices,
+    captured request/response bodies, not token usage. ``output`` is the working
+    directory by default;
+    ``overwrite`` permits replacing its four report files. Explicit output
+    directories must be new. For example, Settings(False, out, prices,
     True) records a readable offline teaching run. Freezing the container avoids
-    accidental reassignment; the Prices object itself remains mutable.
+    accidental reassignment; the Prices object itself remains mutable. ``output``
+    is the report root and must be owned by the caller run; this value does not
+    itself create directories or files.
     """
 
     live: bool
     output: Path
     prices: Prices
     capture_content: bool
+    overwrite: bool = False
 
 
 def argument_parser(app_file: str, description: str) -> argparse.ArgumentParser:
@@ -55,7 +58,11 @@ def argument_parser(app_file: str, description: str) -> argparse.ArgumentParser:
     parser.add_argument(
         "--live", action="store_true", help="Use the provider configured in .env"
     )
-    parser.add_argument("--out", type=Path, help="New report directory")
+    parser.add_argument(
+        "--out",
+        type=Path,
+        help="New report directory; default: working directory (replaces report files)",
+    )
     parser.add_argument("--env-file", type=Path, default=app_dir / ".env")
     parser.add_argument("--prices", type=Path)
     parser.add_argument("--fx-file", type=Path)
@@ -64,17 +71,19 @@ def argument_parser(app_file: str, description: str) -> argparse.ArgumentParser:
 
 
 def settings_for(app_file: str, description: str, *, args=None) -> Settings:
-    """Resolve the standalone sample's CLI, environment, and cost references.
+    """Prepare a sample run with explicit configuration and usable cost references.
 
     Pass the sample's ``__file__`` and its argparse description. Optional args
     must come from argument_parser (possibly extended by the sample); omitting
-    args parses the standard CLI here. Paths are anchored
+    args parses the standard CLI here. Reference/configuration paths are anchored
     to the sample package so launching from another working directory still finds
-    its .env and the project catalog. Shell values take precedence over .env.
+    its .env and the project catalog. Run outputs default to the working directory. Shell values take precedence over .env.
     Price/FX lookups can access the network and write daily caches unless explicit
     files are supplied. FX failure leaves USD accounting available and records why
     EUR cannot be calculated. Invalid pricing files propagate their load errors;
-    argparse owns invalid CLI arguments. This does not invoke an LLM.
+    argparse owns invalid CLI arguments. This does not invoke an LLM. Only the
+    documented FX availability failure is retained as an accounting diagnostic
+    so USD reporting can continue.
     """
     app_dir = Path(app_file).resolve().parent
     project_root = app_dir.parents[1]
@@ -111,16 +120,22 @@ def settings_for(app_file: str, description: str, *, args=None) -> Settings:
         prices.exchange_error = (
             f"Daily EUR conversion unavailable ({type(exc).__name__})"
         )
-    # An explicit directory makes the destination predictable. Otherwise a unique
-    # timestamp/ID keeps successive runs from replacing earlier trace evidence.
-    output = args.out or project_root / "reports" / app_dir.name / (
-        datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ") + "-" + uuid4().hex[:8]
-    )
-    return Settings(args.live, output, prices, not args.metadata_only)
+    # Defaults are deliberately visible where the command was launched. A named
+    # --out directory retains the archival behavior and must not already exist.
+    output = args.out or Path.cwd()
+    print(f"Report directory: {output.resolve()}")
+    if args.out is None:
+        print(
+            "Replaces report.html, run.json, spans.jsonl, and prices.json in this directory."
+        )
+    return Settings(args.live, output, prices, not args.metadata_only, args.out is None)
 
 
 def launch_local(*, app_file, description, create_run, make_static_client, title):
-    """Wire a sample to the shared client loop and recorder.
+    """Run a sample conversation and save the evidence needed to inspect its cost.
+
+    Sample entry points call this after defining their graph/client factories.
+    It returns no result; the useful outputs are report files and client output.
 
     create_run(live) returns (compiled workflow, provider name, model ID).
     The workflow already contains its model adapters and tools; the two strings
@@ -129,6 +144,10 @@ def launch_local(*, app_file, description, create_run, make_static_client, title
     The static-client
     factory owns test requests; the platform never imports sample scenarios.
     Console requires a live model because fixed responses cannot answer new input.
+    The function owns CLI/configuration and report finalization, while the
+    supplied factories own graph construction and scripted scenario content.
+    Provider, pricing, recorder, and graph failures propagate after any report
+    artifacts already written by the recorder remain available for diagnosis.
     """
     parser = argument_parser(app_file, description)
     parser.add_argument("--client", choices=("static", "console"), default="static")
@@ -157,6 +176,7 @@ def launch_local(*, app_file, description, create_run, make_static_client, title
             title=title,
             demo=not settings.live,
             include_output=settings.capture_content,
+            overwrite=settings.overwrite,
         )
     finally:
         # A failed run can still leave useful diagnostic artifacts; avoid dead links.

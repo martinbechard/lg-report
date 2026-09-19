@@ -17,7 +17,7 @@ uv sync
 uv run python -m samples.thinking_agent.app
 ```
 
-The report is written under `reports/thinking_agent/<timestamp>-<id>/` together
+The report is written as `./report.html` in the current working directory together
 with the raw trace, normalized run, and prices. `--out reports/my-investigation`
 selects a new directory; existing runs are not overwritten.
 

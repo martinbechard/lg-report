@@ -30,17 +30,25 @@ class TestEmbedding:
     __test__ = False
 
     def __call__(self, input):
+        # Make retrieval deterministic for the two fixture topics.
+        # Chroma supplies input texts; return one three-dimensional vector per text.
+        # Keyword membership separates topics and makes no semantic-quality claim.
         return [
             [1.0, 0.0, 0.0] if "raven" in text else [0.0, 1.0, 0.0] for text in input
         ]
 
     def embed_query(self, input):
+        # Keep query vectors compatible with the stored fixture documents.
+        # Chroma passes query texts through this entry point; reuse the same encoding.
         return self(input)
 
     def name(self):
+        # Give Chroma a stable embedding identity when reopening the collection.
         return "test-topic-embedding"
 
 
+# A shard boundary may continue the current article; only the next title
+# starts a new article. Protect that continuity and the global article offset.
 def test_article_boundaries_across_files(tmp_path):
     first = tmp_path / "one.parquet"
     second = tmp_path / "two.parquet"
@@ -55,6 +63,8 @@ def test_article_boundaries_across_files(tmp_path):
     assert result[1][1] == 5
 
 
+# Chunk overlap preserves retrieval context and the final chunk must
+# cover the document tail rather than silently dropping it.
 def test_token_chunks_overlap_and_cover_tail():
     tokenizer = Tokenizer(models.WordLevel({"[UNK]": 0, "word": 1}, unk_token="[UNK]"))
     tokenizer.pre_tokenizer = pre_tokenizers.Whitespace()
@@ -68,6 +78,8 @@ def test_token_chunks_overlap_and_cover_tail():
     assert list(chunks("", tokenizer)) == []
 
 
+# Exercise the persisted local index through the real search tool and
+# graph to protect the complete offline RAG path.
 def test_chroma_persistence_tool_and_graph(tmp_path, monkeypatch):
     client = chromadb.PersistentClient(path=str(tmp_path / "db"))
     collection = client.create_collection(
@@ -111,6 +123,9 @@ def test_chroma_persistence_tool_and_graph(tmp_path, monkeypatch):
     def open_fixture_index(directory):
         # Replace disk selection at the agent's boundary; the graph still uses
         # the real test collection and real retrieval tool internally.
+        # Exercise the agent/tool graph with the already populated test collection.
+        # Record the requested directory so path selection remains checked, then
+        # return the real local collection instead of opening the production corpus.
         opened_paths.append(directory)
         return reopened
 
@@ -119,6 +134,9 @@ def test_chroma_persistence_tool_and_graph(tmp_path, monkeypatch):
         build_workflow(model), StaticClient([Request("Where does the raven live?")])
     ).invoke({}, {})
     assert opened_paths == [wikipedia_rag_agent.WIKIPEDIA_INDEX_DIRECTORY]
+    # The graph returns a state mapping with conversation messages. Select the
+    # ToolMessage containing executed retrieval evidence; the overall graph
+    # result is not itself a tool result, and the final AIMessage is the answer.
     observation = next(
         message for message in final["messages"] if message.type == "tool"
     )
@@ -127,11 +145,15 @@ def test_chroma_persistence_tool_and_graph(tmp_path, monkeypatch):
     assert final["messages"][-1].usage_metadata["input_tokens"] > 0
 
 
+# A partial index must fail explicitly so chat cannot report results
+# from an incomplete corpus.
 def test_chat_refuses_partial_index(tmp_path):
     with pytest.raises(ValueError, match="Build the index first"):
         open_index(tmp_path)
 
 
+# Reuse, resume, and settings validation protect costly ingestion from
+# duplicate work and prevent incompatible indexes from being accepted.
 def test_ingestion_reuse_resume_and_settings_guard(tmp_path, monkeypatch):
     from lg_report.platform import rag_index
 
@@ -149,6 +171,9 @@ def test_ingestion_reuse_resume_and_settings_guard(tmp_path, monkeypatch):
 
     def local_download(*args, filename, **kwargs):
         # Keep index lifecycle tests independent of external downloads/model caches.
+        # Resolve ingestion dependencies locally so lifecycle tests need no downloads.
+        # `filename` selects the saved tokenizer or a populated/empty parquet shard;
+        # return its filesystem path in the download helper contract.
         if filename == "tokenizer.json":
             return str(tokenizer_file)
         return str(source if "00000" in filename else empty)

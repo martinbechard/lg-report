@@ -60,7 +60,10 @@ class ReviewState(TypedDict, total=False):
 
 
 def build_workflow(model, *, max_rounds: int = 3, first_draft_high_level: bool = False):
-    """Build a bounded review workflow around one shared LLM.
+    """Give the application an answer that has passed through draft review.
+
+    Compile an author/judge cycle that can revise a draft up to the configured
+    budget and returns an explicit approval or limit-reached outcome.
 
     max_rounds counts drafts, including the first; at least one is required.
     first_draft_high_level is an explicit teaching option. It asks the author for
@@ -89,7 +92,11 @@ def build_workflow(model, *, max_rounds: int = 3, first_draft_high_level: bool =
     judge = evidence_judge.build_agent(model)
 
     def begin(state: ReviewState):
-        """Initialize a cycle from the external conversation, not from old drafts.
+        """Start a fresh review cycle for the caller's latest conversation turn.
+
+        ``state["messages"]`` is the external conversation supplied at invocation.
+        Return a partial state update that preserves that conversation and resets
+        internal histories/counters before LangGraph schedules the author.
 
         convert_to_messages accepts the dictionaries/tuples used by clients and
         yields message objects; later nodes can safely read .type and .content.
@@ -108,7 +115,10 @@ def build_workflow(model, *, max_rounds: int = 3, first_draft_high_level: bool =
         }
 
     def write(state: ReviewState):
-        """Spend one author LLM call on either the initial draft or its revision.
+        """Prepare a candidate answer, or correct it after the judge requests changes.
+
+        LangGraph calls this node first after begin and again on a revision edge.
+        The candidate goes to the judge next; it is not yet the user's answer.
 
         Read user messages on round zero. On later rounds, reuse the author-only
         history and append the judge's validated feedback. Return the updated
@@ -122,6 +132,9 @@ def build_workflow(model, *, max_rounds: int = 3, first_draft_high_level: bool =
             # this does not ask for false facts or force a predetermined rejection.
             if first_draft_high_level:
                 instruction += " For this first draft, give only a high-level overview; leave the detailed drill-down for revision."
+            # LangChain's HumanMessage is a user-role message container, not an
+            # interactive prompt or a human callback. Here application-generated
+            # instructions enter the author's model context through that role.
             history = [*state["messages"], HumanMessage(content=instruction)]
         else:
             # Previous draft and original request remain in the author history.
@@ -145,7 +158,12 @@ def build_workflow(model, *, max_rounds: int = 3, first_draft_high_level: bool =
         }
 
     def assess(state: ReviewState):
-        """Give the judge the current candidate and parse its decision strictly.
+        """Decide whether the candidate meets the user's request or needs revision.
+
+        After each author turn, ``state`` provides the draft, original conversation,
+        and prior judge history. Return updated judge history and a parsed review
+        for route to choose the next node. This model assessment is not an
+        independent factual guarantee; parsing only checks the decision contract.
 
         Repeating the original request/evidence keeps the rubric anchored to the
         user's needs instead of letting earlier feedback become a different task.
@@ -167,6 +185,8 @@ def build_workflow(model, *, max_rounds: int = 3, first_draft_high_level: bool =
                 content=f"Original conversation and evidence:\n{request}\n\nCURRENT draft:\n{state['draft']}"
             ),
         ]
+        # This role runnable calls the chat model and returns its AIMessage.
+        # response.text is model-authored JSON text, not an executed tool result.
         response = judge.invoke(history)
         # Strict validation protects the conditional edge from misspelled verdicts,
         # missing feedback, or an apparent approval embedded in arbitrary prose.
@@ -176,7 +196,10 @@ def build_workflow(model, *, max_rounds: int = 3, first_draft_high_level: bool =
         return {"judge_history": [*history, response], "review": review.model_dump()}
 
     def route(state: ReviewState):
-        """Choose an edge without calling an LLM or changing workflow state.
+        """Continue revision only when the draft needs work and budget remains.
+
+        LangGraph calls this after assess with its validated review and round
+        count in ``state``. Return ``author`` to revise or ``finish`` to deliver.
 
         The return value is an edge label, not a model instruction. The mapping
         below translates it to a node. Application code enforces the budget;
@@ -194,7 +217,11 @@ def build_workflow(model, *, max_rounds: int = 3, first_draft_high_level: bool =
         return "author"
 
     def finish(state: ReviewState):
-        """Publish exactly one user-facing answer, without another model call.
+        """Deliver the reviewed draft when approval or the revision budget ends the cycle.
+
+        Return a partial state update with the final conversation and outcome;
+        LangGraph then follows finish to END and returns state to the caller.
+        ``state`` supplies the latest draft, parsed review, and user history.
 
         Both approval and limit exhaustion arrive here. The verdict distinguishes
         them; the selected edge alone cannot. Keep the latest draft useful, but
@@ -211,6 +238,9 @@ def build_workflow(model, *, max_rounds: int = 3, first_draft_high_level: bool =
                 + "\n\nOutstanding review:\n"
                 + "\n".join(state["review"]["feedback"])
             )
+        # AIMessage marks assistant-role text for the external conversation.
+        # Constructing it does not call a model; answer is the already-produced
+        # draft with a local warning appended when review did not approve it.
         return {
             "messages": [*state["messages"], AIMessage(content=answer)],
             "outcome": "approved" if approved else "limit_reached",
@@ -219,6 +249,17 @@ def build_workflow(model, *, max_rounds: int = 3, first_draft_high_level: bool =
     # StateGraph defines the application control flow explicitly. The functions
     # above are nodes; a model response cannot skip the judge or call finish itself.
     # State updates replace their named fields, leaving other fields untouched.
+    # Actual return edge (author and judge each denote a single node):
+    #
+    # START -> begin -> author -> judge -- approve or budget spent --> finish -> END
+    #                    ^         |
+    #                    |         | revise, round < max_rounds
+    #                    +---------+
+    #
+    # Every revised draft returns through judge. Approval takes precedence on
+    # the last round; exhausting the budget with revise finishes unapproved.
+    # Provider or validation errors propagate instead of taking a finish edge.
+    #
     graph = StateGraph(ReviewState)
     graph.add_node("begin", begin)
     graph.add_node(

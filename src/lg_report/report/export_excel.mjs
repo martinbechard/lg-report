@@ -8,6 +8,9 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 import { pathToFileURL } from 'node:url';
 
+// Resolve the spreadsheet library from the configured export runtime, whose
+// dependencies may live outside this package. Importing loads its API; only
+// Workbook.create() below constructs the in-memory workbook.
 const require = createRequire(path.resolve(process.env.LG_EXCEL_RUNTIME || '.cache/excel', 'package.json'));
 const { Workbook, SpreadsheetFile } = await import(pathToFileURL(require.resolve('@oai/artifact-tool')).href);
 const [input, output] = process.argv.slice(2);
@@ -19,7 +22,9 @@ const wb = Workbook.create();
 const turns = wb.worksheets.add('Turns');
 const tree = wb.worksheets.add('Execution tree');
 const ref = wb.worksheets.add('Reference data');
-/** Convert a zero-based column index to Excel letters (0 → A, 26 → AA). */
+/** Give generated formulas a valid Excel column address.
+ * columnIndex is zero-based (0 → A, 26 → AA); return letters only, with no row.
+ */
 const columnLetter = columnIndex => {
   let letters = '';
   // Excel addresses use digits 1..26, with no zero digit. Subtracting one
@@ -29,18 +34,31 @@ const columnLetter = columnIndex => {
   }
   return letters;
 };
-/** Resolve a one-based row and zero-based column to a writable cell range. */
+/** Let value/formula writers address one cell without duplicating A1 syntax.
+ * sheet is an artifact-tool worksheet; rowNumber is one-based and columnIndex
+ * zero-based. Return its range handle; obtaining the handle writes nothing.
+ */
 const workbookCell = (sheet, rowNumber, columnIndex) => sheet.getRange(`${columnLetter(columnIndex)}${rowNumber}`);
+// Preserve captured content as readable cell data when populating a worksheet.
+// sheet selects the worksheet; rowNumber is one-based and columnIndex zero-based.
+// content is the value to store; null/undefined leaves an empty cell. The range
+// API expects a two-dimensional values grid, even when writing just one cell.
 // Captured prompts and tool output are untrusted cell data. Only writeFormula() may
 // create executable spreadsheet formulas; a leading '=' in content stays literal.
 const writeCellValue = (sheet, rowNumber, columnIndex, content) => {
   const literal = typeof content === 'string' && content.startsWith('=') ? "'" + content : content ?? null;
   workbookCell(sheet, rowNumber, columnIndex).values = [[literal]];
 };
-/** Write a formula produced by this exporter, never captured message content. */
+/** Keep workbook estimates editable by installing a generated calculation.
+ * sheet, one-based rowNumber, and zero-based columnIndex select its destination.
+ * expression is exporter-authored formula text; the formulas property registers
+ * it for workbook calculation rather than displaying it as literal content.
+ */
 const writeFormula = (sheet, rowNumber, columnIndex, expression) => {
   workbookCell(sheet, rowNumber, columnIndex).formulas = [[expression]];
 };
+// Bridge JSON decimal strings into spreadsheet numbers while retaining missing
+// evidence. sourceValue comes from the Python projection; return a number or null.
 // Null denotes unavailable telemetry/rates; Number(null) would falsely make it zero.
 const optionalNumber = sourceValue => sourceValue == null ? null : Number(sourceValue);
 const labels=['Fresh input','Cache read','Cache write','Output (non-reasoning)','Reasoning'];
@@ -52,6 +70,9 @@ const treeHeaders=['Operation','Depth','Type','Model · effort','Status','Input 
 const rateRows = new Map();
 const rateEntries=Object.entries(data.prices.models);
 
+// Give a newly populated sheet consistent readable formatting. sheet is the
+// worksheet handle; cols and rows are inclusive extents counted from A1. This
+// mutates formatting and frozen panes, without changing stored amounts/formulas.
 // Freeze both identifiers and headers: wide token/currency columns must remain
 // understandable while the reader scrolls through a long conversation.
 function styleWorksheet(sheet,cols,rows) {
@@ -120,6 +141,10 @@ const turnRows=new Map();
 // Each row follows the conversation's request → context → response sequence.
 // Totals reference charge rows, never the repeated explanatory context counts.
 const sequence=[];
+// Make recorded messages readable in workbook content rows. messages is an array
+// of normalized request/response containers; return combined display text, or an
+// empty string for absent messages. tool_calls are proposed model arguments here,
+// while a tool event's response contains that tool's captured execution result.
 // Preserve plain message text; serialize structured content and tool-call objects
 // so both provider response shapes remain readable. Empty parts add no blank blocks.
 const messageText = messages => messages?.map(m=>[
@@ -127,7 +152,10 @@ const messageText = messages => messages?.map(m=>[
   ...(m.tool_calls||[]).map(c=>JSON.stringify(c))
 ].filter(Boolean).join('\n')).join('\n') || '';
 let currentEvent=null;
-/** Append one ordered presentation row for the current event.
+/** Preserve the request/context/response story before writing workbook cells.
+ * stage is the displayed row label; the options describe optional detail data.
+ * Append to sequence using the currentEvent selected by the surrounding loop,
+ * and return the future one-based worksheet row for formulas to reference.
  * cat is a display category index (0..4), or null for noncharge context/detail.
  * tokens and total are counts, not prices; money formulas are attached later.
  */
@@ -204,12 +232,19 @@ const last=sequence.length+1;
 const sequenceHeaders=['Request','Turn','Sequence','Tokens','EUR / execution','USD / execution','Projected EUR','Projected USD','Content','Model · effort','Status','Context total tokens','Span ID'];
 styleWorksheet(turns,sequenceHeaders.length,last);
 turns.getRange('A1:M1').values=[sequenceHeaders];
+// Give forecast cells formulas that respond to the editable execution count.
+// sheet and one-based rowNumber select a row; all four column arguments are
+// zero-based source/destination positions. Unknown source costs remain Unknown.
 // Scaling before rounding is essential: sub-cent call costs would otherwise
 // become zero before a 100,000-execution forecast. Keep source columns precise.
 function writeProjectedCosts(sheet, rowNumber, eurColumn, usdColumn, projectedEurColumn, projectedUsdColumn) {
   writeFormula(sheet,rowNumber,projectedEurColumn,`=IF(ISNUMBER(${columnLetter(eurColumn)}${rowNumber}),ROUND(${columnLetter(eurColumn)}${rowNumber}*'Reference data'!$B$2,0),"Unknown")`);
   writeFormula(sheet,rowNumber,projectedUsdColumn,`=IF(ISNUMBER(${columnLetter(usdColumn)}${rowNumber}),ROUND(${columnLetter(usdColumn)}${rowNumber}*'Reference data'!$B$2,0),"Unknown")`);
 }
+// Produce a trustworthy total only when every contributing charge is known.
+// sheet, one-based rowNumber, and zero-based columnIndex select the destination;
+// sourceReferences contains generated A1 references, including sheet names when
+// necessary. Install a guarded sum formula, or write zero for an empty group.
 // SUM alone ignores text cells, which would turn an unknown charge into a
 // deceptively complete total. Require every referenced charge to be numeric.
 function sumKnownCharges(sheet, rowNumber, columnIndex, sourceReferences) {
@@ -299,6 +334,10 @@ turns.getRange(`D2:D${last}`).setNumberFormat('#,##0');
 turns.getRange(`L2:L${last}`).setNumberFormat('#,##0');
 turns.getRange(`A2:M${last}`).conditionalFormats.addCustom('$K2="error"',{fill:'#ffd3d3',font:{color:'#8b1010'}});
 
+// Let an execution-tree row display its contained model costs without creating
+// another billing source. sheet/r select its destination worksheet/one-based row;
+// sourceRows contains one-based call-total row numbers in Turns. Write formulas
+// referring to those calls and their category rows, then add execution forecasts.
 // Reference the same charge rows as Turns so both views recalculate together.
 // Subtree rows repeat descendant costs for drill-down; they are not new charges
 // and must never be added to the run total.
@@ -313,6 +352,9 @@ function writeSubtreeCosts(sheet,r,sourceRows){
   for(let j=0;j<2;j++)sumKnownCharges(sheet,r,24+j,sourceRows.map(n=>`'Turns'!${columnLetter(4+j)}${n}`));
   writeProjectedCosts(sheet,r,24,25,26,27);
 }
+// Keep tiny per-execution costs visible while presenting forecasts as whole
+// currency units. sheet is the execution-tree worksheet; rows is its last row.
+// Set number formats on data rows only; this does not round the stored values.
 function formatTreeAmounts(sheet,rows){
   for(const c of ['K','L','N','O','Q','R','T','U','W','X','Y','Z'])sheet.getRange(`${c}2:${c}${rows}`).setNumberFormat('0.###############;-0.###############;0');
   sheet.getRange(`AA2:AB${rows}`).setNumberFormat('#,##0');
@@ -370,10 +412,13 @@ if(Math.abs(actual-expected)>1e-10) throw new Error(`USD mismatch ${actual} vs $
 const initial=workbookCell(turns,2,6).values[0][0];
 writeCellValue(ref,2,1,200000);wb.recalculate();
 const changed=workbookCell(turns,2,6).values[0][0];
-const expectedChanged=Math.round(expected*Number(data.prices.exchange.rate)*200000);
+// FX can be unavailable in a standalone batch. Preserve Unknown rather than
+// crashing during this validation probe or inventing a zero conversion rate.
+const expectedChanged=data.prices.exchange
+  ? Math.round(expected*Number(data.prices.exchange.rate)*200000) : null;
 // After changing executions, rounded EUR must match the independently scaled
 // expectation; otherwise the workbook's editable forecast is not trustworthy.
-if(Math.abs(changed-expectedChanged)>0.00001) throw new Error('Execution multiplier does not recalculate');
+if(expectedChanged !== null && Math.abs(changed-expectedChanged)>0.00001) throw new Error('Execution multiplier does not recalculate');
 writeCellValue(ref,2,1,100000);wb.recalculate();
 console.log(JSON.stringify({runUSD:actual,projectedEUR:initial,projectionAt200000:changed,rows:last,treeRows:treeLast}));
 console.log((await wb.inspect({kind:'match',searchTerm:'#REF!|#DIV/0!|#VALUE!|#NAME\\?|#NUM!',options:{useRegex:true,maxResults:10},maxChars:1500})).ndjson);

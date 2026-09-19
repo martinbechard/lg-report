@@ -17,8 +17,13 @@ from lg_report.workflows.tool_chat import build_workflow
 from .test_case import USER_PROMPTS, make_simulated_model
 
 
+# This adapter exists to make the model/tool/model lifecycle visible at the
+# sample boundary. The local workflow executes the tool; this module only picks
+# the client and model and hands both to the shared recorder.
 def create_run(live: bool):
-    """Build the workflow and return its provider and model name for reporting.
+    """Prepare the reference-lookup lesson so tool observations can inform answers.
+
+    Return the workflow and its provider/model labels for report accounting.
 
     ``live`` is the explicit CLI choice: True constructs configured API clients;
     False creates fresh scripted models for this sample's fixed test case. Neither
@@ -35,11 +40,14 @@ def create_run(live: bool):
 
 
 def main() -> None:
-    """Select a client and record one complete conversation."""
+    """Run the reference-lookup lesson and save its model/tool exchange report."""
     launch_local(
         app_file=__file__,
         description=__doc__,
         create_run=create_run,
+        # The launcher calls this zero-argument factory only for static input.
+        # Request holds one user turn; StaticClient supplies these turns in order.
+        # Creating the client does not invoke the graph or supply model answers.
         make_static_client=lambda: StaticClient(
             [Request(prompt) for prompt in USER_PROMPTS]
         ),

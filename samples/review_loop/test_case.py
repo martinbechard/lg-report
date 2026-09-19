@@ -10,6 +10,8 @@ Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 
 import json
 
+# LangChain's AIMessage holds an assistant response; constructing it runs nothing.
+# Its tool_calls, when present, are proposed names/arguments, not tool results.
 from langchain_core.messages import AIMessage
 
 from lg_report.agents.evidence_judge import SYSTEM_PROMPT as JUDGE_INSTRUCTIONS
@@ -78,8 +80,13 @@ FINAL_REVIEW = {
 }
 
 
+# The fixture intentionally serializes judge output as JSON because the real
+# workflow must parse and validate model text. This catches schema/routing
+# regressions while keeping semantic quality claims outside the offline test.
 def make_simulated_model():
-    """Return a fresh shared simulator for the complete two-round scenario.
+    """Demonstrate a draft improving after feedback in a repeatable review session.
+
+    Return a fresh shared simulator for the complete two-round scenario.
 
     The simulator recognizes each tool-free role by its actual system instruction.
     The author consumes its two answers in order, and the judge consumes its two

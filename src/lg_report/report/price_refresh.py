@@ -44,6 +44,11 @@ class TableRows(HTMLParser):
     """
 
     def __init__(self):
+        """Prepare an empty price-table collector for a subsequent feed(html).
+
+        HTMLParser owns parsing and calls the handlers below synchronously
+        during feed(); constructing this object does not read a page.
+        """
         super().__init__()
         self.rows = []
         self.row = []
@@ -51,7 +56,11 @@ class TableRows(HTMLParser):
         self.in_sup = False
 
     def handle_starttag(self, tag, attrs):
-        """Track table-cell boundaries and suppress superscript note markers."""
+        """Keep price columns separate as HTMLParser encounters opening tags.
+
+        ``tag`` is the element name; ``attrs`` contains unused HTML attributes.
+        Reset the active row/cell or enter footnote suppression for later text.
+        """
         # Footnote digits are not tariff digits; row/cell boundaries reset the
         # accumulator so only one table cell contributes to each price field.
         if tag == "sup":
@@ -62,14 +71,22 @@ class TableRows(HTMLParser):
             self.cell = ""
 
     def handle_data(self, data):
-        """Keep cell text while ignoring page content outside a cell."""
+        """Collect tariff text for the current cell without importing page prose.
+
+        HTMLParser supplies decoded text chunks in ``data``; append eligible
+        chunks to the active cell so the closing-tag handler can retain it.
+        """
         # Accept text only inside an active cell and outside a footnote; page
         # prose or superscripts could otherwise masquerade as a price.
         if self.cell is not None and not self.in_sup:
             self.cell += data
 
     def handle_endtag(self, tag):
-        """Finish cells/rows for exact header and model-name validation."""
+        """Make completed tariff rows available for later price validation.
+
+        HTMLParser supplies the closing element name as ``tag``. Commit a cell
+        or row, or end footnote suppression, then return to the parser.
+        """
         # Footnote digits are not tariff digits; row/cell boundaries reset the
         # accumulator so only one table cell contributes to each price field.
         if tag == "sup":
@@ -84,7 +101,10 @@ class TableRows(HTMLParser):
 
 
 def parse_rate(key: str, text: str) -> Rate:
-    """Extract one supported provider:model tariff from its official page body.
+    """Establish a trustworthy tariff before the refresh loop replaces saved prices.
+
+    ``key`` is an allowlisted provider:model identity and ``text`` is its fetched
+    page body; return a Rate only when the expected pricing structure matches.
 
     Require exact identity, units, and a unique row so page redesigns fail closed.
     The returned Rate has amounts only: get_prices adds provenance after parsing
@@ -168,7 +188,10 @@ def parse_rate(key: str, text: str) -> Rate:
 
 
 def fetch_text(url: str) -> str:
-    """Retrieve an official source body with a bounded fifteen-second request.
+    """Supply the refresh parser with the source evidence for a tariff lookup.
+
+    ``url`` comes from the supported-source mapping. Execute a request with a
+    fifteen-second timeout and return the page body for parsing and retention.
 
     Return decoded UTF-8 text; network and decoding errors propagate to the
     refresh loop so the previous snapshot keeps its original verification date.

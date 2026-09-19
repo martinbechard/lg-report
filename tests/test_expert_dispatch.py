@@ -3,6 +3,8 @@
 These checks prove routing-tool execution, isolation, and cost accounting. Fixed
 responses do not prove a live model will classify every natural-language question.
 
+AI attribution: Modified with AI assistance.
+
 Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
 
@@ -18,6 +20,8 @@ from samples.expert_dispatch.app import create_run
 from samples.expert_dispatch.test_case import CASES
 
 
+# Exercise every scripted routing case and prove selected experts
+# receive isolated inputs while nested usage remains attributable and priced.
 def test_expert_selection_isolation_and_costs(tmp_path):
     graph, provider, model = create_run(False)
     client = StaticClient([Request(question) for _, question, _ in CASES])
@@ -68,6 +72,8 @@ def test_expert_selection_isolation_and_costs(tmp_path):
     )
 
 
+# Capture binding calls because a shared model instance must still
+# expose each agent's own tool schema at the invocation boundary.
 def test_shared_model_retains_separate_tool_bindings(monkeypatch):
     from lg_report.platform.shared_simulated_model import SharedSimulatedModel
     from lg_report.workflows.expert_dispatch import build_workflow
@@ -77,6 +83,9 @@ def test_shared_model_retains_separate_tool_bindings(monkeypatch):
     original = SharedSimulatedModel.bind_tools
 
     def capture_binding(self, tools, **kwargs):
+        # Observe agent-specific tool binding without replacing binding behavior.
+        # `self` is the shared model; `tools` and kwargs come from each agent builder.
+        # Return the original runnable binding after recording its schema arguments.
         binding = original(self, tools, **kwargs)
         bound_schemas.append(binding.kwargs["tool_definitions"])
         return binding
@@ -102,6 +111,8 @@ def test_shared_model_retains_separate_tool_bindings(monkeypatch):
     assert "general-purpose" not in str(task_schema)
 
 
+# The live factory owns one model configuration and must pass its
+# identity through unchanged rather than configuring a second hidden instance.
 def test_live_configures_one_model(monkeypatch):
     from samples.expert_dispatch import app
 
@@ -109,6 +120,8 @@ def test_live_configures_one_model(monkeypatch):
     configured_calls = []
 
     def configure_once():
+        # Detect duplicate live configuration without constructing a provider model.
+        # Return one sentinel object plus provider/model labels in the factory contract.
         configured_calls.append(True)
         return model_instance, "provider", "model"
 
@@ -120,6 +133,8 @@ def test_live_configures_one_model(monkeypatch):
     assert (provider, model) == ("provider", "model")
 
 
+# Replace builders with identity recorders to protect the invariant
+# that dispatcher and experts share the caller-supplied model.
 def test_workflow_passes_same_model_to_all_agents(monkeypatch):
     from lg_report.workflows import expert_dispatch as workflow
 
@@ -127,6 +142,8 @@ def test_workflow_passes_same_model_to_all_agents(monkeypatch):
     received = []
 
     def build_expert(shared_model):
+        # Check that each expert builder receives the identical shared model.
+        # Record shared_model and return an opaque stand-in; no expert runs here.
         received.append(shared_model)
         return object()
 
@@ -138,6 +155,8 @@ def test_workflow_passes_same_model_to_all_agents(monkeypatch):
         monkeypatch.setattr(expert, "build_agent", build_expert)
 
     def build_dispatcher(shared_model, experts):
+        # Check that dispatcher construction gets the same model and three experts.
+        # Return a recognizable workflow sentinel so the outer factory can be checked.
         received.append(shared_model)
         assert len(experts) == 3
         return "workflow"
@@ -147,6 +166,8 @@ def test_workflow_passes_same_model_to_all_agents(monkeypatch):
     assert len(received) == 4 and all(item is model for item in received)
 
 
+# AST and source checks enforce dependency direction and keep samples
+# from bypassing the production agent/workflow construction boundary.
 def test_agent_and_workflow_dependencies():
     root = Path(__file__).parents[1]
     for folder in ("agents", "workflows", "tools"):
@@ -166,6 +187,8 @@ def test_agent_and_workflow_dependencies():
     assert not list((root / "samples").glob("*/tools.py"))
 
 
+# Domain tools must label evidence and return an explicit miss for
+# empty, unknown, or cross-domain queries instead of inventing an answer.
 def test_domain_lookup_boundaries_and_missing_evidence():
     from lg_report.tools.domain_reference import (
         search_history_reference,
