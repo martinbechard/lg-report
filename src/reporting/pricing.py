@@ -38,6 +38,20 @@ class Rate(Record):
     cache_write_1h: Decimal | None = Field(default=None, ge=0, allow_inf_nan=False)
 
 
+class ModelCalibration(Record):
+    """Keep explicit calibration evidence separate from automatically refreshed prices.
+
+    A failed check has no capacity: it must not revive a guessed denominator.
+    Metadata verification establishes published capacity, not an empirical limit.
+    """
+
+    checked_at: datetime
+    capacity: int | None = Field(default=None, gt=0)
+    source: str | None = None
+    resolved_model: str | None = None
+    error: str | None = None
+
+
 class Prices(Record):
     """A report's reproducible tariff and FX snapshot, including lookup failures.
 
@@ -46,6 +60,7 @@ class Prices(Record):
     renderers so an export does not silently substitute newer tariffs.
     """
 
+    calibrations: dict[str, ModelCalibration] = Field(default_factory=dict)
     refresh_errors: dict[str, str] = Field(default_factory=dict)
     currency: str = "USD"
     exchange: ExchangeRate | None = None

@@ -61,6 +61,18 @@ def context_capacity(provider, model, prices):
     if illustrative:
         rate = prices.models.get(key)
         key = rate.based_on if rate else None
+    # An explicit check overrides the legacy table, including failed checks.
+    # Saved Prices snapshots carry this evidence, so rendering needs no network.
+    checked = prices.calibrations.get(key)
+    if checked is not None:
+        if checked.capacity is None or checked.error:
+            return None
+        return {
+            "capacity": checked.capacity,
+            "model": key,
+            "source": checked.source,
+            "illustrative": illustrative,
+        }
     capacity = capacities.get(key)
     if capacity is None:
         return None

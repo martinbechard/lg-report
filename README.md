@@ -287,6 +287,33 @@ Only model spans contribute token costs. Graph and tool spans show execution str
 
 Real usage comes from provider-reported `AIMessage.usage_metadata`. Missing usage or prices remain unknown. The simulator maintains a growing context ledger, counts canonical message JSON and tool definitions, and assumes the completed conversation is cached for the next request. These are illustrative counts, not a provider tokenizer. Simulated reasoning text is a teaching fixture. Live reports show only reasoning content exposed by the provider.
 
+Run context calibration explicitly when you want to verify the configured models:
+
+```bash
+uv run python scripts/calibrate_models.py
+# Or select a different catalog:
+uv run python scripts/calibrate_models.py --config path/to/models.json
+```
+
+The command reads `OPENAI_API_KEY` and `ANTHROPIC_API_KEY` from the environment
+or `.env`, checks every real entry in the catalog, and saves a `calibrations`
+section in that same file. Demo entries use their declared model basis. It checks
+model visibility with the key and obtains context capacity from OpenAI's official
+model page or Anthropic's model metadata. It makes no generation requests and
+does not empirically test the maximum prompt size or guarantee inference access.
+Keys and raw error responses are never stored. Unsupported providers, missing
+keys, and failed lookups are recorded as unavailable; the command exits nonzero
+if any real model fails while still saving successful checks. Pricing fields and
+aliases are preserved.
+
+Calibration never runs at startup, during requests, or during report rendering.
+New runs retain the saved calibration in their `prices.json` snapshot. An explicit
+failed check makes capacity unavailable instead of reverting to the hardcoded
+lookup; models with no calibration yet retain the legacy lookup. Existing saved
+reports keep their original snapshot. To apply a calibrated catalog when
+re-rendering an existing run, supply it explicitly with `--prices models.json`.
+Capacity is the published total, not remaining room after input and output.
+
 `models.json` contains exact `provider:model` keys and USD rates per million tokens. Costs use `Decimal`. Cache categories partition input; reasoning partitions output and uses the output rate. The app's cache TTL is five minutes. Unknown models or unpriced categories produce an incomplete known subtotal. At sample startup, standard prices for GPT-5.5, GPT-5.6 Luna, GPT-5.6 Sol, Claude Sonnet 5, Claude Opus 4.8, and Claude Fable 5.1 are refreshed from official provider pages. Successful lookups and source text are saved under `.cache/lg-report/prices` by date and reused that day (`LG_PRICES_CACHE` overrides the directory). Demo rates explicitly follow GPT-5.6 Luna. `--prices` or `LG_PRICES` supplies an authoritative file and disables price fetching. Failed lookups retain the last verified prices and dates, with a warning in the report; unsupported models require a supplied file. Saved reports keep their exact `prices.json` snapshot, and `render` does not reprice historical runs automatically. Estimates exclude embedding calls, tool fees, infrastructure, taxes, and discounts.
 
 Every cost identifies EUR or USD. The reference section records price verification dates and exchange-rate provenance. Saved dates provide provenance without marking every cost as an error. Exchange-rate publication can precede retrieval on weekends, holidays, or before the daily update; actual retrieval failures and missing data remain visible.
