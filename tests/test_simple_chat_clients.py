@@ -9,6 +9,7 @@ AI attribution: Generated with AI assistance.
 Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
 
+import pytest
 from fixtures.mock_client import MockClient
 from langchain_core.messages import AIMessage
 
@@ -16,6 +17,72 @@ from agent_runtime.agents.chat_agent import build_agent
 from agent_runtime.harness.console_client import ConsoleClient
 from agent_runtime.harness.conversation import Attachment, Conversation, Request
 from samples.simple_chat.scripted_run import make_simulated_model
+
+
+@pytest.mark.parametrize("exit_kind", ["quit", "eof", "sigint"])
+def test_console_exit_inside_async_runner_saves_report(tmp_path, exit_kind):
+    """Real SIGINT at input must exit as cleanly as /quit and EOF.
+
+    Raising KeyboardInterrupt directly misses asyncio.Runner's SIGINT handler:
+    it cancels the task while synchronous input continues waiting for a line.
+    Exercise the actual signal and recorder together, without a provider call.
+    """
+    import json
+    import signal
+
+    from reporting.execute_runnable import execute_runnable
+    from reporting.pricing import Prices
+
+    original_handler = signal.getsignal(signal.SIGINT)
+
+    def read(_):
+        """Reproduce a signal followed by the line that used to unblock input."""
+        if exit_kind == "sigint":
+            signal.raise_signal(signal.SIGINT)
+        if exit_kind == "eof":
+            raise EOFError
+        return "/quit"
+
+    directory = tmp_path / "report"
+    result = execute_runnable(
+        Conversation(None, ConsoleClient(read=read)),
+        {},
+        directory,
+        Prices(as_of="2026-09-22", note="No model calls", models={}),
+        provider="test",
+        model="test",
+    )
+    assert result is None
+    assert signal.getsignal(signal.SIGINT) == original_handler
+    assert (directory / "report.html").exists()
+    # No turns means no recorded spans; the exporter truthfully marks this
+    # empty report incomplete, but exiting must not mark it as an error.
+    assert json.loads((directory / "run.json").read_text())["status"] == "incomplete"
+
+
+@pytest.mark.parametrize(
+    "payload, expected",
+    [({"kind": "approval"}, "cancel"), ({"kind": "question"}, "/cancel")],
+)
+def test_console_sigint_at_workflow_prompt_does_not_cancel_task(payload, expected):
+    """Ctrl-C answers a workflow pause using its existing cancellation contract."""
+    import asyncio
+    import signal
+
+    def read(_):
+        """Use a real signal so the runner's cancellation behavior is exercised."""
+        signal.raise_signal(signal.SIGINT)
+        return "unexpected input"
+
+    async def answer():
+        """A later await must remain usable after the prompt handles Ctrl-C."""
+        handler = signal.getsignal(signal.SIGINT)
+        result = ConsoleClient(read=read, write=lambda _: None).answer(payload)
+        assert signal.getsignal(signal.SIGINT) == handler
+        await asyncio.sleep(0)
+        return result
+
+    assert asyncio.run(answer()) == expected
 
 
 # Static requests must attach file context only to the intended turn

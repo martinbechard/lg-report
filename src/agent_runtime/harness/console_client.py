@@ -12,6 +12,8 @@ AI attribution: Generated with AI assistance.
 Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
 
+import signal
+import threading
 from pathlib import Path
 
 from .conversation import Attachment, Request
@@ -59,6 +61,25 @@ class ConsoleClient:
         self.answer_callback = answer
         self.last_status = None
 
+    def _read_input(self, prompt: str) -> str:
+        """Let blocking terminal input raise Ctrl-C where the client can handle it.
+
+        asyncio.run normally handles SIGINT by cancelling its main task. During
+        synchronous input that cancellation cannot run, so input keeps waiting
+        and a later /quit exposes a delayed KeyboardInterrupt. Temporarily use
+        Python's ordinary input-time handler so receive/answer can apply their
+        existing exit policies. Restore the runner's handler even on failure;
+        interrupts during agent execution must retain asyncio's cancellation.
+        Only the main thread can change process signal handlers.
+        """
+        if threading.current_thread() is not threading.main_thread():
+            return self.read(prompt)
+        previous = signal.signal(signal.SIGINT, signal.default_int_handler)
+        try:
+            return self.read(prompt)
+        finally:
+            signal.signal(signal.SIGINT, previous)
+
     def receive(self) -> Request | None:
         """Take the next authored request, or collect terminal commands and input.
 
@@ -77,7 +98,7 @@ class ConsoleClient:
             self.prompter = None
         while True:
             try:
-                line = self.read("User: ")
+                line = self._read_input("User: ")
             except (EOFError, KeyboardInterrupt):
                 # EOF/Ctrl-C at the prompt is a normal user exit. Returning lets
                 # the recorder close spans and generate the session report.
@@ -165,7 +186,7 @@ class ConsoleClient:
         # does not silently approve and is distinct from aborting an active run.
         approval = payload["kind"] == "approval"
         try:
-            return self.read(
+            return self._read_input(
                 "approve / reject / cancel: "
                 if approval
                 else "Answer (/cancel to abandon): "
