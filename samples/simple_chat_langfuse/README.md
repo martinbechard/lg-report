@@ -2,7 +2,7 @@
 # Simple chat with Langfuse
 
 This is the same `agents/chat_agent.py` used by the local-report sample. It uses
-the same clients and `platform.Conversation`; only the recording wrapper changes.
+the same clients and `harness.Conversation`; only the recording wrapper changes.
 There is no second graph definition and no Langfuse-specific conversation loop.
 
 Start with [How the parts fit together](../../docs/chat-composition.md) for the
@@ -22,17 +22,17 @@ Live model mode additionally needs the selected provider key and model settings.
 ## Static test case
 
 ```bash
-uv run python -m samples.simple_chat_langfuse.app
+uv run python -m agent_runtime --sample simple_chat_langfuse
 ```
 
-This reuses `samples/simple_chat/test_case.py`: two user prompts and scripted
+This reuses `samples/simple_chat/scripted_run.py`: two user prompts and scripted
 assistant responses. It makes no LLM provider call, but sends real traces to the
 configured Langfuse endpoint. `--live` uses the same requests with a real model.
 
 ## Console chat
 
 ```bash
-uv run python -m samples.simple_chat_langfuse.app --client console --live
+uv run python -m agent_runtime --sample simple_chat_langfuse --client console --live
 ```
 
 Enter prompts at `User:`. `/attach PATH` queues a UTF-8 text file, `/send` sends
@@ -43,14 +43,20 @@ requires a real model because the static answers cannot answer arbitrary prompts
 Traces are **private by default**. Add `--public-trace` only when you want the
 captured content visible through a public trace link. This includes attached file
 text and applies to hosted as well as local Langfuse. API keys are still required.
-No local HTML, Excel, pricing refresh, or trace JSON files are produced here.
+Every run also writes `run.json`, `spans.jsonl`, `prices.json`, and `report.html`
+to `reports/simple_chat_langfuse/` (or `--out`). Local reporting observes the same
+execution as Langfuse; the workflow is not run twice. `--metadata-only` omits
+content from the local bundle. Excel remains a separate export.
 
 ## Execution and trace structure
 
-1. `app.py` chooses models, the shared `workflows/simple_chat.py` workflow, and a client.
-2. `platform.langfuse_runtime.launch` loads configuration and validates access
-   before constructing the graph. It selects the static or console client.
-3. `run_conversation` opens one root and attaches the official callback once.
+1. `sample.json` declares the shared simple-chat workflow and Langfuse tracing.
+   The shared launcher selects the client; the workflow requests its model from the factory.
+2. `execute_conversation` creates `LangfuseCapture`, which validates project access
+   before graph construction. The console application supplies the client.
+3. `conversation_trace` opens one root and supplies turn observation hooks.
+   `execute_conversation` attaches the official callback and calls `execute_runnable` once,
+   capturing the same conversation locally, including failures.
 4. `Conversation` requests each user turn, retains history, and invokes the graph.
    Its optional scope hook opens `Turn N`, records the result, and closes the span.
 5. The callback records nested graph/model/tool observations. The wrapper flushes

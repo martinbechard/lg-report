@@ -14,21 +14,21 @@ From the repository root:
 
 ```sh
 uv sync --locked
-uv run python -m samples.subagent_chat.app
+uv run python -m agent_runtime --sample subagent_chat
 ```
 
 The command prints the HTML path and creates `spans.jsonl`, `run.json`,
-`prices.json`, and `report.html` in the current working directory, replacing the previous default run.
-`--out` selects a new directory; existing directories are rejected.
-`--fx-file` supplies a local USD/EUR rate; otherwise the shared daily lookup/cache
-is used. No Langfuse service or credentials are involved.
+`prices.json`, and `report.html` in `reports/subagent_chat/`, replacing the previous default run.
+`--out` selects another directory; reruns replace its generated reports.
+`--fx-file` supplies a local USD/EUR rate; otherwise the saved shared
+`exchange-rate.json` is used without network access. No Langfuse service or credentials are involved.
 
 For a real model:
 
 ```sh
 cp samples/subagent_chat/.env.example samples/subagent_chat/.env
 # Configure LG_PROVIDER, LG_MODEL, and the selected provider's API key.
-uv run python -m samples.subagent_chat.app --live
+uv run python -m agent_runtime --sample subagent_chat --live
 ```
 
 The same provider/model configuration is used for both agents, with separate
@@ -37,37 +37,59 @@ number of calls. Environment variables override the sample's `.env`.
 
 ## Read the code
 
-- `app.py` selects models, client, and recorder.
-- `src/lg_report/workflows/subagent_chat.py` composes the participating agents.
-- `src/lg_report/agents/delegating_parent.py` owns the agent instructions and registration.
-- `src/lg_report/tools/workflow_reference.py` owns the callable evidence tools.
-- `src/lg_report/agents/workflow_specialist.py` owns the child role and lookup tool.
-- `test_case.py` owns two independent scripted models. Scripts specify model
-  responses and tool requests; they do not execute tools or calculate totals.
-- `workflow_reference` is reused from the tool-chat lesson. It is a local fixture
-  lookup, not a network search or a vector RAG pipeline.
-- `lg_report.platform.sample_runtime` handles configuration and attaches the local recorder.
+- `sample.json` declares the sample ID, display name, description, workflow, and
+  script module. The shared launcher selects clients and recording.
+- `src/agent_runtime/workflows/subagent_chat.py` composes the participating agents.
+- `src/agent_runtime/agents/delegating_parent.py` owns the agent instructions and registration.
+- `src/agent_runtime/tools/echo_tool.py` owns the local echo tool.
+- `src/agent_runtime/agents/workflow_specialist.py` owns the child role and echo tool.
+- `scripted_run.py` describes one conversation in execution order. `client` entries
+  supply static prompts; `ai` entries supply the workflow-created model;
+  `workflow-specialist` entries supply the model created by that agent.
+  Tool entries document expected observations; actual tools still run.
+- `src/agent_runtime/harness/model_factory.py` provides
+  `build_model(model_name=None, *, caller)`. Omit the name to use `LG_MODEL`.
+  The factory creates a fresh provider or simulated model on each call. Only
+  the harness chooses the mode; workflows and agents do not import fixtures.
+- `echo_tool` is reused from the tool-chat lesson. It returns
+  `Your input was: ` followed by the supplied `text` unchanged, with no network
+  or model call. The echo adds no independent factual evidence.
+- `agent_runtime.harness.sample_catalog.SampleCatalog` discovers metadata and
+  establishes the model factory scope. `settings.prepare_sample` resolves
+  shared launch inputs; `main` selects the client or listener. `execute_conversation`
+  executes a prepared console/static conversation with its recorder.
+- The launcher creates `ConsoleClient()` directly and calls
+  `configure_sample_script` from `harness/configure_sample_script.py` when authored
+  requests are needed, attaching a `ScriptPrompter` to that client.
+
+The workflow calls `build_model(caller="workflow")` and passes that model to the
+parent. The specialist calls `build_model(caller="workflow-specialist")` itself.
+Both calls use the same factory in live and simulated runs. Outside the runtime's
+construction scope the factory defaults to real models; live errors propagate.
+A model retains its mode and independent response cursor after the scope ends.
+This example uses one workflow-created model and one agent-created model; it
+does not infer separate response streams for multiple agents sharing one object.
 
 The specialist dictionary explicitly supplies its own system prompt, model, and
-lookup tool. The parent does not have that lookup tool. Its generated `task`
+echo tool. The parent does not have that echo tool. Its generated `task`
 request selects `workflow-specialist` and supplies a self-contained assignment.
 DeepAgents performs the invocation and returns the specialist's final message as
 the parent's tool result. The application never calls the specialist manually.
 
 `StateBackend` keeps framework file operations in memory. DeepAgents also exposes
 its standard built-in tools/default delegation capabilities; the scripted run
-uses only the named specialist and the reference lookup.
+uses only the named specialist and the echo tool.
 
 ## Expected sequence
 
 One user turn contains **four model requests and two tool executions**:
 
 1. Parent R1 emits a `task` request for `workflow-specialist`.
-2. Inside that task, specialist R2 requests `workflow_reference`.
-3. The lookup executes; specialist R3 consumes the result and returns a summary.
+2. Inside that task, specialist R2 requests `echo_tool`.
+3. The echo executes; specialist R3 consumes the result and returns a summary.
 4. Parent R4 consumes that summary and produces the final answer.
 
-In the execution tree, expand `task`: the specialist's graph, models, and lookup
+In the execution tree, expand `task`: the specialist's graph, models, and echo tool
 must be descendants of it. The conversation and chart include all four model
 calls. Parent/subtree rows already contain descendant costs; do not add them
 again to model rows.
@@ -84,9 +106,9 @@ Each simulated agent has its own context meter and response cursor. Its first
 request has no cached history; its second reuses its own previous context. Counts
 are illustrative JSON words/punctuation, not provider tokenizer counts. Actual
 provider usage is retained in live mode. All four model calls contribute to the
-turn cost; `task` and the local lookup have no additional model-token charge.
+turn cost; `task` and the local echo have no additional model-token charge.
 
-Try changing `DELEGATED_TASK` and `SPECIALIST_SUMMARY` in `test_case.py`. Inspect
+Try changing `DELEGATED_TASK` and `SPECIALIST_SUMMARY` in `scripted_run.py`. Inspect
 which agent's input grows and where the summary enters the parent's context.
 Keep the tool request's `subagent_type` aligned with the registered specialist.
 

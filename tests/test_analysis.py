@@ -17,20 +17,20 @@ from pathlib import Path
 
 import pytest
 
-from lg_report.agents.chat_agent import build_agent as build_chat_agent
-from lg_report.agents.investigation_agent import build_agent as build_thinking_agent
-from lg_report.agents.reference_chat_agent import build_agent as build_tool_agent
-from lg_report.report import exchange
-from lg_report.report.exchange import ExchangeRate, get_exchange_rate
-from lg_report.report.pricing import breakdown, cost, load_prices
-from lg_report.report.recording import record_run
-from lg_report.report.render import tree_rows
-from lg_report.report.schema import Run, Step, Usage
-from samples.simple_chat.test_case import make_simulated_model as make_chat_model
-from samples.thinking_agent.test_case import (
+from agent_runtime.agents.chat_agent import build_agent as build_chat_agent
+from agent_runtime.agents.investigation_agent import build_agent as build_thinking_agent
+from agent_runtime.agents.reference_chat_agent import build_agent as build_tool_agent
+from reporting import exchange
+from reporting.exchange import ExchangeRate, get_exchange_rate
+from reporting.execute_runnable import execute_runnable
+from reporting.pricing import breakdown, cost, load_prices
+from reporting.render import tree_rows
+from reporting.schema import Run, Step, Usage
+from samples.simple_chat.scripted_run import make_simulated_model as make_chat_model
+from samples.thinking_agent.scripted_run import (
     make_simulated_model as make_thinking_model,
 )
-from samples.tool_chat.test_case import make_simulated_model as make_tool_model
+from samples.tool_chat.scripted_run import make_simulated_model as make_tool_model
 
 
 @pytest.fixture
@@ -40,48 +40,56 @@ def prices():
     return load_prices(Path(__file__).parent / "fixtures/accounting_prices.json")
 
 
-# A same-day rate lookup should read the verified cache and avoid a
-# second network call, protecting deterministic accounting in repeated runs.
-def test_daily_cache_avoids_second_fetch(tmp_path, monkeypatch):
+def test_saved_exchange_rate_is_offline_even_when_old(tmp_path, monkeypatch):
+    """An old saved rate is usable without waiting on a network refresh."""
+    import urllib.request
+
+    path = tmp_path / "exchange-rate.json"
+    path.write_text('{"rate":"0.88","date":"2000-01-01"}')
+    monkeypatch.setattr(exchange, "DEFAULT_RATE_FILE", path)
+
+    def forbidden(*args, **kwargs):
+        """Any FX network attempt inside report execution violates the boundary."""
+        pytest.fail("Reading a saved rate must not access the network")
+
+    monkeypatch.setattr(urllib.request, "urlopen", forbidden)
+    assert get_exchange_rate().rate == Decimal("0.88")
+    assert get_exchange_rate(path).source == str(path)
+    path.unlink()
+    with pytest.raises(FileNotFoundError):
+        get_exchange_rate()
+
+
+@pytest.mark.parametrize("fails", [False, True])
+def test_exchange_refresh_preserves_snapshot_on_failure(tmp_path, monkeypatch, fails):
+    """Only the refresh script fetches; unsuccessful refresh never erases evidence."""
+    import runpy
+    import sys
+
+    root = Path(__file__).resolve().parents[1]
+    main = runpy.run_path(str(root / "scripts/update_exchange_rate.py"))["main"]
+    path = tmp_path / "exchange-rate.json"
+    previous = '{"rate":"0.88","date":"2000-01-01"}'
+    path.write_text(previous)
+    rate = ExchangeRate(rate="0.9", date="2026-09-17", fetched_at=datetime.now(UTC))
     calls = []
-    rate = ExchangeRate(rate="0.871", date="2026-09-17", fetched_at=datetime.now(UTC))
 
     def fetch():
-        # Observe cache misses without network access. Return the same fixed rate
-        # on each fetch so only the number of calls distinguishes reuse from refresh.
+        """Substitute one deterministic service response or network failure."""
         calls.append(1)
+        if fails:
+            raise OSError("service unavailable")
         return rate
 
-    monkeypatch.setattr(exchange, "fetch_exchange_rate", fetch)
-    assert get_exchange_rate(cache_dir=tmp_path) == rate
-    assert get_exchange_rate(cache_dir=tmp_path) == rate
-    assert len(calls) == 1
-    assert (tmp_path / f"{datetime.now().astimezone().date()}.json").exists()
-
-
-# An explicit rates file is the offline authority and must bypass
-# network access entirely.
-def test_supplied_file_is_offline(tmp_path, monkeypatch):
-    path = tmp_path / "provided.json"
-    path.write_text('{"rate":"0.88","date":"2026-09-16"}')
-
-    def forbidden():
-        # Fail immediately if the explicit-file path attempts a network fallback.
-        # The replacement needs no arguments because fetch_exchange_rate takes none.
-        pytest.fail("A supplied file must not trigger a network lookup")
-
-    monkeypatch.setattr(exchange, "fetch_exchange_rate", forbidden)
-    result = get_exchange_rate(path)
-    assert result.rate == Decimal("0.88") and result.source == str(path)
-
-
-# Yesterday's cache cannot silently stand in for today's rates; this
-# keeps freshness metadata honest when refresh is required.
-def test_old_cache_does_not_replace_today(tmp_path, monkeypatch):
-    (tmp_path / "2000-01-01.json").write_text('{"rate":"0.1","date":"2000-01-01"}')
-    rate = ExchangeRate(rate="0.9", date="2026-09-17")
-    monkeypatch.setattr(exchange, "fetch_exchange_rate", lambda: rate)
-    assert get_exchange_rate(cache_dir=tmp_path).rate == Decimal("0.9")
+    monkeypatch.setitem(main.__globals__, "fetch_exchange_rate", fetch)
+    monkeypatch.setattr(sys, "argv", ["update_exchange_rate.py", "--out", str(path)])
+    assert main() == (1 if fails else 0)
+    assert calls == [1]
+    if fails:
+        assert path.read_text() == previous
+    else:
+        assert get_exchange_rate(path) == rate
+    assert not path.with_suffix(".json.tmp").exists()
 
 
 @pytest.mark.parametrize(
@@ -133,8 +141,8 @@ def test_disjoint_token_columns_reconcile(prices):
 def test_annotated_tool_tree_and_parent_totals(tmp_path, prices):
     out = tmp_path / "run"
     prices.exchange = ExchangeRate(rate="0.871", date="2026-09-17")
-    record_run(
-        build_tool_agent(make_tool_model()),
+    execute_runnable(
+        build_tool_agent({"model": make_tool_model()}),
         {"messages": [("user", "Explain ReAct")]},
         out,
         prices,
@@ -144,9 +152,9 @@ def test_annotated_tool_tree_and_parent_totals(tmp_path, prices):
     )
     run = Run.model_validate_json((out / "run.json").read_text())
     tool = next(s for s in run.steps if s.kind == "tool")
-    assert "local agent-workflow reference" in tool.context["description"]
+    assert "Return the provided text" in tool.context["description"]
     models = [s for s in run.steps if s.kind == "model"]
-    assert models[0].context["requested_tools"] == ["workflow_reference"]
+    assert models[0].context["requested_tools"] == ["echo_tool"]
     assert models[1].context["finish_reason"] == "stop"
     assert "report_description" in models[0].context
     assert "message_count" in models[0].context
@@ -162,10 +170,10 @@ def test_annotated_tool_tree_and_parent_totals(tmp_path, prices):
     assert "Fresh input" in html and "Reasoning" in html
 
 
-# Reporting must expose stale verification and explicit units so a
-# reader can distinguish known costs from unsupported conversions.
-def test_stale_dates_and_explicit_units(tmp_path, prices):
-    from lg_report.report.render import render
+# Saved dates provide provenance, not evidence of failed retrieval. Older
+# references must retain correct amounts without coloring every cost as an error.
+def test_reference_dates_and_explicit_units(tmp_path, prices):
+    from reporting.render import render
 
     prices.as_of = __import__("datetime").date(2000, 1, 1)
     for rate in prices.models.values():
@@ -186,20 +194,33 @@ def test_stale_dates_and_explicit_units(tmp_path, prices):
     output = tmp_path / "dated.html"
     render(run, prices, output)
     html = output.read_text()
-    assert 'class="stale">1 USD = 0.8 EUR' in html
+    assert "<p>1 USD = 0.8 EUR" in html
+    assert 'class="stale"' not in html
+    assert 'class="euro stale"' not in html
     assert "Prices 2000-01-01" not in html
-    assert 'class="rate-date stale">Verified 2000-01-01' in html
+    assert 'class="rate-date">Verified 2000-01-01' in html
     assert "FX 2000-01-02" not in html
     assert "Rate reference date <strong>2000-01-02</strong>" in html
     assert "USD / 1M tokens" in html and "EUR / 1M tokens" in html
     assert "0.000040 USD" in html and "0.000032 EUR" in html
-    assert tree_rows(run, prices)[0]["stale_prices"]
+    assert "earlier date alone does not mean retrieval failed" in html
+    # Actual retrieval failures still require a visible explanation.
+    prices.exchange = None
+    prices.exchange_error = "Daily EUR conversion unavailable (TimeoutError)"
+    prices.refresh_errors = {"demo:scripted-chat": "Price refresh failed"}
+    render(run, prices, output)
+    unavailable = output.read_text()
+    assert (
+        'class="notice">Daily EUR conversion unavailable (TimeoutError)' in unavailable
+    )
+    assert "EUR amounts are unknown" in unavailable
+    assert "Price refresh failed" in unavailable
 
 
 # Unknown child pricing must remain visible as partial knowledge while
 # known subtotals still reconcile to their parent activity.
 def test_partial_costs_reconcile_with_parent(prices):
-    from lg_report.report.pricing import summarize
+    from reporting.pricing import summarize
 
     step = Step(
         id="m",
@@ -221,18 +242,19 @@ def test_partial_costs_reconcile_with_parent(prices):
 # The documented multi-turn sample protects context growth and report
 # ordering over more than one user request.
 def test_complete_multiturn_sample(tmp_path, prices):
-    from lg_report.platform.conversation import Conversation, Request
-    from lg_report.platform.static_client import StaticClient
-    from lg_report.report.render import conversation_turns
+    from fixtures.mock_client import MockClient
+
+    from agent_runtime.harness.conversation import Conversation, Request
+    from reporting.render import conversation_turns
 
     agent = Conversation(
-        build_tool_agent(make_tool_model()),
-        StaticClient(
+        build_tool_agent({"model": make_tool_model()}),
+        MockClient(
             [Request(p) for p in ["Explain ReAct", "Why do observations help?"]]
         ),
     )
     out = tmp_path / "conversation"
-    record_run(
+    execute_runnable(
         agent,
         {},
         out,
@@ -252,7 +274,7 @@ def test_complete_multiturn_sample(tmp_path, prices):
         "Why do observations help?",
     ]
     assert [len(t["events"]) for t in turns] == [3, 3]
-    from lg_report.platform.demo_meter import message_units
+    from agent_runtime.harness.demo_meter import message_units
 
     assert models[0].usage.cache_read == 0
     for previous, current in pairwise(models):
@@ -276,7 +298,7 @@ def test_complete_multiturn_sample(tmp_path, prices):
             )
             assert cell["usd"] == sum(e["cells"][index]["usd"] for e in turn["events"])
 
-    from lg_report.report.pricing import summarize
+    from reporting.pricing import summarize
 
     assert sum(t["total"] for t in turns) == summarize(run, prices)["known_cost"]
     assert all(e["step"].response for t in turns for e in t["events"])
@@ -284,7 +306,7 @@ def test_complete_multiturn_sample(tmp_path, prices):
     assert "No annotations" not in html and "Operation context" not in html
     assert "Span ID" in html and "Description" in html and "Model · effort" in html
     assert "scripted-chat-fast" in html and "Turn 2" in html
-    assert "Tool arguments" in html and "Tool call: workflow_reference" in html
+    assert "Tool arguments" in html and "Tool call: echo_tool" in html
     conversation = html.split("<h2>Conversation</h2>")[1].split(
         "<h2>Execution tree</h2>"
     )[0]
@@ -340,8 +362,8 @@ def test_complete_multiturn_sample(tmp_path, prices):
 def test_effort_from_provider_invocation(tmp_path):
     from uuid import uuid4
 
-    from lg_report.report.capture import TraceCapture
-    from lg_report.report.normalize import normalize
+    from agent_runtime.harness.trace_capture import TraceCapture
+    from reporting.normalize import normalize
 
     path = tmp_path / "trace.jsonl"
     capture = TraceCapture(path, "openai", "test-model")
@@ -357,7 +379,7 @@ def test_effort_from_provider_invocation(tmp_path):
 def test_context_simulation_retains_response_and_tool_result():
     from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 
-    from lg_report.platform.demo_meter import (
+    from agent_runtime.harness.demo_meter import (
         ContextSimulation,
         message_record,
         message_units,
@@ -392,19 +414,20 @@ def test_context_simulation_retains_response_and_tool_result():
 # Each request needs a fresh root while its model/tool components stay
 # nested under that request for turn-level attribution.
 def test_every_request_nests_components_under_fresh_input(tmp_path, prices, tool_loop):
-    from lg_report.platform.conversation import Conversation, Request
-    from lg_report.platform.static_client import StaticClient
+    from fixtures.mock_client import MockClient
+
+    from agent_runtime.harness.conversation import Conversation, Request
 
     # tool_loop selects the two paths whose fresh-input composition differs:
     # direct chat adds user messages; the tool graph also adds observations and
     # a second request per turn. Both must obey the same report nesting rules.
     out = tmp_path / "layout"
-    record_run(
+    execute_runnable(
         Conversation(
-            build_tool_agent(make_tool_model())
+            build_tool_agent({"model": make_tool_model()})
             if tool_loop
-            else build_chat_agent(make_chat_model()),
-            StaticClient([Request(p) for p in ["First question", "Follow-up"]]),
+            else build_chat_agent({"model": make_chat_model()}),
+            MockClient([Request(p) for p in ["First question", "Follow-up"]]),
         ),
         {},
         out,
@@ -469,8 +492,8 @@ def test_unspecified_cache_write_uses_five_minute_rate(prices):
 def test_thinking_sample_accounts_for_reasoning(tmp_path, prices):
 
     out = tmp_path / "thinking"
-    record_run(
-        build_thinking_agent(make_thinking_model()),
+    execute_runnable(
+        build_thinking_agent({"model": make_thinking_model()}),
         {"messages": [("user", "Investigate latency")]},
         out,
         prices,
@@ -507,3 +530,108 @@ def test_thinking_sample_accounts_for_reasoning(tmp_path, prices):
         models[4].usage.cache_read
         == heavy.usage.input_tokens + heavy.usage.output_tokens - heavy.usage.reasoning
     )
+
+
+@pytest.mark.parametrize(
+    ("provider", "model", "tokens", "expected"),
+    [
+        ("openai", "gpt-5.5", 525_000, 50),
+        ("openai", "gpt-5.6-luna", 0, 0),
+        ("openai", "gpt-5.6-sol", 1_050_000, 100),
+        ("anthropic", "claude-sonnet-5", 250_000, 25),
+        ("anthropic", "claude-opus-4-8", 250_000, 25),
+        ("anthropic", "claude-fable-5-1", 250_000, 25),
+        ("openai", "unknown", 100, None),
+    ],
+)
+def test_context_occupancy_uses_inclusive_input(
+    prices, provider, model, tokens, expected
+):
+    """Cached tokens count once; output and unfamiliar models cannot distort occupancy."""
+    from reporting.context import context_utilization
+
+    step = Step(
+        id="m",
+        name="model",
+        kind="model",
+        start_ns=0,
+        end_ns=1,
+        status="ok",
+        provider=provider,
+        model=model,
+        usage=Usage(input_tokens=tokens, output_tokens=200, cache_read=tokens),
+    )
+    result = context_utilization(step, prices)
+    if expected is None:
+        assert result is None
+    else:
+        assert result["percent"] == expected
+        assert result["tokens"] == tokens
+    step.usage = None
+    assert context_utilization(step, prices) is None
+
+
+def test_context_chart_gaps_axes_and_thinner_line(tmp_path, prices):
+    """Exercise real rendering with missing, zero, half-full, and overfull inputs."""
+    from reporting.render import conversation_turns, cost_chart, render
+
+    prices.exchange = ExchangeRate(rate="0.8", date="2026-09-20")
+    # Reuse the arithmetic tariff while declaring its model basis explicitly;
+    # the ratio must remain labelled illustrative for these simulated requests.
+    prices.models["demo:scripted-chat"].based_on = "openai:gpt-5.6-luna"
+    run = Run(
+        id="context",
+        title="Context chart",
+        status="ok",
+        demo=True,
+        steps=[
+            Step(
+                id=str(i),
+                name="model",
+                kind="model",
+                start_ns=i,
+                end_ns=i + 1,
+                status="ok",
+                provider="demo",
+                model="scripted-chat",
+                usage=None
+                if count is None
+                else Usage(input_tokens=count, output_tokens=10),
+            )
+            for i, count in enumerate([525_000, None, 0, 1_575_000])
+        ],
+    )
+    chart = cost_chart(conversation_turns(run, prices), prices)
+    assert len(chart["context_lines"]) == 2
+    assert chart["context_missing"] and chart["context_illustrative"]
+    assert chart["bars"][0]["context"]["percent"] == 50
+    assert chart["bars"][2]["context_y"] == 290
+    assert chart["bars"][3]["context_y"] == 30
+    assert chart["context_ticks"][-1]["value"] == 150
+    destination = tmp_path / "context.html"
+    render(run, prices, destination)
+    html = destination.read_text()
+    assert 'stroke="#17734b" stroke-width="1.5"' in html
+    assert 'stroke="#912c42" stroke-width="3"' in html
+    assert "50.000%" in html and "0.000%" in html
+    assert "Illustrative context used" in html and "Context %" in html
+    assert "gaps are not zero" in html
+
+
+def test_context_capacity_resolves_explicit_alias(prices):
+    """An explicit model alias works without guessing suffixes of unknown models."""
+    from reporting.context import context_utilization
+
+    prices.aliases["openai:dated-model"] = "openai:gpt-5.5"
+    step = Step(
+        id="m",
+        name="model",
+        kind="model",
+        start_ns=0,
+        end_ns=1,
+        status="ok",
+        provider="openai",
+        model="dated-model",
+        usage=Usage(input_tokens=105_000, output_tokens=0),
+    )
+    assert context_utilization(step, prices)["percent"] == 10

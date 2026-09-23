@@ -1,0 +1,8 @@
+{
+  "rate": "0.87032",
+  "date": "2026-09-21",
+  "fetched_at": "2026-09-21T21:41:19.039349Z",
+  "source": "https://api.frankfurter.dev/v2/rate/usd/eur?providers=ecb",
+  "base": "USD",
+  "quote": "EUR"
+}

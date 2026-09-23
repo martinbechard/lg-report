@@ -1,0 +1,120 @@
+{
+  "schema_version": 1,
+  "id": "01a0c6a6-3860-73e3-bf9f-bcbb281c76b4",
+  "title": "rag_chat · turn 5",
+  "demo": false,
+  "status": "ok",
+  "steps": [
+    {
+      "id": "01a0c6a6-3860-73e3-bf9f-bcbb281c76b4",
+      "parent_id": null,
+      "name": "wikipedia_rag_agent",
+      "kind": "workflow",
+      "start_ns": 1790039177312968000,
+      "end_ns": 1790039179156885000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "report_turn": 5,
+        "thread_id": "6489670c-f560-41f2-bfc7-227e9bb43042",
+        "description": "Execute the wikipedia_rag_agent workflow operation and pass its result to the next graph step."
+      }
+    },
+    {
+      "id": "01a0c6a6-3863-7fb1-8940-a83efb7f3e4e",
+      "parent_id": "01a0c6a6-3860-73e3-bf9f-bcbb281c76b4",
+      "name": "model",
+      "kind": "workflow",
+      "start_ns": 1790039177315375000,
+      "end_ns": 1790039179154769000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "model",
+        "langgraph_step": 25,
+        "report_turn": 5,
+        "thread_id": "6489670c-f560-41f2-bfc7-227e9bb43042",
+        "tags": [
+          "graph:step:25"
+        ],
+        "description": "Prepare the current conversation, run model middleware, and invoke the chat model."
+      }
+    },
+    {
+      "id": "01a0c6a6-3864-7172-80db-efbcb00b2264",
+      "parent_id": "01a0c6a6-3863-7fb1-8940-a83efb7f3e4e",
+      "name": "ChatOpenAI",
+      "kind": "model",
+      "start_ns": 1790039177317124000,
+      "end_ns": 1790039179152928000,
+      "status": "ok",
+      "provider": "openai",
+      "model": "gpt-5.6-luna",
+      "effort": null,
+      "usage": {
+        "input_tokens": 9854,
+        "output_tokens": 87,
+        "cache_read": 9745,
+        "cache_write": 106,
+        "cache_write_5m": 0,
+        "cache_write_1h": 0,
+        "reasoning": 31
+      },
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "model",
+        "langgraph_step": 25,
+        "report_turn": 5,
+        "thread_id": "6489670c-f560-41f2-bfc7-227e9bb43042",
+        "tags": [
+          "seq:step:1"
+        ],
+        "description": "Generate the next assistant message or tool request from the current conversation.",
+        "input_message_bytes": 49835,
+        "message_count": 22,
+        "message_roles": [
+          "system",
+          "human",
+          "ai",
+          "tool",
+          "ai",
+          "tool",
+          "ai",
+          "human",
+          "ai",
+          "tool",
+          "ai",
+          "human",
+          "ai",
+          "tool",
+          "ai",
+          "tool",
+          "ai",
+          "human",
+          "ai",
+          "tool",
+          "ai",
+          "human"
+        ]
+      }
+    }
+  ],
+  "output": null
+}

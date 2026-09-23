@@ -1,0 +1,11 @@
+{
+  "samples": [
+    {
+      "id": "thinking_agent",
+      "name": "Thinking agent",
+      "description": "Investigate evidence and test a hypothesis.",
+      "workflow": "agent_runtime.workflows.thinking_agent:build_workflow",
+      "scripted_run": "samples.thinking_agent.scripted_run"
+    }
+  ]
+}

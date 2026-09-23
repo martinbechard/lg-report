@@ -30,22 +30,22 @@ From the repository root:
 
 ```sh
 uv sync --locked
-uv run python -m samples.expert_dispatch.app
+uv run python -m agent_runtime --sample expert_dispatch
 ```
 
 The default test case asks three questions in one conversation, one per domain.
 Expect twelve model requests (dispatcher, expert retrieval request, expert answer,
 dispatcher answer per turn), three task executions plus three reference lookups, and one final user-facing answer per turn. The command prints the HTML
-path at `./report.html` in the current working directory (replacing the previous default run) with raw spans, run.json, and prices.json.
+path at `reports/expert_dispatch/report.html` (replacing the previous default run) with raw spans, run.json, and prices.json.
 Use `--prices models.json --fx-file /path/to/rate.json` for offline reference data.
-Pricing and FX can otherwise use their free daily lookups.
+Model-price refreshes can otherwise use the network; FX only reads the shared saved reference.
 
 ## Real questions in the console
 
 ```sh
 cp samples/expert_dispatch/.env.example samples/expert_dispatch/.env
 # Set LG_PROVIDER, LG_MODEL, and the corresponding provider key.
-uv run python -m samples.expert_dispatch.app --client console --live
+uv run python -m agent_runtime --sample expert_dispatch --client console --live
 ```
 
 Use `User:` to submit questions; `/attach PATH` queues UTF-8 text, `/send` submits
@@ -57,13 +57,13 @@ For the fixed three-question scenario with a provider, use `--live` alone.
 
 ## Read the code
 
-- `app.py`: client/model selection and recording wiring.
-- `test_case.py`: fixed questions, scripted dispatch decisions, and expert answers.
-- `src/lg_report/workflows/expert_dispatch.py`: connects the four roles.
-- `src/lg_report/agents/dispatcher_agent.py`: routing instructions and native task tool.
-- `src/lg_report/agents/movie_expert.py`, `sports_expert.py`, `history_expert.py`: independent expert definitions.
-- Shared `platform` code: console/static clients, history, configuration, simulation.
-- `src/lg_report/tools/domain_reference.py`: real local lookups with source-labelled passages and explicit misses.
+- `sample.json`: discovery metadata and workflow selection.
+- `scripted_run.py`: fixed questions, scripted dispatch decisions, and expert answers.
+- `src/agent_runtime/workflows/expert_dispatch.py`: connects the four roles.
+- `src/agent_runtime/agents/dispatcher_agent.py`: routing instructions and native task tool.
+- `src/agent_runtime/agents/reference_expert.py`: one shared factory with independent movie, sports, and history definitions.
+- Shared `harness` code: console/static clients, history, configuration, simulation.
+- `src/agent_runtime/tools/search_reference.py`: real local lookups with source-labelled passages and explicit misses.
 - Shared `report` code: capture, prices, HTML and Excel export.
 
 The dispatcher model selects by meaning using the registered expert descriptions;

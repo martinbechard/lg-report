@@ -1,0 +1,111 @@
+{
+  "refresh_errors": {},
+  "currency": "USD",
+  "exchange": {
+    "rate": "0.8726",
+    "date": "2026-09-18",
+    "fetched_at": "2026-09-21T13:02:57.882963Z",
+    "source": "https://api.frankfurter.dev/v2/rate/usd/eur?providers=ecb",
+    "base": "USD",
+    "quote": "EUR"
+  },
+  "exchange_error": null,
+  "as_of": "2026-09-18",
+  "note": "Standard online token rates. Verify rates and model access before use. Cache writes with unspecified lifetime use the 5-minute rate unless an explicit cache_write rate is configured. No batch, regional, long-context, tool, or negotiated pricing adjustments are applied.",
+  "sources": [
+    "https://developers.openai.com/api/docs/models/gpt-5.5.md",
+    "https://developers.openai.com/api/docs/models/gpt-5.6-luna.md",
+    "https://developers.openai.com/api/docs/models/gpt-5.6-sol.md",
+    "https://platform.claude.com/docs/en/about-claude/pricing"
+  ],
+  "models": {
+    "openai:gpt-5.5": {
+      "fetched_at": "2026-09-18T16:57:21.647481Z",
+      "based_on": null,
+      "as_of": "2026-09-18",
+      "source": "https://developers.openai.com/api/docs/models/gpt-5.5.md",
+      "input": "5",
+      "output": "30",
+      "cache_read": "0.5",
+      "cache_write": null,
+      "cache_write_5m": null,
+      "cache_write_1h": null
+    },
+    "openai:gpt-5.6-luna": {
+      "fetched_at": "2026-09-18T16:57:21.648610Z",
+      "based_on": null,
+      "as_of": "2026-09-18",
+      "source": "https://developers.openai.com/api/docs/models/gpt-5.6-luna.md",
+      "input": "0.2",
+      "output": "1.2",
+      "cache_read": "0.02",
+      "cache_write": "0.250",
+      "cache_write_5m": null,
+      "cache_write_1h": null
+    },
+    "openai:gpt-5.6-sol": {
+      "fetched_at": "2026-09-18T16:57:21.648975Z",
+      "based_on": null,
+      "as_of": "2026-09-18",
+      "source": "https://developers.openai.com/api/docs/models/gpt-5.6-sol.md",
+      "input": "4",
+      "output": "20",
+      "cache_read": "0.4",
+      "cache_write": "5.00",
+      "cache_write_5m": null,
+      "cache_write_1h": null
+    },
+    "anthropic:claude-sonnet-5": {
+      "fetched_at": "2026-09-18T16:57:21.663815Z",
+      "based_on": null,
+      "as_of": "2026-09-18",
+      "source": "https://platform.claude.com/docs/en/about-claude/pricing",
+      "input": "2",
+      "output": "10",
+      "cache_read": "0.20",
+      "cache_write": null,
+      "cache_write_5m": "2.50",
+      "cache_write_1h": "4"
+    },
+    "anthropic:claude-opus-4-8": {
+      "fetched_at": "2026-09-18T16:57:21.674755Z",
+      "based_on": null,
+      "as_of": "2026-09-18",
+      "source": "https://platform.claude.com/docs/en/about-claude/pricing",
+      "input": "5",
+      "output": "25",
+      "cache_read": "0.50",
+      "cache_write": null,
+      "cache_write_5m": "6.25",
+      "cache_write_1h": "10"
+    },
+    "anthropic:claude-fable-5-1": {
+      "fetched_at": "2026-09-18T16:57:21.686328Z",
+      "based_on": null,
+      "as_of": "2026-09-18",
+      "source": "https://platform.claude.com/docs/en/about-claude/pricing",
+      "input": "10",
+      "output": "50",
+      "cache_read": "0.25",
+      "cache_write": null,
+      "cache_write_5m": "12.50",
+      "cache_write_1h": "20"
+    },
+    "demo:scripted-chat": {
+      "fetched_at": "2026-09-18T16:57:21.648610Z",
+      "based_on": "openai:gpt-5.6-luna",
+      "as_of": "2026-09-18",
+      "source": "Illustrative demo rates based on openai:gpt-5.6-luna; no provider billing",
+      "input": "0.2",
+      "output": "1.2",
+      "cache_read": "0.02",
+      "cache_write": "0.250",
+      "cache_write_5m": null,
+      "cache_write_1h": null
+    }
+  },
+  "aliases": {
+    "openai:gpt-5.5-2026-04-23": "openai:gpt-5.5",
+    "openai:gpt-5.6": "openai:gpt-5.6-sol"
+  }
+}

@@ -11,6 +11,8 @@ authors = [
 ]
 requires-python = ">=3.11"
 dependencies = [
+    "ag-ui-langgraph>=0.0.40,<1",
+    "ag-ui-protocol>=0.1,<1",
     "chromadb>=1.5.9",
     "deepagents>=0.7.15",
     "fastmcp>=4,<5",
@@ -31,7 +33,13 @@ dependencies = [
 ]
 
 [project.scripts]
-lg-report = "lg_report:main"
+lg-report = "reporting:main"
+
+[project.optional-dependencies]
+chat = [
+    "fastapi>=0.115,<1",
+    "uvicorn[standard]>=0.34,<1",
+]
 
 [build-system]
 requires = ["hatchling"]
@@ -44,4 +52,4 @@ dev = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/lg_report", "samples"]
+packages = ["src/agent_runtime", "src/reporting", "samples"]

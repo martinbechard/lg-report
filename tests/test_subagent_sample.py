@@ -11,14 +11,19 @@ Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 
 from pathlib import Path
 
-from lg_report.platform.conversation import Conversation, Request
-from lg_report.platform.static_client import StaticClient
-from lg_report.report.pricing import cost, load_prices, summarize
-from lg_report.report.recording import record_run
-from lg_report.report.render import agent_activity, conversation_turns
-from lg_report.report.schema import Run
-from samples.subagent_chat.app import USER_PROMPTS, create_graph
-from samples.subagent_chat.test_case import DELEGATED_TASK, SPECIALIST_SUMMARY
+from fixtures.mock_client import MockClient
+
+from agent_runtime.harness.conversation import Conversation, Request
+from agent_runtime.harness.sample_catalog import SampleCatalog
+from reporting.execute_runnable import execute_runnable
+from reporting.pricing import cost, load_prices, summarize
+from reporting.render import agent_activity, conversation_turns
+from reporting.schema import Run
+from samples.subagent_chat.scripted_run import (
+    DELEGATED_TASK,
+    SPECIALIST_SUMMARY,
+    USER_PROMPTS,
+)
 
 
 def test_delegation_context_and_costs(tmp_path):
@@ -27,9 +32,10 @@ def test_delegation_context_and_costs(tmp_path):
     """Child work is billed once, nested under task, and summarized to the parent."""
     prices = load_prices(Path(__file__).parents[1] / "models.json")
     output = tmp_path / "run"
-    record_run(
+    execute_runnable(
         Conversation(
-            create_graph(False), StaticClient([Request(p) for p in USER_PROMPTS])
+            SampleCatalog().create_run("subagent_chat", False)[0],
+            MockClient([Request(p) for p in USER_PROMPTS]),
         ),
         {},
         output,

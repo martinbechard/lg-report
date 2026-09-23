@@ -1,0 +1,11 @@
+{
+  "samples": [
+    {
+      "id": "subagent_chat",
+      "name": "Subagent chat",
+      "description": "A parent agent delegates to a specialist.",
+      "workflow": "agent_runtime.workflows.subagent_chat:build_workflow",
+      "scripted_run": "samples.subagent_chat.scripted_run"
+    }
+  ]
+}

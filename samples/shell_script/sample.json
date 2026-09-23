@@ -1,0 +1,11 @@
+{
+  "samples": [
+    {
+      "id": "shell_script",
+      "name": "Shell script",
+      "description": "Run a local script through DeepAgent\u2019s native execute tool.",
+      "workflow": "agent_runtime.workflows.shell_script:build_workflow",
+      "scripted_run": "samples.shell_script.scripted_run"
+    }
+  ]
+}

@@ -13,15 +13,15 @@ import chromadb
 import pyarrow as pa
 import pyarrow.parquet as pq
 import pytest
+from fixtures.mock_client import MockClient
 from langchain_core.messages import AIMessage
 from tokenizers import Tokenizer, models, pre_tokenizers
 
-from lg_report.platform.conversation import Conversation, Request
-from lg_report.platform.rag_index import articles, chunks, open_index
-from lg_report.platform.simulated_model import MeteredDemoModel
-from lg_report.platform.static_client import StaticClient
-from lg_report.tools.search_wikipedia import build_search_tool
-from lg_report.workflows.rag_chat import build_workflow
+from agent_runtime.harness.conversation import Conversation, Request
+from agent_runtime.harness.rag_index import articles, chunks, open_index
+from agent_runtime.harness.simulated_model import MeteredDemoModel
+from agent_runtime.tools.semantic_search_wikipedia import build_search_tool
+from agent_runtime.workflows.rag_chat import build_workflow
 
 
 class TestEmbedding:
@@ -107,7 +107,7 @@ def test_chroma_persistence_tool_and_graph(tmp_path, monkeypatch):
                 content="",
                 tool_calls=[
                     {
-                        "name": "search_wikipedia",
+                        "name": "semantic_search_wikipedia",
                         "args": {"query": "raven"},
                         "id": "lookup",
                     }
@@ -116,7 +116,7 @@ def test_chroma_persistence_tool_and_graph(tmp_path, monkeypatch):
             AIMessage(content="Urban adaptation [raven-1]"),
         ]
     )
-    from lg_report.agents import wikipedia_rag_agent
+    from agent_runtime.agents import wikipedia_rag_agent
 
     opened_paths = []
 
@@ -131,7 +131,7 @@ def test_chroma_persistence_tool_and_graph(tmp_path, monkeypatch):
 
     monkeypatch.setattr(wikipedia_rag_agent, "open_index", open_fixture_index)
     final = Conversation(
-        build_workflow(model), StaticClient([Request("Where does the raven live?")])
+        build_workflow(model), MockClient([Request("Where does the raven live?")])
     ).invoke({}, {})
     assert opened_paths == [wikipedia_rag_agent.WIKIPEDIA_INDEX_DIRECTORY]
     # The graph returns a state mapping with conversation messages. Select the
@@ -155,7 +155,7 @@ def test_chat_refuses_partial_index(tmp_path):
 # Reuse, resume, and settings validation protect costly ingestion from
 # duplicate work and prevent incompatible indexes from being accepted.
 def test_ingestion_reuse_resume_and_settings_guard(tmp_path, monkeypatch):
-    from lg_report.platform import rag_index
+    from agent_runtime.harness import rag_index
 
     monkeypatch.setattr(rag_index, "restore_archive", lambda *args: False)
     source = tmp_path / "source.parquet"

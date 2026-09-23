@@ -12,9 +12,33 @@ wheels/
 .env
 .env.*
 !.env.example
-# Keep local runs private; commit only regenerated sample reports.
-reports/*
-!reports/examples/
+# Publish the stable teaching outputs; keep ad hoc runs and exporter diagnostics local.
+/reports/*
+!/reports/index.html
+!/reports/README.md
+!/reports/simple_chat/
+!/reports/tool_chat/
+!/reports/shell_script/
+!/reports/subagent_chat/
+!/reports/context_budget/
+!/reports/thinking_agent/
+!/reports/review_loop/
+!/reports/expert_dispatch/
+!/reports/rag_chat/
+!/reports/mcp_rag_chat/
+!/reports/file_approval/
+!/reports/quote_request/
+!/reports/claims_context_naive/
+!/reports/claims_context_managed/
+/reports/*/*
+!/reports/*/report.html
+!/reports/*/report.xlsx
+!/reports/*/run.json
+!/reports/*/spans.jsonl
+!/reports/*/prices.json
+!/reports/*/excel-data.json
+!/reports/*/context.json
+!/reports/*/edited-summary.txt
 **/*langfuse*/reports/
 **/*langfuse*/data/
 **/*langfuse*/*.db
@@ -38,3 +62,7 @@ langfuse-data/
 /run.json
 /spans.jsonl
 /prices.json
+/context.json
+
+# macOS Finder metadata is local to each workstation.
+.DS_Store

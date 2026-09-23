@@ -10,23 +10,24 @@ earlier user messages, attachments, assistant answers, and any tool exchanges.
 
 ## Files and responsibilities
 
-The reusable code lives under `src/lg_report/`:
+The reusable code lives under `src/agent_runtime/`:
 
 - **`workflows/simple_chat.py`** composes the single-agent workflow.
 - **`agents/chat_agent.py`** defines the named agent, its system instructions,
   and its DeepAgents graph. It imports no client or test case.
-- **`platform/conversation.py`** defines requests, text attachments, the client
+- **`harness/conversation.py`** defines requests, text attachments, the client
   interface, and the session loop that retains history and turn metadata.
-- **`platform/console_client.py`** accepts human prompts and text files.
-- **`platform/static_client.py`** consumes requests supplied by any test case;
+- **`harness/console_client.py`** accepts human prompts and text files.
+- **`harness/script_prompter.py`** sequences authored requests for `ConsoleClient`;
   it contains no predefined prompts or expected answers.
-- **`platform/simulated_model.py`** and **`platform/demo_meter.py`** provide the
+- **`harness/simulated_model.py`** and **`harness/demo_meter.py`** provide the
   generic offline model and context/token simulation.
-- **`report/`** captures traces, prices usage, and exports HTML/Excel.
+- **`src/reporting/`** normalizes captured traces, prices usage, and exports HTML/Excel.
+  Runtime trace capture lives in `src/agent_runtime/harness/trace_capture.py`.
 - **`tools/`** is the home for application tools. Simple chat defines none.
 
-This sample directory contains **`app.py`** for component wiring and
-**`test_case.py`** for the scenario's user prompts and prerecorded model answers,
+This sample directory contains **`sample.json`** for discovery metadata and
+**`scripted_run.py`** for the scenario's user prompts and prerecorded model answers,
 plus this README and configuration example. A client simulator and a model
 simulator serve different roles even when one test case configures both.
 
@@ -39,15 +40,15 @@ No avatar agent is implemented yet.
 
 ```bash
 uv sync
-uv run python -m samples.simple_chat.app
+uv run python -m agent_runtime --sample simple_chat
 ```
 
 Default client: `static`. Default model: simulated. This executes a real graph
 with two predefined user turns and two prerecorded responses, without provider
-charges. Daily pricing/FX lookups may still access the network. Use `--prices`
-and `--fx-file` to supply those references without lookups.
+charges. Model-price refreshes may still access the network; use `--prices models.json`
+to avoid them. FX always reads the saved shared `exchange-rate.json`.
 
-The graph still includes DeepAgents' built-in tool definitions, which consume
+The graph includes DeepAgents' built-in tool definitions, which consume
 context even though its instructions ask it to answer without tools. StateBackend
 keeps built-in file operations in graph state rather than the local filesystem.
 
@@ -56,7 +57,7 @@ keeps built-in file operations in graph state rather than the local filesystem.
 ```bash
 cp samples/simple_chat/.env.example samples/simple_chat/.env
 # Configure an OpenAI or Anthropic API key in that file.
-uv run python -m samples.simple_chat.app --client console --live
+uv run python -m agent_runtime --sample simple_chat --client console --live
 ```
 
 Enter a prompt and read the response. Commands:
@@ -81,13 +82,13 @@ with the default static client.
 ## Reports and checks
 
 The command prints its HTML report path and saves `spans.jsonl`, `run.json`,
-`prices.json`, and `report.html` in the current working directory (replacing the previous default run).
-`--out` selects a new directory. Reports are finalized when the session ends;
+`prices.json`, and `report.html` in `reports/simple_chat/` (replacing the previous default run).
+`--out` selects another reusable directory. Reports are finalized when the session ends;
 quitting before any request produces an incomplete report with no model spans.
 
 In the static run, compare R1's fresh input with R2's cached history and new prompt.
-Edit test prompts in `test_case.py`, not the agent file. When changing the
-scenario in offline mode, update the corresponding answers in `test_case.py`.
+Edit test prompts in `scripted_run.py`, not the agent file. When changing the
+scenario in offline mode, update the corresponding answers in `scripted_run.py`.
 Tests in `tests/test_simple_chat_clients.py` exercise file context, console input,
 history, and the interrupt boundary without contacting a provider.
 

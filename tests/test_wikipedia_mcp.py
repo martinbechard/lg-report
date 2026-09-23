@@ -23,8 +23,8 @@ from langchain.mcp import MCPAdapter
 from langchain_core.messages import AIMessage
 from test_rag import TestEmbedding
 
-from lg_report.mcp_servers.wikipedia import build_server
-from lg_report.platform.simulated_model import MeteredDemoModel
+from agent_runtime.harness.simulated_model import MeteredDemoModel
+from agent_runtime.mcp_servers.wikipedia import build_server
 
 
 @pytest.fixture
@@ -53,7 +53,7 @@ def test_mcp_contract_and_deep_agent(collection):
             # Discovery returns executable LangChain tool adapters and their
             # schemas. It does not run a search; ainvoke below executes one.
             tools = await adapter.list_tools()
-            assert [tool.name for tool in tools] == ["search_wikipedia"]
+            assert [tool.name for tool in tools] == ["semantic_search_wikipedia"]
             schema = tools[0].args_schema
             assert set(schema["properties"]) == {"query"}
             result = await tools[0].ainvoke({"query": "raven"})
@@ -67,7 +67,7 @@ def test_mcp_contract_and_deep_agent(collection):
                         content="",
                         tool_calls=[
                             {
-                                "name": "search_wikipedia",
+                                "name": "semantic_search_wikipedia",
                                 "args": {"query": "raven"},
                                 "id": "lookup",
                             }
@@ -107,7 +107,7 @@ def test_mcp_contract_and_deep_agent(collection):
 def test_stdio_discovery_and_call(tmp_path):
     script = tmp_path / "fixture_server.py"
     script.write_text('''"""Serve deterministic retrieval over real stdio for the transport test."""
-from lg_report.mcp_servers.wikipedia import build_server
+from agent_runtime.mcp_servers.wikipedia import build_server
 class Collection:
     def count(self):
         return 1
@@ -139,7 +139,7 @@ def test_server_refuses_missing_index(tmp_path):
         [
             sys.executable,
             "-m",
-            "lg_report.mcp_servers.wikipedia",
+            "agent_runtime.mcp_servers.wikipedia",
             "--directory",
             str(tmp_path),
         ],

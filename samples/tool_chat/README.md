@@ -14,38 +14,38 @@ From the repository root:
 
 ```bash
 uv sync
-uv run python -m samples.tool_chat.app
+uv run python -m agent_runtime --sample tool_chat
 ```
 
 Each run writes raw spans, normalized data, the pricing snapshot, and HTML under
-the current working directory, replacing the previous default run. Use `--out reports/my-tool-run` to select
-a fresh directory.
+`reports/tool_chat/`, replacing the previous run. Use `--out reports/my-tool-run` to select
+another reusable directory.
 
 For a real model, copy `samples/tool_chat/.env.example` to
 `samples/tool_chat/.env`, provide the selected key, and run:
 
 ```bash
-uv run python -m samples.tool_chat.app --live
+uv run python -m agent_runtime --sample tool_chat --live
 ```
 
-Default runs use the simulator, so they do not call a model provider. The daily
-FX lookup is separate and can be supplied from a file. Live mode incurs model
+Default runs use the simulator, so they do not call a model provider. FX reads the shared
+`exchange-rate.json` without a network lookup. Live mode incurs model
 charges and is not required to follow the scripted call sequence.
 
 ## Code and execution flow
 
-- `app.py` selects models, client, and recorder.
-- `src/lg_report/workflows/tool_chat.py` composes the participating agents.
-- `src/lg_report/agents/reference_chat_agent.py` owns the agent instructions and registration.
-- `src/lg_report/tools/workflow_reference.py` owns the callable evidence tools.
-- `test_case.py` scripts four model responses. It does **not** fake tool
+- `sample.json` declares the workflow and script; the shared launcher selects client and recorder.
+- `src/agent_runtime/workflows/tool_chat.py` composes the participating agents.
+- `src/agent_runtime/agents/reference_chat_agent.py` owns the agent instructions and registration.
+- `src/agent_runtime/tools/echo_tool.py` owns the local echo tool.
+- `scripted_run.py` scripts four model responses. It does **not** fake tool
   execution: LangGraph dispatches the registered Python function.
 - Shared reporting wraps the application; no report-generation code is inside
   the tool or graph definition.
 
 Each of the two user turns follows:
 
-1. The model returns a `workflow_reference` tool request.
+1. The model returns a `echo_tool` tool request.
 2. LangGraph invokes the function and appends a tool-result message.
 3. The model consumes the expanded history and returns an answer.
 
@@ -60,12 +60,13 @@ arguments and result. R2's fresh input contains the observation, while the
 simulator reuses prior conversation as cached history. Compare that sequence
 with the second turn, where R3/R4 continue the request numbering.
 
-The reference is intentionally small and local. This demonstrates a lookup
-tool, **not** embeddings, vector retrieval, document permissions, or a complete
-RAG system. Tool execution has no external service fee in this sample; real
+`echo_tool(text: str)` returns `Your input was: ` followed by the supplied
+string unchanged. For example, `echo_tool` with `text="ReAct"` returns
+`Your input was: ReAct`. It repeats input and supplies no independent evidence.
+It performs no search, network access, or model call. Tool execution has no external service fee in this sample; real
 tools may have costs outside model-token accounting.
 
-To experiment, change the reference implementation or add a tool. Register it
+To experiment, change the echo implementation or add a tool. Register it
 in `build_agent()` and update the scripted response's tool name and arguments.
 The request/result linkage and captured graph should still reconcile.
 

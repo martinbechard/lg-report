@@ -1,0 +1,390 @@
+<!-- Copyright (c) 2026 Martin.Bechard@DevConsult.ca; third-party source excerpts retain their original rights. -->
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>mcp_rag_chat · turn 1 · LG Report</title>
+<style>
+:root{color-scheme:light;--ink:#193e42;--muted:#617679;--line:#d5e0dc;--accent:#087d6c}*{box-sizing:border-box}body{margin:0;background:#f4f6f2;color:var(--ink);font:14px/1.5 system-ui,sans-serif}main{padding:16px 32px;max-width:1800px;margin:auto}header{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;border-top:3px solid var(--accent);padding:8px 0}.eyebrow{text-transform:uppercase;font-size:11px;letter-spacing:.15em;color:var(--accent)}h1{font-size:24px;margin:0}h2{font-size:22px}p{color:var(--muted)}.cards{display:flex;gap:12px 28px;flex-wrap:wrap;margin:8px 0 16px;padding:8px 0;border-bottom:1px solid var(--line)}.card{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}.card strong{font-size:16px}.card span,small{color:var(--muted)}.error-row td,.error-event{background:#ffd3d3!important;color:#8b1010!important}.span-id{font:10px/1.4 monospace;overflow-wrap:anywhere;max-width:120px;min-width:100px;text-align:left}.description-cell{min-width:280px;max-width:380px;text-align:left;white-space:normal}.turn{background:white;border:1px solid var(--line);border-radius:8px;padding:18px;margin:16px 0}.event{padding:12px 16px;margin:12px 0}.llm-event{background:#f5f8fd}.tool-event{border-left:2px solid #c4cbd2;margin-left:20px}.llm-event>.event-heading{color:#173b70}.event pre{margin:8px 0}.rate-date{display:block;font-size:10px;margin-top:3px}.notice{background:#fff1d4;padding:12px 16px;border-radius:8px}.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:15px 0}button{border:1px solid var(--line);border-radius:5px;background:white;color:var(--ink);padding:7px 12px;cursor:pointer}button:focus-visible,summary:focus-visible{outline:3px solid #007cb0;outline-offset:2px}.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:10px;background:white;max-height:75vh}table{border-collapse:separate;border-spacing:0;width:100%;min-width:1500px}th,td{padding:13px 10px;border-bottom:1px solid var(--line);text-align:right;vertical-align:top;min-width:112px}th{position:sticky;top:0;background:#eaf0eb;z-index:2;font-size:11px;text-transform:uppercase;text-align:right}th:first-child,td:first-child{position:sticky;left:0;text-align:left;min-width:310px;max-width:390px;background:#fff;z-index:1;border-right:1px solid var(--line)}th:first-child{z-index:3;background:#eaf0eb}.tokens{font-size:17px;font-weight:600;font-variant-numeric:tabular-nums}.euro,.dollar{font-size:12px;font-weight:400}.euro{color:var(--accent)}.dollar{color:var(--muted)}.kind{font-size:10px;text-transform:uppercase;color:var(--accent)}.step-name{font-weight:600;overflow-wrap:anywhere}.toggle{padding:1px 5px;margin-right:5px}.context{margin-top:6px;font-size:12px;white-space:normal}.context summary{cursor:pointer;color:var(--accent)}dl{margin:8px 0}dt{font-weight:600}dd{margin:0 0 8px;overflow-wrap:anywhere}.status{font-size:11px}.error,.partial{color:#a44c10}.tree-row[hidden]{display:none}.subtree{font-size:10px;color:var(--muted)}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:white;padding:20px;border:1px solid var(--line)}footer{font-size:12px;color:var(--muted);margin-top:24px}@media(max-width:700px){main{padding:16px}h1{font-size:26px}th:first-child,td:first-child{min-width:240px;max-width:270px}}@media print{.toolbar{display:none}.table-wrap{overflow:visible;max-height:none}.tree-row[hidden]{display:table-row}th,td{position:static!important}main{padding:0}table{font-size:9px;min-width:0}}
+
+/* Conversation metrics use the full card width; reference dates remain in the pricing section. */
+.turn-heading,.event-heading{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.turn-heading{justify-content:space-between;margin-bottom:12px}.turn-heading h3{margin:0}
+
+.turn .table-wrap{max-height:none}.turn table{min-width:1080px;table-layout:fixed}
+.turn th,.turn td{min-width:0;padding:10px 8px}.turn th:first-child,.turn td:first-child{width:180px;min-width:180px;max-width:180px}
+.turn .tokens{font-size:15px;white-space:nowrap}.turn .tokens small{font-size:10px;font-weight:400}
+.turn .euro,.turn .dollar{white-space:nowrap}.turn .event .span-id{max-width:none;min-width:0;white-space:nowrap}
+.turn .event-heading{font-size:15px}.turn .llm-response-heading{font-size:15px;font-weight:700}.reasoning-section{margin:8px 0 16px}.output-label{margin-top:16px!important}.thinking-preview{font-style:italic;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;line-height:1.5;max-height:4.5em;white-space:pre-wrap;margin:8px 0}.prompt-label{font-size:13px;font-weight:600;margin-top:8px}.turn .event{padding:10px 14px}.turn pre{padding:14px;margin:8px 0}
+.cost-line{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}.request-costs{margin:12px 0}.input-detail{margin-left:20px;padding-left:12px}.step-metrics{display:flex;flex-wrap:wrap;gap:12px 24px;margin:12px 0}.metric{min-width:130px}.metric>span{display:block;color:var(--muted);font-size:11px}.metric strong{display:block;font-size:15px}.call-context{background:#eef4ef;padding:10px 12px;margin:10px 0;font-size:13px}.turn-cost{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}.turn-cost .euro,.turn-cost .dollar{display:inline}
+.agent-label{font-weight:600;color:#684296;margin-bottom:8px}.agent-activity{border-left:4px solid #8462a7;padding:12px 16px;margin:12px 0;background:#f6f1fb}.agent-activity h3{margin:0 0 8px}.agent-activity a{color:#684296}
+/* Tool definitions form a closed panel so subsequent prompts are visibly outside it. */
+.tool-definitions{margin:12px 0 24px;padding:0 16px;border:1px solid #b8c9cc;border-radius:8px;background:#edf3f3}
+.tool-definitions>summary.prompt-label{margin:0;padding:12px 0;cursor:pointer;list-style:none}
+.tool-definitions>summary::before{content:"▸";display:inline-block;width:18px}
+.tool-definitions[open]>summary::before{content:"▾"}
+.tool-definitions[open]{padding-bottom:16px}
+.tool-definitions[open]>summary{border-bottom:1px solid #b8c9cc;margin-bottom:16px}
+.tool-definitions h5{font-size:13px;margin:20px 0 6px}
+/* Agent and tool execution scopes retain their own ancestry guide lines. */
+.conversation-thread{padding-left:0}
+.conversation-agent{border-left:3px solid #8462a7;padding:10px 0 10px 14px;margin:0}
+.conversation-children{padding:8px 0 8px 18px}
+.conversation-thread .tool-event{margin-left:18px;border-left:2px solid #8b969f}
+.conversation-thread .event{margin-top:0;margin-bottom:0}
+.conversation-thread .conversation-agent>.agent-label{padding:4px 14px}
+@media(max-width:700px){.conversation-agent{padding-left:8px}.conversation-children{padding-left:10px}.conversation-thread .tool-event{margin-left:10px}}
+/* Native disclosures keep their labels keyboard accessible when collapsed. */
+.agent-activity>summary,.conversation-agent>summary,.event>summary,.turn>summary{cursor:pointer;list-style:none;padding:6px 0}
+.agent-activity>summary::before,.conversation-agent>summary::before,.event>summary::before,.turn>summary::before{content:"▸";display:inline-block;width:14px;flex-shrink:0}
+.agent-activity[open]>summary::before,.conversation-agent[open]>summary::before,.event[open]>summary::before,.turn[open]>summary::before{content:"▾"}
+summary::-webkit-details-marker{display:none}
+.activity-children{padding-left:20px;margin-top:12px}
+.activity-children>.agent-activity{margin-bottom:0}
+.turn>summary{justify-content:flex-start}.turn>summary .turn-cost{margin-left:auto}
+</style></head><body><main>
+<header><h1>mcp_rag_chat · turn 1</h1><span>ok</span><small>Offline demonstration · no provider billed</small></header>
+
+<div class="cards"><div class="card"><span>Estimated model cost</span><strong>EUR unavailable</strong><strong>0.001183 USD</strong><small>all calls priced</small></div><div class="card"><span>Input tokens · including cache</span><strong>8,107</strong></div><div class="card"><span>Output tokens · including reasoning</span><strong>140</strong></div><div class="card"><span>Model calls / elapsed</span><strong>2 / 0.24s</strong></div></div>
+
+
+
+
+
+
+
+<h2>LLM costs by request</h2>
+<p>EUR chart unavailable: no exchange rate was recorded.</p>
+
+
+<h2>Agent activity</h2>
+<p>Agents are identified by the named execution scopes enclosing model calls in the trace. Each entry is one invocation; times are relative to the run start. Costs include only that agent’s own model calls, excluding delegated agents.</p>
+
+<div class="toolbar"><button type="button" data-disclosure-target="agent-activity-list" data-expand="true">Expand all agents</button><button type="button" data-disclosure-target="agent-activity-list" data-expand="false">Collapse all agents</button></div>
+<div id="agent-activity-list">
+<details open class="agent-activity" id="agent-01a0c692-17a2-7253-a1c8-2a9f6b24c4af">
+<summary><strong>wikipedia_mcp_agent</strong> · Turn 1 · ok</summary>
+<div>Top-level agent · Turn 1</div>
+<div>Started +0.00s · Duration 0.24s · Status: ok · 2 model call(s)</div>
+<div class="cost-line">Own model cost <div class="euro">EUR unknown</div><div class="dollar">0.001183 USD</div></div>
+
+</details>
+</div>
+
+
+<section aria-labelledby="collaboration-heading">
+<h3 id="collaboration-heading">Agent collaboration</h3>
+<p>Read downward in time order. Each lane is one agent invocation; arrows show calls and successful returns. Boxes show model and tool activity with their recorded outcome. Timestamps mark activity starts or returns, not a proportional time scale. Click an agent name for details.</p>
+
+<h4>Turn 1</h4>
+<div style="overflow-x:auto">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 443" style="display:block;width:380px;max-width:none" role="group" aria-label="Agent collaboration for turn 1">
+<defs><marker id="collaboration-arrow-1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#684296"></path></marker></defs>
+
+
+<line x1="220" x2="220" y1="81" y2="433" stroke="#c7b8db" stroke-dasharray="4 4"></line>
+<a href="#agent-01a0c692-17a2-7253-a1c8-2a9f6b24c4af" aria-label="Activity details for wikipedia_mcp_agent">
+<rect x="95" y="4" width="250" height="73" rx="8" fill="#f6f1fb" stroke="#8462a7"></rect>
+<text x="220" y="26" text-anchor="middle" font-size="13" font-weight="600" fill="#684296">wikipedia_mcp_agent</text>
+<text x="220" y="47" text-anchor="middle" font-size="11">Status: ok</text>
+<text x="220" y="64" text-anchor="middle" font-size="11">2 model call(s) · 238.81 ms</text>
+</a>
+
+
+<text x="8" y="115" font-size="10" fill="#617679">+0.00 ms</text>
+
+<rect x="100" y="97" width="240" height="28" rx="5" fill="#f5f8fd" stroke="#8096b4"></rect>
+<text x="220" y="115" text-anchor="middle" font-size="11">Started</text>
+
+
+<text x="8" y="173" font-size="10" fill="#617679">+8.44 ms</text>
+
+<rect x="100" y="155" width="240" height="28" rx="5" fill="#f5f8fd" stroke="#8096b4"></rect>
+<text x="220" y="173" text-anchor="middle" font-size="11">R1 · LLM · ok</text>
+
+
+<text x="8" y="231" font-size="10" fill="#617679">+14.74 ms</text>
+
+<rect x="100" y="213" width="240" height="60" rx="5" fill="#f5f8fd" stroke="#8096b4"></rect>
+<text x="220" y="231" text-anchor="middle" font-size="11">Tool ·</text><text x="220" y="247" text-anchor="middle" font-size="11">semantic_search_wikipedia ·</text><text x="220" y="263" text-anchor="middle" font-size="11">ok</text>
+
+
+<text x="8" y="321" font-size="10" fill="#617679">+235.39 ms</text>
+
+<rect x="100" y="303" width="240" height="28" rx="5" fill="#f5f8fd" stroke="#8096b4"></rect>
+<text x="220" y="321" text-anchor="middle" font-size="11">R2 · LLM · ok</text>
+
+
+<text x="8" y="379" font-size="10" fill="#617679">+238.81 ms</text>
+
+<rect x="100" y="361" width="240" height="28" rx="5" fill="#f5f8fd" stroke="#8096b4"></rect>
+<text x="220" y="379" text-anchor="middle" font-size="11">Finished · ok</text>
+
+
+</svg>
+</div>
+
+</section>
+
+
+<h2>Conversation</h2>
+<div class="toolbar"><button type="button" data-disclosure-target="conversation-list" data-expand="true">Expand all conversation</button><button type="button" data-disclosure-target="conversation-list" data-expand="false">Collapse all conversation</button></div>
+
+
+<div id="conversation-list"><details open class="turn"><summary class="turn-heading"><strong>Turn 1</strong><span class="turn-cost">Turn cost <div class="euro">EUR unknown</div><div class="dollar">0.001183 USD</div></span></summary>
+<div class="conversation-thread"><details open class="conversation-agent" aria-label="Agent wikipedia_mcp_agent"><summary class="agent-label">Agent · wikipedia_mcp_agent · ok</summary><details open class="event llm-event "><summary class="event-heading"><strong>R1 · LLM request · 3286 tokens</strong> · scripted-chat-light<span class="status">· ok</span><span class="span-id">01a0c692-17ac-7100-a263-2ee1c6827a86</span></summary><div class="agent-label">Agent · <a href="#agent-01a0c692-17a2-7253-a1c8-2a9f6b24c4af">wikipedia_mcp_agent</a></div>
+
+<div class="request-costs" aria-label="Input token costs"><div class="cost-line"><strong>Fresh input · 3286 tokens</strong><div class="euro">EUR unknown</div><div class="dollar">0.000657 USD</div></div></div>
+<div class="input-detail">
+
+<details class="tool-definitions"><summary class="prompt-label">Tool definitions · 3162 tokens</summary>
+<p>Tool definitions were not captured for this request.</p>
+</details>
+
+<div class="request-setup"><div class="prompt-label">System prompt · 85 tokens</div></div>
+<div class="prompt-label">User prompt · tokens unreported</div><pre>Content was omitted from this recording.</pre>
+
+</div>
+<div class="prompt-label">Cache write · 3286 tokens</div><div class="prompt-label">Context: Added: 3286 tokens · Total: 3286 tokens</div>
+
+
+
+<p>Response content was omitted from this recording.</p><div class="prompt-label">Cache write · 83 tokens</div><div class="prompt-label">Context: Added: 83 tokens · Total: 3369 tokens</div><div class="cost-line"><strong>Call cost</strong><div class="euro">EUR unknown</div><div class="dollar">0.000757 USD</div></div><div class="status">Status: ok</div></details><details open class="event tool-event "><summary class="event-heading"><strong>Tool · semantic_search_wikipedia</strong><span class="status">· ok</span><span class="span-id">01a0c692-17b2-7fb1-815e-fac3ca7fa5bd</span></summary><div class="agent-label">Agent · <a href="#agent-01a0c692-17a2-7253-a1c8-2a9f6b24c4af">wikipedia_mcp_agent</a></div>
+
+
+<p>Response content was omitted from this recording.</p><div class="status">Status: ok</div></details><details open class="event llm-event "><summary class="event-heading"><strong>R2 · LLM request · 4821 tokens</strong> · scripted-chat-light<span class="status">· ok</span><span class="span-id">01a0c692-188f-75a3-b05c-6243efcf4d1c</span></summary><div class="agent-label">Agent · <a href="#agent-01a0c692-17a2-7253-a1c8-2a9f6b24c4af">wikipedia_mcp_agent</a></div>
+<div class="cost-line"><strong>Conversation history · cache read · 3369 tokens</strong><div class="euro">EUR unknown</div><div class="dollar">0.000067 USD</div></div>
+<div class="request-costs" aria-label="Input token costs"><div class="cost-line"><strong>Fresh input · 1452 tokens</strong><div class="euro">EUR unknown</div><div class="dollar">0.000290 USD</div></div></div>
+<div class="input-detail">
+
+<details class="tool-definitions"><summary class="prompt-label">Tool definitions · 3162 tokens</summary>
+<p>Tool definitions were not captured for this request.</p>
+</details>
+
+
+
+
+</div>
+<div class="prompt-label">Cache write · 1452 tokens</div><div class="prompt-label">Context: Added: 1452 tokens · Total: 4821 tokens</div>
+
+
+
+<p>Response content was omitted from this recording.</p><div class="prompt-label">Cache write · 57 tokens</div><div class="prompt-label">Context: Added: 57 tokens · Total: 4878 tokens</div><div class="cost-line"><strong>Call cost</strong><div class="euro">EUR unknown</div><div class="dollar">0.000426 USD</div></div><div class="status">Status: ok</div></details></details></div></details></div>
+
+<h2>Execution tree</h2><p>Drill into graph nodes, model calls, and tools. Each token category has its own column with EUR and USD cost underneath. Categories are disjoint: fresh input excludes cache; output excludes reasoning.</p>
+<div class="toolbar"><button id="expand-all" type="button">Expand all</button><button id="collapse-all" type="button">Collapse all</button><span>8 spans · parent rows show subtree totals; do not add parent and child rows together.</span></div>
+
+
+<div class="table-wrap"><table aria-label="Expandable execution trace and token costs"><thead><tr><th>Operation</th><th>Span ID</th><th>Status</th><th>Description</th><th>Model · effort</th><th>Elapsed</th><th>Fresh input</th><th>Cache read</th><th>Cache write</th><th>Output · non-reasoning</th><th>Reasoning</th><th>Total cost<br>EUR / USD</th></tr></thead><tbody>
+<tr class="tree-row " data-index="0" data-parent=""><td><div style="padding-left:0px"><div class="kind">agent <span class="status ">· ok</span></div><div class="step-name"><button type="button" class="toggle" aria-expanded="true" aria-label="Toggle children of wikipedia_mcp_agent">−</button>wikipedia_mcp_agent</div><div class="subtree">Subtree totals</div></div></td><td class="span-id">01a0c692-17a2-7253-a1c8-2a9f6b24c4af</td><td>ok</td><td class="description-cell">Execute the wikipedia_mcp_agent workflow operation and pass its result to the next graph step.</td><td>—</td><td>238.81 ms</td><td><div class="tokens">4,738 <small>tokens</small></div><div class="euro">EUR unknown</div><div class="dollar">0.000948 USD</div></td><td><div class="tokens">3,369 <small>tokens</small></div><div class="euro">EUR unknown</div><div class="dollar">0.000067 USD</div></td><td><div class="tokens">0 <small>tokens</small></div><div class="euro">EUR unknown</div><div class="dollar">0.000000 USD</div></td><td><div class="tokens">140 <small>tokens</small></div><div class="euro">EUR unknown</div><div class="dollar">0.000168 USD</div></td><td><div class="tokens">0 <small>tokens</small></div><div class="euro">EUR unknown</div><div class="dollar">0.000000 USD</div></td><td><div class="euro">EUR unknown</div><div class="dollar">0.001183 USD</div></td></tr><tr class="tree-row " data-index="1" data-parent="0"><td><div style="padding-left:14px"><div class="kind">workflow <span class="status ">· ok</span></div><div class="step-name">PatchToolCallsMiddleware.before_agent</div></div></td><td class="span-id">01a0c692-17a5-7151-bdfb-0fdc7b7bb82d</td><td>ok</td><td class="description-cell">Check message history and repair missing tool responses before the agent starts.<div class="context">Graph step 1</div></td><td>—</td><td>0.41 ms</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr class="tree-row " data-index="2" data-parent="0"><td><div style="padding-left:14px"><div class="kind">workflow <span class="status ">· ok</span></div><div class="step-name"><button type="button" class="toggle" aria-expanded="true" aria-label="Toggle children of model">−</button>model</div><div class="subtree">Subtree totals</div></div></td><td class="span-id">01a0c692-17a6-7f72-a128-83e250d27bd4</td><td>ok</td><td class="description-cell">Prepare the current conversation, run model middleware, and invoke the chat model.<div class="context">Graph step 2</div></td><td>—</td><td>9.81 ms</td><td><div class="tokens">3,286 <small>tokens</small></div><div class="euro">EUR unknown</div><div class="dollar">0.000657 USD</div></td><td><div class="tokens">0 <small>tokens</small></div><div class="euro">EUR unknown</div><div class="dollar">0.000000 USD</div></td><td><div class="tokens">0 <small>tokens</small></div><div class="euro">EUR unknown</div><div class="dollar">0.000000 USD</div></td><td><div class="tokens">83 <small>tokens</small></div><div class="euro">EUR unknown</div><div class="dollar">0.000100 USD</div></td><td><div class="tokens">0 <small>tokens</small></div><div class="euro">EUR unknown</div><div class="dollar">0.000000 USD</div></td><td><div class="euro">EUR unknown</div><div class="dollar">0.000757 USD</div></td></tr><tr class="tree-row " data-index="3" data-parent="2"><td><div style="padding-left:28px"><div class="kind">model <span class="status ">· ok</span></div><div class="step-name">MeteredDemoModel</div></div></td><td class="span-id">01a0c692-17ac-7100-a263-2ee1c6827a86</td><td>ok</td><td class="description-cell">Search Wikipedia through MCP and consume the returned evidence.<div class="context">Graph step 2</div><div class="context">Requested: semantic_search_wikipedia</div></td><td>scripted-chat-light<div class="context">demo</div></td><td>2.75 ms</td><td><div class="tokens">3,286 <small>tokens</small></div><div class="euro">EUR unknown</div><div class="dollar">0.000657 USD</div></td><td><div class="tokens">0 <small>tokens</small></div><div class="euro">EUR unknown</div><div class="dollar">0.000000 USD</div></td><td><div class="tokens">0 <small>tokens</small></div><div class="euro">EUR unknown</div><div class="dollar">0.000000 USD</div></td><td><div class="tokens">83 <small>tokens</small></div><div class="euro">EUR unknown</div><div class="dollar">0.000100 USD</div></td><td><div class="tokens">0 <small>tokens</small></div><div class="euro">EUR unknown</div><div class="dollar">0.000000 USD</div></td><td><div class="euro">EUR unknown</div><div class="dollar">0.000757 USD</div></td></tr><tr class="tree-row " data-index="4" data-parent="0"><td><div style="padding-left:14px"><div class="kind">workflow <span class="status ">· ok</span></div><div class="step-name"><button type="button" class="toggle" aria-expanded="true" aria-label="Toggle children of tools">−</button>tools</div><div class="subtree">Subtree totals</div></div></td><td class="span-id">01a0c692-17b1-70e3-aeac-43b8676856b8</td><td>ok</td><td class="description-cell">Execute tool calls requested by the preceding model response and return their observations.<div class="context">Graph step 3</div></td><td>—</td><td>219.08 ms</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr class="tree-row " data-index="5" data-parent="4"><td><div style="padding-left:28px"><div class="kind">tool <span class="status ">· ok</span></div><div class="step-name">semantic_search_wikipedia</div></div></td><td class="span-id">01a0c692-17b2-7fb1-815e-fac3ca7fa5bd</td><td>ok</td><td class="description-cell">Search indexed WikiText and return up to four source-labelled passages. The corpus is a historical Wikipedia subset, not current news. Retrieved
+passages are candidates; check relevance before using them as evidence.<div class="context">Graph step 3</div></td><td>—</td><td>216.74 ms</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr class="tree-row " data-index="6" data-parent="0"><td><div style="padding-left:14px"><div class="kind">workflow <span class="status ">· ok</span></div><div class="step-name"><button type="button" class="toggle" aria-expanded="true" aria-label="Toggle children of model">−</button>model</div><div class="subtree">Subtree totals</div></div></td><td class="span-id">01a0c692-188d-7752-bbc8-b2bc21239e7c</td><td>ok</td><td class="description-cell">Prepare the current conversation, run model middleware, and invoke the chat model.<div class="context">Graph step 4</div></td><td>—</td><td>5.27 ms</td><td><div class="tokens">1,452 <small>tokens</small></div><div class="euro">EUR unknown</div><div class="dollar">0.000290 USD</div></td><td><div class="tokens">3,369 <small>tokens</small></div><div class="euro">EUR unknown</div><div class="dollar">0.000067 USD</div></td><td><div class="tokens">0 <small>tokens</small></div><div class="euro">EUR unknown</div><div class="dollar">0.000000 USD</div></td><td><div class="tokens">57 <small>tokens</small></div><div class="euro">EUR unknown</div><div class="dollar">0.000068 USD</div></td><td><div class="tokens">0 <small>tokens</small></div><div class="euro">EUR unknown</div><div class="dollar">0.000000 USD</div></td><td><div class="euro">EUR unknown</div><div class="dollar">0.000426 USD</div></td></tr><tr class="tree-row " data-index="7" data-parent="6"><td><div style="padding-left:28px"><div class="kind">model <span class="status ">· ok</span></div><div class="step-name">MeteredDemoModel</div></div></td><td class="span-id">01a0c692-188f-75a3-b05c-6243efcf4d1c</td><td>ok</td><td class="description-cell">Search Wikipedia through MCP and consume the returned evidence.<div class="context">Graph step 4</div></td><td>scripted-chat-light<div class="context">demo</div></td><td>2.20 ms</td><td><div class="tokens">1,452 <small>tokens</small></div><div class="euro">EUR unknown</div><div class="dollar">0.000290 USD</div></td><td><div class="tokens">3,369 <small>tokens</small></div><div class="euro">EUR unknown</div><div class="dollar">0.000067 USD</div></td><td><div class="tokens">0 <small>tokens</small></div><div class="euro">EUR unknown</div><div class="dollar">0.000000 USD</div></td><td><div class="tokens">57 <small>tokens</small></div><div class="euro">EUR unknown</div><div class="dollar">0.000068 USD</div></td><td><div class="tokens">0 <small>tokens</small></div><div class="euro">EUR unknown</div><div class="dollar">0.000000 USD</div></td><td><div class="euro">EUR unknown</div><div class="dollar">0.000426 USD</div></td></tr>
+</tbody></table></div>
+<h2>Token price references</h2>
+
+<p class="notice">No exchange-rate snapshot is available. EUR amounts are unknown; USD amounts remain available.</p>
+<p>USD per million tokens · verification dates apply to every rate in the row. Dates record price verification, not when this HTML was generated. These are saved reference prices; an earlier date alone does not mean retrieval failed.</p>
+<div class="table-wrap"><table aria-label="Token price references and dates"><thead><tr><th>Model / verification date</th><th>Input</th><th>Cache read</th><th>Cache write</th><th>Output / reasoning</th></tr></thead><tbody><tr><td>openai:gpt-5.5<strong class="rate-date">Verified 2026-09-18</strong><div class="context">https://developers.openai.com/api/docs/models/gpt-5.5.md</div></td><td><div class="dollar">5 USD / 1M tokens</div></td><td><div class="dollar">0.5 USD / 1M tokens</div></td><td>Unknown</td><td><div class="dollar">30 USD / 1M tokens</div></td></tr><tr><td>openai:gpt-5.6-luna<strong class="rate-date">Verified 2026-09-18</strong><div class="context">https://developers.openai.com/api/docs/models/gpt-5.6-luna.md</div></td><td><div class="dollar">0.2 USD / 1M tokens</div></td><td><div class="dollar">0.02 USD / 1M tokens</div></td><td><div class="dollar">0.250 USD / 1M tokens</div></td><td><div class="dollar">1.2 USD / 1M tokens</div></td></tr><tr><td>openai:gpt-5.6-sol<strong class="rate-date">Verified 2026-09-18</strong><div class="context">https://developers.openai.com/api/docs/models/gpt-5.6-sol.md</div></td><td><div class="dollar">4 USD / 1M tokens</div></td><td><div class="dollar">0.4 USD / 1M tokens</div></td><td><div class="dollar">5.00 USD / 1M tokens</div></td><td><div class="dollar">20 USD / 1M tokens</div></td></tr><tr><td>anthropic:claude-sonnet-5<strong class="rate-date">Verified 2026-09-18</strong><div class="context">https://platform.claude.com/docs/en/about-claude/pricing</div></td><td><div class="dollar">2 USD / 1M tokens</div></td><td><div class="dollar">0.20 USD / 1M tokens</div></td><td><div class="dollar">2.50 USD / 1M tokens</div></td><td><div class="dollar">10 USD / 1M tokens</div></td></tr><tr><td>anthropic:claude-opus-4-8<strong class="rate-date">Verified 2026-09-18</strong><div class="context">https://platform.claude.com/docs/en/about-claude/pricing</div></td><td><div class="dollar">5 USD / 1M tokens</div></td><td><div class="dollar">0.50 USD / 1M tokens</div></td><td><div class="dollar">6.25 USD / 1M tokens</div></td><td><div class="dollar">25 USD / 1M tokens</div></td></tr><tr><td>anthropic:claude-fable-5-1<strong class="rate-date">Verified 2026-09-18</strong><div class="context">https://platform.claude.com/docs/en/about-claude/pricing</div></td><td><div class="dollar">10 USD / 1M tokens</div></td><td><div class="dollar">0.25 USD / 1M tokens</div></td><td><div class="dollar">12.50 USD / 1M tokens</div></td><td><div class="dollar">50 USD / 1M tokens</div></td></tr><tr><td>demo:scripted-chat<strong class="rate-date">Verified 2026-09-18</strong><div class="context">Illustrative demo rates based on openai:gpt-5.6-luna; no provider billing</div></td><td><div class="dollar">0.2 USD / 1M tokens</div></td><td><div class="dollar">0.02 USD / 1M tokens</div></td><td><div class="dollar">0.250 USD / 1M tokens</div></td><td><div class="dollar">1.2 USD / 1M tokens</div></td></tr></tbody></table></div>
+<details><summary>Complete pricing and exchange-rate data</summary><p>Standard online token rates. Verify rates and model access before use. Cache writes with unspecified lifetime use the 5-minute rate unless an explicit cache_write rate is configured. No batch, regional, long-context, tool, or negotiated pricing adjustments are applied.</p><pre>{
+  &#34;refresh_errors&#34;: {},
+  &#34;currency&#34;: &#34;USD&#34;,
+  &#34;exchange&#34;: null,
+  &#34;exchange_error&#34;: null,
+  &#34;as_of&#34;: &#34;2026-09-18&#34;,
+  &#34;note&#34;: &#34;Standard online token rates. Verify rates and model access before use. Cache writes with unspecified lifetime use the 5-minute rate unless an explicit cache_write rate is configured. No batch, regional, long-context, tool, or negotiated pricing adjustments are applied.&#34;,
+  &#34;sources&#34;: [
+    &#34;https://developers.openai.com/api/docs/models/gpt-5.5.md&#34;,
+    &#34;https://developers.openai.com/api/docs/models/gpt-5.6-luna.md&#34;,
+    &#34;https://developers.openai.com/api/docs/models/gpt-5.6-sol.md&#34;,
+    &#34;https://platform.claude.com/docs/en/about-claude/pricing&#34;
+  ],
+  &#34;models&#34;: {
+    &#34;openai:gpt-5.5&#34;: {
+      &#34;fetched_at&#34;: &#34;2026-09-18T16:57:21.647481Z&#34;,
+      &#34;based_on&#34;: null,
+      &#34;as_of&#34;: &#34;2026-09-18&#34;,
+      &#34;source&#34;: &#34;https://developers.openai.com/api/docs/models/gpt-5.5.md&#34;,
+      &#34;input&#34;: &#34;5&#34;,
+      &#34;output&#34;: &#34;30&#34;,
+      &#34;cache_read&#34;: &#34;0.5&#34;,
+      &#34;cache_write&#34;: null,
+      &#34;cache_write_5m&#34;: null,
+      &#34;cache_write_1h&#34;: null
+    },
+    &#34;openai:gpt-5.6-luna&#34;: {
+      &#34;fetched_at&#34;: &#34;2026-09-18T16:57:21.648610Z&#34;,
+      &#34;based_on&#34;: null,
+      &#34;as_of&#34;: &#34;2026-09-18&#34;,
+      &#34;source&#34;: &#34;https://developers.openai.com/api/docs/models/gpt-5.6-luna.md&#34;,
+      &#34;input&#34;: &#34;0.2&#34;,
+      &#34;output&#34;: &#34;1.2&#34;,
+      &#34;cache_read&#34;: &#34;0.02&#34;,
+      &#34;cache_write&#34;: &#34;0.250&#34;,
+      &#34;cache_write_5m&#34;: null,
+      &#34;cache_write_1h&#34;: null
+    },
+    &#34;openai:gpt-5.6-sol&#34;: {
+      &#34;fetched_at&#34;: &#34;2026-09-18T16:57:21.648975Z&#34;,
+      &#34;based_on&#34;: null,
+      &#34;as_of&#34;: &#34;2026-09-18&#34;,
+      &#34;source&#34;: &#34;https://developers.openai.com/api/docs/models/gpt-5.6-sol.md&#34;,
+      &#34;input&#34;: &#34;4&#34;,
+      &#34;output&#34;: &#34;20&#34;,
+      &#34;cache_read&#34;: &#34;0.4&#34;,
+      &#34;cache_write&#34;: &#34;5.00&#34;,
+      &#34;cache_write_5m&#34;: null,
+      &#34;cache_write_1h&#34;: null
+    },
+    &#34;anthropic:claude-sonnet-5&#34;: {
+      &#34;fetched_at&#34;: &#34;2026-09-18T16:57:21.663815Z&#34;,
+      &#34;based_on&#34;: null,
+      &#34;as_of&#34;: &#34;2026-09-18&#34;,
+      &#34;source&#34;: &#34;https://platform.claude.com/docs/en/about-claude/pricing&#34;,
+      &#34;input&#34;: &#34;2&#34;,
+      &#34;output&#34;: &#34;10&#34;,
+      &#34;cache_read&#34;: &#34;0.20&#34;,
+      &#34;cache_write&#34;: null,
+      &#34;cache_write_5m&#34;: &#34;2.50&#34;,
+      &#34;cache_write_1h&#34;: &#34;4&#34;
+    },
+    &#34;anthropic:claude-opus-4-8&#34;: {
+      &#34;fetched_at&#34;: &#34;2026-09-18T16:57:21.674755Z&#34;,
+      &#34;based_on&#34;: null,
+      &#34;as_of&#34;: &#34;2026-09-18&#34;,
+      &#34;source&#34;: &#34;https://platform.claude.com/docs/en/about-claude/pricing&#34;,
+      &#34;input&#34;: &#34;5&#34;,
+      &#34;output&#34;: &#34;25&#34;,
+      &#34;cache_read&#34;: &#34;0.50&#34;,
+      &#34;cache_write&#34;: null,
+      &#34;cache_write_5m&#34;: &#34;6.25&#34;,
+      &#34;cache_write_1h&#34;: &#34;10&#34;
+    },
+    &#34;anthropic:claude-fable-5-1&#34;: {
+      &#34;fetched_at&#34;: &#34;2026-09-18T16:57:21.686328Z&#34;,
+      &#34;based_on&#34;: null,
+      &#34;as_of&#34;: &#34;2026-09-18&#34;,
+      &#34;source&#34;: &#34;https://platform.claude.com/docs/en/about-claude/pricing&#34;,
+      &#34;input&#34;: &#34;10&#34;,
+      &#34;output&#34;: &#34;50&#34;,
+      &#34;cache_read&#34;: &#34;0.25&#34;,
+      &#34;cache_write&#34;: null,
+      &#34;cache_write_5m&#34;: &#34;12.50&#34;,
+      &#34;cache_write_1h&#34;: &#34;20&#34;
+    },
+    &#34;demo:scripted-chat&#34;: {
+      &#34;fetched_at&#34;: &#34;2026-09-18T16:57:21.648610Z&#34;,
+      &#34;based_on&#34;: &#34;openai:gpt-5.6-luna&#34;,
+      &#34;as_of&#34;: &#34;2026-09-18&#34;,
+      &#34;source&#34;: &#34;Illustrative demo rates based on openai:gpt-5.6-luna; no provider billing&#34;,
+      &#34;input&#34;: &#34;0.2&#34;,
+      &#34;output&#34;: &#34;1.2&#34;,
+      &#34;cache_read&#34;: &#34;0.02&#34;,
+      &#34;cache_write&#34;: &#34;0.250&#34;,
+      &#34;cache_write_5m&#34;: null,
+      &#34;cache_write_1h&#34;: null
+    }
+  },
+  &#34;aliases&#34;: {
+    &#34;openai:gpt-5.5-2026-04-23&#34;: &#34;openai:gpt-5.5&#34;,
+    &#34;openai:gpt-5.6&#34;: &#34;openai:gpt-5.6-sol&#34;
+  }
+}</pre></details>
+<footer><div>Run 01a0c692-17a2-7253-a1c8-2a9f6b24c4af</div><p>Offline demonstration: actual graph execution with scripted responses. Token counts use message and tool-definition JSON words and punctuation. The simulation retains completed conversation history, including responses, for subsequent cache reads.</p><p>Turn costs sum model calls once. Tool fees are outside this model-token estimate.</p>Only model calls contribute token charges. Reasoning is priced at the output-token rate. Missing usage or prices are never assumed free. Context is framework metadata or application-authored annotations, not inferred private reasoning. Token estimates exclude tool fees, infrastructure, taxes, and discounts. Schema 1.</footer>
+<div id="cost-tooltip" role="tooltip" hidden style="position:fixed;z-index:20;pointer-events:none;background:#173b70;color:white;padding:10px 14px;border-radius:6px;box-shadow:0 3px 12px #0003;white-space:pre-line;font-size:13px;max-width:280px"></div>
+</main><script>
+const costTip = document.getElementById('cost-tooltip');
+/** Show one shared tooltip for a bar segment, cumulative-cost point, or context point. */
+function showCostTip(segment, event) {
+  costTip.textContent = segment.dataset.costTip.split(' | ').join('\n');
+  costTip.hidden = false;
+  const rect = segment.getBoundingClientRect();
+  // Keyboard focus has no pointer coordinates; anchor to the chart element.
+  // Clamp both axes so a tooltip remains readable at viewport boundaries.
+  const x = event.clientX ?? rect.right;
+  const y = event.clientY ?? rect.top;
+  costTip.style.left = Math.max(8, Math.min(x + 14, window.innerWidth - costTip.offsetWidth - 8)) + 'px';
+  costTip.style.top = Math.max(8, Math.min(y + 14, window.innerHeight - costTip.offsetHeight - 8)) + 'px';
+}
+document.querySelectorAll('[data-cost-tip]').forEach(segment => {
+  segment.setAttribute('aria-label', segment.dataset.costTip);
+  segment.addEventListener('pointerenter', event => showCostTip(segment, event));
+  segment.addEventListener('pointermove', event => showCostTip(segment, event));
+  segment.addEventListener('pointerleave', () => costTip.hidden = true);
+  segment.addEventListener('focus', () => showCostTip(segment, {}));
+  segment.addEventListener('blur', () => costTip.hidden = true);
+});
+document.addEventListener('keydown', event => { if (event.key === 'Escape') costTip.hidden = true; });
+
+// Row indices are template-local identifiers, not provider span IDs. Parent
+// indices let visibility follow the execution hierarchy without altering totals.
+const treeRows = Array.from(document.querySelectorAll('.tree-row'));
+const rowByIndex = new Map(treeRows.map(row => [row.dataset.index, row]));
+const expandedRowIndices = new Set(treeRows.map(row => row.dataset.index));
+
+/** Apply ancestor visibility while preserving each descendant's own open state. */
+function refreshTreeVisibility() {
+  for (const row of treeRows) {
+    let parentIndex = row.dataset.parent;
+    let visible = true;
+    // The empty parent is the root sentinel; roots remain visible even when
+    // Collapse all removes every entry from the expanded set.
+    while (parentIndex !== '') {
+      // Any closed ancestor hides the entire branch, not just direct children.
+      if (!expandedRowIndices.has(parentIndex)) {
+        visible = false;
+        break;
+      }
+      parentIndex = rowByIndex.get(parentIndex).dataset.parent;
+    }
+    row.hidden = !visible;
+    const toggleButton = row.querySelector('.toggle');
+    // Leaves have no expansion control. Parents expose the same state to
+    // assistive technology and the visual plus/minus affordance.
+    if (toggleButton) {
+      const isExpanded = expandedRowIndices.has(row.dataset.index);
+      toggleButton.setAttribute('aria-expanded', String(isExpanded));
+      toggleButton.textContent = isExpanded ? '−' : '+';
+    }
+  }
+}
+for (const row of treeRows) {
+  const toggleButton = row.querySelector('.toggle');
+  // Only parent rows have children to hide; leaf rows need no click handler.
+  if (toggleButton) {
+    toggleButton.addEventListener('click', () => {
+      const rowIndex = row.dataset.index;
+      // Toggle only this parent; descendants retain their choices for reopening.
+      if (expandedRowIndices.has(rowIndex)) expandedRowIndices.delete(rowIndex);
+      else expandedRowIndices.add(rowIndex);
+      refreshTreeVisibility();
+    });
+  }
+}
+document.getElementById('expand-all').addEventListener('click', () => {
+  for (const row of treeRows) expandedRowIndices.add(row.dataset.index);
+  refreshTreeVisibility();
+});
+document.getElementById('collapse-all').addEventListener('click', () => {
+  expandedRowIndices.clear();
+  refreshTreeVisibility();
+});
+refreshTreeVisibility();
+// Section controls affect only their own disclosures, leaving the trace tree alone.
+for (const button of document.querySelectorAll('[data-disclosure-target]')) {
+  button.addEventListener('click', () => {
+    const section = document.getElementById(button.dataset.disclosureTarget);
+    for (const detail of section.querySelectorAll('details')) {
+      detail.open = button.dataset.expand === 'true';
+    }
+  });
+}
+// Agent links must also reveal a target nested inside a collapsed caller.
+function revealAgentTarget() {
+  const target = document.getElementById(location.hash.slice(1));
+  if (!target || !target.classList.contains('agent-activity')) return;
+  for (let node = target; node; node = node.parentElement) {
+    if (node.tagName === 'DETAILS') node.open = true;
+  }
+  target.scrollIntoView({block: 'start'});
+}
+window.addEventListener('hashchange', revealAgentTarget);
+document.addEventListener('click', event => {
+  if (event.target.closest('a[href^="#agent-"]')) setTimeout(revealAgentTarget, 0);
+});
+revealAgentTarget();
+</script></body></html>

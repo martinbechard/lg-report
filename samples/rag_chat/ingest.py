@@ -11,8 +11,8 @@ import argparse
 import json
 from pathlib import Path
 
-from lg_report.agents.wikipedia_rag_agent import WIKIPEDIA_INDEX_DIRECTORY
-from lg_report.platform.rag_index import DEFAULT_PASSAGES, build_index
+from agent_runtime.agents.wikipedia_rag_agent import WIKIPEDIA_INDEX_DIRECTORY
+from agent_runtime.harness.rag_index import DEFAULT_PASSAGES, build_index
 
 
 def main():

@@ -1,0 +1,13 @@
+{
+  "samples": [
+    {
+      "id": "file_approval",
+      "name": "File approval",
+      "description": "Review restricted writes proposed by the agent.",
+      "workflow": "agent_runtime.workflows.file_approval:build_workflow",
+      "scripted_run": "samples.file_approval.scripted_run",
+      "interaction": "approval",
+      "default_client": "console"
+    }
+  ]
+}

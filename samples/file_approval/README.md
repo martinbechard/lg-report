@@ -1,53 +1,118 @@
 <!-- Copyright (c) 2026 Martin.Bechard@DevConsult.ca -->
-# File editing with human approval
+# Agent-invoked tools with automatic human approval
 
-Read a UTF-8 source and propose two successive modifications to an output file.
-Each modification appends one teaching-scenario sentence. The graph performs real
-file I/O; it uses no model, provider key, or simulated token counts.
+The human asks an agent to edit a document. The agent chooses when to read and
+what to write. The workflow supplies middleware that automatically intercepts
+restricted `write_file` and `edit_file` calls **after the model proposes them and before they
+execute**. Approval is enforced by code, not by asking the model to behave.
 
-```sh
-uv run python -m samples.file_approval.app --source samples/file_approval/input.txt --target reports/edited-summary.txt --mode always-ask
-uv run python -m samples.file_approval.app --source samples/file_approval/input.txt --target reports/automatic-summary.txt --mode autoapprove
+```text
+Human request
+     |
+     v
++---------------- File editor agent ----------------+
+| system prompt + bounded file tools + model loop   |
+|                                                  |
+| model -> workflow-supplied approval middleware    |
+|   ^                 |                            |
+|   |          unrestricted read / approved write   |
+|   |                 v                            |
+|   +------------- real tools                      |
+|   +------------- rejection result (no execution) |
++--------------------------------------------------+
+                      |
+       restricted write in always-ask mode
+                      v
+              checkpoint + interrupt
+                      |
+                human decision
+                      |
+              resume same checkpoint
+              /         |          \
+          approve     reject       cancel
+          execute    agent sees    graph ends
+           tool      rejection     without write
+
+Model final answer -> END
 ```
 
-The target's parent directory must already exist. `reports/` exists in this
-repository and keeps the resulting local files out of Git. Paths are relative to
-the working directory; absolute paths also work. Source and target may be the
-same file. An existing target is replaced by the proposed source-derived content,
-so the approval prompt shows its full diff and replacement text.
+The middleware is inside the compiled agent graph so it can control the actual
+tool execution boundary. Ownership remains separate: `agents/file_editor.py`
+constructs a DeepAgent with its native `read_file`, `write_file`, and `edit_file`
+tools. `backends/file_access_backend.py` maps `/source.txt` and `/target.txt` to trusted
+local paths and delegates file operations to DeepAgent’s `FilesystemBackend`.
+Only the target can be changed; other backend operations are unsupported.
+`workflows/file_approval.py` configures the policy;
+`middleware/restricted_tool_approval.py` implements approval, cancellation, and
+stale-content checks. The caller supplies the checkpointer. The client submits AG-UI resume entries to `LangGraphAgent`, preserving the thread and recorder callbacks. It does not choose when to interrupt.
 
-- `always-ask` (default): review each exact proposed write, then type `approve`,
-  `reject`, or `cancel`. Unknown answers ask again without writing.
-- `autoapprove`: apply both modifications without prompting.
-- `reject`: skip only this modification. A later proposal excludes rejected text.
-- `cancel`, EOF, or Ctrl-C at a prompt: stop remaining work. Previously approved
-  changes remain; cancellation does not undo a write already authorized.
-
-Approval applies to one modification only. Reads require no approval. If the
-output changes while the prompt is waiting, the workflow fails without overwriting
-that newer content. This is a single-user example, not a concurrent filesystem
-transaction service.
-
-For an unattended fixture, explicitly select simulated human decisions:
+The small `RestrictedToolApproval` middleware makes the policy visible for
+teaching. It uses LangGraph's real `interrupt` and LangChain's agent middleware
+hooks. It is application code, not DeepAgents' built-in approval middleware.
+LangChain also provides `HumanInTheLoopMiddleware`; this sample spells out its
+own approve/reject/cancel protocol to show cancellation ending the graph.
 
 ```sh
-uv run python -m samples.file_approval.app --source samples/file_approval/input.txt --target reports/scripted-summary.txt --client static --decision approve
+# Scripted model decisions; real tools and console approval
+uv run python -m agent_runtime --sample file_approval --source samples/file_approval/input.txt --target reports/edited-summary.txt
+
+# Real model decisions, with exactly the same automatic approval gate
+uv run python -m agent_runtime --sample file_approval --live --source samples/file_approval/input.txt --target reports/edited-summary.txt --request 'Add a short next-steps section.'
+
+# Explicitly bypass human approval for this run
+uv run python -m agent_runtime --sample file_approval --source samples/file_approval/input.txt --target reports/automatic-summary.txt --mode autoapprove
+```
+
+Configure `LG_PROVIDER`, `LG_MODEL`, and the provider key in the environment or
+the sample's `.env` for `--live`. Custom `--request` text requires live mode.
+The default offline fixture authors two successive additions and fresh reads;
+it proves tool interception and execution, not live editing quality. Rejection
+handling is scripted in that fixture; a live model decides how to continue from
+the rejection result under its instructions.
+
+- `always-ask` (default) shows the target path, tool name, complete proposed
+  content or string replacement, and expected previous content for each restricted call.
+- `approve` releases that exact call. `reject` supplies an error tool result
+  without executing it, then lets the agent continue. Invalid answers ask again.
+- `cancel`, EOF, or Ctrl-C at the approval prompt ends the graph. Earlier writes
+  remain; there is no rollback. A batch is reviewed before any of its tools run,
+  so cancellation also skips previously approved calls in that pending batch.
+- `autoapprove` runs the same agent/tools without human interrupts.
+
+The model can read only the configured source and target, and write only the
+target. DeepAgent creates missing parent directories when writing. An existing target is preserved as the
+starting document by the default scenario; source and target may be the same
+file. Middleware checkpoints the target content when it is read (or before the
+first model call if no read occurs), then compares it immediately before
+executing either mutation tool. The model does not supply `expected_content`. A changed target fails the run rather than
+silently overwriting a human's intervening edit. This comparison and write are
+not atomic; the sample assumes a single-user local application.
+
+For unattended demonstrations, simulate human decisions explicitly:
+
+```sh
+uv run python -m agent_runtime --sample file_approval --source samples/file_approval/input.txt --target reports/scripted-summary.txt --client static --decision approve
 ```
 
 `--decision reject` and `--decision cancel` exercise other outcomes. Static
-approval is a test fixture, not evidence that a human approved the changes.
+approval is not evidence of human review. No file is read or preloaded by the
+client: even the offline model builds proposals from actual tool observations.
 
-The workflow separates read, prepare, approve, and apply nodes. Only the apply
-node writes. LangGraph's [interrupt/resume API](https://reference.langchain.com/python/langgraph/types/interrupt)
-suspends the approval node and resumes with the user's decision. The shared
-`HumanLoop` client preserves recorder callbacks across every resume. An in-memory
-checkpointer supports pauses within this process, not recovery after restarting it.
+The in-memory checkpointer supports pause/resume within this process. Resuming
+replays the interrupted middleware node; it does not regenerate the model's
+proposal or repeat completed tools. Restart recovery is outside this sample.
 
-Each run prints its final state and a local `report.html` path. `run.json` remains
-independent of HTML. `--out` chooses a new report directory; `--metadata-only`
-omits captured payloads. `--prices models.json --fx-file /path/to/fx.json` avoids
-price/FX network lookups. No LLM is used; `--live` is rejected.
+Each run prints its final state and `report.html` path. The report includes the
+named file editor and real model/tool spans; offline model usage is labeled
+simulated. `run.json` remains independent of HTML. `--out` selects another reusable report
+directory, `--metadata-only` omits captured payloads, and
+`--prices models.json --fx-file /path/to/fx.json` uses local pricing inputs.
+Default output is `reports/file_approval/` and is replaced on rerun.
 
-Local reports default to `report.html`, `run.json`, `spans.jsonl`, and
-`prices.json` in the current working directory. The next default run replaces
-these files. Use `--out reports/saved-run` with a new directory to keep a run.
+## Angular client
+
+Select **File approval** in the Angular catalog, or add `--client angular` to
+the CLI command with explicit source/target paths. The catalog gives each session
+an isolated temporary output. Approval controls use the same driver as the
+console; a download appears after a confirmed write. Starting a new chat removes
+the previous temporary workspace. Explicit CLI target files are retained.

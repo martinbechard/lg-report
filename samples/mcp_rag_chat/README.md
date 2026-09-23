@@ -1,7 +1,7 @@
 <!-- Copyright (c) 2026 Martin.Bechard@DevConsult.ca; third-party source excerpts retain their original rights. -->
 # Deep Agents with Wikipedia MCP
 
-Run a Deep Agent that discovers `search_wikipedia` from a local FastMCP server,
+Run a Deep Agent that discovers `semantic_search_wikipedia` from a local FastMCP server,
 searches the completed WikiText-103 Chroma index over stdio, and consumes the
 returned passages in a second model request. The standard recorder saves
 `run.json`, `spans.jsonl`, `prices.json`, and `report.html`.
@@ -14,15 +14,15 @@ From the repository root:
 uv sync --locked
 # Only if the existing RAG index has not been built:
 uv run python -m samples.rag_chat.ingest
-uv run python -m samples.mcp_rag_chat.app
+uv run python -m agent_runtime --sample mcp_rag_chat
 ```
 
 No separately running server is needed. The workflow launches and closes the MCP
 subprocess for each turn, using the same Python environment. The printed HTML
-path defaults to `./report.html` in the current working directory, replacing the previous default run.
+path defaults to `reports/mcp_rag_chat/report.html`, replacing the previous default run.
 
 The default uses a scripted model with **real MCP transport and vector retrieval**.
-It makes two simulated model calls and one real `search_wikipedia` call. The final
+It makes two simulated model calls and one real `semantic_search_wikipedia` call. The final
 scripted message acknowledges retrieval; inspect the tool observation for actual
 passages and IDs. It does not claim to generate or evaluate a factual answer.
 No model API key is needed. The completed index and cached embedding model are
@@ -37,7 +37,7 @@ Local embedding CPU and MCP transport have no separate LLM token charge.
 ```sh
 cp samples/mcp_rag_chat/.env.example samples/mcp_rag_chat/.env
 # Configure the provider, model, and API key in that file.
-uv run python -m samples.mcp_rag_chat.app --client console --live
+uv run python -m agent_runtime --sample mcp_rag_chat --client console --live
 ```
 
 Use `/quit` to finish and export the report. `/attach PATH` supplies UTF-8 text to
@@ -46,21 +46,22 @@ provider usage and asks the agent to cite passage IDs and abstain when evidence
 is insufficient. The corpus is a historical subset, not current Wikipedia.
 
 Standard options include `--out`, `--prices`, `--fx-file`, `--env-file`, and
-`--metadata-only`. Price and FX refreshes can use the network even with a scripted
-model; supply local price and FX files to avoid those lookups. Credentials and
-reports are ignored by Git. Existing output directories cannot be overwritten.
+`--metadata-only`. Model-price refreshes can use the network even with a scripted
+model; supply `--prices models.json` to avoid them. FX reads the saved shared
+`exchange-rate.json`. Credentials remain ignored by Git; stable sample reports
+are included, and reruns replace their previous generated output.
 
 ## Code path
 
-`app.py` → `workflows/mcp_rag_chat.py` → `agents/wikipedia_mcp_agent.py`
-→ `MCPAdapter` → stdio → `mcp_servers/wikipedia.py` → `tools/search_wikipedia.py`.
+`sample.json` → `workflows/mcp_rag_chat.py` → `agents/wikipedia_mcp_agent.py`
+→ `MCPAdapter` → stdio → `mcp_servers/wikipedia.py` → `tools/semantic_search_wikipedia.py`.
 
 The synchronous workflow bridge preserves the recorder's callbacks and passes the
 complete conversation history into async invocation. Each turn starts a fresh
 agent and server connection; only conversation messages persist across turns.
 It does not provide checkpoint/resume or persistent agent filesystem state.
 Async applications can use `open_agent` directly for a longer-lived connection.
-See [MCP server details](../../src/lg_report/mcp_servers/README.md).
+See [MCP server details](../../src/agent_runtime/mcp_servers/README.md).
 
 ## Verify
 

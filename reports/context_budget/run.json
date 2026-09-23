@@ -1,0 +1,3361 @@
+{
+  "schema_version": 1,
+  "id": "01a0c6fd-6d92-75a1-ab4d-f15a8266314f",
+  "title": "Context budgets · shared peers and isolated specialist",
+  "demo": true,
+  "status": "ok",
+  "steps": [
+    {
+      "id": "01a0c6fd-6d92-75a1-ab4d-f15a8266314f",
+      "parent_id": null,
+      "name": "context_budget_workflow",
+      "kind": "workflow",
+      "start_ns": 1790044892568268000,
+      "end_ns": 1790044892623086000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "report_turn": 1,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "description": "Execute the context_budget_workflow workflow operation and pass its result to the next graph step."
+      }
+    },
+    {
+      "id": "01a0c6fd-6d99-7f90-b402-fb0a782cfa0c",
+      "parent_id": "01a0c6fd-6d92-75a1-ab4d-f15a8266314f",
+      "name": "planning_peer",
+      "kind": "workflow",
+      "start_ns": 1790044892569721000,
+      "end_ns": 1790044892577331000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "planning_peer",
+        "langgraph_step": 1,
+        "report_turn": 1,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:1"
+        ],
+        "description": "Execute the planning_peer workflow operation and pass its result to the next graph step."
+      }
+    },
+    {
+      "id": "01a0c6fd-6d9a-7703-bc8e-c54a16b51c7c",
+      "parent_id": "01a0c6fd-6d99-7f90-b402-fb0a782cfa0c",
+      "name": "run",
+      "kind": "workflow",
+      "start_ns": 1790044892570158000,
+      "end_ns": 1790044892577047000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "planning_peer",
+        "langgraph_step": 1,
+        "report_turn": 1,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "seq:step:1"
+        ],
+        "description": "Execute the run workflow operation and pass its result to the next graph step."
+      }
+    },
+    {
+      "id": "01a0c6fd-6d9a-7703-bc8e-c55124488b8f",
+      "parent_id": "01a0c6fd-6d9a-7703-bc8e-c54a16b51c7c",
+      "name": "context_planner",
+      "kind": "workflow",
+      "start_ns": 1790044892570674000,
+      "end_ns": 1790044892576680000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "planning_peer",
+        "langgraph_step": 1,
+        "report_turn": 1,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "description": "Execute the context_planner workflow operation and pass its result to the next graph step."
+      }
+    },
+    {
+      "id": "01a0c6fd-6d9b-71e3-be05-f0cf4de6d58d",
+      "parent_id": "01a0c6fd-6d9a-7703-bc8e-c55124488b8f",
+      "name": "SummarizationMiddleware.before_model",
+      "kind": "workflow",
+      "start_ns": 1790044892571363000,
+      "end_ns": 1790044892571852000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "SummarizationMiddleware.before_model",
+        "langgraph_step": 1,
+        "report_turn": 1,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:1"
+        ],
+        "description": "Execute the SummarizationMiddleware.before_model workflow operation and pass its result to the next graph step."
+      }
+    },
+    {
+      "id": "01a0c6fd-6d9c-72a1-8e56-2b099078dd39",
+      "parent_id": "01a0c6fd-6d9a-7703-bc8e-c55124488b8f",
+      "name": "model",
+      "kind": "workflow",
+      "start_ns": 1790044892572452000,
+      "end_ns": 1790044892575884000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "model",
+        "langgraph_step": 2,
+        "report_turn": 1,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:2"
+        ],
+        "description": "Prepare the current conversation, run model middleware, and invoke the chat model."
+      }
+    },
+    {
+      "id": "01a0c6fd-6d9d-7461-b48c-677a338145c8",
+      "parent_id": "01a0c6fd-6d9c-72a1-8e56-2b099078dd39",
+      "name": "CompactingDemoModel",
+      "kind": "model",
+      "start_ns": 1790044892573242000,
+      "end_ns": 1790044892575349000,
+      "status": "ok",
+      "provider": "demo",
+      "model": "scripted-chat",
+      "effort": null,
+      "usage": {
+        "input_tokens": 423,
+        "output_tokens": 42,
+        "cache_read": 0,
+        "cache_write": 0,
+        "cache_write_5m": 0,
+        "cache_write_1h": 0,
+        "reasoning": 0
+      },
+      "error": null,
+      "request": [
+        {
+          "role": "system",
+          "content": "You are the planning peer. Read the latest user request and earlier context. Write a short brief for the responding peer, preserving user constraints. Do not answer the user or call tools.",
+          "tool_calls": [],
+          "tool_call_id": null
+        },
+        {
+          "role": "human",
+          "content": "PARENT_ONLY_DETAIL: Answer in French. Explain agent workflow delegation. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. ",
+          "tool_calls": [],
+          "tool_call_id": null
+        }
+      ],
+      "response": [
+        {
+          "role": "ai",
+          "content": "Preserve the French language requirement; obtain workflow evidence and explain delegation.",
+          "tool_calls": [],
+          "tool_call_id": null
+        }
+      ],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "model",
+        "langgraph_step": 2,
+        "report_description": "Plan from shared workflow history.",
+        "report_turn": 1,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "seq:step:1"
+        ],
+        "description": "Plan from shared workflow history.",
+        "input_message_bytes": 2565,
+        "message_count": 2,
+        "message_roles": [
+          "system",
+          "human"
+        ],
+        "simulated_definitions_tokens": 2,
+        "simulated_system_tokens": 66,
+        "simulated_human_tokens": 355,
+        "context_ledger": "{\"request_tokens\": 423, \"cache_read_tokens\": 0, \"fresh_input_tokens\": 423, \"request_cache_write_tokens\": 423, \"response_cache_write_tokens\": 42, \"added_message_tokens\": 423, \"response_tokens\": 42, \"context_after_response_tokens\": 465}",
+        "usage_basis": "Simulated canonical-JSON tokens; rewritten context, no cache reuse assumed"
+      }
+    },
+    {
+      "id": "01a0c6fd-6da1-74a0-be0d-e56eb7fb1e08",
+      "parent_id": "01a0c6fd-6d92-75a1-ab4d-f15a8266314f",
+      "name": "responding_peer",
+      "kind": "workflow",
+      "start_ns": 1790044892577923000,
+      "end_ns": 1790044892622465000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "responding_peer",
+        "langgraph_step": 2,
+        "report_turn": 1,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:2"
+        ],
+        "description": "Execute the responding_peer workflow operation and pass its result to the next graph step."
+      }
+    },
+    {
+      "id": "01a0c6fd-6da2-70c0-9fd4-c6f65da05ede",
+      "parent_id": "01a0c6fd-6da1-74a0-be0d-e56eb7fb1e08",
+      "name": "run",
+      "kind": "workflow",
+      "start_ns": 1790044892578205000,
+      "end_ns": 1790044892622111000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "responding_peer",
+        "langgraph_step": 2,
+        "report_turn": 1,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "seq:step:1"
+        ],
+        "description": "Execute the run workflow operation and pass its result to the next graph step."
+      }
+    },
+    {
+      "id": "01a0c6fd-6da2-70c0-9fd4-c702e34f7825",
+      "parent_id": "01a0c6fd-6da2-70c0-9fd4-c6f65da05ede",
+      "name": "context_responder",
+      "kind": "workflow",
+      "start_ns": 1790044892578547000,
+      "end_ns": 1790044892621603000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "responding_peer",
+        "langgraph_step": 2,
+        "report_turn": 1,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "description": "Execute the context_responder workflow operation and pass its result to the next graph step."
+      }
+    },
+    {
+      "id": "01a0c6fd-6da3-7d60-a579-193c053ded42",
+      "parent_id": "01a0c6fd-6da2-70c0-9fd4-c702e34f7825",
+      "name": "SummarizationMiddleware.before_model",
+      "kind": "workflow",
+      "start_ns": 1790044892579196000,
+      "end_ns": 1790044892582903000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "SummarizationMiddleware.before_model",
+        "langgraph_step": 1,
+        "report_turn": 1,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:1"
+        ],
+        "description": "Execute the SummarizationMiddleware.before_model workflow operation and pass its result to the next graph step."
+      }
+    },
+    {
+      "id": "01a0c6fd-6da3-7d60-a579-194216e48cb9",
+      "parent_id": "01a0c6fd-6da3-7d60-a579-193c053ded42",
+      "name": "CompactingDemoModel",
+      "kind": "workflow",
+      "start_ns": 1790044892579547000,
+      "end_ns": 1790044892582550000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "SummarizationMiddleware.before_model",
+        "langgraph_step": 1,
+        "report_turn": 1,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "seq:step:1"
+        ],
+        "description": "Execute the CompactingDemoModel workflow operation and pass its result to the next graph step."
+      }
+    },
+    {
+      "id": "01a0c6fd-6da3-7d60-a579-1952a966dd3e",
+      "parent_id": "01a0c6fd-6da3-7d60-a579-194216e48cb9",
+      "name": "CompactingDemoModel",
+      "kind": "model",
+      "start_ns": 1790044892580159000,
+      "end_ns": 1790044892582082000,
+      "status": "ok",
+      "provider": "demo",
+      "model": "scripted-chat",
+      "effort": null,
+      "usage": {
+        "input_tokens": 939,
+        "output_tokens": 42,
+        "cache_read": 0,
+        "cache_write": 0,
+        "cache_write_5m": 0,
+        "cache_write_1h": 0,
+        "reasoning": 0
+      },
+      "error": null,
+      "request": [
+        {
+          "role": "human",
+          "content": "<role>\nContext Extraction Assistant\n</role>\n\n<primary_objective>\nYour sole objective in this task is to extract the highest quality/most relevant context from the conversation history below.\n</primary_objective>\n\n<objective_information>\nYou're nearing the total number of input tokens you can accept, so you must extract the highest quality/most relevant pieces of information from your conversation history.\nThis context will then overwrite the conversation history presented below. Because of this, ensure the context you extract is only the most important information to continue working toward your overall goal.\n</objective_information>\n\n<instructions>\nThe conversation history below will be replaced with the context you extract in this step.\nYou want to ensure that you don't repeat any actions you've already completed, so the context you extract from the conversation history should be focused on the most important information to your overall goal.\n\nYou should structure your summary using the following sections. Each section acts as a checklist - you must populate it with relevant information or explicitly state \"None\" if there is nothing to report for that section:\n\n## SESSION INTENT\n\nWhat is the user's primary goal or request? What overall task are you trying to accomplish? This should be concise but complete enough to understand the purpose of the entire session.\n\n## SUMMARY\n\nExtract and record all of the most important context from the conversation history. Include important choices, conclusions, or strategies determined during this conversation. Include the reasoning behind key decisions. Document any rejected options and why they were not pursued.\n\n## ARTIFACTS\n\nWhat artifacts, files, or resources were created, modified, or accessed during this conversation? For file modifications, list specific file paths and briefly describe the changes made to each. This section prevents silent loss of artifact information.\n\n## NEXT STEPS\n\nWhat specific tasks remain to be completed to achieve the session intent? What should you do next?\n\n</instructions>\n\nThe user will message you with the full message history from which you'll extract context to create a replacement. Carefully read through it all and think deeply about what information is most important to your overall goal and should be saved:\n\nWith all of this in mind, please carefully read over the entire conversation history, and extract the most important and relevant context to replace it so that you can free up space in the conversation history.\nRespond ONLY with the extracted context. Do not include any additional information, or text before or after the extracted context.\n\n<messages>\nMessages to summarize:\n<message type=\"human\">PARENT_ONLY_DETAIL: Answer in French. Explain agent workflow delegation. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. This is repeated background for the compaction demonstration. </message>\n</messages>",
+          "tool_calls": [],
+          "tool_call_id": null
+        }
+      ],
+      "response": [
+        {
+          "role": "ai",
+          "content": "The user requires French answers about workflow delegation. Preserve that constraint.",
+          "tool_calls": [],
+          "tool_call_id": null
+        }
+      ],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "SummarizationMiddleware.before_model",
+        "langgraph_step": 1,
+        "report_description": "Summarize shared workflow history.",
+        "report_turn": 1,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "description": "Summarize shared workflow history.",
+        "input_message_bytes": 5105,
+        "message_count": 1,
+        "message_roles": [
+          "human"
+        ],
+        "simulated_definitions_tokens": 2,
+        "simulated_human_tokens": 937,
+        "context_ledger": "{\"request_tokens\": 939, \"cache_read_tokens\": 0, \"fresh_input_tokens\": 939, \"request_cache_write_tokens\": 939, \"response_cache_write_tokens\": 42, \"added_message_tokens\": 939, \"response_tokens\": 42, \"context_after_response_tokens\": 981}",
+        "usage_basis": "Simulated canonical-JSON tokens; rewritten context, no cache reuse assumed"
+      }
+    },
+    {
+      "id": "01a0c6fd-6da7-7813-b5c7-7ca59e4999d1",
+      "parent_id": "01a0c6fd-6da2-70c0-9fd4-c702e34f7825",
+      "name": "model",
+      "kind": "workflow",
+      "start_ns": 1790044892583496000,
+      "end_ns": 1790044892587377000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "model",
+        "langgraph_step": 2,
+        "report_turn": 1,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:2"
+        ],
+        "description": "Prepare the current conversation, run model middleware, and invoke the chat model."
+      }
+    },
+    {
+      "id": "01a0c6fd-6da8-7831-b8f1-c1eb79a216e5",
+      "parent_id": "01a0c6fd-6da7-7813-b5c7-7ca59e4999d1",
+      "name": "CompactingDemoModel",
+      "kind": "model",
+      "start_ns": 1790044892584906000,
+      "end_ns": 1790044892586745000,
+      "status": "ok",
+      "provider": "demo",
+      "model": "scripted-chat",
+      "effort": null,
+      "usage": {
+        "input_tokens": 584,
+        "output_tokens": 90,
+        "cache_read": 0,
+        "cache_write": 0,
+        "cache_write_5m": 0,
+        "cache_write_1h": 0,
+        "reasoning": 0
+      },
+      "error": null,
+      "request": [
+        {
+          "role": "system",
+          "content": "You are the responding peer. Read the user's request and the planning brief. Delegate workflow reference research to workflow-specialist using task with a self-contained assignment. Then answer concisely using the returned evidence. Preserve user constraints from the shared conversation or its summary.",
+          "tool_calls": [],
+          "tool_call_id": null
+        },
+        {
+          "role": "human",
+          "content": "Here is a summary of the conversation to date:\n\nThe user requires French answers about workflow delegation. Preserve that constraint.",
+          "tool_calls": [],
+          "tool_call_id": null
+        },
+        {
+          "role": "ai",
+          "content": "Preserve the French language requirement; obtain workflow evidence and explain delegation.",
+          "tool_calls": [],
+          "tool_call_id": null
+        }
+      ],
+      "response": [
+        {
+          "role": "ai",
+          "content": "",
+          "tool_calls": [
+            {
+              "name": "task",
+              "args": {
+                "subagent_type": "workflow-specialist",
+                "description": "Explain delegation using workflow_reference, then return a concise summary."
+              },
+              "id": "delegate-0",
+              "type": "tool_call"
+            }
+          ],
+          "tool_call_id": null
+        }
+      ],
+      "tool_definitions": [
+        {
+          "type": "function",
+          "function": {
+            "name": "task",
+            "description": "Launch an ephemeral subagent to handle a complex, multi-step task.\n\nAvailable agent types and the tools they have access to:\n- workflow-specialist: Looks up agent workflow concepts and returns an evidence-based summary.\n\nSpecify subagent_type to select the agent. Usage notes:\n- Launch multiple agents concurrently when their tasks are independent, using a single message with multiple tool calls.\n- Each invocation is stateless by default: the agent sees only the prompt you give it and returns a single final report. Put full detail in the prompt and state exactly what it should return — unless an agent type below says it inherits your conversation instead.\n- The agent's report is not shown to the user; relay a summary yourself.\n- Tell the agent whether to create content, analyze, or only research, since it can't necessarily see the user's intent unless it inherits your conversation, as noted per agent type below.\n- If an agent's description says to use it proactively, do so without waiting to be asked.\n- When only general-purpose is available, use it for any complex, context-heavy task; it has the same capabilities as the main agent.",
+            "parameters": {
+              "properties": {
+                "description": {
+                  "description": "A detailed description of the task for the subagent to perform autonomously. Include all necessary context and specify the expected output format.",
+                  "type": "string"
+                },
+                "subagent_type": {
+                  "description": "The type of subagent to use. Must be one of the available agent types listed in the tool description.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "description",
+                "subagent_type"
+              ],
+              "type": "object"
+            }
+          }
+        }
+      ],
+      "context": {
+        "langgraph_node": "model",
+        "langgraph_step": 2,
+        "report_description": "Delegate from shared history and respond.",
+        "report_turn": 1,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "seq:step:1"
+        ],
+        "description": "Delegate from shared history and respond.",
+        "input_message_bytes": 725,
+        "message_count": 3,
+        "message_roles": [
+          "system",
+          "human",
+          "ai"
+        ],
+        "simulated_definitions_tokens": 405,
+        "simulated_system_tokens": 82,
+        "simulated_human_tokens": 55,
+        "simulated_ai_tokens": 42,
+        "context_ledger": "{\"request_tokens\": 584, \"cache_read_tokens\": 0, \"fresh_input_tokens\": 584, \"request_cache_write_tokens\": 584, \"response_cache_write_tokens\": 90, \"added_message_tokens\": 584, \"response_tokens\": 90, \"context_after_response_tokens\": 674}",
+        "usage_basis": "Simulated canonical-JSON tokens; rewritten context, no cache reuse assumed",
+        "requested_tools": [
+          "task"
+        ]
+      }
+    },
+    {
+      "id": "01a0c6fd-6dab-7ea3-885c-975996fbe2d5",
+      "parent_id": "01a0c6fd-6da2-70c0-9fd4-c702e34f7825",
+      "name": "tools",
+      "kind": "workflow",
+      "start_ns": 1790044892588084000,
+      "end_ns": 1790044892616344000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "tools",
+        "langgraph_step": 3,
+        "report_turn": 1,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:3"
+        ],
+        "description": "Execute tool calls requested by the preceding model response and return their observations."
+      }
+    },
+    {
+      "id": "01a0c6fd-6dac-7bf1-8d52-5d0644d02481",
+      "parent_id": "01a0c6fd-6dab-7ea3-885c-975996fbe2d5",
+      "name": "task",
+      "kind": "tool",
+      "start_ns": 1790044892588747000,
+      "end_ns": 1790044892615700000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [
+        {
+          "role": "tool_call",
+          "content": "{'subagent_type': 'workflow-specialist', 'description': 'Explain delegation using workflow_reference, then return a concise summary.'}"
+        }
+      ],
+      "response": [
+        {
+          "role": "tool",
+          "content": "Command(update={'messages': [ToolMessage(content='An agent selects a tool, observes its result, and uses it to answer.', tool_call_id='delegate-0')]})"
+        }
+      ],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "tools",
+        "langgraph_step": 3,
+        "report_turn": 1,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "seq:step:1"
+        ],
+        "description": "Launch an ephemeral subagent to handle a complex, multi-step task.\n\nAvailable agent types and the tools they have access to:\n- workflow-specialist: Looks up agent workflow concepts and returns an evidence-based summary.\n\nSpecify subagent_type to select the agent. Usage notes:\n- Launch multiple agents concurrently when their tasks are independent, using a single message with multiple tool calls.\n- Each invocation is stateless by default: the agent sees only the prompt you give it and returns a single final report. Put full detail in the prompt and state exactly what it should return — unless an agent type below says it inherits your conversation instead.\n- The agent's report is not shown to the user; relay a summary yourself.\n- Tell the agent whether to create content, analyze, or only research, since it can't necessarily see the user's intent unless it inherits your conversation, as noted per agent type below.\n- If an agent's description says to use it proactively, do so without waiting to be asked.\n- When only general-purpose is available, use it for any complex, context-heavy task; it has the same capabilities as the main agent."
+      }
+    },
+    {
+      "id": "01a0c6fd-6dad-7011-be60-5fe99d708e93",
+      "parent_id": "01a0c6fd-6dac-7bf1-8d52-5d0644d02481",
+      "name": "workflow-specialist",
+      "kind": "workflow",
+      "start_ns": 1790044892589516000,
+      "end_ns": 1790044892615163000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "tools",
+        "langgraph_step": 3,
+        "report_turn": 1,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "description": "Execute the workflow-specialist workflow operation and pass its result to the next graph step."
+      }
+    },
+    {
+      "id": "01a0c6fd-6dae-7df3-a44f-628c5ec37104",
+      "parent_id": "01a0c6fd-6dad-7011-be60-5fe99d708e93",
+      "name": "SummarizationMiddleware.before_model",
+      "kind": "workflow",
+      "start_ns": 1790044892590457000,
+      "end_ns": 1790044892590986000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "SummarizationMiddleware.before_model",
+        "langgraph_step": 1,
+        "report_turn": 1,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:1"
+        ],
+        "description": "Execute the SummarizationMiddleware.before_model workflow operation and pass its result to the next graph step."
+      }
+    },
+    {
+      "id": "01a0c6fd-6daf-7391-be14-fbaa27070520",
+      "parent_id": "01a0c6fd-6dad-7011-be60-5fe99d708e93",
+      "name": "model",
+      "kind": "workflow",
+      "start_ns": 1790044892591481000,
+      "end_ns": 1790044892595790000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "model",
+        "langgraph_step": 2,
+        "report_turn": 1,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:2"
+        ],
+        "description": "Prepare the current conversation, run model middleware, and invoke the chat model."
+      }
+    },
+    {
+      "id": "01a0c6fd-6db0-7682-8ab1-ce91b6f17aa5",
+      "parent_id": "01a0c6fd-6daf-7391-be14-fbaa27070520",
+      "name": "CompactingDemoModel",
+      "kind": "model",
+      "start_ns": 1790044892592754000,
+      "end_ns": 1790044892595214000,
+      "status": "ok",
+      "provider": "demo",
+      "model": "scripted-chat",
+      "effort": null,
+      "usage": {
+        "input_tokens": 222,
+        "output_tokens": 208,
+        "cache_read": 0,
+        "cache_write": 0,
+        "cache_write_5m": 0,
+        "cache_write_1h": 0,
+        "reasoning": 0
+      },
+      "error": null,
+      "request": [
+        {
+          "role": "system",
+          "content": "You are a workflow reference specialist. Call workflow_reference for evidence about the assigned topic, then return a concise factual summary to the parent. Do not delegate further.",
+          "tool_calls": [],
+          "tool_call_id": null
+        },
+        {
+          "role": "human",
+          "content": "Explain delegation using workflow_reference, then return a concise summary.",
+          "tool_calls": [],
+          "tool_call_id": null
+        }
+      ],
+      "response": [
+        {
+          "role": "ai",
+          "content": "",
+          "tool_calls": [
+            {
+              "name": "workflow_reference",
+              "args": {
+                "topic": "CHILD_ONLY_DETAIL: delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background "
+              },
+              "id": "lookup-0-0",
+              "type": "tool_call"
+            }
+          ],
+          "tool_call_id": null
+        }
+      ],
+      "tool_definitions": [
+        {
+          "type": "function",
+          "function": {
+            "name": "workflow_reference",
+            "description": "Return a fixed explanation from a small local agent-workflow reference.",
+            "parameters": {
+              "properties": {
+                "topic": {
+                  "description": "The workflow concept used to label the explanation, such as tool calling or delegation. This fixture returns the same explanation for every topic.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "topic"
+              ],
+              "type": "object"
+            }
+          }
+        }
+      ],
+      "context": {
+        "langgraph_node": "model",
+        "langgraph_step": 2,
+        "report_description": "Research within isolated subagent history.",
+        "report_turn": 1,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "seq:step:1"
+        ],
+        "description": "Research within isolated subagent history.",
+        "input_message_bytes": 390,
+        "message_count": 2,
+        "message_roles": [
+          "system",
+          "human"
+        ],
+        "simulated_definitions_tokens": 122,
+        "simulated_system_tokens": 60,
+        "simulated_human_tokens": 40,
+        "context_ledger": "{\"request_tokens\": 222, \"cache_read_tokens\": 0, \"fresh_input_tokens\": 222, \"request_cache_write_tokens\": 222, \"response_cache_write_tokens\": 208, \"added_message_tokens\": 222, \"response_tokens\": 208, \"context_after_response_tokens\": 430}",
+        "usage_basis": "Simulated canonical-JSON tokens; rewritten context, no cache reuse assumed",
+        "requested_tools": [
+          "workflow_reference"
+        ]
+      }
+    },
+    {
+      "id": "01a0c6fd-6db4-7912-9e5e-8442387c73c4",
+      "parent_id": "01a0c6fd-6dad-7011-be60-5fe99d708e93",
+      "name": "tools",
+      "kind": "workflow",
+      "start_ns": 1790044892596421000,
+      "end_ns": 1790044892598052000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "tools",
+        "langgraph_step": 3,
+        "report_turn": 1,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:3"
+        ],
+        "description": "Execute tool calls requested by the preceding model response and return their observations."
+      }
+    },
+    {
+      "id": "01a0c6fd-6db4-7912-9e5e-845447da5342",
+      "parent_id": "01a0c6fd-6db4-7912-9e5e-8442387c73c4",
+      "name": "workflow_reference",
+      "kind": "tool",
+      "start_ns": 1790044892596879000,
+      "end_ns": 1790044892597388000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [
+        {
+          "role": "tool_call",
+          "content": "{'topic': 'CHILD_ONLY_DETAIL: delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background '}"
+        }
+      ],
+      "response": [
+        {
+          "role": "tool",
+          "content": "CHILD_ONLY_DETAIL: delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background : an agent selects a tool, observes its result, and uses it to answer.",
+          "tool_calls": [],
+          "tool_call_id": "lookup-0-0"
+        }
+      ],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "tools",
+        "langgraph_step": 3,
+        "report_turn": 1,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "seq:step:1"
+        ],
+        "description": "Return a fixed explanation from a small local agent-workflow reference."
+      }
+    },
+    {
+      "id": "01a0c6fd-6db6-77c0-b4b6-4b921d58854f",
+      "parent_id": "01a0c6fd-6dad-7011-be60-5fe99d708e93",
+      "name": "SummarizationMiddleware.before_model",
+      "kind": "workflow",
+      "start_ns": 1790044892598582000,
+      "end_ns": 1790044892601637000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "SummarizationMiddleware.before_model",
+        "langgraph_step": 4,
+        "report_turn": 1,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:4"
+        ],
+        "description": "Execute the SummarizationMiddleware.before_model workflow operation and pass its result to the next graph step."
+      }
+    },
+    {
+      "id": "01a0c6fd-6db6-77c0-b4b6-4ba9be26651d",
+      "parent_id": "01a0c6fd-6db6-77c0-b4b6-4b921d58854f",
+      "name": "CompactingDemoModel",
+      "kind": "workflow",
+      "start_ns": 1790044892598963000,
+      "end_ns": 1790044892601334000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "SummarizationMiddleware.before_model",
+        "langgraph_step": 4,
+        "report_turn": 1,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "seq:step:1"
+        ],
+        "description": "Execute the CompactingDemoModel workflow operation and pass its result to the next graph step."
+      }
+    },
+    {
+      "id": "01a0c6fd-6db7-7951-8a5e-b83f3a20e213",
+      "parent_id": "01a0c6fd-6db6-77c0-b4b6-4ba9be26651d",
+      "name": "CompactingDemoModel",
+      "kind": "model",
+      "start_ns": 1790044892599597000,
+      "end_ns": 1790044892600891000,
+      "status": "ok",
+      "provider": "demo",
+      "model": "scripted-chat",
+      "effort": null,
+      "usage": {
+        "input_tokens": 624,
+        "output_tokens": 46,
+        "cache_read": 0,
+        "cache_write": 0,
+        "cache_write_5m": 0,
+        "cache_write_1h": 0,
+        "reasoning": 0
+      },
+      "error": null,
+      "request": [
+        {
+          "role": "human",
+          "content": "<role>\nContext Extraction Assistant\n</role>\n\n<primary_objective>\nYour sole objective in this task is to extract the highest quality/most relevant context from the conversation history below.\n</primary_objective>\n\n<objective_information>\nYou're nearing the total number of input tokens you can accept, so you must extract the highest quality/most relevant pieces of information from your conversation history.\nThis context will then overwrite the conversation history presented below. Because of this, ensure the context you extract is only the most important information to continue working toward your overall goal.\n</objective_information>\n\n<instructions>\nThe conversation history below will be replaced with the context you extract in this step.\nYou want to ensure that you don't repeat any actions you've already completed, so the context you extract from the conversation history should be focused on the most important information to your overall goal.\n\nYou should structure your summary using the following sections. Each section acts as a checklist - you must populate it with relevant information or explicitly state \"None\" if there is nothing to report for that section:\n\n## SESSION INTENT\n\nWhat is the user's primary goal or request? What overall task are you trying to accomplish? This should be concise but complete enough to understand the purpose of the entire session.\n\n## SUMMARY\n\nExtract and record all of the most important context from the conversation history. Include important choices, conclusions, or strategies determined during this conversation. Include the reasoning behind key decisions. Document any rejected options and why they were not pursued.\n\n## ARTIFACTS\n\nWhat artifacts, files, or resources were created, modified, or accessed during this conversation? For file modifications, list specific file paths and briefly describe the changes made to each. This section prevents silent loss of artifact information.\n\n## NEXT STEPS\n\nWhat specific tasks remain to be completed to achieve the session intent? What should you do next?\n\n</instructions>\n\nThe user will message you with the full message history from which you'll extract context to create a replacement. Carefully read through it all and think deeply about what information is most important to your overall goal and should be saved:\n\nWith all of this in mind, please carefully read over the entire conversation history, and extract the most important and relevant context to replace it so that you can free up space in the conversation history.\nRespond ONLY with the extracted context. Do not include any additional information, or text before or after the extracted context.\n\n<messages>\nMessages to summarize:\n<message type=\"human\">Explain delegation using workflow_reference, then return a concise summary.</message>\n</messages>",
+          "tool_calls": [],
+          "tool_call_id": null
+        }
+      ],
+      "response": [
+        {
+          "role": "ai",
+          "content": "The assignment is to explain delegation. The reference says agents select tools and use observations.",
+          "tool_calls": [],
+          "tool_call_id": null
+        }
+      ],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "SummarizationMiddleware.before_model",
+        "langgraph_step": 4,
+        "report_description": "Summarize isolated subagent history.",
+        "report_turn": 1,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "description": "Summarize isolated subagent history.",
+        "input_message_bytes": 2937,
+        "message_count": 1,
+        "message_roles": [
+          "human"
+        ],
+        "simulated_definitions_tokens": 2,
+        "simulated_human_tokens": 622,
+        "context_ledger": "{\"request_tokens\": 624, \"cache_read_tokens\": 0, \"fresh_input_tokens\": 624, \"request_cache_write_tokens\": 624, \"response_cache_write_tokens\": 46, \"added_message_tokens\": 624, \"response_tokens\": 46, \"context_after_response_tokens\": 670}",
+        "usage_basis": "Simulated canonical-JSON tokens; rewritten context, no cache reuse assumed"
+      }
+    },
+    {
+      "id": "01a0c6fd-6dba-7443-95d3-4e41b6605524",
+      "parent_id": "01a0c6fd-6dad-7011-be60-5fe99d708e93",
+      "name": "model",
+      "kind": "workflow",
+      "start_ns": 1790044892602251000,
+      "end_ns": 1790044892605400000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "model",
+        "langgraph_step": 5,
+        "report_turn": 1,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:5"
+        ],
+        "description": "Prepare the current conversation, run model middleware, and invoke the chat model."
+      }
+    },
+    {
+      "id": "01a0c6fd-6dba-7443-95d3-4e5ba2eb4af3",
+      "parent_id": "01a0c6fd-6dba-7443-95d3-4e41b6605524",
+      "name": "CompactingDemoModel",
+      "kind": "model",
+      "start_ns": 1790044892603010000,
+      "end_ns": 1790044892604865000,
+      "status": "ok",
+      "provider": "demo",
+      "model": "scripted-chat",
+      "effort": null,
+      "usage": {
+        "input_tokens": 638,
+        "output_tokens": 73,
+        "cache_read": 0,
+        "cache_write": 0,
+        "cache_write_5m": 0,
+        "cache_write_1h": 0,
+        "reasoning": 0
+      },
+      "error": null,
+      "request": [
+        {
+          "role": "system",
+          "content": "You are a workflow reference specialist. Call workflow_reference for evidence about the assigned topic, then return a concise factual summary to the parent. Do not delegate further.",
+          "tool_calls": [],
+          "tool_call_id": null
+        },
+        {
+          "role": "human",
+          "content": "Here is a summary of the conversation to date:\n\nThe assignment is to explain delegation. The reference says agents select tools and use observations.",
+          "tool_calls": [],
+          "tool_call_id": null
+        },
+        {
+          "role": "ai",
+          "content": "",
+          "tool_calls": [
+            {
+              "name": "workflow_reference",
+              "args": {
+                "topic": "CHILD_ONLY_DETAIL: delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background "
+              },
+              "id": "lookup-0-0",
+              "type": "tool_call"
+            }
+          ],
+          "tool_call_id": null
+        },
+        {
+          "role": "tool",
+          "content": "CHILD_ONLY_DETAIL: delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background : an agent selects a tool, observes its result, and uses it to answer.",
+          "tool_calls": [],
+          "tool_call_id": "lookup-0-0"
+        }
+      ],
+      "response": [
+        {
+          "role": "ai",
+          "content": "",
+          "tool_calls": [
+            {
+              "name": "workflow_reference",
+              "args": {
+                "topic": "tool observations"
+              },
+              "id": "lookup-0-1",
+              "type": "tool_call"
+            }
+          ],
+          "tool_call_id": null
+        }
+      ],
+      "tool_definitions": [
+        {
+          "type": "function",
+          "function": {
+            "name": "workflow_reference",
+            "description": "Return a fixed explanation from a small local agent-workflow reference.",
+            "parameters": {
+              "properties": {
+                "topic": {
+                  "description": "The workflow concept used to label the explanation, such as tool calling or delegation. This fixture returns the same explanation for every topic.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "topic"
+              ],
+              "type": "object"
+            }
+          }
+        }
+      ],
+      "context": {
+        "langgraph_node": "model",
+        "langgraph_step": 5,
+        "report_description": "Research within isolated subagent history.",
+        "report_turn": 1,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "seq:step:1"
+        ],
+        "description": "Research within isolated subagent history.",
+        "input_message_bytes": 3676,
+        "message_count": 4,
+        "message_roles": [
+          "system",
+          "human",
+          "ai",
+          "tool"
+        ],
+        "simulated_definitions_tokens": 122,
+        "simulated_system_tokens": 60,
+        "simulated_human_tokens": 59,
+        "simulated_ai_tokens": 208,
+        "simulated_tool_tokens": 189,
+        "context_ledger": "{\"request_tokens\": 638, \"cache_read_tokens\": 0, \"fresh_input_tokens\": 638, \"request_cache_write_tokens\": 638, \"response_cache_write_tokens\": 73, \"added_message_tokens\": 638, \"response_tokens\": 73, \"context_after_response_tokens\": 711}",
+        "usage_basis": "Simulated canonical-JSON tokens; rewritten context, no cache reuse assumed",
+        "requested_tools": [
+          "workflow_reference"
+        ]
+      }
+    },
+    {
+      "id": "01a0c6fd-6dbd-7611-9906-5b8fc7a9c7f6",
+      "parent_id": "01a0c6fd-6dad-7011-be60-5fe99d708e93",
+      "name": "tools",
+      "kind": "workflow",
+      "start_ns": 1790044892606007000,
+      "end_ns": 1790044892607885000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "tools",
+        "langgraph_step": 6,
+        "report_turn": 1,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:6"
+        ],
+        "description": "Execute tool calls requested by the preceding model response and return their observations."
+      }
+    },
+    {
+      "id": "01a0c6fd-6dbe-72b2-aa6b-b8e7b644b22f",
+      "parent_id": "01a0c6fd-6dbd-7611-9906-5b8fc7a9c7f6",
+      "name": "workflow_reference",
+      "kind": "tool",
+      "start_ns": 1790044892606395000,
+      "end_ns": 1790044892607101000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [
+        {
+          "role": "tool_call",
+          "content": "{'topic': 'tool observations'}"
+        }
+      ],
+      "response": [
+        {
+          "role": "tool",
+          "content": "tool observations: an agent selects a tool, observes its result, and uses it to answer.",
+          "tool_calls": [],
+          "tool_call_id": "lookup-0-1"
+        }
+      ],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "tools",
+        "langgraph_step": 6,
+        "report_turn": 1,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "seq:step:1"
+        ],
+        "description": "Return a fixed explanation from a small local agent-workflow reference."
+      }
+    },
+    {
+      "id": "01a0c6fd-6dc0-7522-8c45-7173f06bd711",
+      "parent_id": "01a0c6fd-6dad-7011-be60-5fe99d708e93",
+      "name": "SummarizationMiddleware.before_model",
+      "kind": "workflow",
+      "start_ns": 1790044892608459000,
+      "end_ns": 1790044892611298000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "SummarizationMiddleware.before_model",
+        "langgraph_step": 7,
+        "report_turn": 1,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:7"
+        ],
+        "description": "Execute the SummarizationMiddleware.before_model workflow operation and pass its result to the next graph step."
+      }
+    },
+    {
+      "id": "01a0c6fd-6dc0-7522-8c45-71830173bfe3",
+      "parent_id": "01a0c6fd-6dc0-7522-8c45-7173f06bd711",
+      "name": "CompactingDemoModel",
+      "kind": "workflow",
+      "start_ns": 1790044892608880000,
+      "end_ns": 1790044892610980000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "SummarizationMiddleware.before_model",
+        "langgraph_step": 7,
+        "report_turn": 1,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "seq:step:1"
+        ],
+        "description": "Execute the CompactingDemoModel workflow operation and pass its result to the next graph step."
+      }
+    },
+    {
+      "id": "01a0c6fd-6dc1-7c72-aa4c-8d5c2d4533d4",
+      "parent_id": "01a0c6fd-6dc0-7522-8c45-71830173bfe3",
+      "name": "CompactingDemoModel",
+      "kind": "model",
+      "start_ns": 1790044892609284000,
+      "end_ns": 1790044892610585000,
+      "status": "ok",
+      "provider": "demo",
+      "model": "scripted-chat",
+      "effort": null,
+      "usage": {
+        "input_tokens": 1007,
+        "output_tokens": 46,
+        "cache_read": 0,
+        "cache_write": 0,
+        "cache_write_5m": 0,
+        "cache_write_1h": 0,
+        "reasoning": 0
+      },
+      "error": null,
+      "request": [
+        {
+          "role": "human",
+          "content": "<role>\nContext Extraction Assistant\n</role>\n\n<primary_objective>\nYour sole objective in this task is to extract the highest quality/most relevant context from the conversation history below.\n</primary_objective>\n\n<objective_information>\nYou're nearing the total number of input tokens you can accept, so you must extract the highest quality/most relevant pieces of information from your conversation history.\nThis context will then overwrite the conversation history presented below. Because of this, ensure the context you extract is only the most important information to continue working toward your overall goal.\n</objective_information>\n\n<instructions>\nThe conversation history below will be replaced with the context you extract in this step.\nYou want to ensure that you don't repeat any actions you've already completed, so the context you extract from the conversation history should be focused on the most important information to your overall goal.\n\nYou should structure your summary using the following sections. Each section acts as a checklist - you must populate it with relevant information or explicitly state \"None\" if there is nothing to report for that section:\n\n## SESSION INTENT\n\nWhat is the user's primary goal or request? What overall task are you trying to accomplish? This should be concise but complete enough to understand the purpose of the entire session.\n\n## SUMMARY\n\nExtract and record all of the most important context from the conversation history. Include important choices, conclusions, or strategies determined during this conversation. Include the reasoning behind key decisions. Document any rejected options and why they were not pursued.\n\n## ARTIFACTS\n\nWhat artifacts, files, or resources were created, modified, or accessed during this conversation? For file modifications, list specific file paths and briefly describe the changes made to each. This section prevents silent loss of artifact information.\n\n## NEXT STEPS\n\nWhat specific tasks remain to be completed to achieve the session intent? What should you do next?\n\n</instructions>\n\nThe user will message you with the full message history from which you'll extract context to create a replacement. Carefully read through it all and think deeply about what information is most important to your overall goal and should be saved:\n\nWith all of this in mind, please carefully read over the entire conversation history, and extract the most important and relevant context to replace it so that you can free up space in the conversation history.\nRespond ONLY with the extracted context. Do not include any additional information, or text before or after the extracted context.\n\n<messages>\nMessages to summarize:\n<message type=\"human\">Here is a summary of the conversation to date:\n\nThe assignment is to explain delegation. The reference says agents select tools and use observations.</message>\n<message type=\"ai\">\n  <tool_call id=\"lookup-0-0\" name=\"workflow_reference\">{\"topic\": \"CHILD_ONLY_DETAIL: delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background \"}</tool_call>\n</message>\n<message type=\"tool\">CHILD_ONLY_DETAIL: delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background : an agent selects a tool, observes its result, and uses it to answer.</message>\n</messages>",
+          "tool_calls": [],
+          "tool_call_id": null
+        }
+      ],
+      "response": [
+        {
+          "role": "ai",
+          "content": "The assignment is to explain delegation. The reference says agents select tools and use observations.",
+          "tool_calls": [],
+          "tool_call_id": null
+        }
+      ],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "SummarizationMiddleware.before_model",
+        "langgraph_step": 7,
+        "report_description": "Summarize isolated subagent history.",
+        "report_turn": 1,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "description": "Summarize isolated subagent history.",
+        "input_message_bytes": 6161,
+        "message_count": 1,
+        "message_roles": [
+          "human"
+        ],
+        "simulated_definitions_tokens": 2,
+        "simulated_human_tokens": 1005,
+        "context_ledger": "{\"request_tokens\": 1007, \"cache_read_tokens\": 0, \"fresh_input_tokens\": 1007, \"request_cache_write_tokens\": 1007, \"response_cache_write_tokens\": 46, \"added_message_tokens\": 1007, \"response_tokens\": 46, \"context_after_response_tokens\": 1053}",
+        "usage_basis": "Simulated canonical-JSON tokens; rewritten context, no cache reuse assumed"
+      }
+    },
+    {
+      "id": "01a0c6fd-6dc3-7d22-945a-cb6583688eeb",
+      "parent_id": "01a0c6fd-6dad-7011-be60-5fe99d708e93",
+      "name": "model",
+      "kind": "workflow",
+      "start_ns": 1790044892611798000,
+      "end_ns": 1790044892614383000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "model",
+        "langgraph_step": 8,
+        "report_turn": 1,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:8"
+        ],
+        "description": "Prepare the current conversation, run model middleware, and invoke the chat model."
+      }
+    },
+    {
+      "id": "01a0c6fd-6dc4-7560-889a-788ee96d682f",
+      "parent_id": "01a0c6fd-6dc3-7d22-945a-cb6583688eeb",
+      "name": "CompactingDemoModel",
+      "kind": "model",
+      "start_ns": 1790044892612529000,
+      "end_ns": 1790044892613803000,
+      "status": "ok",
+      "provider": "demo",
+      "model": "scripted-chat",
+      "effort": null,
+      "usage": {
+        "input_tokens": 368,
+        "output_tokens": 45,
+        "cache_read": 0,
+        "cache_write": 0,
+        "cache_write_5m": 0,
+        "cache_write_1h": 0,
+        "reasoning": 0
+      },
+      "error": null,
+      "request": [
+        {
+          "role": "system",
+          "content": "You are a workflow reference specialist. Call workflow_reference for evidence about the assigned topic, then return a concise factual summary to the parent. Do not delegate further.",
+          "tool_calls": [],
+          "tool_call_id": null
+        },
+        {
+          "role": "human",
+          "content": "Here is a summary of the conversation to date:\n\nThe assignment is to explain delegation. The reference says agents select tools and use observations.",
+          "tool_calls": [],
+          "tool_call_id": null
+        },
+        {
+          "role": "ai",
+          "content": "",
+          "tool_calls": [
+            {
+              "name": "workflow_reference",
+              "args": {
+                "topic": "tool observations"
+              },
+              "id": "lookup-0-1",
+              "type": "tool_call"
+            }
+          ],
+          "tool_call_id": null
+        },
+        {
+          "role": "tool",
+          "content": "tool observations: an agent selects a tool, observes its result, and uses it to answer.",
+          "tool_calls": [],
+          "tool_call_id": "lookup-0-1"
+        }
+      ],
+      "response": [
+        {
+          "role": "ai",
+          "content": "An agent selects a tool, observes its result, and uses it to answer.",
+          "tool_calls": [],
+          "tool_call_id": null
+        }
+      ],
+      "tool_definitions": [
+        {
+          "type": "function",
+          "function": {
+            "name": "workflow_reference",
+            "description": "Return a fixed explanation from a small local agent-workflow reference.",
+            "parameters": {
+              "properties": {
+                "topic": {
+                  "description": "The workflow concept used to label the explanation, such as tool calling or delegation. This fixture returns the same explanation for every topic.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "topic"
+              ],
+              "type": "object"
+            }
+          }
+        }
+      ],
+      "context": {
+        "langgraph_node": "model",
+        "langgraph_step": 8,
+        "report_description": "Research within isolated subagent history.",
+        "report_turn": 1,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "seq:step:1"
+        ],
+        "description": "Research within isolated subagent history.",
+        "input_message_bytes": 792,
+        "message_count": 4,
+        "message_roles": [
+          "system",
+          "human",
+          "ai",
+          "tool"
+        ],
+        "simulated_definitions_tokens": 122,
+        "simulated_system_tokens": 60,
+        "simulated_human_tokens": 59,
+        "simulated_ai_tokens": 73,
+        "simulated_tool_tokens": 54,
+        "context_ledger": "{\"request_tokens\": 368, \"cache_read_tokens\": 0, \"fresh_input_tokens\": 368, \"request_cache_write_tokens\": 368, \"response_cache_write_tokens\": 45, \"added_message_tokens\": 368, \"response_tokens\": 45, \"context_after_response_tokens\": 413}",
+        "usage_basis": "Simulated canonical-JSON tokens; rewritten context, no cache reuse assumed"
+      }
+    },
+    {
+      "id": "01a0c6fd-6dc8-77f1-95f2-b3381df3ace9",
+      "parent_id": "01a0c6fd-6da2-70c0-9fd4-c702e34f7825",
+      "name": "SummarizationMiddleware.before_model",
+      "kind": "workflow",
+      "start_ns": 1790044892616952000,
+      "end_ns": 1790044892617310000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "SummarizationMiddleware.before_model",
+        "langgraph_step": 4,
+        "report_turn": 1,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:4"
+        ],
+        "description": "Execute the SummarizationMiddleware.before_model workflow operation and pass its result to the next graph step."
+      }
+    },
+    {
+      "id": "01a0c6fd-6dc9-7b00-ad3e-bcaef2b37994",
+      "parent_id": "01a0c6fd-6da2-70c0-9fd4-c702e34f7825",
+      "name": "model",
+      "kind": "workflow",
+      "start_ns": 1790044892617802000,
+      "end_ns": 1790044892620735000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "model",
+        "langgraph_step": 5,
+        "report_turn": 1,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:5"
+        ],
+        "description": "Prepare the current conversation, run model middleware, and invoke the chat model."
+      }
+    },
+    {
+      "id": "01a0c6fd-6dca-7c93-89f6-dae2f49d52d5",
+      "parent_id": "01a0c6fd-6dc9-7b00-ad3e-bcaef2b37994",
+      "name": "CompactingDemoModel",
+      "kind": "model",
+      "start_ns": 1790044892618544000,
+      "end_ns": 1790044892619952000,
+      "status": "ok",
+      "provider": "demo",
+      "model": "scripted-chat",
+      "effort": null,
+      "usage": {
+        "input_tokens": 723,
+        "output_tokens": 42,
+        "cache_read": 0,
+        "cache_write": 0,
+        "cache_write_5m": 0,
+        "cache_write_1h": 0,
+        "reasoning": 0
+      },
+      "error": null,
+      "request": [
+        {
+          "role": "system",
+          "content": "You are the responding peer. Read the user's request and the planning brief. Delegate workflow reference research to workflow-specialist using task with a self-contained assignment. Then answer concisely using the returned evidence. Preserve user constraints from the shared conversation or its summary.",
+          "tool_calls": [],
+          "tool_call_id": null
+        },
+        {
+          "role": "human",
+          "content": "Here is a summary of the conversation to date:\n\nThe user requires French answers about workflow delegation. Preserve that constraint.",
+          "tool_calls": [],
+          "tool_call_id": null
+        },
+        {
+          "role": "ai",
+          "content": "Preserve the French language requirement; obtain workflow evidence and explain delegation.",
+          "tool_calls": [],
+          "tool_call_id": null
+        },
+        {
+          "role": "ai",
+          "content": "",
+          "tool_calls": [
+            {
+              "name": "task",
+              "args": {
+                "subagent_type": "workflow-specialist",
+                "description": "Explain delegation using workflow_reference, then return a concise summary."
+              },
+              "id": "delegate-0",
+              "type": "tool_call"
+            }
+          ],
+          "tool_call_id": null
+        },
+        {
+          "role": "tool",
+          "content": "An agent selects a tool, observes its result, and uses it to answer.",
+          "tool_calls": [],
+          "tool_call_id": "delegate-0"
+        }
+      ],
+      "response": [
+        {
+          "role": "ai",
+          "content": "Le spécialiste reçoit une mission autonome et renvoie sa réponse au parent.",
+          "tool_calls": [],
+          "tool_call_id": null
+        }
+      ],
+      "tool_definitions": [
+        {
+          "type": "function",
+          "function": {
+            "name": "task",
+            "description": "Launch an ephemeral subagent to handle a complex, multi-step task.\n\nAvailable agent types and the tools they have access to:\n- workflow-specialist: Looks up agent workflow concepts and returns an evidence-based summary.\n\nSpecify subagent_type to select the agent. Usage notes:\n- Launch multiple agents concurrently when their tasks are independent, using a single message with multiple tool calls.\n- Each invocation is stateless by default: the agent sees only the prompt you give it and returns a single final report. Put full detail in the prompt and state exactly what it should return — unless an agent type below says it inherits your conversation instead.\n- The agent's report is not shown to the user; relay a summary yourself.\n- Tell the agent whether to create content, analyze, or only research, since it can't necessarily see the user's intent unless it inherits your conversation, as noted per agent type below.\n- If an agent's description says to use it proactively, do so without waiting to be asked.\n- When only general-purpose is available, use it for any complex, context-heavy task; it has the same capabilities as the main agent.",
+            "parameters": {
+              "properties": {
+                "description": {
+                  "description": "A detailed description of the task for the subagent to perform autonomously. Include all necessary context and specify the expected output format.",
+                  "type": "string"
+                },
+                "subagent_type": {
+                  "description": "The type of subagent to use. Must be one of the available agent types listed in the tool description.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "description",
+                "subagent_type"
+              ],
+              "type": "object"
+            }
+          }
+        }
+      ],
+      "context": {
+        "langgraph_node": "model",
+        "langgraph_step": 5,
+        "report_description": "Delegate from shared history and respond.",
+        "report_turn": 1,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "seq:step:1"
+        ],
+        "description": "Delegate from shared history and respond.",
+        "input_message_bytes": 1120,
+        "message_count": 5,
+        "message_roles": [
+          "system",
+          "human",
+          "ai",
+          "ai",
+          "tool"
+        ],
+        "simulated_definitions_tokens": 405,
+        "simulated_system_tokens": 82,
+        "simulated_human_tokens": 55,
+        "simulated_ai_tokens": 132,
+        "simulated_tool_tokens": 49,
+        "context_ledger": "{\"request_tokens\": 723, \"cache_read_tokens\": 0, \"fresh_input_tokens\": 723, \"request_cache_write_tokens\": 723, \"response_cache_write_tokens\": 42, \"added_message_tokens\": 723, \"response_tokens\": 42, \"context_after_response_tokens\": 765}",
+        "usage_basis": "Simulated canonical-JSON tokens; rewritten context, no cache reuse assumed"
+      }
+    },
+    {
+      "id": "01a0c6fd-6ddf-7ff3-a9b3-b543084473dc",
+      "parent_id": null,
+      "name": "context_budget_workflow",
+      "kind": "workflow",
+      "start_ns": 1790044892639944000,
+      "end_ns": 1790044892684326000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "report_turn": 2,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "description": "Execute the context_budget_workflow workflow operation and pass its result to the next graph step."
+      }
+    },
+    {
+      "id": "01a0c6fd-6de0-7e21-b0c7-19c4fa4be33a",
+      "parent_id": "01a0c6fd-6ddf-7ff3-a9b3-b543084473dc",
+      "name": "planning_peer",
+      "kind": "workflow",
+      "start_ns": 1790044892640844000,
+      "end_ns": 1790044892646860000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "planning_peer",
+        "langgraph_step": 5,
+        "report_turn": 2,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:5"
+        ],
+        "description": "Execute the planning_peer workflow operation and pass its result to the next graph step."
+      }
+    },
+    {
+      "id": "01a0c6fd-6de1-7253-8c03-a3592aab94a5",
+      "parent_id": "01a0c6fd-6de0-7e21-b0c7-19c4fa4be33a",
+      "name": "run",
+      "kind": "workflow",
+      "start_ns": 1790044892641120000,
+      "end_ns": 1790044892646496000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "planning_peer",
+        "langgraph_step": 5,
+        "report_turn": 2,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "seq:step:1"
+        ],
+        "description": "Execute the run workflow operation and pass its result to the next graph step."
+      }
+    },
+    {
+      "id": "01a0c6fd-6de1-7253-8c03-a366075ba1d3",
+      "parent_id": "01a0c6fd-6de1-7253-8c03-a3592aab94a5",
+      "name": "context_planner",
+      "kind": "workflow",
+      "start_ns": 1790044892641453000,
+      "end_ns": 1790044892646176000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "planning_peer",
+        "langgraph_step": 5,
+        "report_turn": 2,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "description": "Execute the context_planner workflow operation and pass its result to the next graph step."
+      }
+    },
+    {
+      "id": "01a0c6fd-6de1-7253-8c03-a375ca409245",
+      "parent_id": "01a0c6fd-6de1-7253-8c03-a366075ba1d3",
+      "name": "SummarizationMiddleware.before_model",
+      "kind": "workflow",
+      "start_ns": 1790044892642039000,
+      "end_ns": 1790044892642752000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "SummarizationMiddleware.before_model",
+        "langgraph_step": 1,
+        "report_turn": 2,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:1"
+        ],
+        "description": "Execute the SummarizationMiddleware.before_model workflow operation and pass its result to the next graph step."
+      }
+    },
+    {
+      "id": "01a0c6fd-6de3-7d30-853a-72139947bf17",
+      "parent_id": "01a0c6fd-6de1-7253-8c03-a366075ba1d3",
+      "name": "model",
+      "kind": "workflow",
+      "start_ns": 1790044892643290000,
+      "end_ns": 1790044892645659000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "model",
+        "langgraph_step": 2,
+        "report_turn": 2,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:2"
+        ],
+        "description": "Prepare the current conversation, run model middleware, and invoke the chat model."
+      }
+    },
+    {
+      "id": "01a0c6fd-6de3-7d30-853a-7225958e8a59",
+      "parent_id": "01a0c6fd-6de3-7d30-853a-72139947bf17",
+      "name": "CompactingDemoModel",
+      "kind": "model",
+      "start_ns": 1790044892643854000,
+      "end_ns": 1790044892645205000,
+      "status": "ok",
+      "provider": "demo",
+      "model": "scripted-chat",
+      "effort": null,
+      "usage": {
+        "input_tokens": 389,
+        "output_tokens": 42,
+        "cache_read": 0,
+        "cache_write": 0,
+        "cache_write_5m": 0,
+        "cache_write_1h": 0,
+        "reasoning": 0
+      },
+      "error": null,
+      "request": [
+        {
+          "role": "system",
+          "content": "You are the planning peer. Read the latest user request and earlier context. Write a short brief for the responding peer, preserving user constraints. Do not answer the user or call tools.",
+          "tool_calls": [],
+          "tool_call_id": null
+        },
+        {
+          "role": "human",
+          "content": "Here is a summary of the conversation to date:\n\nThe user requires French answers about workflow delegation. Preserve that constraint.",
+          "tool_calls": [],
+          "tool_call_id": null
+        },
+        {
+          "role": "ai",
+          "content": "Preserve the French language requirement; obtain workflow evidence and explain delegation.",
+          "tool_calls": [],
+          "tool_call_id": null
+        },
+        {
+          "role": "ai",
+          "content": "",
+          "tool_calls": [
+            {
+              "name": "task",
+              "args": {
+                "subagent_type": "workflow-specialist",
+                "description": "Explain delegation using workflow_reference, then return a concise summary."
+              },
+              "id": "delegate-0",
+              "type": "tool_call"
+            }
+          ],
+          "tool_call_id": null
+        },
+        {
+          "role": "tool",
+          "content": "An agent selects a tool, observes its result, and uses it to answer.",
+          "tool_calls": [],
+          "tool_call_id": "delegate-0"
+        },
+        {
+          "role": "ai",
+          "content": "Le spécialiste reçoit une mission autonome et renvoie sa réponse au parent.",
+          "tool_calls": [],
+          "tool_call_id": null
+        },
+        {
+          "role": "human",
+          "content": "Now explain how the specialist's tool observations return to its parent.",
+          "tool_calls": [],
+          "tool_call_id": null
+        }
+      ],
+      "response": [
+        {
+          "role": "ai",
+          "content": "Preserve the French language requirement; obtain workflow evidence and explain delegation.",
+          "tool_calls": [],
+          "tool_call_id": null
+        }
+      ],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "model",
+        "langgraph_step": 2,
+        "report_description": "Plan from shared workflow history.",
+        "report_turn": 2,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "seq:step:1"
+        ],
+        "description": "Plan from shared workflow history.",
+        "input_message_bytes": 1284,
+        "message_count": 7,
+        "message_roles": [
+          "system",
+          "human",
+          "ai",
+          "ai",
+          "tool",
+          "ai",
+          "human"
+        ],
+        "simulated_definitions_tokens": 2,
+        "simulated_system_tokens": 66,
+        "simulated_human_tokens": 98,
+        "simulated_ai_tokens": 174,
+        "simulated_tool_tokens": 49,
+        "context_ledger": "{\"request_tokens\": 389, \"cache_read_tokens\": 0, \"fresh_input_tokens\": 389, \"request_cache_write_tokens\": 389, \"response_cache_write_tokens\": 42, \"added_message_tokens\": 389, \"response_tokens\": 42, \"context_after_response_tokens\": 431}",
+        "usage_basis": "Simulated canonical-JSON tokens; rewritten context, no cache reuse assumed"
+      }
+    },
+    {
+      "id": "01a0c6fd-6de7-7532-a988-9dc144ff4c07",
+      "parent_id": "01a0c6fd-6ddf-7ff3-a9b3-b543084473dc",
+      "name": "responding_peer",
+      "kind": "workflow",
+      "start_ns": 1790044892647778000,
+      "end_ns": 1790044892683723000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "responding_peer",
+        "langgraph_step": 6,
+        "report_turn": 2,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:6"
+        ],
+        "description": "Execute the responding_peer workflow operation and pass its result to the next graph step."
+      }
+    },
+    {
+      "id": "01a0c6fd-6de8-73e2-8dba-68d030dab63f",
+      "parent_id": "01a0c6fd-6de7-7532-a988-9dc144ff4c07",
+      "name": "run",
+      "kind": "workflow",
+      "start_ns": 1790044892648207000,
+      "end_ns": 1790044892683433000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "responding_peer",
+        "langgraph_step": 6,
+        "report_turn": 2,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "seq:step:1"
+        ],
+        "description": "Execute the run workflow operation and pass its result to the next graph step."
+      }
+    },
+    {
+      "id": "01a0c6fd-6de8-73e2-8dba-68eeb7e24a9e",
+      "parent_id": "01a0c6fd-6de8-73e2-8dba-68d030dab63f",
+      "name": "context_responder",
+      "kind": "workflow",
+      "start_ns": 1790044892648554000,
+      "end_ns": 1790044892683077000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "responding_peer",
+        "langgraph_step": 6,
+        "report_turn": 2,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "description": "Execute the context_responder workflow operation and pass its result to the next graph step."
+      }
+    },
+    {
+      "id": "01a0c6fd-6de8-73e2-8dba-68fbf627b22e",
+      "parent_id": "01a0c6fd-6de8-73e2-8dba-68eeb7e24a9e",
+      "name": "SummarizationMiddleware.before_model",
+      "kind": "workflow",
+      "start_ns": 1790044892649180000,
+      "end_ns": 1790044892649458000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "SummarizationMiddleware.before_model",
+        "langgraph_step": 1,
+        "report_turn": 2,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:1"
+        ],
+        "description": "Execute the SummarizationMiddleware.before_model workflow operation and pass its result to the next graph step."
+      }
+    },
+    {
+      "id": "01a0c6fd-6de9-7640-8145-3a1be23bcb24",
+      "parent_id": "01a0c6fd-6de8-73e2-8dba-68eeb7e24a9e",
+      "name": "model",
+      "kind": "workflow",
+      "start_ns": 1790044892649891000,
+      "end_ns": 1790044892653092000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "model",
+        "langgraph_step": 2,
+        "report_turn": 2,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:2"
+        ],
+        "description": "Prepare the current conversation, run model middleware, and invoke the chat model."
+      }
+    },
+    {
+      "id": "01a0c6fd-6dea-7663-97bd-ac29bd7e9ff4",
+      "parent_id": "01a0c6fd-6de9-7640-8145-3a1be23bcb24",
+      "name": "CompactingDemoModel",
+      "kind": "model",
+      "start_ns": 1790044892650518000,
+      "end_ns": 1790044892652535000,
+      "status": "ok",
+      "provider": "demo",
+      "model": "scripted-chat",
+      "effort": null,
+      "usage": {
+        "input_tokens": 850,
+        "output_tokens": 90,
+        "cache_read": 0,
+        "cache_write": 0,
+        "cache_write_5m": 0,
+        "cache_write_1h": 0,
+        "reasoning": 0
+      },
+      "error": null,
+      "request": [
+        {
+          "role": "system",
+          "content": "You are the responding peer. Read the user's request and the planning brief. Delegate workflow reference research to workflow-specialist using task with a self-contained assignment. Then answer concisely using the returned evidence. Preserve user constraints from the shared conversation or its summary.",
+          "tool_calls": [],
+          "tool_call_id": null
+        },
+        {
+          "role": "human",
+          "content": "Here is a summary of the conversation to date:\n\nThe user requires French answers about workflow delegation. Preserve that constraint.",
+          "tool_calls": [],
+          "tool_call_id": null
+        },
+        {
+          "role": "ai",
+          "content": "Preserve the French language requirement; obtain workflow evidence and explain delegation.",
+          "tool_calls": [],
+          "tool_call_id": null
+        },
+        {
+          "role": "ai",
+          "content": "",
+          "tool_calls": [
+            {
+              "name": "task",
+              "args": {
+                "subagent_type": "workflow-specialist",
+                "description": "Explain delegation using workflow_reference, then return a concise summary."
+              },
+              "id": "delegate-0",
+              "type": "tool_call"
+            }
+          ],
+          "tool_call_id": null
+        },
+        {
+          "role": "tool",
+          "content": "An agent selects a tool, observes its result, and uses it to answer.",
+          "tool_calls": [],
+          "tool_call_id": "delegate-0"
+        },
+        {
+          "role": "ai",
+          "content": "Le spécialiste reçoit une mission autonome et renvoie sa réponse au parent.",
+          "tool_calls": [],
+          "tool_call_id": null
+        },
+        {
+          "role": "human",
+          "content": "Now explain how the specialist's tool observations return to its parent.",
+          "tool_calls": [],
+          "tool_call_id": null
+        },
+        {
+          "role": "ai",
+          "content": "Preserve the French language requirement; obtain workflow evidence and explain delegation.",
+          "tool_calls": [],
+          "tool_call_id": null
+        }
+      ],
+      "response": [
+        {
+          "role": "ai",
+          "content": "",
+          "tool_calls": [
+            {
+              "name": "task",
+              "args": {
+                "subagent_type": "workflow-specialist",
+                "description": "Explain delegation using workflow_reference, then return a concise summary."
+              },
+              "id": "delegate-1",
+              "type": "tool_call"
+            }
+          ],
+          "tool_call_id": null
+        }
+      ],
+      "tool_definitions": [
+        {
+          "type": "function",
+          "function": {
+            "name": "task",
+            "description": "Launch an ephemeral subagent to handle a complex, multi-step task.\n\nAvailable agent types and the tools they have access to:\n- workflow-specialist: Looks up agent workflow concepts and returns an evidence-based summary.\n\nSpecify subagent_type to select the agent. Usage notes:\n- Launch multiple agents concurrently when their tasks are independent, using a single message with multiple tool calls.\n- Each invocation is stateless by default: the agent sees only the prompt you give it and returns a single final report. Put full detail in the prompt and state exactly what it should return — unless an agent type below says it inherits your conversation instead.\n- The agent's report is not shown to the user; relay a summary yourself.\n- Tell the agent whether to create content, analyze, or only research, since it can't necessarily see the user's intent unless it inherits your conversation, as noted per agent type below.\n- If an agent's description says to use it proactively, do so without waiting to be asked.\n- When only general-purpose is available, use it for any complex, context-heavy task; it has the same capabilities as the main agent.",
+            "parameters": {
+              "properties": {
+                "description": {
+                  "description": "A detailed description of the task for the subagent to perform autonomously. Include all necessary context and specify the expected output format.",
+                  "type": "string"
+                },
+                "subagent_type": {
+                  "description": "The type of subagent to use. Must be one of the available agent types listed in the tool description.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "description",
+                "subagent_type"
+              ],
+              "type": "object"
+            }
+          }
+        }
+      ],
+      "context": {
+        "langgraph_node": "model",
+        "langgraph_step": 2,
+        "report_description": "Delegate from shared history and respond.",
+        "report_turn": 2,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "seq:step:1"
+        ],
+        "description": "Delegate from shared history and respond.",
+        "input_message_bytes": 1552,
+        "message_count": 8,
+        "message_roles": [
+          "system",
+          "human",
+          "ai",
+          "ai",
+          "tool",
+          "ai",
+          "human",
+          "ai"
+        ],
+        "simulated_definitions_tokens": 405,
+        "simulated_system_tokens": 82,
+        "simulated_human_tokens": 98,
+        "simulated_ai_tokens": 216,
+        "simulated_tool_tokens": 49,
+        "context_ledger": "{\"request_tokens\": 850, \"cache_read_tokens\": 0, \"fresh_input_tokens\": 850, \"request_cache_write_tokens\": 850, \"response_cache_write_tokens\": 90, \"added_message_tokens\": 850, \"response_tokens\": 90, \"context_after_response_tokens\": 940}",
+        "usage_basis": "Simulated canonical-JSON tokens; rewritten context, no cache reuse assumed",
+        "requested_tools": [
+          "task"
+        ]
+      }
+    },
+    {
+      "id": "01a0c6fd-6ded-7f50-b093-18f30d339635",
+      "parent_id": "01a0c6fd-6de8-73e2-8dba-68eeb7e24a9e",
+      "name": "tools",
+      "kind": "workflow",
+      "start_ns": 1790044892653596000,
+      "end_ns": 1790044892678322000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "tools",
+        "langgraph_step": 3,
+        "report_turn": 2,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:3"
+        ],
+        "description": "Execute tool calls requested by the preceding model response and return their observations."
+      }
+    },
+    {
+      "id": "01a0c6fd-6ded-7f50-b093-190775b91abb",
+      "parent_id": "01a0c6fd-6ded-7f50-b093-18f30d339635",
+      "name": "task",
+      "kind": "tool",
+      "start_ns": 1790044892653983000,
+      "end_ns": 1790044892677868000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [
+        {
+          "role": "tool_call",
+          "content": "{'subagent_type': 'workflow-specialist', 'description': 'Explain delegation using workflow_reference, then return a concise summary.'}"
+        }
+      ],
+      "response": [
+        {
+          "role": "tool",
+          "content": "Command(update={'messages': [ToolMessage(content='An agent selects a tool, observes its result, and uses it to answer.', tool_call_id='delegate-1')]})"
+        }
+      ],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "tools",
+        "langgraph_step": 3,
+        "report_turn": 2,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "seq:step:1"
+        ],
+        "description": "Launch an ephemeral subagent to handle a complex, multi-step task.\n\nAvailable agent types and the tools they have access to:\n- workflow-specialist: Looks up agent workflow concepts and returns an evidence-based summary.\n\nSpecify subagent_type to select the agent. Usage notes:\n- Launch multiple agents concurrently when their tasks are independent, using a single message with multiple tool calls.\n- Each invocation is stateless by default: the agent sees only the prompt you give it and returns a single final report. Put full detail in the prompt and state exactly what it should return — unless an agent type below says it inherits your conversation instead.\n- The agent's report is not shown to the user; relay a summary yourself.\n- Tell the agent whether to create content, analyze, or only research, since it can't necessarily see the user's intent unless it inherits your conversation, as noted per agent type below.\n- If an agent's description says to use it proactively, do so without waiting to be asked.\n- When only general-purpose is available, use it for any complex, context-heavy task; it has the same capabilities as the main agent."
+      }
+    },
+    {
+      "id": "01a0c6fd-6dee-7360-8064-72764dedf044",
+      "parent_id": "01a0c6fd-6ded-7f50-b093-190775b91abb",
+      "name": "workflow-specialist",
+      "kind": "workflow",
+      "start_ns": 1790044892654425000,
+      "end_ns": 1790044892677540000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "tools",
+        "langgraph_step": 3,
+        "report_turn": 2,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "description": "Execute the workflow-specialist workflow operation and pass its result to the next graph step."
+      }
+    },
+    {
+      "id": "01a0c6fd-6dee-7360-8064-72822eab7aa8",
+      "parent_id": "01a0c6fd-6dee-7360-8064-72764dedf044",
+      "name": "SummarizationMiddleware.before_model",
+      "kind": "workflow",
+      "start_ns": 1790044892655153000,
+      "end_ns": 1790044892655587000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "SummarizationMiddleware.before_model",
+        "langgraph_step": 1,
+        "report_turn": 2,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:1"
+        ],
+        "description": "Execute the SummarizationMiddleware.before_model workflow operation and pass its result to the next graph step."
+      }
+    },
+    {
+      "id": "01a0c6fd-6df0-74b2-bb05-f686105d816f",
+      "parent_id": "01a0c6fd-6dee-7360-8064-72764dedf044",
+      "name": "model",
+      "kind": "workflow",
+      "start_ns": 1790044892656155000,
+      "end_ns": 1790044892659422000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "model",
+        "langgraph_step": 2,
+        "report_turn": 2,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:2"
+        ],
+        "description": "Prepare the current conversation, run model middleware, and invoke the chat model."
+      }
+    },
+    {
+      "id": "01a0c6fd-6df0-74b2-bb05-f6953e38d1c3",
+      "parent_id": "01a0c6fd-6df0-74b2-bb05-f686105d816f",
+      "name": "CompactingDemoModel",
+      "kind": "model",
+      "start_ns": 1790044892656731000,
+      "end_ns": 1790044892658744000,
+      "status": "ok",
+      "provider": "demo",
+      "model": "scripted-chat",
+      "effort": null,
+      "usage": {
+        "input_tokens": 222,
+        "output_tokens": 208,
+        "cache_read": 0,
+        "cache_write": 0,
+        "cache_write_5m": 0,
+        "cache_write_1h": 0,
+        "reasoning": 0
+      },
+      "error": null,
+      "request": [
+        {
+          "role": "system",
+          "content": "You are a workflow reference specialist. Call workflow_reference for evidence about the assigned topic, then return a concise factual summary to the parent. Do not delegate further.",
+          "tool_calls": [],
+          "tool_call_id": null
+        },
+        {
+          "role": "human",
+          "content": "Explain delegation using workflow_reference, then return a concise summary.",
+          "tool_calls": [],
+          "tool_call_id": null
+        }
+      ],
+      "response": [
+        {
+          "role": "ai",
+          "content": "",
+          "tool_calls": [
+            {
+              "name": "workflow_reference",
+              "args": {
+                "topic": "CHILD_ONLY_DETAIL: delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background "
+              },
+              "id": "lookup-1-0",
+              "type": "tool_call"
+            }
+          ],
+          "tool_call_id": null
+        }
+      ],
+      "tool_definitions": [
+        {
+          "type": "function",
+          "function": {
+            "name": "workflow_reference",
+            "description": "Return a fixed explanation from a small local agent-workflow reference.",
+            "parameters": {
+              "properties": {
+                "topic": {
+                  "description": "The workflow concept used to label the explanation, such as tool calling or delegation. This fixture returns the same explanation for every topic.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "topic"
+              ],
+              "type": "object"
+            }
+          }
+        }
+      ],
+      "context": {
+        "langgraph_node": "model",
+        "langgraph_step": 2,
+        "report_description": "Research within isolated subagent history.",
+        "report_turn": 2,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "seq:step:1"
+        ],
+        "description": "Research within isolated subagent history.",
+        "input_message_bytes": 390,
+        "message_count": 2,
+        "message_roles": [
+          "system",
+          "human"
+        ],
+        "simulated_definitions_tokens": 122,
+        "simulated_system_tokens": 60,
+        "simulated_human_tokens": 40,
+        "context_ledger": "{\"request_tokens\": 222, \"cache_read_tokens\": 0, \"fresh_input_tokens\": 222, \"request_cache_write_tokens\": 222, \"response_cache_write_tokens\": 208, \"added_message_tokens\": 222, \"response_tokens\": 208, \"context_after_response_tokens\": 430}",
+        "usage_basis": "Simulated canonical-JSON tokens; rewritten context, no cache reuse assumed",
+        "requested_tools": [
+          "workflow_reference"
+        ]
+      }
+    },
+    {
+      "id": "01a0c6fd-6df4-7571-8f27-8a5ae0fcf792",
+      "parent_id": "01a0c6fd-6dee-7360-8064-72764dedf044",
+      "name": "tools",
+      "kind": "workflow",
+      "start_ns": 1790044892660282000,
+      "end_ns": 1790044892661799000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "tools",
+        "langgraph_step": 3,
+        "report_turn": 2,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:3"
+        ],
+        "description": "Execute tool calls requested by the preceding model response and return their observations."
+      }
+    },
+    {
+      "id": "01a0c6fd-6df4-7571-8f27-8a6e7118ae0e",
+      "parent_id": "01a0c6fd-6df4-7571-8f27-8a5ae0fcf792",
+      "name": "workflow_reference",
+      "kind": "tool",
+      "start_ns": 1790044892660741000,
+      "end_ns": 1790044892661183000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [
+        {
+          "role": "tool_call",
+          "content": "{'topic': 'CHILD_ONLY_DETAIL: delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background '}"
+        }
+      ],
+      "response": [
+        {
+          "role": "tool",
+          "content": "CHILD_ONLY_DETAIL: delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background : an agent selects a tool, observes its result, and uses it to answer.",
+          "tool_calls": [],
+          "tool_call_id": "lookup-1-0"
+        }
+      ],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "tools",
+        "langgraph_step": 3,
+        "report_turn": 2,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "seq:step:1"
+        ],
+        "description": "Return a fixed explanation from a small local agent-workflow reference."
+      }
+    },
+    {
+      "id": "01a0c6fd-6df6-77e1-84bd-7fc35b64d190",
+      "parent_id": "01a0c6fd-6dee-7360-8064-72764dedf044",
+      "name": "SummarizationMiddleware.before_model",
+      "kind": "workflow",
+      "start_ns": 1790044892662319000,
+      "end_ns": 1790044892665000000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "SummarizationMiddleware.before_model",
+        "langgraph_step": 4,
+        "report_turn": 2,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:4"
+        ],
+        "description": "Execute the SummarizationMiddleware.before_model workflow operation and pass its result to the next graph step."
+      }
+    },
+    {
+      "id": "01a0c6fd-6df6-77e1-84bd-7fd7e52df8bf",
+      "parent_id": "01a0c6fd-6df6-77e1-84bd-7fc35b64d190",
+      "name": "CompactingDemoModel",
+      "kind": "workflow",
+      "start_ns": 1790044892662686000,
+      "end_ns": 1790044892664714000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "SummarizationMiddleware.before_model",
+        "langgraph_step": 4,
+        "report_turn": 2,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "seq:step:1"
+        ],
+        "description": "Execute the CompactingDemoModel workflow operation and pass its result to the next graph step."
+      }
+    },
+    {
+      "id": "01a0c6fd-6df6-77e1-84bd-7fe8abeb8f7d",
+      "parent_id": "01a0c6fd-6df6-77e1-84bd-7fd7e52df8bf",
+      "name": "CompactingDemoModel",
+      "kind": "model",
+      "start_ns": 1790044892663088000,
+      "end_ns": 1790044892664344000,
+      "status": "ok",
+      "provider": "demo",
+      "model": "scripted-chat",
+      "effort": null,
+      "usage": {
+        "input_tokens": 624,
+        "output_tokens": 46,
+        "cache_read": 0,
+        "cache_write": 0,
+        "cache_write_5m": 0,
+        "cache_write_1h": 0,
+        "reasoning": 0
+      },
+      "error": null,
+      "request": [
+        {
+          "role": "human",
+          "content": "<role>\nContext Extraction Assistant\n</role>\n\n<primary_objective>\nYour sole objective in this task is to extract the highest quality/most relevant context from the conversation history below.\n</primary_objective>\n\n<objective_information>\nYou're nearing the total number of input tokens you can accept, so you must extract the highest quality/most relevant pieces of information from your conversation history.\nThis context will then overwrite the conversation history presented below. Because of this, ensure the context you extract is only the most important information to continue working toward your overall goal.\n</objective_information>\n\n<instructions>\nThe conversation history below will be replaced with the context you extract in this step.\nYou want to ensure that you don't repeat any actions you've already completed, so the context you extract from the conversation history should be focused on the most important information to your overall goal.\n\nYou should structure your summary using the following sections. Each section acts as a checklist - you must populate it with relevant information or explicitly state \"None\" if there is nothing to report for that section:\n\n## SESSION INTENT\n\nWhat is the user's primary goal or request? What overall task are you trying to accomplish? This should be concise but complete enough to understand the purpose of the entire session.\n\n## SUMMARY\n\nExtract and record all of the most important context from the conversation history. Include important choices, conclusions, or strategies determined during this conversation. Include the reasoning behind key decisions. Document any rejected options and why they were not pursued.\n\n## ARTIFACTS\n\nWhat artifacts, files, or resources were created, modified, or accessed during this conversation? For file modifications, list specific file paths and briefly describe the changes made to each. This section prevents silent loss of artifact information.\n\n## NEXT STEPS\n\nWhat specific tasks remain to be completed to achieve the session intent? What should you do next?\n\n</instructions>\n\nThe user will message you with the full message history from which you'll extract context to create a replacement. Carefully read through it all and think deeply about what information is most important to your overall goal and should be saved:\n\nWith all of this in mind, please carefully read over the entire conversation history, and extract the most important and relevant context to replace it so that you can free up space in the conversation history.\nRespond ONLY with the extracted context. Do not include any additional information, or text before or after the extracted context.\n\n<messages>\nMessages to summarize:\n<message type=\"human\">Explain delegation using workflow_reference, then return a concise summary.</message>\n</messages>",
+          "tool_calls": [],
+          "tool_call_id": null
+        }
+      ],
+      "response": [
+        {
+          "role": "ai",
+          "content": "The assignment is to explain delegation. The reference says agents select tools and use observations.",
+          "tool_calls": [],
+          "tool_call_id": null
+        }
+      ],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "SummarizationMiddleware.before_model",
+        "langgraph_step": 4,
+        "report_description": "Summarize isolated subagent history.",
+        "report_turn": 2,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "description": "Summarize isolated subagent history.",
+        "input_message_bytes": 2937,
+        "message_count": 1,
+        "message_roles": [
+          "human"
+        ],
+        "simulated_definitions_tokens": 2,
+        "simulated_human_tokens": 622,
+        "context_ledger": "{\"request_tokens\": 624, \"cache_read_tokens\": 0, \"fresh_input_tokens\": 624, \"request_cache_write_tokens\": 624, \"response_cache_write_tokens\": 46, \"added_message_tokens\": 624, \"response_tokens\": 46, \"context_after_response_tokens\": 670}",
+        "usage_basis": "Simulated canonical-JSON tokens; rewritten context, no cache reuse assumed"
+      }
+    },
+    {
+      "id": "01a0c6fd-6df9-72e3-b7f6-f2c34a41d733",
+      "parent_id": "01a0c6fd-6dee-7360-8064-72764dedf044",
+      "name": "model",
+      "kind": "workflow",
+      "start_ns": 1790044892665496000,
+      "end_ns": 1790044892668364000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "model",
+        "langgraph_step": 5,
+        "report_turn": 2,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:5"
+        ],
+        "description": "Prepare the current conversation, run model middleware, and invoke the chat model."
+      }
+    },
+    {
+      "id": "01a0c6fd-6df9-72e3-b7f6-f2d07886da47",
+      "parent_id": "01a0c6fd-6df9-72e3-b7f6-f2c34a41d733",
+      "name": "CompactingDemoModel",
+      "kind": "model",
+      "start_ns": 1790044892666050000,
+      "end_ns": 1790044892667838000,
+      "status": "ok",
+      "provider": "demo",
+      "model": "scripted-chat",
+      "effort": null,
+      "usage": {
+        "input_tokens": 638,
+        "output_tokens": 73,
+        "cache_read": 0,
+        "cache_write": 0,
+        "cache_write_5m": 0,
+        "cache_write_1h": 0,
+        "reasoning": 0
+      },
+      "error": null,
+      "request": [
+        {
+          "role": "system",
+          "content": "You are a workflow reference specialist. Call workflow_reference for evidence about the assigned topic, then return a concise factual summary to the parent. Do not delegate further.",
+          "tool_calls": [],
+          "tool_call_id": null
+        },
+        {
+          "role": "human",
+          "content": "Here is a summary of the conversation to date:\n\nThe assignment is to explain delegation. The reference says agents select tools and use observations.",
+          "tool_calls": [],
+          "tool_call_id": null
+        },
+        {
+          "role": "ai",
+          "content": "",
+          "tool_calls": [
+            {
+              "name": "workflow_reference",
+              "args": {
+                "topic": "CHILD_ONLY_DETAIL: delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background "
+              },
+              "id": "lookup-1-0",
+              "type": "tool_call"
+            }
+          ],
+          "tool_call_id": null
+        },
+        {
+          "role": "tool",
+          "content": "CHILD_ONLY_DETAIL: delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background : an agent selects a tool, observes its result, and uses it to answer.",
+          "tool_calls": [],
+          "tool_call_id": "lookup-1-0"
+        }
+      ],
+      "response": [
+        {
+          "role": "ai",
+          "content": "",
+          "tool_calls": [
+            {
+              "name": "workflow_reference",
+              "args": {
+                "topic": "tool observations"
+              },
+              "id": "lookup-1-1",
+              "type": "tool_call"
+            }
+          ],
+          "tool_call_id": null
+        }
+      ],
+      "tool_definitions": [
+        {
+          "type": "function",
+          "function": {
+            "name": "workflow_reference",
+            "description": "Return a fixed explanation from a small local agent-workflow reference.",
+            "parameters": {
+              "properties": {
+                "topic": {
+                  "description": "The workflow concept used to label the explanation, such as tool calling or delegation. This fixture returns the same explanation for every topic.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "topic"
+              ],
+              "type": "object"
+            }
+          }
+        }
+      ],
+      "context": {
+        "langgraph_node": "model",
+        "langgraph_step": 5,
+        "report_description": "Research within isolated subagent history.",
+        "report_turn": 2,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "seq:step:1"
+        ],
+        "description": "Research within isolated subagent history.",
+        "input_message_bytes": 3676,
+        "message_count": 4,
+        "message_roles": [
+          "system",
+          "human",
+          "ai",
+          "tool"
+        ],
+        "simulated_definitions_tokens": 122,
+        "simulated_system_tokens": 60,
+        "simulated_human_tokens": 59,
+        "simulated_ai_tokens": 208,
+        "simulated_tool_tokens": 189,
+        "context_ledger": "{\"request_tokens\": 638, \"cache_read_tokens\": 0, \"fresh_input_tokens\": 638, \"request_cache_write_tokens\": 638, \"response_cache_write_tokens\": 73, \"added_message_tokens\": 638, \"response_tokens\": 73, \"context_after_response_tokens\": 711}",
+        "usage_basis": "Simulated canonical-JSON tokens; rewritten context, no cache reuse assumed",
+        "requested_tools": [
+          "workflow_reference"
+        ]
+      }
+    },
+    {
+      "id": "01a0c6fd-6dfc-7883-a799-ccb1357cc1a2",
+      "parent_id": "01a0c6fd-6dee-7360-8064-72764dedf044",
+      "name": "tools",
+      "kind": "workflow",
+      "start_ns": 1790044892668945000,
+      "end_ns": 1790044892670599000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "tools",
+        "langgraph_step": 6,
+        "report_turn": 2,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:6"
+        ],
+        "description": "Execute tool calls requested by the preceding model response and return their observations."
+      }
+    },
+    {
+      "id": "01a0c6fd-6dfd-78c2-b17c-13645f49ac38",
+      "parent_id": "01a0c6fd-6dfc-7883-a799-ccb1357cc1a2",
+      "name": "workflow_reference",
+      "kind": "tool",
+      "start_ns": 1790044892669353000,
+      "end_ns": 1790044892669832000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [
+        {
+          "role": "tool_call",
+          "content": "{'topic': 'tool observations'}"
+        }
+      ],
+      "response": [
+        {
+          "role": "tool",
+          "content": "tool observations: an agent selects a tool, observes its result, and uses it to answer.",
+          "tool_calls": [],
+          "tool_call_id": "lookup-1-1"
+        }
+      ],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "tools",
+        "langgraph_step": 6,
+        "report_turn": 2,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "seq:step:1"
+        ],
+        "description": "Return a fixed explanation from a small local agent-workflow reference."
+      }
+    },
+    {
+      "id": "01a0c6fd-6dfe-7e12-98c2-c407d5e8d506",
+      "parent_id": "01a0c6fd-6dee-7360-8064-72764dedf044",
+      "name": "SummarizationMiddleware.before_model",
+      "kind": "workflow",
+      "start_ns": 1790044892671077000,
+      "end_ns": 1790044892674051000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "SummarizationMiddleware.before_model",
+        "langgraph_step": 7,
+        "report_turn": 2,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:7"
+        ],
+        "description": "Execute the SummarizationMiddleware.before_model workflow operation and pass its result to the next graph step."
+      }
+    },
+    {
+      "id": "01a0c6fd-6dff-7c50-b2cd-47267ed14c80",
+      "parent_id": "01a0c6fd-6dfe-7e12-98c2-c407d5e8d506",
+      "name": "CompactingDemoModel",
+      "kind": "workflow",
+      "start_ns": 1790044892671469000,
+      "end_ns": 1790044892673713000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "SummarizationMiddleware.before_model",
+        "langgraph_step": 7,
+        "report_turn": 2,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "seq:step:1"
+        ],
+        "description": "Execute the CompactingDemoModel workflow operation and pass its result to the next graph step."
+      }
+    },
+    {
+      "id": "01a0c6fd-6dff-7c50-b2cd-4730fc5eaa9c",
+      "parent_id": "01a0c6fd-6dff-7c50-b2cd-47267ed14c80",
+      "name": "CompactingDemoModel",
+      "kind": "model",
+      "start_ns": 1790044892671836000,
+      "end_ns": 1790044892673193000,
+      "status": "ok",
+      "provider": "demo",
+      "model": "scripted-chat",
+      "effort": null,
+      "usage": {
+        "input_tokens": 1007,
+        "output_tokens": 46,
+        "cache_read": 0,
+        "cache_write": 0,
+        "cache_write_5m": 0,
+        "cache_write_1h": 0,
+        "reasoning": 0
+      },
+      "error": null,
+      "request": [
+        {
+          "role": "human",
+          "content": "<role>\nContext Extraction Assistant\n</role>\n\n<primary_objective>\nYour sole objective in this task is to extract the highest quality/most relevant context from the conversation history below.\n</primary_objective>\n\n<objective_information>\nYou're nearing the total number of input tokens you can accept, so you must extract the highest quality/most relevant pieces of information from your conversation history.\nThis context will then overwrite the conversation history presented below. Because of this, ensure the context you extract is only the most important information to continue working toward your overall goal.\n</objective_information>\n\n<instructions>\nThe conversation history below will be replaced with the context you extract in this step.\nYou want to ensure that you don't repeat any actions you've already completed, so the context you extract from the conversation history should be focused on the most important information to your overall goal.\n\nYou should structure your summary using the following sections. Each section acts as a checklist - you must populate it with relevant information or explicitly state \"None\" if there is nothing to report for that section:\n\n## SESSION INTENT\n\nWhat is the user's primary goal or request? What overall task are you trying to accomplish? This should be concise but complete enough to understand the purpose of the entire session.\n\n## SUMMARY\n\nExtract and record all of the most important context from the conversation history. Include important choices, conclusions, or strategies determined during this conversation. Include the reasoning behind key decisions. Document any rejected options and why they were not pursued.\n\n## ARTIFACTS\n\nWhat artifacts, files, or resources were created, modified, or accessed during this conversation? For file modifications, list specific file paths and briefly describe the changes made to each. This section prevents silent loss of artifact information.\n\n## NEXT STEPS\n\nWhat specific tasks remain to be completed to achieve the session intent? What should you do next?\n\n</instructions>\n\nThe user will message you with the full message history from which you'll extract context to create a replacement. Carefully read through it all and think deeply about what information is most important to your overall goal and should be saved:\n\nWith all of this in mind, please carefully read over the entire conversation history, and extract the most important and relevant context to replace it so that you can free up space in the conversation history.\nRespond ONLY with the extracted context. Do not include any additional information, or text before or after the extracted context.\n\n<messages>\nMessages to summarize:\n<message type=\"human\">Here is a summary of the conversation to date:\n\nThe assignment is to explain delegation. The reference says agents select tools and use observations.</message>\n<message type=\"ai\">\n  <tool_call id=\"lookup-1-0\" name=\"workflow_reference\">{\"topic\": \"CHILD_ONLY_DETAIL: delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background \"}</tool_call>\n</message>\n<message type=\"tool\">CHILD_ONLY_DETAIL: delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background delegation reference background : an agent selects a tool, observes its result, and uses it to answer.</message>\n</messages>",
+          "tool_calls": [],
+          "tool_call_id": null
+        }
+      ],
+      "response": [
+        {
+          "role": "ai",
+          "content": "The assignment is to explain delegation. The reference says agents select tools and use observations.",
+          "tool_calls": [],
+          "tool_call_id": null
+        }
+      ],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "SummarizationMiddleware.before_model",
+        "langgraph_step": 7,
+        "report_description": "Summarize isolated subagent history.",
+        "report_turn": 2,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "description": "Summarize isolated subagent history.",
+        "input_message_bytes": 6161,
+        "message_count": 1,
+        "message_roles": [
+          "human"
+        ],
+        "simulated_definitions_tokens": 2,
+        "simulated_human_tokens": 1005,
+        "context_ledger": "{\"request_tokens\": 1007, \"cache_read_tokens\": 0, \"fresh_input_tokens\": 1007, \"request_cache_write_tokens\": 1007, \"response_cache_write_tokens\": 46, \"added_message_tokens\": 1007, \"response_tokens\": 46, \"context_after_response_tokens\": 1053}",
+        "usage_basis": "Simulated canonical-JSON tokens; rewritten context, no cache reuse assumed"
+      }
+    },
+    {
+      "id": "01a0c6fd-6e02-7681-b6e6-4759685ce343",
+      "parent_id": "01a0c6fd-6dee-7360-8064-72764dedf044",
+      "name": "model",
+      "kind": "workflow",
+      "start_ns": 1790044892674691000,
+      "end_ns": 1790044892677065000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "model",
+        "langgraph_step": 8,
+        "report_turn": 2,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:8"
+        ],
+        "description": "Prepare the current conversation, run model middleware, and invoke the chat model."
+      }
+    },
+    {
+      "id": "01a0c6fd-6e03-7aa0-86ee-a1cad6ec41ad",
+      "parent_id": "01a0c6fd-6e02-7681-b6e6-4759685ce343",
+      "name": "CompactingDemoModel",
+      "kind": "model",
+      "start_ns": 1790044892675325000,
+      "end_ns": 1790044892676572000,
+      "status": "ok",
+      "provider": "demo",
+      "model": "scripted-chat",
+      "effort": null,
+      "usage": {
+        "input_tokens": 368,
+        "output_tokens": 45,
+        "cache_read": 0,
+        "cache_write": 0,
+        "cache_write_5m": 0,
+        "cache_write_1h": 0,
+        "reasoning": 0
+      },
+      "error": null,
+      "request": [
+        {
+          "role": "system",
+          "content": "You are a workflow reference specialist. Call workflow_reference for evidence about the assigned topic, then return a concise factual summary to the parent. Do not delegate further.",
+          "tool_calls": [],
+          "tool_call_id": null
+        },
+        {
+          "role": "human",
+          "content": "Here is a summary of the conversation to date:\n\nThe assignment is to explain delegation. The reference says agents select tools and use observations.",
+          "tool_calls": [],
+          "tool_call_id": null
+        },
+        {
+          "role": "ai",
+          "content": "",
+          "tool_calls": [
+            {
+              "name": "workflow_reference",
+              "args": {
+                "topic": "tool observations"
+              },
+              "id": "lookup-1-1",
+              "type": "tool_call"
+            }
+          ],
+          "tool_call_id": null
+        },
+        {
+          "role": "tool",
+          "content": "tool observations: an agent selects a tool, observes its result, and uses it to answer.",
+          "tool_calls": [],
+          "tool_call_id": "lookup-1-1"
+        }
+      ],
+      "response": [
+        {
+          "role": "ai",
+          "content": "An agent selects a tool, observes its result, and uses it to answer.",
+          "tool_calls": [],
+          "tool_call_id": null
+        }
+      ],
+      "tool_definitions": [
+        {
+          "type": "function",
+          "function": {
+            "name": "workflow_reference",
+            "description": "Return a fixed explanation from a small local agent-workflow reference.",
+            "parameters": {
+              "properties": {
+                "topic": {
+                  "description": "The workflow concept used to label the explanation, such as tool calling or delegation. This fixture returns the same explanation for every topic.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "topic"
+              ],
+              "type": "object"
+            }
+          }
+        }
+      ],
+      "context": {
+        "langgraph_node": "model",
+        "langgraph_step": 8,
+        "report_description": "Research within isolated subagent history.",
+        "report_turn": 2,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "seq:step:1"
+        ],
+        "description": "Research within isolated subagent history.",
+        "input_message_bytes": 792,
+        "message_count": 4,
+        "message_roles": [
+          "system",
+          "human",
+          "ai",
+          "tool"
+        ],
+        "simulated_definitions_tokens": 122,
+        "simulated_system_tokens": 60,
+        "simulated_human_tokens": 59,
+        "simulated_ai_tokens": 73,
+        "simulated_tool_tokens": 54,
+        "context_ledger": "{\"request_tokens\": 368, \"cache_read_tokens\": 0, \"fresh_input_tokens\": 368, \"request_cache_write_tokens\": 368, \"response_cache_write_tokens\": 45, \"added_message_tokens\": 368, \"response_tokens\": 45, \"context_after_response_tokens\": 413}",
+        "usage_basis": "Simulated canonical-JSON tokens; rewritten context, no cache reuse assumed"
+      }
+    },
+    {
+      "id": "01a0c6fd-6e06-75d3-b3c9-904e329419cc",
+      "parent_id": "01a0c6fd-6de8-73e2-8dba-68eeb7e24a9e",
+      "name": "SummarizationMiddleware.before_model",
+      "kind": "workflow",
+      "start_ns": 1790044892678823000,
+      "end_ns": 1790044892679150000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "SummarizationMiddleware.before_model",
+        "langgraph_step": 4,
+        "report_turn": 2,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:4"
+        ],
+        "description": "Execute the SummarizationMiddleware.before_model workflow operation and pass its result to the next graph step."
+      }
+    },
+    {
+      "id": "01a0c6fd-6e07-77a3-8b60-c3db5b2a757f",
+      "parent_id": "01a0c6fd-6de8-73e2-8dba-68eeb7e24a9e",
+      "name": "model",
+      "kind": "workflow",
+      "start_ns": 1790044892679547000,
+      "end_ns": 1790044892682504000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "model",
+        "langgraph_step": 5,
+        "report_turn": 2,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:5"
+        ],
+        "description": "Prepare the current conversation, run model middleware, and invoke the chat model."
+      }
+    },
+    {
+      "id": "01a0c6fd-6e08-7342-a304-2bba6be23724",
+      "parent_id": "01a0c6fd-6e07-77a3-8b60-c3db5b2a757f",
+      "name": "CompactingDemoModel",
+      "kind": "model",
+      "start_ns": 1790044892680226000,
+      "end_ns": 1790044892681868000,
+      "status": "ok",
+      "provider": "demo",
+      "model": "scripted-chat",
+      "effort": null,
+      "usage": {
+        "input_tokens": 989,
+        "output_tokens": 42,
+        "cache_read": 0,
+        "cache_write": 0,
+        "cache_write_5m": 0,
+        "cache_write_1h": 0,
+        "reasoning": 0
+      },
+      "error": null,
+      "request": [
+        {
+          "role": "system",
+          "content": "You are the responding peer. Read the user's request and the planning brief. Delegate workflow reference research to workflow-specialist using task with a self-contained assignment. Then answer concisely using the returned evidence. Preserve user constraints from the shared conversation or its summary.",
+          "tool_calls": [],
+          "tool_call_id": null
+        },
+        {
+          "role": "human",
+          "content": "Here is a summary of the conversation to date:\n\nThe user requires French answers about workflow delegation. Preserve that constraint.",
+          "tool_calls": [],
+          "tool_call_id": null
+        },
+        {
+          "role": "ai",
+          "content": "Preserve the French language requirement; obtain workflow evidence and explain delegation.",
+          "tool_calls": [],
+          "tool_call_id": null
+        },
+        {
+          "role": "ai",
+          "content": "",
+          "tool_calls": [
+            {
+              "name": "task",
+              "args": {
+                "subagent_type": "workflow-specialist",
+                "description": "Explain delegation using workflow_reference, then return a concise summary."
+              },
+              "id": "delegate-0",
+              "type": "tool_call"
+            }
+          ],
+          "tool_call_id": null
+        },
+        {
+          "role": "tool",
+          "content": "An agent selects a tool, observes its result, and uses it to answer.",
+          "tool_calls": [],
+          "tool_call_id": "delegate-0"
+        },
+        {
+          "role": "ai",
+          "content": "Le spécialiste reçoit une mission autonome et renvoie sa réponse au parent.",
+          "tool_calls": [],
+          "tool_call_id": null
+        },
+        {
+          "role": "human",
+          "content": "Now explain how the specialist's tool observations return to its parent.",
+          "tool_calls": [],
+          "tool_call_id": null
+        },
+        {
+          "role": "ai",
+          "content": "Preserve the French language requirement; obtain workflow evidence and explain delegation.",
+          "tool_calls": [],
+          "tool_call_id": null
+        },
+        {
+          "role": "ai",
+          "content": "",
+          "tool_calls": [
+            {
+              "name": "task",
+              "args": {
+                "subagent_type": "workflow-specialist",
+                "description": "Explain delegation using workflow_reference, then return a concise summary."
+              },
+              "id": "delegate-1",
+              "type": "tool_call"
+            }
+          ],
+          "tool_call_id": null
+        },
+        {
+          "role": "tool",
+          "content": "An agent selects a tool, observes its result, and uses it to answer.",
+          "tool_calls": [],
+          "tool_call_id": "delegate-1"
+        }
+      ],
+      "response": [
+        {
+          "role": "ai",
+          "content": "Le spécialiste reçoit une mission autonome et renvoie sa réponse au parent.",
+          "tool_calls": [],
+          "tool_call_id": null
+        }
+      ],
+      "tool_definitions": [
+        {
+          "type": "function",
+          "function": {
+            "name": "task",
+            "description": "Launch an ephemeral subagent to handle a complex, multi-step task.\n\nAvailable agent types and the tools they have access to:\n- workflow-specialist: Looks up agent workflow concepts and returns an evidence-based summary.\n\nSpecify subagent_type to select the agent. Usage notes:\n- Launch multiple agents concurrently when their tasks are independent, using a single message with multiple tool calls.\n- Each invocation is stateless by default: the agent sees only the prompt you give it and returns a single final report. Put full detail in the prompt and state exactly what it should return — unless an agent type below says it inherits your conversation instead.\n- The agent's report is not shown to the user; relay a summary yourself.\n- Tell the agent whether to create content, analyze, or only research, since it can't necessarily see the user's intent unless it inherits your conversation, as noted per agent type below.\n- If an agent's description says to use it proactively, do so without waiting to be asked.\n- When only general-purpose is available, use it for any complex, context-heavy task; it has the same capabilities as the main agent.",
+            "parameters": {
+              "properties": {
+                "description": {
+                  "description": "A detailed description of the task for the subagent to perform autonomously. Include all necessary context and specify the expected output format.",
+                  "type": "string"
+                },
+                "subagent_type": {
+                  "description": "The type of subagent to use. Must be one of the available agent types listed in the tool description.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "description",
+                "subagent_type"
+              ],
+              "type": "object"
+            }
+          }
+        }
+      ],
+      "context": {
+        "langgraph_node": "model",
+        "langgraph_step": 5,
+        "report_description": "Delegate from shared history and respond.",
+        "report_turn": 2,
+        "thread_id": "f3f0172b-48e5-4be2-838c-284281dbbb9d",
+        "cache_ttl": "5m",
+        "tags": [
+          "seq:step:1"
+        ],
+        "description": "Delegate from shared history and respond.",
+        "input_message_bytes": 1947,
+        "message_count": 10,
+        "message_roles": [
+          "system",
+          "human",
+          "ai",
+          "ai",
+          "tool",
+          "ai",
+          "human",
+          "ai",
+          "ai",
+          "tool"
+        ],
+        "simulated_definitions_tokens": 405,
+        "simulated_system_tokens": 82,
+        "simulated_human_tokens": 98,
+        "simulated_ai_tokens": 306,
+        "simulated_tool_tokens": 98,
+        "context_ledger": "{\"request_tokens\": 989, \"cache_read_tokens\": 0, \"fresh_input_tokens\": 989, \"request_cache_write_tokens\": 989, \"response_cache_write_tokens\": 42, \"added_message_tokens\": 989, \"response_tokens\": 42, \"context_after_response_tokens\": 1031}",
+        "usage_basis": "Simulated canonical-JSON tokens; rewritten context, no cache reuse assumed"
+      }
+    }
+  ],
+  "output": "Le spécialiste reçoit une mission autonome et renvoie sa réponse au parent."
+}

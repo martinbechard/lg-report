@@ -15,7 +15,7 @@ from pathlib import Path
 
 import pytest
 
-from lg_report.report import price_refresh as refresh
+from reporting import price_refresh as refresh
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = Path(__file__).parent / "fixtures/pricing"

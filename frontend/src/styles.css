@@ -1,0 +1,98 @@
+/* A quiet, single-column chat. The small in-chat menu is the only navigation.
+ * AI attribution: Generated with AI assistance by Northstar.
+ * Copyright (c) 2026 Martin.Bechard@DevConsult.ca
+ */
+:root { font-family: 'Avenir Next', 'Segoe UI', sans-serif; color: #273342; background: #fff; font-synthesis: none; --muted: #748091; --line: #e8ebef; --accent: #304b72; }
+* { box-sizing: border-box; }
+body { margin: 0; }
+button, textarea, select { font: inherit; color: inherit; }
+button { cursor: pointer; border: 0; background: none; }
+button:disabled { cursor: default; opacity: .4; }
+button:focus-visible, select:focus-visible, a:focus-visible, section:focus-visible { outline: 2px solid #8aa7cd; outline-offset: 3px; }
+.chat { max-width: 850px; height: 100dvh; margin: 0 auto; display: flex; flex-direction: column; }
+header { display: flex; align-items: center; gap: 10px; padding: 20px 24px; min-height: 72px; }
+select { min-width: 0; max-width: 65%; border: 0; background: transparent; font-size: 14px; font-weight: 600; padding: 7px 4px; cursor: pointer; }
+/* Keep sample selection compact instead of stretching across the header. */
+#sample { flex: 0 1 auto; width: 200px; max-width: 42%; }
+#mode { max-width: 52%; font-size: 12px; font-weight: 400; }
+.new-chat { flex-shrink: 0; margin-left: auto; color: #6c7888; font-size: 23px; width: 36px; height: 36px; border-radius: 8px; }
+.new-chat:hover:enabled, .attach:hover:enabled { background: #f3f5f7; }
+.transcript { flex: 1; min-height: 0; overflow: auto; padding: 24px 28px; }
+.welcome { min-height: 55%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+h1 { font-size: 27px; font-weight: 550; letter-spacing: -.7px; margin: 0 0 10px; }
+.welcome p { font-size: 14px; color: var(--muted); margin: 0 0 24px; }
+.suggestion { max-width: 520px; border: 1px solid var(--line); border-radius: 12px; font-size: 13px; text-align: left; line-height: 1.6; padding: 13px 16px; }
+.suggestion span { margin-left: 18px; color: var(--muted); }
+.suggestion:hover:enabled { background: #f7f9fb; }
+.message { margin: 0 0 28px; font-size: 15px; line-height: 1.8; overflow-wrap: anywhere; }
+.message.user { width: fit-content; max-width: 85%; margin-left: auto; padding: 12px 18px; border-radius: 18px 18px 4px 18px; background: #f0f3f7; }
+.user-text { white-space: pre-wrap; }
+.prose > :first-child { margin-top: 0; }
+.prose > :last-child { margin-bottom: 0; }
+.prose pre { background: #f5f7f9; padding: 16px; border-radius: 10px; overflow: auto; font-size: 13px; line-height: 1.6; }
+.prose code { font-family: ui-monospace, monospace; font-size: .9em; }
+.prose a { color: #305e9e; }
+.prose img { max-width: 100%; }
+.prose table { display: block; overflow: auto; border-collapse: collapse; }
+.prose th, .prose td { padding: 8px; border: 1px solid var(--line); }
+.sent-file { display: inline-block; font-size: 11px; color: #6b7788; margin: 6px 8px 0 0; }
+.working { color: var(--muted); font-size: 12px; }
+footer { padding: 12px 24px 24px; }
+.composer { border: 1px solid #dfe4ea; border-radius: 18px; background: #fff; box-shadow: 0 3px 15px #23364b06; }
+.composer:focus-within { border-color: #9cacc2; }
+.composer.dragging { outline: 2px dashed #8aa7cd; }
+textarea { width: 100%; display: block; resize: none; background: transparent; border: 0; outline: none; padding: 16px 18px 4px; font-size: 14px; line-height: 1.6; }
+textarea::placeholder { color: #8b95a3; }
+.composer-tools { display: flex; align-items: center; padding: 7px 12px 11px; gap: 10px; }
+.attach { display: grid; place-items: center; width: 35px; height: 35px; border-radius: 8px; color: #738095; }
+.hint { font-size: 11px; color: var(--muted); }
+.send { margin-left: auto; background: var(--accent); color: white; border-radius: 11px; height: 35px; width: 35px; font-size: 21px; }
+.attachments { display: flex; flex-wrap: wrap; gap: 6px; padding: 12px 14px 0; }
+.file-chip { display: inline-flex; align-items: center; gap: 6px; border-radius: 7px; padding: 4px 8px; background: #f0f3f7; font-size: 12px; overflow-wrap: anywhere; }
+.file-chip button { font-size: 17px; }
+.error { background: #fff4f0; color: #854b36; border-radius: 9px; font-size: 13px; line-height: 1.6; padding: 10px 14px; margin-bottom: 10px; }
+.error button { text-decoration: underline; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+@media (max-width: 600px) { header { padding: 12px 14px; min-height: 60px; } .transcript { padding: 20px 18px; } footer { padding: 10px 12px 16px; } h1 { font-size: 24px; } .message { font-size: 14px; } .message.user { max-width: 90%; } }
+
+/* Tool calls stay beside the answer; details are available without a side panel. */
+.tool-execution { border: 1px solid var(--line); border-radius: 10px; font-size: 12px; margin: 8px 0; }
+.tool-execution summary { cursor: pointer; padding: 10px 12px; overflow-wrap: anywhere; }
+.tool-execution summary:focus-visible { outline: 2px solid #8aa7cd; outline-offset: 2px; }
+.tool-status { color: var(--muted); margin-left: 10px; }
+.tool-details { padding: 0 12px 12px; }
+.tool-details p { color: var(--muted); margin: 8px 0 4px; }
+.tool-details pre { white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; font-size: 12px; font-family: ui-monospace, monospace; }
+
+/* Delegation transcripts nest within the conversation, including nested tools. */
+.subagent-conversation { border-left: 2px solid #b8c8db; margin: 12px 0; font-size: 13px; }
+.subagent-conversation > summary { cursor: pointer; padding: 10px 12px; }
+.subagent-conversation > summary span { color: var(--muted); margin-left: 10px; }
+.subagent-body { padding: 4px 12px; }
+.subagent-body .message { font-size: 13px; margin-bottom: 16px; }
+.delegated-task { white-space: pre-wrap; color: #536176; }
+
+/* Delegations sit between task arguments and results. Native open state keeps
+ * the invitation accurate for mouse, keyboard and restored browser state. */
+.tool-details > .subagent-conversation { margin-left: 12px; }
+.subagent-conversation[open] > summary > .view-conversation { display: none; }
+.agent-name { color: var(--muted); font-size: 12px; margin: 0 0 6px; }
+
+/* Pending workflow interactions remain visible while execution is paused. */
+.interaction{border:1px solid #bbc9cf;padding:16px;margin-bottom:12px;max-height:45vh;overflow:auto}.interaction h2{font-size:18px}.interaction pre{white-space:pre-wrap;overflow-wrap:anywhere}.interaction button{margin:8px 8px 0 0}.interaction input{width:100%;padding:10px}
+
+/* Context capacity is token-based; bytes describe serialized input messages.
+ * An unavailable reading uses a patterned track instead of suggesting 0%. */
+.context-usage { margin: 0 4px 12px; font-size: 11px; color: #596779; }
+.context-summary, .context-scale { display: flex; justify-content: space-between; gap: 8px; }
+.context-usage meter { display: block; width: 100%; height: 12px; accent-color: #17734b; }
+.context-unavailable { height: 6px; margin: 3px 0; border-radius: 4px; background: repeating-linear-gradient(135deg, #e8ebef 0 4px, #f7f9fb 4px 8px); }
+.context-scale { margin-top: 3px; font-variant-numeric: tabular-nums; }
+.context-usage p { margin: 4px 0 0; overflow-wrap: anywhere; }
+
+/* Inspect retained context without letting a long transcript consume the chat. */
+.context-details { margin-top: 6px; }
+.context-details summary { cursor: pointer; }
+.context-details[open] { max-height: 35dvh; overflow: auto; }
+.context-details h3 { font-size: 12px; }
+.context-details pre { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 11px; }

@@ -10,22 +10,24 @@ Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 
 import json
 from contextlib import asynccontextmanager
+from functools import partial
 from pathlib import Path
 
 import pytest
 from deepagents import create_deep_agent
-from deepagents.backends import StateBackend
+from fixtures.mock_client import MockClient
 from langchain.mcp import MCPAdapter
 
-from lg_report.mcp_servers.wikipedia import build_server
-from lg_report.platform.conversation import Conversation, Request
-from lg_report.platform.static_client import StaticClient
-from lg_report.report.pricing import load_prices
-from lg_report.report.recording import record_run
-from lg_report.report.schema import Run
-from lg_report.workflows import mcp_rag_chat
-from samples.mcp_rag_chat.app import create_run
-from samples.mcp_rag_chat.test_case import USER_PROMPTS
+from agent_runtime.harness.conversation import Conversation, Request
+from agent_runtime.harness.sample_catalog import SampleCatalog
+from agent_runtime.mcp_servers.wikipedia import build_server
+from agent_runtime.workflows import mcp_rag_chat
+from reporting.execute_runnable import execute_runnable
+from reporting.pricing import load_prices
+from reporting.schema import Run
+
+create_run = partial(SampleCatalog().create_run, "mcp_rag_chat")
+from samples.mcp_rag_chat.scripted_run import USER_PROMPTS
 
 
 class Collection:
@@ -53,7 +55,7 @@ def test_sample_records_mcp_evidence(tmp_path, monkeypatch):
     lifecycle = []
 
     @asynccontextmanager
-    async def open_fixture(model):
+    async def open_fixture(parameters):
         # Keep an MCP session alive while the synchronous bridge uses its agent.
         # `model` is the scripted model passed by the workflow. Yield a real Deep
         # Agent configured with discovered tools; finally records context exit even
@@ -62,17 +64,16 @@ def test_sample_records_mcp_evidence(tmp_path, monkeypatch):
             lifecycle.append("opened")
             try:
                 yield create_deep_agent(
-                    model=model,
+                    **parameters,
                     tools=await adapter.list_tools(),
-                    backend=StateBackend(),
                 )
             finally:
                 lifecycle.append("closed")
 
     monkeypatch.setattr(mcp_rag_chat, "open_agent", open_fixture)
     workflow, provider, model = create_run(False)
-    client = StaticClient([Request(USER_PROMPTS[0])])
-    record_run(
+    client = MockClient([Request(USER_PROMPTS[0])])
+    execute_runnable(
         Conversation(workflow, client),
         {},
         tmp_path / "report",
@@ -91,7 +92,7 @@ def test_sample_records_mcp_evidence(tmp_path, monkeypatch):
     # second model request must include evidence returned by the MCP tool.
     tools = [s for s in run.steps if s.kind == "tool"]
     assert len(models) == 2
-    assert len(tools) == 1 and tools[0].name == "search_wikipedia"
+    assert len(tools) == 1 and tools[0].name == "semantic_search_wikipedia"
     assert "fixture-raven" in json.dumps(models[1].request)
     assert all(step.usage.input_tokens > 0 for step in models)
     assert (tmp_path / "report/report.html").is_file()
@@ -113,7 +114,7 @@ def test_bridge_closes_on_failure(monkeypatch):
             raise ValueError("agent failed")
 
     @asynccontextmanager
-    async def open_fixture(model):
+    async def open_fixture(parameters):
         # Exercise the bridge cleanup path with an agent that always fails.
         # Accept the workflow model argument for interface compatibility; yield the
         # failure stub and record cleanup when the async context is exited.

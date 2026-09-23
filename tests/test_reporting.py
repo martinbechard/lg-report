@@ -22,15 +22,15 @@ from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.graph import END, START, StateGraph
 from langgraph.types import Command, interrupt
 
-from lg_report.agents.chat_agent import build_agent as build_chat_agent
-from lg_report.platform.simulated_model import ScriptedChatModel
-from lg_report.report.capture import TraceCapture
-from lg_report.report.normalize import normalize
-from lg_report.report.pricing import cost, load_prices, summarize
-from lg_report.report.recording import record_run
-from lg_report.report.render import render
-from lg_report.report.schema import Run, Step, Usage
-from samples.simple_chat.test_case import make_simulated_model as make_chat_model
+from agent_runtime.agents.chat_agent import build_agent as build_chat_agent
+from agent_runtime.harness.simulated_model import ScriptedChatModel
+from agent_runtime.harness.trace_capture import TraceCapture
+from reporting.execute_runnable import execute_runnable
+from reporting.normalize import normalize
+from reporting.pricing import cost, load_prices, summarize
+from reporting.render import render
+from reporting.schema import Run, Step, Usage
+from samples.simple_chat.scripted_run import make_simulated_model as make_chat_model
 
 
 @pytest.fixture
@@ -52,8 +52,8 @@ def read_run(directory):
 # normalized spans, privacy filtering, pricing, and HTML output agree.
 def test_real_deepagents_offline_pipeline(tmp_path, prices):
     out = tmp_path / "run"
-    record_run(
-        build_chat_agent(make_chat_model()),
+    execute_runnable(
+        build_chat_agent({"model": make_chat_model()}),
         {"messages": [("user", "secret input")]},
         out,
         prices,
@@ -199,7 +199,7 @@ def test_model_tool_model_sequence(tmp_path, prices):
     )
     agent = create_deep_agent(model=model, tools=[lookup], subagents=[])
     out = tmp_path / "tool"
-    record_run(
+    execute_runnable(
         agent,
         {"messages": [("user", "Look up LangGraph")]},
         out,
@@ -243,7 +243,7 @@ def test_failure_preserves_partial_report(tmp_path, prices):
     graph.add_edge("failing-node", END)
     out = tmp_path / "failure"
     with pytest.raises(RuntimeError, match="secret exception"):
-        record_run(
+        execute_runnable(
             graph.compile(), {}, out, prices, provider="demo", model="scripted-chat"
         )
     run = read_run(out)
@@ -280,11 +280,11 @@ def test_interrupt_and_resume_separate_invocations(tmp_path, prices):
     graph.add_node("approval", approval)
     graph.add_edge(START, "approval")
     graph.add_edge("approval", END)
-    # This saver retains checkpoints only in this process. Both record_run
+    # This saver retains checkpoints only in this process. Both execute_runnable
     # calls below use the same compiled graph and thread id to resume its pause.
     agent = graph.compile(checkpointer=InMemorySaver())
     config = {"configurable": {"thread_id": "test"}}
-    record_run(
+    execute_runnable(
         agent,
         {},
         tmp_path / "pause",
@@ -294,7 +294,7 @@ def test_interrupt_and_resume_separate_invocations(tmp_path, prices):
         config=config,
     )
     assert read_run(tmp_path / "pause").status == "interrupted"
-    record_run(
+    execute_runnable(
         agent,
         Command(resume=True),
         tmp_path / "resume",
@@ -310,8 +310,8 @@ def test_interrupt_and_resume_separate_invocations(tmp_path, prices):
 # not destroy prior evidence or mix two accounting sessions.
 def test_existing_directory_is_not_overwritten(tmp_path, prices):
     with pytest.raises(FileExistsError):
-        record_run(
-            build_chat_agent(make_chat_model()),
+        execute_runnable(
+            build_chat_agent({"model": make_chat_model()}),
             {},
             tmp_path,
             prices,
@@ -396,7 +396,7 @@ def test_retry_keeps_both_attempts(tmp_path, prices):
     )
     graph.add_edge(START, "model")
     graph.add_edge("model", END)
-    record_run(
+    execute_runnable(
         graph.compile(),
         {},
         tmp_path / "retry",
@@ -441,7 +441,7 @@ def test_failure_before_callbacks_is_not_masked(tmp_path, prices):
 
     out = tmp_path / "early-failure"
     with pytest.raises(RuntimeError, match="original failure"):
-        record_run(
+        execute_runnable(
             BrokenAgent(), {}, out, prices, provider="demo", model="scripted-chat"
         )
     assert read_run(out).status == "error"

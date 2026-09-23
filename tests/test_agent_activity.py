@@ -11,10 +11,10 @@ Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 from decimal import Decimal
 from pathlib import Path
 
-from lg_report.report.collaboration import collaboration_diagrams
-from lg_report.report.pricing import load_prices
-from lg_report.report.render import agent_activity, conversation_turns, render
-from lg_report.report.schema import Run, Step, Usage
+from reporting.collaboration import collaboration_diagrams
+from reporting.pricing import load_prices
+from reporting.render import agent_activity, conversation_turns, render
+from reporting.schema import Run, Step, Usage
 
 
 # Use hand-built spans to protect ownership, partial-cost, escaping,

@@ -20,7 +20,7 @@ Run a real conversation with your configured provider:
 ```sh
 cp samples/quote_request/.env.example samples/quote_request/.env
 # Set your provider credentials in the local .env file.
-uv run python -m samples.quote_request.app --live --client console
+uv run python -m agent_runtime --sample quote_request --live --client console
 ```
 
 The console displays the model's reason and question. Answer in ordinary language.
@@ -34,8 +34,8 @@ request can finish without questions. There are no mandatory contact fields.
 An offline demonstration explicitly replays authored model decisions and answers:
 
 ```sh
-uv run python -m samples.quote_request.app --client static
-uv run python -m samples.quote_request.app --client static --scenario cancel
+uv run python -m agent_runtime --sample quote_request --client static
+uv run python -m agent_runtime --sample quote_request --client static --scenario cancel
 ```
 
 This simulation demonstrates interrupt/resume wiring, multiple issues, and
@@ -43,12 +43,15 @@ cancellation; it is not evidence of LLM reasoning. Custom values and console
 answers require live mode because scripted decisions cannot interpret them.
 
 The graph follows assess → ask human → assess, or assess → complete. The
-`quote_interpreter` agent owns the system prompt, decision-tool binding, and model
-call; the workflow supplies conversation context and owns validation, routing,
+`quote_interpreter` agent owns the system prompt, message formatting, decision-tool
+binding, model call, and output validation. The workflow supplies structured
+request/conversation data and owns history retention, routing, checkpoints,
 and interrupts. The model
 returns a `QuoteDecision` tool call containing its action, explanation, and
 question or summary. This output schema validates the model protocol, not the
-business meaning of the quote. A separate ask node uses a real LangGraph
+business meaning of the quote. The agent returns a validated decision to the
+workflow; the workflow never inspects model tool names or arguments. A separate
+ask node uses a real LangGraph
 interrupt, so resuming does not repeat the preceding model call. Human answers
 are preserved verbatim and included in the next assessment.
 
@@ -58,11 +61,17 @@ returns `status: cancelled` and clears current draft/conversation state, but doe
 not erase prior checkpoints or traces. Checkpoints last only for this process.
 
 One shared recorder captures the session in HTML and independent `run.json`.
-`--out` selects a new output directory; `--metadata-only` omits report payloads
+`--out` selects another reusable output directory; `--metadata-only` omits report payloads
 but does not prevent sending the request to the model. `--prices models.json` and
-`--fx-file /path/to/fx.json` avoid price/FX lookups. Live usage comes from provider
+`--fx-file /path/to/fx.json` select saved model-price and FX references; FX never performs a lookup here. Live usage comes from provider
 callbacks; absent usage remains explicit. Offline decisions invent no usage.
 
 Local reports default to `report.html`, `run.json`, `spans.jsonl`, and
-`prices.json` in the current working directory. The next default run replaces
-these files. Use `--out reports/saved-run` with a new directory to keep a run.
+`prices.json` in `reports/quote_request/`. The next default run replaces
+these files. Use `--out reports/saved-run` to choose another reusable report directory.
+
+## Angular client
+
+Select **Quote clarification** in the catalog, or launch this sample with
+`--client angular`. Questions remain paused until answered or cancelled. The
+console and browser submit the same AG-UI resume contract to LangGraphAgent.

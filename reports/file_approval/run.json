@@ -1,0 +1,2394 @@
+{
+  "schema_version": 1,
+  "id": "01a0c410-e7cb-79f0-a41b-0c24b54e5453",
+  "title": "Human approval · file modifications",
+  "demo": false,
+  "status": "ok",
+  "steps": [
+    {
+      "id": "01a0c410-e7cb-79f0-a41b-0c24b54e5453",
+      "parent_id": null,
+      "name": "file_editor",
+      "kind": "workflow",
+      "start_ns": 1789995837389137000,
+      "end_ns": 1789995843093424000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "report_turn": 1,
+        "thread_id": "fceb6904-7729-45c3-8610-66fb17702a56",
+        "cache_ttl": "5m",
+        "description": "Execute the file_editor workflow operation and pass its result to the next graph step."
+      }
+    },
+    {
+      "id": "01a0c410-e7ce-7102-b348-1c54b1874184",
+      "parent_id": "01a0c410-e7cb-79f0-a41b-0c24b54e5453",
+      "name": "model",
+      "kind": "workflow",
+      "start_ns": 1789995837390304000,
+      "end_ns": 1789995839301018000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "model",
+        "langgraph_step": 1,
+        "report_turn": 1,
+        "thread_id": "fceb6904-7729-45c3-8610-66fb17702a56",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:1"
+        ],
+        "description": "Prepare the current conversation, run model middleware, and invoke the chat model."
+      }
+    },
+    {
+      "id": "01a0c410-e7cf-79a0-b847-f3bbbd51105b",
+      "parent_id": "01a0c410-e7ce-7102-b348-1c54b1874184",
+      "name": "ChatOpenAI",
+      "kind": "model",
+      "start_ns": 1789995837391740000,
+      "end_ns": 1789995839300259000,
+      "status": "ok",
+      "provider": "openai",
+      "model": "gpt-5.6-luna",
+      "effort": null,
+      "usage": {
+        "input_tokens": 278,
+        "output_tokens": 68,
+        "cache_read": 0,
+        "cache_write": 0,
+        "cache_write_5m": 0,
+        "cache_write_1h": 0,
+        "reasoning": 18
+      },
+      "error": null,
+      "request": [
+        {
+          "role": "system",
+          "content": "You edit a UTF-8 document according to the human's request.\nUse read_file to inspect the source and target as needed. If the target exists,\npreserve its current content unless the human requests replacement; otherwise\nuse the source as the starting document. Make each requested change separately,\nwith one write_file call at a time. Supply the complete resulting content and\nthe exact expected_content from the latest target observation (null if absent).\nAfter each write outcome, read the target again before proposing the next change.\nA rejected tool call did not execute: do not retry or reintroduce that change.\nReport only changes confirmed by tool results. Tool execution policy is enforced\nby the harness; do not ask for permission in prose or invent approval results.\n",
+          "tool_calls": [],
+          "tool_call_id": null
+        },
+        {
+          "role": "human",
+          "content": "Append each of these sentences as a separate change: ['\\nReviewed by the project team.\\n', 'Next step: request a quote.\\n']",
+          "tool_calls": [],
+          "tool_call_id": null
+        }
+      ],
+      "response": [
+        {
+          "role": "ai",
+          "content": [
+            {
+              "id": "rs_02fbc37f694deedf006ab12b3e5c0087d2a8c743973bfa6c7c",
+              "summary": [],
+              "type": "reasoning",
+              "content": [],
+              "index": 0,
+              "encrypted_content": "gAAAAABqsSs_xMzyQt9KlDkEhoWJBLQGA_GYDBDRTAcApadSP8mlCE_QPmHwpjxiiP-t7rX6hLMTWK4DK3RrTp-8jmj0hHXHzAusJhwtQzimZuIRiR5MtLc7tsflc7LIasiDHKygOwadNYVR9FNciAlpp55L-M99HghSI7cOoc6Z4dcrIC6VUz_LtQNoMJJXs1mykTm9G29D4gRDycnANzyo6v6knSz1ffuOiT5zgRFjm7IQhOziZp11sxZZZQCeNKLsTvdbe60XdVOuEN2xUxkyQgx83xio-aqYDqHY2OuIPiR5fHp-bC5rmMxWY_OznYGEe7400QqcsjS5x5_4pzi4yJWQBsxwKm08EQaq3JYrrMDjb4pcBJ42v3WjYKr5-o3gbpXelNQByLNQWkPhnjSN7tJjWehzF3ncGO_RH0WUIacURTPopdEAw8H1HVvlvQHD9tc8XCzrerGoBisuq1Nmw3zcUQNvBBemtpUCVmo9kuKNd5eAFtXCX5jD7ce9keDUMxVSjUh8J6GXd9tI_HAWXPnGObYg1fm2zYBQMgUfS9Drn2cnb14ZA5k4TFXMLQ4kP6Y5c3PRBNxEZZ_iYgFDFGLTI46bEUKMiEPn7OrK9uqQtH4YBpkCT_cszs_aWtqBhy_BonrUcik4HP4CkPgo4JjjlcbwlHcie-6I2kQAVnk7dlVSlv-3wkMbpOAERNCFFfBYI537u5tWgzM0N6vnkOiyH_xibHu5NnZqajlO4tnDIaRdzJFW43rShnbjREgPM-yg81efcKI7tW6sxyj01jm9ypowidAwIR7MKR4eJe-H-n8LpcsmSvvMFfSvEjAfUtfQICdIFVZe1OJU02iJpoNFIRFwzfg-nOsyTHIh4j1I30ug2vqbx8MOosJtA2_mLC62-is-vzoyr-jGLDFefxFY4OmuPgz9nWdZt2h2F5XELSGQnkNKygtjo39OO9jPo3LhVQ0FX6Knlp0922tf-szQyOW5pkofWozLMwZyHIZjB2oifHTCdHnhoarclBVdkrizjcRE8DQ0WOaFCKVM7y6H7_s46Yyo_DCn86F3UkXOso_tQv6O9z-_z8A8QvNsuBrpmo_Xos69mJSuLRiDD5CGjvETlJH30Jnsc8BXWDTX_P4X5RAeww9C0HDIpFsmhqUiEUfbkE-pwJyLwqCIJ0Zye_BQ8hqo59cNuVbtBBcs3S89f-dTBvLZwZ5jEyabxeW75bxi4jGv1vYd6vhjAge8m5h1WsfUrb2s3ubnzL-qD3Bxs48NPBTZBCHRqOWr60dcjLpsWgu8Z9_GsucsglOmCj89cA=="
+            },
+            {
+              "type": "function_call",
+              "name": "read_file",
+              "arguments": "{\"document\":\"source\"}",
+              "call_id": "call_2xQQVqFxMuOiXKFo6RVCHfqE",
+              "id": "fc_02fbc37f694deedf006ab12b3f16a087d2b0fd0aa7d0827d8f",
+              "index": 1
+            },
+            {
+              "type": "function_call",
+              "name": "read_file",
+              "arguments": "{\"document\":\"target\"}",
+              "call_id": "call_0olejKKvYpbXd44bId2wpd21",
+              "id": "fc_02fbc37f694deedf006ab12b3f16b087d2918b7c22735ab048",
+              "index": 2
+            }
+          ],
+          "tool_calls": [
+            {
+              "name": "read_file",
+              "args": {
+                "document": "source"
+              },
+              "id": "call_2xQQVqFxMuOiXKFo6RVCHfqE",
+              "type": "tool_call"
+            },
+            {
+              "name": "read_file",
+              "args": {
+                "document": "target"
+              },
+              "id": "call_0olejKKvYpbXd44bId2wpd21",
+              "type": "tool_call"
+            }
+          ],
+          "tool_call_id": null
+        }
+      ],
+      "tool_definitions": [
+        {
+          "type": "function",
+          "function": {
+            "name": "read_file",
+            "description": "Read source or target; return content, or null for a missing target.",
+            "parameters": {
+              "properties": {
+                "document": {
+                  "enum": [
+                    "source",
+                    "target"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "document"
+              ],
+              "type": "object"
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "write_file",
+            "description": "Replace the target if it still matches expected_content; null means absent.",
+            "parameters": {
+              "properties": {
+                "content": {
+                  "type": "string"
+                },
+                "expected_content": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "content",
+                "expected_content"
+              ],
+              "type": "object"
+            }
+          }
+        }
+      ],
+      "context": {
+        "langgraph_node": "model",
+        "langgraph_step": 1,
+        "report_turn": 1,
+        "thread_id": "fceb6904-7729-45c3-8610-66fb17702a56",
+        "cache_ttl": "5m",
+        "tags": [
+          "seq:step:1"
+        ],
+        "description": "Generate the next assistant message or tool request from the current conversation.",
+        "message_count": 2,
+        "message_roles": [
+          "system",
+          "human"
+        ],
+        "requested_tools": [
+          "read_file",
+          "read_file"
+        ]
+      }
+    },
+    {
+      "id": "01a0c410-ef46-7ce2-b1d9-a5e88e266ea8",
+      "parent_id": "01a0c410-e7cb-79f0-a41b-0c24b54e5453",
+      "name": "RestrictedToolApproval.after_model",
+      "kind": "workflow",
+      "start_ns": 1789995839302230000,
+      "end_ns": 1789995839302696000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "RestrictedToolApproval.after_model",
+        "langgraph_step": 2,
+        "report_turn": 1,
+        "thread_id": "fceb6904-7729-45c3-8610-66fb17702a56",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:2"
+        ],
+        "description": "Execute the RestrictedToolApproval.after_model workflow operation and pass its result to the next graph step."
+      }
+    },
+    {
+      "id": "01a0c410-ef48-7f43-bdcf-2b954249c570",
+      "parent_id": "01a0c410-e7cb-79f0-a41b-0c24b54e5453",
+      "name": "tools",
+      "kind": "workflow",
+      "start_ns": 1789995839304494000,
+      "end_ns": 1789995839307889000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "tools",
+        "langgraph_step": 3,
+        "report_turn": 1,
+        "thread_id": "fceb6904-7729-45c3-8610-66fb17702a56",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:3"
+        ],
+        "description": "Execute tool calls requested by the preceding model response and return their observations."
+      }
+    },
+    {
+      "id": "01a0c410-ef48-7f43-bdcf-2ba94dd37384",
+      "parent_id": "01a0c410-e7cb-79f0-a41b-0c24b54e5453",
+      "name": "tools",
+      "kind": "workflow",
+      "start_ns": 1789995839304542000,
+      "end_ns": 1789995839310942000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "tools",
+        "langgraph_step": 3,
+        "report_turn": 1,
+        "thread_id": "fceb6904-7729-45c3-8610-66fb17702a56",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:3"
+        ],
+        "description": "Execute tool calls requested by the preceding model response and return their observations."
+      }
+    },
+    {
+      "id": "01a0c410-ef49-7fc0-a3af-53a49a4dc082",
+      "parent_id": "01a0c410-ef48-7f43-bdcf-2b954249c570",
+      "name": "read_file",
+      "kind": "tool",
+      "start_ns": 1789995839305192000,
+      "end_ns": 1789995839307258000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [
+        {
+          "role": "tool_call",
+          "content": "{'document': 'source'}"
+        }
+      ],
+      "response": [
+        {
+          "role": "tool",
+          "content": "{\"document\": \"source\", \"content\": \"Project summary\\nWe prepare clear, practical reports.\\n\"}",
+          "tool_calls": [],
+          "tool_call_id": "call_2xQQVqFxMuOiXKFo6RVCHfqE"
+        }
+      ],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "tools",
+        "langgraph_step": 3,
+        "report_turn": 1,
+        "thread_id": "fceb6904-7729-45c3-8610-66fb17702a56",
+        "cache_ttl": "5m",
+        "tags": [
+          "seq:step:1"
+        ],
+        "description": "Read source or target; return content, or null for a missing target."
+      }
+    },
+    {
+      "id": "01a0c410-ef49-7fc0-a3af-53bd81fa3db2",
+      "parent_id": "01a0c410-ef48-7f43-bdcf-2ba94dd37384",
+      "name": "read_file",
+      "kind": "tool",
+      "start_ns": 1789995839305417000,
+      "end_ns": 1789995839310374000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [
+        {
+          "role": "tool_call",
+          "content": "{'document': 'target'}"
+        }
+      ],
+      "response": [
+        {
+          "role": "tool",
+          "content": "{\"document\": \"target\", \"content\": \"Project summary\\nWe prepare clear, practical reports.\\n\\nReviewed by the project team.\\nNext step: request a quote.\\n\"}",
+          "tool_calls": [],
+          "tool_call_id": "call_0olejKKvYpbXd44bId2wpd21"
+        }
+      ],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "tools",
+        "langgraph_step": 3,
+        "report_turn": 1,
+        "thread_id": "fceb6904-7729-45c3-8610-66fb17702a56",
+        "cache_ttl": "5m",
+        "tags": [
+          "seq:step:1"
+        ],
+        "description": "Read source or target; return content, or null for a missing target."
+      }
+    },
+    {
+      "id": "01a0c410-ef4f-7450-a11b-10ad681d6da2",
+      "parent_id": "01a0c410-e7cb-79f0-a41b-0c24b54e5453",
+      "name": "model",
+      "kind": "workflow",
+      "start_ns": 1789995839311619000,
+      "end_ns": 1789995843088748000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "model",
+        "langgraph_step": 4,
+        "report_turn": 1,
+        "thread_id": "fceb6904-7729-45c3-8610-66fb17702a56",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:4"
+        ],
+        "description": "Prepare the current conversation, run model middleware, and invoke the chat model."
+      }
+    },
+    {
+      "id": "01a0c410-ef50-71a0-ac90-e25553a03c16",
+      "parent_id": "01a0c410-ef4f-7450-a11b-10ad681d6da2",
+      "name": "ChatOpenAI",
+      "kind": "model",
+      "start_ns": 1789995839312236000,
+      "end_ns": 1789995843086929000,
+      "status": "ok",
+      "provider": "openai",
+      "model": "gpt-5.6-luna",
+      "effort": null,
+      "usage": {
+        "input_tokens": 426,
+        "output_tokens": 234,
+        "cache_read": 0,
+        "cache_write": 0,
+        "cache_write_5m": 0,
+        "cache_write_1h": 0,
+        "reasoning": 149
+      },
+      "error": null,
+      "request": [
+        {
+          "role": "system",
+          "content": "You edit a UTF-8 document according to the human's request.\nUse read_file to inspect the source and target as needed. If the target exists,\npreserve its current content unless the human requests replacement; otherwise\nuse the source as the starting document. Make each requested change separately,\nwith one write_file call at a time. Supply the complete resulting content and\nthe exact expected_content from the latest target observation (null if absent).\nAfter each write outcome, read the target again before proposing the next change.\nA rejected tool call did not execute: do not retry or reintroduce that change.\nReport only changes confirmed by tool results. Tool execution policy is enforced\nby the harness; do not ask for permission in prose or invent approval results.\n",
+          "tool_calls": [],
+          "tool_call_id": null
+        },
+        {
+          "role": "human",
+          "content": "Append each of these sentences as a separate change: ['\\nReviewed by the project team.\\n', 'Next step: request a quote.\\n']",
+          "tool_calls": [],
+          "tool_call_id": null
+        },
+        {
+          "role": "ai",
+          "content": [
+            {
+              "id": "rs_02fbc37f694deedf006ab12b3e5c0087d2a8c743973bfa6c7c",
+              "summary": [],
+              "type": "reasoning",
+              "content": [],
+              "index": 0,
+              "encrypted_content": "gAAAAABqsSs_xMzyQt9KlDkEhoWJBLQGA_GYDBDRTAcApadSP8mlCE_QPmHwpjxiiP-t7rX6hLMTWK4DK3RrTp-8jmj0hHXHzAusJhwtQzimZuIRiR5MtLc7tsflc7LIasiDHKygOwadNYVR9FNciAlpp55L-M99HghSI7cOoc6Z4dcrIC6VUz_LtQNoMJJXs1mykTm9G29D4gRDycnANzyo6v6knSz1ffuOiT5zgRFjm7IQhOziZp11sxZZZQCeNKLsTvdbe60XdVOuEN2xUxkyQgx83xio-aqYDqHY2OuIPiR5fHp-bC5rmMxWY_OznYGEe7400QqcsjS5x5_4pzi4yJWQBsxwKm08EQaq3JYrrMDjb4pcBJ42v3WjYKr5-o3gbpXelNQByLNQWkPhnjSN7tJjWehzF3ncGO_RH0WUIacURTPopdEAw8H1HVvlvQHD9tc8XCzrerGoBisuq1Nmw3zcUQNvBBemtpUCVmo9kuKNd5eAFtXCX5jD7ce9keDUMxVSjUh8J6GXd9tI_HAWXPnGObYg1fm2zYBQMgUfS9Drn2cnb14ZA5k4TFXMLQ4kP6Y5c3PRBNxEZZ_iYgFDFGLTI46bEUKMiEPn7OrK9uqQtH4YBpkCT_cszs_aWtqBhy_BonrUcik4HP4CkPgo4JjjlcbwlHcie-6I2kQAVnk7dlVSlv-3wkMbpOAERNCFFfBYI537u5tWgzM0N6vnkOiyH_xibHu5NnZqajlO4tnDIaRdzJFW43rShnbjREgPM-yg81efcKI7tW6sxyj01jm9ypowidAwIR7MKR4eJe-H-n8LpcsmSvvMFfSvEjAfUtfQICdIFVZe1OJU02iJpoNFIRFwzfg-nOsyTHIh4j1I30ug2vqbx8MOosJtA2_mLC62-is-vzoyr-jGLDFefxFY4OmuPgz9nWdZt2h2F5XELSGQnkNKygtjo39OO9jPo3LhVQ0FX6Knlp0922tf-szQyOW5pkofWozLMwZyHIZjB2oifHTCdHnhoarclBVdkrizjcRE8DQ0WOaFCKVM7y6H7_s46Yyo_DCn86F3UkXOso_tQv6O9z-_z8A8QvNsuBrpmo_Xos69mJSuLRiDD5CGjvETlJH30Jnsc8BXWDTX_P4X5RAeww9C0HDIpFsmhqUiEUfbkE-pwJyLwqCIJ0Zye_BQ8hqo59cNuVbtBBcs3S89f-dTBvLZwZ5jEyabxeW75bxi4jGv1vYd6vhjAge8m5h1WsfUrb2s3ubnzL-qD3Bxs48NPBTZBCHRqOWr60dcjLpsWgu8Z9_GsucsglOmCj89cA=="
+            },
+            {
+              "type": "function_call",
+              "name": "read_file",
+              "arguments": "{\"document\":\"source\"}",
+              "call_id": "call_2xQQVqFxMuOiXKFo6RVCHfqE",
+              "id": "fc_02fbc37f694deedf006ab12b3f16a087d2b0fd0aa7d0827d8f",
+              "index": 1
+            },
+            {
+              "type": "function_call",
+              "name": "read_file",
+              "arguments": "{\"document\":\"target\"}",
+              "call_id": "call_0olejKKvYpbXd44bId2wpd21",
+              "id": "fc_02fbc37f694deedf006ab12b3f16b087d2918b7c22735ab048",
+              "index": 2
+            }
+          ],
+          "tool_calls": [
+            {
+              "name": "read_file",
+              "args": {
+                "document": "source"
+              },
+              "id": "call_2xQQVqFxMuOiXKFo6RVCHfqE",
+              "type": "tool_call"
+            },
+            {
+              "name": "read_file",
+              "args": {
+                "document": "target"
+              },
+              "id": "call_0olejKKvYpbXd44bId2wpd21",
+              "type": "tool_call"
+            }
+          ],
+          "tool_call_id": null
+        },
+        {
+          "role": "tool",
+          "content": "{\"document\": \"source\", \"content\": \"Project summary\\nWe prepare clear, practical reports.\\n\"}",
+          "tool_calls": [],
+          "tool_call_id": "call_2xQQVqFxMuOiXKFo6RVCHfqE"
+        },
+        {
+          "role": "tool",
+          "content": "{\"document\": \"target\", \"content\": \"Project summary\\nWe prepare clear, practical reports.\\n\\nReviewed by the project team.\\nNext step: request a quote.\\n\"}",
+          "tool_calls": [],
+          "tool_call_id": "call_0olejKKvYpbXd44bId2wpd21"
+        }
+      ],
+      "response": [
+        {
+          "role": "ai",
+          "content": [
+            {
+              "id": "rs_02fbc37f694deedf006ab12b3ff68c87d286f814f79cc66ac1",
+              "summary": [],
+              "type": "reasoning",
+              "content": [],
+              "index": 0,
+              "encrypted_content": "gAAAAABqsStCwVlTU43bn9EXQxRsg6flyxywqbltXLzY3Z9uNXpr_DBBA0Z1TbC8HKCRdUJyhYvHo8XVaRoziIPKwp7VACGjf9VsA7194HPHc1FJP9ya58YxzGuS86xsm4LLixzpwL4bAwIXvOv9-g6CW2C5G-LRK9Y_AuFL7C7YGDHCHB_jjlQR-mEV5PFQ_Gp3wBVQoNlPcHnFNBaqXYbfC52RxyaxMqIkooIgXaOztYvgqSc-IWfe_uMfcI4NOPgMLTX6htoV2w4J5UuzJPwA2rTfDEQN_gz0J_li1aq6B_aXbjzV1CjzTFko4Y9jBbB96PPC_G9_7YM0Tl_WD0uvgvnYsCQAjHMUmIgjjKwS7kpn4trP3ErGh4OebwpdTJ9yaZy-5anAZxmhg0H9mTQzzCM-sXL5Xz19nYurrtLzdVhFJ1miYVw3q1DCeWXGm5idd1oKI0EWHsrfjELBRNkzwh5pf6v7xRdOR3VctIC__MNDxxStnz4yGNrxkmjJY1ht8CQhNbaLJTlMxT1WxGhtTbH-fKxTVwhYcWymN2mMF2MmHxseTpKMyyogdkzPi8R0HMSBIvlQH3V7w65ShCfF5KOO1QbmH1iuswm6pkCQQRjPLA6dvlhYPm0tNK5YdvtE5JPYMHHTlzSaO0pskhaQHYyxLipMsDqDAIl-ZwozUQw3iV7vnTMl4_vqjAG5i4aLNLu7zTEgxBVSqqBE0t0_Ba4p2KXaMr4rC67Wc_WsDqE8oIxFrZYQ5GzNGMmy4eCJLaZ4XmHURsU2_bJsQromvC2B4v5jzTkJcre7Xl_OtMVbuo9kVv5qgXyT-aEHkfFdFdog80IQX8HWGGLemxusXj1_4OlTXa9LvIGHKLbY1qKA5Sz6EYJWKmMDdm3_izkT-8iBiM968yprNwi4b5079QxQCqMUiikt8zBS8GhSYOmd121DGIHopxEaKi_e_kd5tLLAf45APcB05oiZRgfIyx7lnP8BUpOuo73in4Zv7I0rdWYzAPvNR2aA0siPhJgsIwLkyxrO_AhsmaYrLPCecyaIXXhRg7-7Gp7kwnJOZYF2aPnISc8sIHz3PtccEqfwBMKxC-PPfHBkWaG_BLFN_SsTaqPGX5W3NeygjAnB4Ib-TF2ydmQ1DAnudvQW4LUwWBNYUZr2blHLjs03HxyDU4hJYjOHOfTox3NR5E_vMHZFPEyBdnj1s-Ro2F4UXQtLtJGo2yFRY2dBfR3OjMkd8cVHMQaSRxV_GcQiTsO3wgnOLLt1TMVcmalh8JW2QBE6eYR1UELRXrsU6GF7YmhCm_h32NPjcdEHjWe6MLX_6Y8vkypwqbG4mbyn-xb2R8sODXSKcEY9NNFKYfAsS7ZAd1hsLOS6p1Ylr9M6r3JrJ6jmpmgJ2CSKQuRRoPe6pntMZR2VbheGE0acl9WnkhhIWYHFQVj1EDQDxNiDBChjT9ekc1FwCb1HBk6syYkmZH26ITDEciCVsbw05HUve8pza5dmHNnFn4eCvgNKfWJkSfuGl2fc1uKG-HK1CkqzvayrE80XTRVpyHsfrqWD9fMnJhr7C-Q9vRq5t9J91HO3jRxUyg5jOpW0yZ2cAbprEANh0HtPpYoGou72k29Vk-IotTgGbGq0b4RLvTb8UEosj7XwDuuwIXTZq7SkxEwbrJceEyFTZ8gAiq-N07-LuTGkhSLZ-b2HdfvoEiGA_OH4PhjC6qUUzvz4PuZ4jFIyoYQr3wltDawW6YPqY4wjPTUfeW59MjXokY-SLdHZxr-Xi5Bpto7tH7TZr30pNlGzVqD17TWlQuw0XKl8ZIczzlT0l64uAVobWo5BHjtFXovFN-PufOWkDbgkxGHP57alDzVcwTTF3v-pj8FGRCr50aLmZtIe43hE3KGnSJJZMY3BgdVliZTih6HZ3f4zJawmBVNvBtUf4H6lskHsLYvfFi5eTJRJXw3q4rALqc2j0CK37NgMR2k6xR8APvRNDwLVbD7ttU4LjSfrVMFmZRxZ1ZnlNEkNda9Z6hFBloSGquAL9l4K8TMW2gua61okz3AbOHD_TPcQTfXqqUkN2_bf_ONnq9uyxyLKFTlfbb2zOnGEIcqyN0AHeQKZjPFOCFsYNdaG-zgblT-wqG-hgwNxza3JNjkn93yDptjRMk1lsFBZeWEia0-2drOVjTqivvwIyW8obDx3cVztruyAbjb-zUJpzjWMiK73mqSi7qHcwNuCV-QTiEVcEZcWpxvcpSBT__8CZLNf73pnOMfem4aU5je-x_JdP8neKg=="
+            },
+            {
+              "type": "function_call",
+              "name": "write_file",
+              "arguments": "{\"content\":\"Project summary\\nWe prepare clear, practical reports.\\n\\nReviewed by the project team.\\nNext step: request a quote.\\n\\nReviewed by the project team.\\n\",\"expected_content\":\"Project summary\\nWe prepare clear, practical reports.\\n\\nReviewed by the project team.\\nNext step: request a quote.\\n\"}",
+              "call_id": "call_CUFJwnPL2YbjDDkhIdyXBdh5",
+              "id": "fc_02fbc37f694deedf006ab12b42435087d29ecdf7871d8f0355",
+              "index": 1
+            }
+          ],
+          "tool_calls": [
+            {
+              "name": "write_file",
+              "args": {
+                "content": "Project summary\nWe prepare clear, practical reports.\n\nReviewed by the project team.\nNext step: request a quote.\n\nReviewed by the project team.\n",
+                "expected_content": "Project summary\nWe prepare clear, practical reports.\n\nReviewed by the project team.\nNext step: request a quote.\n"
+              },
+              "id": "call_CUFJwnPL2YbjDDkhIdyXBdh5",
+              "type": "tool_call"
+            }
+          ],
+          "tool_call_id": null
+        }
+      ],
+      "tool_definitions": [
+        {
+          "type": "function",
+          "function": {
+            "name": "read_file",
+            "description": "Read source or target; return content, or null for a missing target.",
+            "parameters": {
+              "properties": {
+                "document": {
+                  "enum": [
+                    "source",
+                    "target"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "document"
+              ],
+              "type": "object"
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "write_file",
+            "description": "Replace the target if it still matches expected_content; null means absent.",
+            "parameters": {
+              "properties": {
+                "content": {
+                  "type": "string"
+                },
+                "expected_content": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "content",
+                "expected_content"
+              ],
+              "type": "object"
+            }
+          }
+        }
+      ],
+      "context": {
+        "langgraph_node": "model",
+        "langgraph_step": 4,
+        "report_turn": 1,
+        "thread_id": "fceb6904-7729-45c3-8610-66fb17702a56",
+        "cache_ttl": "5m",
+        "tags": [
+          "seq:step:1"
+        ],
+        "description": "Generate the next assistant message or tool request from the current conversation.",
+        "message_count": 5,
+        "message_roles": [
+          "system",
+          "human",
+          "ai",
+          "tool",
+          "tool"
+        ],
+        "requested_tools": [
+          "write_file"
+        ]
+      }
+    },
+    {
+      "id": "01a0c410-fe12-7743-af5e-dc2d4a9680f1",
+      "parent_id": "01a0c410-e7cb-79f0-a41b-0c24b54e5453",
+      "name": "RestrictedToolApproval.after_model",
+      "kind": "workflow",
+      "start_ns": 1789995843091375000,
+      "end_ns": 1789995843092229000,
+      "status": "interrupted",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "RestrictedToolApproval.after_model",
+        "langgraph_step": 5,
+        "report_turn": 1,
+        "thread_id": "fceb6904-7729-45c3-8610-66fb17702a56",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:5"
+        ],
+        "description": "Execute the RestrictedToolApproval.after_model workflow operation and pass its result to the next graph step."
+      }
+    },
+    {
+      "id": "01a0c410-fe37-7373-8d1b-787f98a12f91",
+      "parent_id": null,
+      "name": "file_editor",
+      "kind": "workflow",
+      "start_ns": 1789995843128357000,
+      "end_ns": 1789995846363713000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "report_turn": 1,
+        "thread_id": "fceb6904-7729-45c3-8610-66fb17702a56",
+        "cache_ttl": "5m",
+        "description": "Execute the file_editor workflow operation and pass its result to the next graph step."
+      }
+    },
+    {
+      "id": "01a0c410-fe39-7993-85e5-bade8d0764ab",
+      "parent_id": "01a0c410-fe37-7373-8d1b-787f98a12f91",
+      "name": "RestrictedToolApproval.after_model",
+      "kind": "workflow",
+      "start_ns": 1789995843129268000,
+      "end_ns": 1789995843129781000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "RestrictedToolApproval.after_model",
+        "langgraph_step": 5,
+        "report_turn": 1,
+        "thread_id": "fceb6904-7729-45c3-8610-66fb17702a56",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:5"
+        ],
+        "description": "Execute the RestrictedToolApproval.after_model workflow operation and pass its result to the next graph step."
+      }
+    },
+    {
+      "id": "01a0c410-fe3a-7123-adfa-88d3e3ae31ff",
+      "parent_id": "01a0c410-fe37-7373-8d1b-787f98a12f91",
+      "name": "tools",
+      "kind": "workflow",
+      "start_ns": 1789995843130849000,
+      "end_ns": 1789995843133831000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "tools",
+        "langgraph_step": 6,
+        "report_turn": 1,
+        "thread_id": "fceb6904-7729-45c3-8610-66fb17702a56",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:6"
+        ],
+        "description": "Execute tool calls requested by the preceding model response and return their observations."
+      }
+    },
+    {
+      "id": "01a0c410-fe3b-7ac3-b17f-381abf6998e8",
+      "parent_id": "01a0c410-fe3a-7123-adfa-88d3e3ae31ff",
+      "name": "write_file",
+      "kind": "tool",
+      "start_ns": 1789995843131475000,
+      "end_ns": 1789995843132967000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [
+        {
+          "role": "tool_call",
+          "content": "{'content': 'Project summary\\nWe prepare clear, practical reports.\\n\\nReviewed by the project team.\\nNext step: request a quote.\\n\\nReviewed by the project team.\\n', 'expected_content': 'Project summary\\nWe prepare clear, practical reports.\\n\\nReviewed by the project team.\\nNext step: request a quote.\\n'}"
+        }
+      ],
+      "response": [
+        {
+          "role": "tool",
+          "content": "Target written successfully.",
+          "tool_calls": [],
+          "tool_call_id": "call_CUFJwnPL2YbjDDkhIdyXBdh5"
+        }
+      ],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "tools",
+        "langgraph_step": 6,
+        "report_turn": 1,
+        "thread_id": "fceb6904-7729-45c3-8610-66fb17702a56",
+        "cache_ttl": "5m",
+        "tags": [
+          "seq:step:1"
+        ],
+        "description": "Replace the target if it still matches expected_content; null means absent."
+      }
+    },
+    {
+      "id": "01a0c410-fe3e-7a62-b8c6-adda27d605d6",
+      "parent_id": "01a0c410-fe37-7373-8d1b-787f98a12f91",
+      "name": "model",
+      "kind": "workflow",
+      "start_ns": 1789995843134662000,
+      "end_ns": 1789995844133055000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "model",
+        "langgraph_step": 7,
+        "report_turn": 1,
+        "thread_id": "fceb6904-7729-45c3-8610-66fb17702a56",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:7"
+        ],
+        "description": "Prepare the current conversation, run model middleware, and invoke the chat model."
+      }
+    },
+    {
+      "id": "01a0c410-fe3f-7673-9f4f-7bcefe0a912f",
+      "parent_id": "01a0c410-fe3e-7a62-b8c6-adda27d605d6",
+      "name": "ChatOpenAI",
+      "kind": "model",
+      "start_ns": 1789995843135350000,
+      "end_ns": 1789995844131510000,
+      "status": "ok",
+      "provider": "openai",
+      "model": "gpt-5.6-luna",
+      "effort": null,
+      "usage": {
+        "input_tokens": 675,
+        "output_tokens": 18,
+        "cache_read": 0,
+        "cache_write": 0,
+        "cache_write_5m": 0,
+        "cache_write_1h": 0,
+        "reasoning": 0
+      },
+      "error": null,
+      "request": [
+        {
+          "role": "system",
+          "content": "You edit a UTF-8 document according to the human's request.\nUse read_file to inspect the source and target as needed. If the target exists,\npreserve its current content unless the human requests replacement; otherwise\nuse the source as the starting document. Make each requested change separately,\nwith one write_file call at a time. Supply the complete resulting content and\nthe exact expected_content from the latest target observation (null if absent).\nAfter each write outcome, read the target again before proposing the next change.\nA rejected tool call did not execute: do not retry or reintroduce that change.\nReport only changes confirmed by tool results. Tool execution policy is enforced\nby the harness; do not ask for permission in prose or invent approval results.\n",
+          "tool_calls": [],
+          "tool_call_id": null
+        },
+        {
+          "role": "human",
+          "content": "Append each of these sentences as a separate change: ['\\nReviewed by the project team.\\n', 'Next step: request a quote.\\n']",
+          "tool_calls": [],
+          "tool_call_id": null
+        },
+        {
+          "role": "ai",
+          "content": [
+            {
+              "id": "rs_02fbc37f694deedf006ab12b3e5c0087d2a8c743973bfa6c7c",
+              "summary": [],
+              "type": "reasoning",
+              "content": [],
+              "index": 0,
+              "encrypted_content": "gAAAAABqsSs_xMzyQt9KlDkEhoWJBLQGA_GYDBDRTAcApadSP8mlCE_QPmHwpjxiiP-t7rX6hLMTWK4DK3RrTp-8jmj0hHXHzAusJhwtQzimZuIRiR5MtLc7tsflc7LIasiDHKygOwadNYVR9FNciAlpp55L-M99HghSI7cOoc6Z4dcrIC6VUz_LtQNoMJJXs1mykTm9G29D4gRDycnANzyo6v6knSz1ffuOiT5zgRFjm7IQhOziZp11sxZZZQCeNKLsTvdbe60XdVOuEN2xUxkyQgx83xio-aqYDqHY2OuIPiR5fHp-bC5rmMxWY_OznYGEe7400QqcsjS5x5_4pzi4yJWQBsxwKm08EQaq3JYrrMDjb4pcBJ42v3WjYKr5-o3gbpXelNQByLNQWkPhnjSN7tJjWehzF3ncGO_RH0WUIacURTPopdEAw8H1HVvlvQHD9tc8XCzrerGoBisuq1Nmw3zcUQNvBBemtpUCVmo9kuKNd5eAFtXCX5jD7ce9keDUMxVSjUh8J6GXd9tI_HAWXPnGObYg1fm2zYBQMgUfS9Drn2cnb14ZA5k4TFXMLQ4kP6Y5c3PRBNxEZZ_iYgFDFGLTI46bEUKMiEPn7OrK9uqQtH4YBpkCT_cszs_aWtqBhy_BonrUcik4HP4CkPgo4JjjlcbwlHcie-6I2kQAVnk7dlVSlv-3wkMbpOAERNCFFfBYI537u5tWgzM0N6vnkOiyH_xibHu5NnZqajlO4tnDIaRdzJFW43rShnbjREgPM-yg81efcKI7tW6sxyj01jm9ypowidAwIR7MKR4eJe-H-n8LpcsmSvvMFfSvEjAfUtfQICdIFVZe1OJU02iJpoNFIRFwzfg-nOsyTHIh4j1I30ug2vqbx8MOosJtA2_mLC62-is-vzoyr-jGLDFefxFY4OmuPgz9nWdZt2h2F5XELSGQnkNKygtjo39OO9jPo3LhVQ0FX6Knlp0922tf-szQyOW5pkofWozLMwZyHIZjB2oifHTCdHnhoarclBVdkrizjcRE8DQ0WOaFCKVM7y6H7_s46Yyo_DCn86F3UkXOso_tQv6O9z-_z8A8QvNsuBrpmo_Xos69mJSuLRiDD5CGjvETlJH30Jnsc8BXWDTX_P4X5RAeww9C0HDIpFsmhqUiEUfbkE-pwJyLwqCIJ0Zye_BQ8hqo59cNuVbtBBcs3S89f-dTBvLZwZ5jEyabxeW75bxi4jGv1vYd6vhjAge8m5h1WsfUrb2s3ubnzL-qD3Bxs48NPBTZBCHRqOWr60dcjLpsWgu8Z9_GsucsglOmCj89cA=="
+            },
+            {
+              "type": "function_call",
+              "name": "read_file",
+              "arguments": "{\"document\":\"source\"}",
+              "call_id": "call_2xQQVqFxMuOiXKFo6RVCHfqE",
+              "id": "fc_02fbc37f694deedf006ab12b3f16a087d2b0fd0aa7d0827d8f",
+              "index": 1
+            },
+            {
+              "type": "function_call",
+              "name": "read_file",
+              "arguments": "{\"document\":\"target\"}",
+              "call_id": "call_0olejKKvYpbXd44bId2wpd21",
+              "id": "fc_02fbc37f694deedf006ab12b3f16b087d2918b7c22735ab048",
+              "index": 2
+            }
+          ],
+          "tool_calls": [
+            {
+              "name": "read_file",
+              "args": {
+                "document": "source"
+              },
+              "id": "call_2xQQVqFxMuOiXKFo6RVCHfqE",
+              "type": "tool_call"
+            },
+            {
+              "name": "read_file",
+              "args": {
+                "document": "target"
+              },
+              "id": "call_0olejKKvYpbXd44bId2wpd21",
+              "type": "tool_call"
+            }
+          ],
+          "tool_call_id": null
+        },
+        {
+          "role": "tool",
+          "content": "{\"document\": \"source\", \"content\": \"Project summary\\nWe prepare clear, practical reports.\\n\"}",
+          "tool_calls": [],
+          "tool_call_id": "call_2xQQVqFxMuOiXKFo6RVCHfqE"
+        },
+        {
+          "role": "tool",
+          "content": "{\"document\": \"target\", \"content\": \"Project summary\\nWe prepare clear, practical reports.\\n\\nReviewed by the project team.\\nNext step: request a quote.\\n\"}",
+          "tool_calls": [],
+          "tool_call_id": "call_0olejKKvYpbXd44bId2wpd21"
+        },
+        {
+          "role": "ai",
+          "content": [
+            {
+              "id": "rs_02fbc37f694deedf006ab12b3ff68c87d286f814f79cc66ac1",
+              "summary": [],
+              "type": "reasoning",
+              "content": [],
+              "index": 0,
+              "encrypted_content": "gAAAAABqsStCwVlTU43bn9EXQxRsg6flyxywqbltXLzY3Z9uNXpr_DBBA0Z1TbC8HKCRdUJyhYvHo8XVaRoziIPKwp7VACGjf9VsA7194HPHc1FJP9ya58YxzGuS86xsm4LLixzpwL4bAwIXvOv9-g6CW2C5G-LRK9Y_AuFL7C7YGDHCHB_jjlQR-mEV5PFQ_Gp3wBVQoNlPcHnFNBaqXYbfC52RxyaxMqIkooIgXaOztYvgqSc-IWfe_uMfcI4NOPgMLTX6htoV2w4J5UuzJPwA2rTfDEQN_gz0J_li1aq6B_aXbjzV1CjzTFko4Y9jBbB96PPC_G9_7YM0Tl_WD0uvgvnYsCQAjHMUmIgjjKwS7kpn4trP3ErGh4OebwpdTJ9yaZy-5anAZxmhg0H9mTQzzCM-sXL5Xz19nYurrtLzdVhFJ1miYVw3q1DCeWXGm5idd1oKI0EWHsrfjELBRNkzwh5pf6v7xRdOR3VctIC__MNDxxStnz4yGNrxkmjJY1ht8CQhNbaLJTlMxT1WxGhtTbH-fKxTVwhYcWymN2mMF2MmHxseTpKMyyogdkzPi8R0HMSBIvlQH3V7w65ShCfF5KOO1QbmH1iuswm6pkCQQRjPLA6dvlhYPm0tNK5YdvtE5JPYMHHTlzSaO0pskhaQHYyxLipMsDqDAIl-ZwozUQw3iV7vnTMl4_vqjAG5i4aLNLu7zTEgxBVSqqBE0t0_Ba4p2KXaMr4rC67Wc_WsDqE8oIxFrZYQ5GzNGMmy4eCJLaZ4XmHURsU2_bJsQromvC2B4v5jzTkJcre7Xl_OtMVbuo9kVv5qgXyT-aEHkfFdFdog80IQX8HWGGLemxusXj1_4OlTXa9LvIGHKLbY1qKA5Sz6EYJWKmMDdm3_izkT-8iBiM968yprNwi4b5079QxQCqMUiikt8zBS8GhSYOmd121DGIHopxEaKi_e_kd5tLLAf45APcB05oiZRgfIyx7lnP8BUpOuo73in4Zv7I0rdWYzAPvNR2aA0siPhJgsIwLkyxrO_AhsmaYrLPCecyaIXXhRg7-7Gp7kwnJOZYF2aPnISc8sIHz3PtccEqfwBMKxC-PPfHBkWaG_BLFN_SsTaqPGX5W3NeygjAnB4Ib-TF2ydmQ1DAnudvQW4LUwWBNYUZr2blHLjs03HxyDU4hJYjOHOfTox3NR5E_vMHZFPEyBdnj1s-Ro2F4UXQtLtJGo2yFRY2dBfR3OjMkd8cVHMQaSRxV_GcQiTsO3wgnOLLt1TMVcmalh8JW2QBE6eYR1UELRXrsU6GF7YmhCm_h32NPjcdEHjWe6MLX_6Y8vkypwqbG4mbyn-xb2R8sODXSKcEY9NNFKYfAsS7ZAd1hsLOS6p1Ylr9M6r3JrJ6jmpmgJ2CSKQuRRoPe6pntMZR2VbheGE0acl9WnkhhIWYHFQVj1EDQDxNiDBChjT9ekc1FwCb1HBk6syYkmZH26ITDEciCVsbw05HUve8pza5dmHNnFn4eCvgNKfWJkSfuGl2fc1uKG-HK1CkqzvayrE80XTRVpyHsfrqWD9fMnJhr7C-Q9vRq5t9J91HO3jRxUyg5jOpW0yZ2cAbprEANh0HtPpYoGou72k29Vk-IotTgGbGq0b4RLvTb8UEosj7XwDuuwIXTZq7SkxEwbrJceEyFTZ8gAiq-N07-LuTGkhSLZ-b2HdfvoEiGA_OH4PhjC6qUUzvz4PuZ4jFIyoYQr3wltDawW6YPqY4wjPTUfeW59MjXokY-SLdHZxr-Xi5Bpto7tH7TZr30pNlGzVqD17TWlQuw0XKl8ZIczzlT0l64uAVobWo5BHjtFXovFN-PufOWkDbgkxGHP57alDzVcwTTF3v-pj8FGRCr50aLmZtIe43hE3KGnSJJZMY3BgdVliZTih6HZ3f4zJawmBVNvBtUf4H6lskHsLYvfFi5eTJRJXw3q4rALqc2j0CK37NgMR2k6xR8APvRNDwLVbD7ttU4LjSfrVMFmZRxZ1ZnlNEkNda9Z6hFBloSGquAL9l4K8TMW2gua61okz3AbOHD_TPcQTfXqqUkN2_bf_ONnq9uyxyLKFTlfbb2zOnGEIcqyN0AHeQKZjPFOCFsYNdaG-zgblT-wqG-hgwNxza3JNjkn93yDptjRMk1lsFBZeWEia0-2drOVjTqivvwIyW8obDx3cVztruyAbjb-zUJpzjWMiK73mqSi7qHcwNuCV-QTiEVcEZcWpxvcpSBT__8CZLNf73pnOMfem4aU5je-x_JdP8neKg=="
+            },
+            {
+              "type": "function_call",
+              "name": "write_file",
+              "arguments": "{\"content\":\"Project summary\\nWe prepare clear, practical reports.\\n\\nReviewed by the project team.\\nNext step: request a quote.\\n\\nReviewed by the project team.\\n\",\"expected_content\":\"Project summary\\nWe prepare clear, practical reports.\\n\\nReviewed by the project team.\\nNext step: request a quote.\\n\"}",
+              "call_id": "call_CUFJwnPL2YbjDDkhIdyXBdh5",
+              "id": "fc_02fbc37f694deedf006ab12b42435087d29ecdf7871d8f0355",
+              "index": 1
+            }
+          ],
+          "tool_calls": [
+            {
+              "name": "write_file",
+              "args": {
+                "content": "Project summary\nWe prepare clear, practical reports.\n\nReviewed by the project team.\nNext step: request a quote.\n\nReviewed by the project team.\n",
+                "expected_content": "Project summary\nWe prepare clear, practical reports.\n\nReviewed by the project team.\nNext step: request a quote.\n"
+              },
+              "id": "call_CUFJwnPL2YbjDDkhIdyXBdh5",
+              "type": "tool_call"
+            }
+          ],
+          "tool_call_id": null
+        },
+        {
+          "role": "tool",
+          "content": "Target written successfully.",
+          "tool_calls": [],
+          "tool_call_id": "call_CUFJwnPL2YbjDDkhIdyXBdh5"
+        }
+      ],
+      "response": [
+        {
+          "role": "ai",
+          "content": [
+            {
+              "type": "function_call",
+              "name": "read_file",
+              "arguments": "{\"document\":\"target\"}",
+              "call_id": "call_eYazGlJt60Ch3Ra9VcS96Xvu",
+              "id": "fc_02fbc37f694deedf006ab12b43d5dc87d2b1702af50e4048f3",
+              "index": 0
+            }
+          ],
+          "tool_calls": [
+            {
+              "name": "read_file",
+              "args": {
+                "document": "target"
+              },
+              "id": "call_eYazGlJt60Ch3Ra9VcS96Xvu",
+              "type": "tool_call"
+            }
+          ],
+          "tool_call_id": null
+        }
+      ],
+      "tool_definitions": [
+        {
+          "type": "function",
+          "function": {
+            "name": "read_file",
+            "description": "Read source or target; return content, or null for a missing target.",
+            "parameters": {
+              "properties": {
+                "document": {
+                  "enum": [
+                    "source",
+                    "target"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "document"
+              ],
+              "type": "object"
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "write_file",
+            "description": "Replace the target if it still matches expected_content; null means absent.",
+            "parameters": {
+              "properties": {
+                "content": {
+                  "type": "string"
+                },
+                "expected_content": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "content",
+                "expected_content"
+              ],
+              "type": "object"
+            }
+          }
+        }
+      ],
+      "context": {
+        "langgraph_node": "model",
+        "langgraph_step": 7,
+        "report_turn": 1,
+        "thread_id": "fceb6904-7729-45c3-8610-66fb17702a56",
+        "cache_ttl": "5m",
+        "tags": [
+          "seq:step:1"
+        ],
+        "description": "Generate the next assistant message or tool request from the current conversation.",
+        "message_count": 7,
+        "message_roles": [
+          "system",
+          "human",
+          "ai",
+          "tool",
+          "tool",
+          "ai",
+          "tool"
+        ],
+        "requested_tools": [
+          "read_file"
+        ]
+      }
+    },
+    {
+      "id": "01a0c411-0226-7903-9de2-83c2167fac59",
+      "parent_id": "01a0c410-fe37-7373-8d1b-787f98a12f91",
+      "name": "RestrictedToolApproval.after_model",
+      "kind": "workflow",
+      "start_ns": 1789995844135199000,
+      "end_ns": 1789995844136085000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "RestrictedToolApproval.after_model",
+        "langgraph_step": 8,
+        "report_turn": 1,
+        "thread_id": "fceb6904-7729-45c3-8610-66fb17702a56",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:8"
+        ],
+        "description": "Execute the RestrictedToolApproval.after_model workflow operation and pass its result to the next graph step."
+      }
+    },
+    {
+      "id": "01a0c411-0229-7032-857b-dc045113d474",
+      "parent_id": "01a0c410-fe37-7373-8d1b-787f98a12f91",
+      "name": "tools",
+      "kind": "workflow",
+      "start_ns": 1789995844137584000,
+      "end_ns": 1789995844140443000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "tools",
+        "langgraph_step": 9,
+        "report_turn": 1,
+        "thread_id": "fceb6904-7729-45c3-8610-66fb17702a56",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:9"
+        ],
+        "description": "Execute tool calls requested by the preceding model response and return their observations."
+      }
+    },
+    {
+      "id": "01a0c411-022a-7ed0-8daa-e2ea6f39fb71",
+      "parent_id": "01a0c411-0229-7032-857b-dc045113d474",
+      "name": "read_file",
+      "kind": "tool",
+      "start_ns": 1789995844138063000,
+      "end_ns": 1789995844139744000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [
+        {
+          "role": "tool_call",
+          "content": "{'document': 'target'}"
+        }
+      ],
+      "response": [
+        {
+          "role": "tool",
+          "content": "{\"document\": \"target\", \"content\": \"Project summary\\nWe prepare clear, practical reports.\\n\\nReviewed by the project team.\\nNext step: request a quote.\\n\\nReviewed by the project team.\\n\"}",
+          "tool_calls": [],
+          "tool_call_id": "call_eYazGlJt60Ch3Ra9VcS96Xvu"
+        }
+      ],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "tools",
+        "langgraph_step": 9,
+        "report_turn": 1,
+        "thread_id": "fceb6904-7729-45c3-8610-66fb17702a56",
+        "cache_ttl": "5m",
+        "tags": [
+          "seq:step:1"
+        ],
+        "description": "Read source or target; return content, or null for a missing target."
+      }
+    },
+    {
+      "id": "01a0c411-022d-7992-bcff-3222a79277e3",
+      "parent_id": "01a0c410-fe37-7373-8d1b-787f98a12f91",
+      "name": "model",
+      "kind": "workflow",
+      "start_ns": 1789995844141181000,
+      "end_ns": 1789995846359731000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "model",
+        "langgraph_step": 10,
+        "report_turn": 1,
+        "thread_id": "fceb6904-7729-45c3-8610-66fb17702a56",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:10"
+        ],
+        "description": "Prepare the current conversation, run model middleware, and invoke the chat model."
+      }
+    },
+    {
+      "id": "01a0c411-022d-7992-bcff-32339dd3e4f7",
+      "parent_id": "01a0c411-022d-7992-bcff-3222a79277e3",
+      "name": "ChatOpenAI",
+      "kind": "model",
+      "start_ns": 1789995844141728000,
+      "end_ns": 1789995846358193000,
+      "status": "ok",
+      "provider": "openai",
+      "model": "gpt-5.6-luna",
+      "effort": null,
+      "usage": {
+        "input_tokens": 750,
+        "output_tokens": 99,
+        "cache_read": 0,
+        "cache_write": 0,
+        "cache_write_5m": 0,
+        "cache_write_1h": 0,
+        "reasoning": 0
+      },
+      "error": null,
+      "request": [
+        {
+          "role": "system",
+          "content": "You edit a UTF-8 document according to the human's request.\nUse read_file to inspect the source and target as needed. If the target exists,\npreserve its current content unless the human requests replacement; otherwise\nuse the source as the starting document. Make each requested change separately,\nwith one write_file call at a time. Supply the complete resulting content and\nthe exact expected_content from the latest target observation (null if absent).\nAfter each write outcome, read the target again before proposing the next change.\nA rejected tool call did not execute: do not retry or reintroduce that change.\nReport only changes confirmed by tool results. Tool execution policy is enforced\nby the harness; do not ask for permission in prose or invent approval results.\n",
+          "tool_calls": [],
+          "tool_call_id": null
+        },
+        {
+          "role": "human",
+          "content": "Append each of these sentences as a separate change: ['\\nReviewed by the project team.\\n', 'Next step: request a quote.\\n']",
+          "tool_calls": [],
+          "tool_call_id": null
+        },
+        {
+          "role": "ai",
+          "content": [
+            {
+              "id": "rs_02fbc37f694deedf006ab12b3e5c0087d2a8c743973bfa6c7c",
+              "summary": [],
+              "type": "reasoning",
+              "content": [],
+              "index": 0,
+              "encrypted_content": "gAAAAABqsSs_xMzyQt9KlDkEhoWJBLQGA_GYDBDRTAcApadSP8mlCE_QPmHwpjxiiP-t7rX6hLMTWK4DK3RrTp-8jmj0hHXHzAusJhwtQzimZuIRiR5MtLc7tsflc7LIasiDHKygOwadNYVR9FNciAlpp55L-M99HghSI7cOoc6Z4dcrIC6VUz_LtQNoMJJXs1mykTm9G29D4gRDycnANzyo6v6knSz1ffuOiT5zgRFjm7IQhOziZp11sxZZZQCeNKLsTvdbe60XdVOuEN2xUxkyQgx83xio-aqYDqHY2OuIPiR5fHp-bC5rmMxWY_OznYGEe7400QqcsjS5x5_4pzi4yJWQBsxwKm08EQaq3JYrrMDjb4pcBJ42v3WjYKr5-o3gbpXelNQByLNQWkPhnjSN7tJjWehzF3ncGO_RH0WUIacURTPopdEAw8H1HVvlvQHD9tc8XCzrerGoBisuq1Nmw3zcUQNvBBemtpUCVmo9kuKNd5eAFtXCX5jD7ce9keDUMxVSjUh8J6GXd9tI_HAWXPnGObYg1fm2zYBQMgUfS9Drn2cnb14ZA5k4TFXMLQ4kP6Y5c3PRBNxEZZ_iYgFDFGLTI46bEUKMiEPn7OrK9uqQtH4YBpkCT_cszs_aWtqBhy_BonrUcik4HP4CkPgo4JjjlcbwlHcie-6I2kQAVnk7dlVSlv-3wkMbpOAERNCFFfBYI537u5tWgzM0N6vnkOiyH_xibHu5NnZqajlO4tnDIaRdzJFW43rShnbjREgPM-yg81efcKI7tW6sxyj01jm9ypowidAwIR7MKR4eJe-H-n8LpcsmSvvMFfSvEjAfUtfQICdIFVZe1OJU02iJpoNFIRFwzfg-nOsyTHIh4j1I30ug2vqbx8MOosJtA2_mLC62-is-vzoyr-jGLDFefxFY4OmuPgz9nWdZt2h2F5XELSGQnkNKygtjo39OO9jPo3LhVQ0FX6Knlp0922tf-szQyOW5pkofWozLMwZyHIZjB2oifHTCdHnhoarclBVdkrizjcRE8DQ0WOaFCKVM7y6H7_s46Yyo_DCn86F3UkXOso_tQv6O9z-_z8A8QvNsuBrpmo_Xos69mJSuLRiDD5CGjvETlJH30Jnsc8BXWDTX_P4X5RAeww9C0HDIpFsmhqUiEUfbkE-pwJyLwqCIJ0Zye_BQ8hqo59cNuVbtBBcs3S89f-dTBvLZwZ5jEyabxeW75bxi4jGv1vYd6vhjAge8m5h1WsfUrb2s3ubnzL-qD3Bxs48NPBTZBCHRqOWr60dcjLpsWgu8Z9_GsucsglOmCj89cA=="
+            },
+            {
+              "type": "function_call",
+              "name": "read_file",
+              "arguments": "{\"document\":\"source\"}",
+              "call_id": "call_2xQQVqFxMuOiXKFo6RVCHfqE",
+              "id": "fc_02fbc37f694deedf006ab12b3f16a087d2b0fd0aa7d0827d8f",
+              "index": 1
+            },
+            {
+              "type": "function_call",
+              "name": "read_file",
+              "arguments": "{\"document\":\"target\"}",
+              "call_id": "call_0olejKKvYpbXd44bId2wpd21",
+              "id": "fc_02fbc37f694deedf006ab12b3f16b087d2918b7c22735ab048",
+              "index": 2
+            }
+          ],
+          "tool_calls": [
+            {
+              "name": "read_file",
+              "args": {
+                "document": "source"
+              },
+              "id": "call_2xQQVqFxMuOiXKFo6RVCHfqE",
+              "type": "tool_call"
+            },
+            {
+              "name": "read_file",
+              "args": {
+                "document": "target"
+              },
+              "id": "call_0olejKKvYpbXd44bId2wpd21",
+              "type": "tool_call"
+            }
+          ],
+          "tool_call_id": null
+        },
+        {
+          "role": "tool",
+          "content": "{\"document\": \"source\", \"content\": \"Project summary\\nWe prepare clear, practical reports.\\n\"}",
+          "tool_calls": [],
+          "tool_call_id": "call_2xQQVqFxMuOiXKFo6RVCHfqE"
+        },
+        {
+          "role": "tool",
+          "content": "{\"document\": \"target\", \"content\": \"Project summary\\nWe prepare clear, practical reports.\\n\\nReviewed by the project team.\\nNext step: request a quote.\\n\"}",
+          "tool_calls": [],
+          "tool_call_id": "call_0olejKKvYpbXd44bId2wpd21"
+        },
+        {
+          "role": "ai",
+          "content": [
+            {
+              "id": "rs_02fbc37f694deedf006ab12b3ff68c87d286f814f79cc66ac1",
+              "summary": [],
+              "type": "reasoning",
+              "content": [],
+              "index": 0,
+              "encrypted_content": "gAAAAABqsStCwVlTU43bn9EXQxRsg6flyxywqbltXLzY3Z9uNXpr_DBBA0Z1TbC8HKCRdUJyhYvHo8XVaRoziIPKwp7VACGjf9VsA7194HPHc1FJP9ya58YxzGuS86xsm4LLixzpwL4bAwIXvOv9-g6CW2C5G-LRK9Y_AuFL7C7YGDHCHB_jjlQR-mEV5PFQ_Gp3wBVQoNlPcHnFNBaqXYbfC52RxyaxMqIkooIgXaOztYvgqSc-IWfe_uMfcI4NOPgMLTX6htoV2w4J5UuzJPwA2rTfDEQN_gz0J_li1aq6B_aXbjzV1CjzTFko4Y9jBbB96PPC_G9_7YM0Tl_WD0uvgvnYsCQAjHMUmIgjjKwS7kpn4trP3ErGh4OebwpdTJ9yaZy-5anAZxmhg0H9mTQzzCM-sXL5Xz19nYurrtLzdVhFJ1miYVw3q1DCeWXGm5idd1oKI0EWHsrfjELBRNkzwh5pf6v7xRdOR3VctIC__MNDxxStnz4yGNrxkmjJY1ht8CQhNbaLJTlMxT1WxGhtTbH-fKxTVwhYcWymN2mMF2MmHxseTpKMyyogdkzPi8R0HMSBIvlQH3V7w65ShCfF5KOO1QbmH1iuswm6pkCQQRjPLA6dvlhYPm0tNK5YdvtE5JPYMHHTlzSaO0pskhaQHYyxLipMsDqDAIl-ZwozUQw3iV7vnTMl4_vqjAG5i4aLNLu7zTEgxBVSqqBE0t0_Ba4p2KXaMr4rC67Wc_WsDqE8oIxFrZYQ5GzNGMmy4eCJLaZ4XmHURsU2_bJsQromvC2B4v5jzTkJcre7Xl_OtMVbuo9kVv5qgXyT-aEHkfFdFdog80IQX8HWGGLemxusXj1_4OlTXa9LvIGHKLbY1qKA5Sz6EYJWKmMDdm3_izkT-8iBiM968yprNwi4b5079QxQCqMUiikt8zBS8GhSYOmd121DGIHopxEaKi_e_kd5tLLAf45APcB05oiZRgfIyx7lnP8BUpOuo73in4Zv7I0rdWYzAPvNR2aA0siPhJgsIwLkyxrO_AhsmaYrLPCecyaIXXhRg7-7Gp7kwnJOZYF2aPnISc8sIHz3PtccEqfwBMKxC-PPfHBkWaG_BLFN_SsTaqPGX5W3NeygjAnB4Ib-TF2ydmQ1DAnudvQW4LUwWBNYUZr2blHLjs03HxyDU4hJYjOHOfTox3NR5E_vMHZFPEyBdnj1s-Ro2F4UXQtLtJGo2yFRY2dBfR3OjMkd8cVHMQaSRxV_GcQiTsO3wgnOLLt1TMVcmalh8JW2QBE6eYR1UELRXrsU6GF7YmhCm_h32NPjcdEHjWe6MLX_6Y8vkypwqbG4mbyn-xb2R8sODXSKcEY9NNFKYfAsS7ZAd1hsLOS6p1Ylr9M6r3JrJ6jmpmgJ2CSKQuRRoPe6pntMZR2VbheGE0acl9WnkhhIWYHFQVj1EDQDxNiDBChjT9ekc1FwCb1HBk6syYkmZH26ITDEciCVsbw05HUve8pza5dmHNnFn4eCvgNKfWJkSfuGl2fc1uKG-HK1CkqzvayrE80XTRVpyHsfrqWD9fMnJhr7C-Q9vRq5t9J91HO3jRxUyg5jOpW0yZ2cAbprEANh0HtPpYoGou72k29Vk-IotTgGbGq0b4RLvTb8UEosj7XwDuuwIXTZq7SkxEwbrJceEyFTZ8gAiq-N07-LuTGkhSLZ-b2HdfvoEiGA_OH4PhjC6qUUzvz4PuZ4jFIyoYQr3wltDawW6YPqY4wjPTUfeW59MjXokY-SLdHZxr-Xi5Bpto7tH7TZr30pNlGzVqD17TWlQuw0XKl8ZIczzlT0l64uAVobWo5BHjtFXovFN-PufOWkDbgkxGHP57alDzVcwTTF3v-pj8FGRCr50aLmZtIe43hE3KGnSJJZMY3BgdVliZTih6HZ3f4zJawmBVNvBtUf4H6lskHsLYvfFi5eTJRJXw3q4rALqc2j0CK37NgMR2k6xR8APvRNDwLVbD7ttU4LjSfrVMFmZRxZ1ZnlNEkNda9Z6hFBloSGquAL9l4K8TMW2gua61okz3AbOHD_TPcQTfXqqUkN2_bf_ONnq9uyxyLKFTlfbb2zOnGEIcqyN0AHeQKZjPFOCFsYNdaG-zgblT-wqG-hgwNxza3JNjkn93yDptjRMk1lsFBZeWEia0-2drOVjTqivvwIyW8obDx3cVztruyAbjb-zUJpzjWMiK73mqSi7qHcwNuCV-QTiEVcEZcWpxvcpSBT__8CZLNf73pnOMfem4aU5je-x_JdP8neKg=="
+            },
+            {
+              "type": "function_call",
+              "name": "write_file",
+              "arguments": "{\"content\":\"Project summary\\nWe prepare clear, practical reports.\\n\\nReviewed by the project team.\\nNext step: request a quote.\\n\\nReviewed by the project team.\\n\",\"expected_content\":\"Project summary\\nWe prepare clear, practical reports.\\n\\nReviewed by the project team.\\nNext step: request a quote.\\n\"}",
+              "call_id": "call_CUFJwnPL2YbjDDkhIdyXBdh5",
+              "id": "fc_02fbc37f694deedf006ab12b42435087d29ecdf7871d8f0355",
+              "index": 1
+            }
+          ],
+          "tool_calls": [
+            {
+              "name": "write_file",
+              "args": {
+                "content": "Project summary\nWe prepare clear, practical reports.\n\nReviewed by the project team.\nNext step: request a quote.\n\nReviewed by the project team.\n",
+                "expected_content": "Project summary\nWe prepare clear, practical reports.\n\nReviewed by the project team.\nNext step: request a quote.\n"
+              },
+              "id": "call_CUFJwnPL2YbjDDkhIdyXBdh5",
+              "type": "tool_call"
+            }
+          ],
+          "tool_call_id": null
+        },
+        {
+          "role": "tool",
+          "content": "Target written successfully.",
+          "tool_calls": [],
+          "tool_call_id": "call_CUFJwnPL2YbjDDkhIdyXBdh5"
+        },
+        {
+          "role": "ai",
+          "content": [
+            {
+              "type": "function_call",
+              "name": "read_file",
+              "arguments": "{\"document\":\"target\"}",
+              "call_id": "call_eYazGlJt60Ch3Ra9VcS96Xvu",
+              "id": "fc_02fbc37f694deedf006ab12b43d5dc87d2b1702af50e4048f3",
+              "index": 0
+            }
+          ],
+          "tool_calls": [
+            {
+              "name": "read_file",
+              "args": {
+                "document": "target"
+              },
+              "id": "call_eYazGlJt60Ch3Ra9VcS96Xvu",
+              "type": "tool_call"
+            }
+          ],
+          "tool_call_id": null
+        },
+        {
+          "role": "tool",
+          "content": "{\"document\": \"target\", \"content\": \"Project summary\\nWe prepare clear, practical reports.\\n\\nReviewed by the project team.\\nNext step: request a quote.\\n\\nReviewed by the project team.\\n\"}",
+          "tool_calls": [],
+          "tool_call_id": "call_eYazGlJt60Ch3Ra9VcS96Xvu"
+        }
+      ],
+      "response": [
+        {
+          "role": "ai",
+          "content": [
+            {
+              "type": "function_call",
+              "name": "write_file",
+              "arguments": "{\"content\":\"Project summary\\nWe prepare clear, practical reports.\\n\\nReviewed by the project team.\\nNext step: request a quote.\\n\\nReviewed by the project team.\\nNext step: request a quote.\\n\",\"expected_content\":\"Project summary\\nWe prepare clear, practical reports.\\n\\nReviewed by the project team.\\nNext step: request a quote.\\n\\nReviewed by the project team.\\n\"}",
+              "call_id": "call_WGGKB0bGiGxlEMJBhr18KFut",
+              "id": "fc_02fbc37f694deedf006ab12b456fb087d2b7764b9df1fe3eba",
+              "index": 0
+            }
+          ],
+          "tool_calls": [
+            {
+              "name": "write_file",
+              "args": {
+                "content": "Project summary\nWe prepare clear, practical reports.\n\nReviewed by the project team.\nNext step: request a quote.\n\nReviewed by the project team.\nNext step: request a quote.\n",
+                "expected_content": "Project summary\nWe prepare clear, practical reports.\n\nReviewed by the project team.\nNext step: request a quote.\n\nReviewed by the project team.\n"
+              },
+              "id": "call_WGGKB0bGiGxlEMJBhr18KFut",
+              "type": "tool_call"
+            }
+          ],
+          "tool_call_id": null
+        }
+      ],
+      "tool_definitions": [
+        {
+          "type": "function",
+          "function": {
+            "name": "read_file",
+            "description": "Read source or target; return content, or null for a missing target.",
+            "parameters": {
+              "properties": {
+                "document": {
+                  "enum": [
+                    "source",
+                    "target"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "document"
+              ],
+              "type": "object"
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "write_file",
+            "description": "Replace the target if it still matches expected_content; null means absent.",
+            "parameters": {
+              "properties": {
+                "content": {
+                  "type": "string"
+                },
+                "expected_content": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "content",
+                "expected_content"
+              ],
+              "type": "object"
+            }
+          }
+        }
+      ],
+      "context": {
+        "langgraph_node": "model",
+        "langgraph_step": 10,
+        "report_turn": 1,
+        "thread_id": "fceb6904-7729-45c3-8610-66fb17702a56",
+        "cache_ttl": "5m",
+        "tags": [
+          "seq:step:1"
+        ],
+        "description": "Generate the next assistant message or tool request from the current conversation.",
+        "message_count": 9,
+        "message_roles": [
+          "system",
+          "human",
+          "ai",
+          "tool",
+          "tool",
+          "ai",
+          "tool",
+          "ai",
+          "tool"
+        ],
+        "requested_tools": [
+          "write_file"
+        ]
+      }
+    },
+    {
+      "id": "01a0c411-0ad9-7763-bf87-98b661e5a608",
+      "parent_id": "01a0c410-fe37-7373-8d1b-787f98a12f91",
+      "name": "RestrictedToolApproval.after_model",
+      "kind": "workflow",
+      "start_ns": 1789995846361927000,
+      "end_ns": 1789995846362661000,
+      "status": "interrupted",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "RestrictedToolApproval.after_model",
+        "langgraph_step": 11,
+        "report_turn": 1,
+        "thread_id": "fceb6904-7729-45c3-8610-66fb17702a56",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:11"
+        ],
+        "description": "Execute the RestrictedToolApproval.after_model workflow operation and pass its result to the next graph step."
+      }
+    },
+    {
+      "id": "01a0c411-0aff-77a1-b3d8-a3fab2a89eac",
+      "parent_id": null,
+      "name": "file_editor",
+      "kind": "workflow",
+      "start_ns": 1789995846399985000,
+      "end_ns": 1789995850944110000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "report_turn": 1,
+        "thread_id": "fceb6904-7729-45c3-8610-66fb17702a56",
+        "cache_ttl": "5m",
+        "description": "Execute the file_editor workflow operation and pass its result to the next graph step."
+      }
+    },
+    {
+      "id": "01a0c411-0b00-7d82-9b9b-41b1dd057cb9",
+      "parent_id": "01a0c411-0aff-77a1-b3d8-a3fab2a89eac",
+      "name": "RestrictedToolApproval.after_model",
+      "kind": "workflow",
+      "start_ns": 1789995846401120000,
+      "end_ns": 1789995846401712000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "RestrictedToolApproval.after_model",
+        "langgraph_step": 11,
+        "report_turn": 1,
+        "thread_id": "fceb6904-7729-45c3-8610-66fb17702a56",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:11"
+        ],
+        "description": "Execute the RestrictedToolApproval.after_model workflow operation and pass its result to the next graph step."
+      }
+    },
+    {
+      "id": "01a0c411-0b02-7f22-ba2d-ce222a7868e7",
+      "parent_id": "01a0c411-0aff-77a1-b3d8-a3fab2a89eac",
+      "name": "tools",
+      "kind": "workflow",
+      "start_ns": 1789995846402902000,
+      "end_ns": 1789995846405438000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "tools",
+        "langgraph_step": 12,
+        "report_turn": 1,
+        "thread_id": "fceb6904-7729-45c3-8610-66fb17702a56",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:12"
+        ],
+        "description": "Execute tool calls requested by the preceding model response and return their observations."
+      }
+    },
+    {
+      "id": "01a0c411-0b03-7892-ab78-9235ffdd63f3",
+      "parent_id": "01a0c411-0b02-7f22-ba2d-ce222a7868e7",
+      "name": "write_file",
+      "kind": "tool",
+      "start_ns": 1789995846403460000,
+      "end_ns": 1789995846404514000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [
+        {
+          "role": "tool_call",
+          "content": "{'content': 'Project summary\\nWe prepare clear, practical reports.\\n\\nReviewed by the project team.\\nNext step: request a quote.\\n\\nReviewed by the project team.\\nNext step: request a quote.\\n', 'expected_content': 'Project summary\\nWe prepare clear, practical reports.\\n\\nReviewed by the project team.\\nNext step: request a quote.\\n\\nReviewed by the project team.\\n'}"
+        }
+      ],
+      "response": [
+        {
+          "role": "tool",
+          "content": "Target written successfully.",
+          "tool_calls": [],
+          "tool_call_id": "call_WGGKB0bGiGxlEMJBhr18KFut"
+        }
+      ],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "tools",
+        "langgraph_step": 12,
+        "report_turn": 1,
+        "thread_id": "fceb6904-7729-45c3-8610-66fb17702a56",
+        "cache_ttl": "5m",
+        "tags": [
+          "seq:step:1"
+        ],
+        "description": "Replace the target if it still matches expected_content; null means absent."
+      }
+    },
+    {
+      "id": "01a0c411-0b06-7043-a413-d5a47b32523a",
+      "parent_id": "01a0c411-0aff-77a1-b3d8-a3fab2a89eac",
+      "name": "model",
+      "kind": "workflow",
+      "start_ns": 1789995846406459000,
+      "end_ns": 1789995849096127000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "model",
+        "langgraph_step": 13,
+        "report_turn": 1,
+        "thread_id": "fceb6904-7729-45c3-8610-66fb17702a56",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:13"
+        ],
+        "description": "Prepare the current conversation, run model middleware, and invoke the chat model."
+      }
+    },
+    {
+      "id": "01a0c411-0b06-7043-a413-d5bee5da6d4a",
+      "parent_id": "01a0c411-0b06-7043-a413-d5a47b32523a",
+      "name": "ChatOpenAI",
+      "kind": "model",
+      "start_ns": 1789995846407353000,
+      "end_ns": 1789995849094312000,
+      "status": "ok",
+      "provider": "openai",
+      "model": "gpt-5.6-luna",
+      "effort": null,
+      "usage": {
+        "input_tokens": 864,
+        "output_tokens": 65,
+        "cache_read": 0,
+        "cache_write": 0,
+        "cache_write_5m": 0,
+        "cache_write_1h": 0,
+        "reasoning": 45
+      },
+      "error": null,
+      "request": [
+        {
+          "role": "system",
+          "content": "You edit a UTF-8 document according to the human's request.\nUse read_file to inspect the source and target as needed. If the target exists,\npreserve its current content unless the human requests replacement; otherwise\nuse the source as the starting document. Make each requested change separately,\nwith one write_file call at a time. Supply the complete resulting content and\nthe exact expected_content from the latest target observation (null if absent).\nAfter each write outcome, read the target again before proposing the next change.\nA rejected tool call did not execute: do not retry or reintroduce that change.\nReport only changes confirmed by tool results. Tool execution policy is enforced\nby the harness; do not ask for permission in prose or invent approval results.\n",
+          "tool_calls": [],
+          "tool_call_id": null
+        },
+        {
+          "role": "human",
+          "content": "Append each of these sentences as a separate change: ['\\nReviewed by the project team.\\n', 'Next step: request a quote.\\n']",
+          "tool_calls": [],
+          "tool_call_id": null
+        },
+        {
+          "role": "ai",
+          "content": [
+            {
+              "id": "rs_02fbc37f694deedf006ab12b3e5c0087d2a8c743973bfa6c7c",
+              "summary": [],
+              "type": "reasoning",
+              "content": [],
+              "index": 0,
+              "encrypted_content": "gAAAAABqsSs_xMzyQt9KlDkEhoWJBLQGA_GYDBDRTAcApadSP8mlCE_QPmHwpjxiiP-t7rX6hLMTWK4DK3RrTp-8jmj0hHXHzAusJhwtQzimZuIRiR5MtLc7tsflc7LIasiDHKygOwadNYVR9FNciAlpp55L-M99HghSI7cOoc6Z4dcrIC6VUz_LtQNoMJJXs1mykTm9G29D4gRDycnANzyo6v6knSz1ffuOiT5zgRFjm7IQhOziZp11sxZZZQCeNKLsTvdbe60XdVOuEN2xUxkyQgx83xio-aqYDqHY2OuIPiR5fHp-bC5rmMxWY_OznYGEe7400QqcsjS5x5_4pzi4yJWQBsxwKm08EQaq3JYrrMDjb4pcBJ42v3WjYKr5-o3gbpXelNQByLNQWkPhnjSN7tJjWehzF3ncGO_RH0WUIacURTPopdEAw8H1HVvlvQHD9tc8XCzrerGoBisuq1Nmw3zcUQNvBBemtpUCVmo9kuKNd5eAFtXCX5jD7ce9keDUMxVSjUh8J6GXd9tI_HAWXPnGObYg1fm2zYBQMgUfS9Drn2cnb14ZA5k4TFXMLQ4kP6Y5c3PRBNxEZZ_iYgFDFGLTI46bEUKMiEPn7OrK9uqQtH4YBpkCT_cszs_aWtqBhy_BonrUcik4HP4CkPgo4JjjlcbwlHcie-6I2kQAVnk7dlVSlv-3wkMbpOAERNCFFfBYI537u5tWgzM0N6vnkOiyH_xibHu5NnZqajlO4tnDIaRdzJFW43rShnbjREgPM-yg81efcKI7tW6sxyj01jm9ypowidAwIR7MKR4eJe-H-n8LpcsmSvvMFfSvEjAfUtfQICdIFVZe1OJU02iJpoNFIRFwzfg-nOsyTHIh4j1I30ug2vqbx8MOosJtA2_mLC62-is-vzoyr-jGLDFefxFY4OmuPgz9nWdZt2h2F5XELSGQnkNKygtjo39OO9jPo3LhVQ0FX6Knlp0922tf-szQyOW5pkofWozLMwZyHIZjB2oifHTCdHnhoarclBVdkrizjcRE8DQ0WOaFCKVM7y6H7_s46Yyo_DCn86F3UkXOso_tQv6O9z-_z8A8QvNsuBrpmo_Xos69mJSuLRiDD5CGjvETlJH30Jnsc8BXWDTX_P4X5RAeww9C0HDIpFsmhqUiEUfbkE-pwJyLwqCIJ0Zye_BQ8hqo59cNuVbtBBcs3S89f-dTBvLZwZ5jEyabxeW75bxi4jGv1vYd6vhjAge8m5h1WsfUrb2s3ubnzL-qD3Bxs48NPBTZBCHRqOWr60dcjLpsWgu8Z9_GsucsglOmCj89cA=="
+            },
+            {
+              "type": "function_call",
+              "name": "read_file",
+              "arguments": "{\"document\":\"source\"}",
+              "call_id": "call_2xQQVqFxMuOiXKFo6RVCHfqE",
+              "id": "fc_02fbc37f694deedf006ab12b3f16a087d2b0fd0aa7d0827d8f",
+              "index": 1
+            },
+            {
+              "type": "function_call",
+              "name": "read_file",
+              "arguments": "{\"document\":\"target\"}",
+              "call_id": "call_0olejKKvYpbXd44bId2wpd21",
+              "id": "fc_02fbc37f694deedf006ab12b3f16b087d2918b7c22735ab048",
+              "index": 2
+            }
+          ],
+          "tool_calls": [
+            {
+              "name": "read_file",
+              "args": {
+                "document": "source"
+              },
+              "id": "call_2xQQVqFxMuOiXKFo6RVCHfqE",
+              "type": "tool_call"
+            },
+            {
+              "name": "read_file",
+              "args": {
+                "document": "target"
+              },
+              "id": "call_0olejKKvYpbXd44bId2wpd21",
+              "type": "tool_call"
+            }
+          ],
+          "tool_call_id": null
+        },
+        {
+          "role": "tool",
+          "content": "{\"document\": \"source\", \"content\": \"Project summary\\nWe prepare clear, practical reports.\\n\"}",
+          "tool_calls": [],
+          "tool_call_id": "call_2xQQVqFxMuOiXKFo6RVCHfqE"
+        },
+        {
+          "role": "tool",
+          "content": "{\"document\": \"target\", \"content\": \"Project summary\\nWe prepare clear, practical reports.\\n\\nReviewed by the project team.\\nNext step: request a quote.\\n\"}",
+          "tool_calls": [],
+          "tool_call_id": "call_0olejKKvYpbXd44bId2wpd21"
+        },
+        {
+          "role": "ai",
+          "content": [
+            {
+              "id": "rs_02fbc37f694deedf006ab12b3ff68c87d286f814f79cc66ac1",
+              "summary": [],
+              "type": "reasoning",
+              "content": [],
+              "index": 0,
+              "encrypted_content": "gAAAAABqsStCwVlTU43bn9EXQxRsg6flyxywqbltXLzY3Z9uNXpr_DBBA0Z1TbC8HKCRdUJyhYvHo8XVaRoziIPKwp7VACGjf9VsA7194HPHc1FJP9ya58YxzGuS86xsm4LLixzpwL4bAwIXvOv9-g6CW2C5G-LRK9Y_AuFL7C7YGDHCHB_jjlQR-mEV5PFQ_Gp3wBVQoNlPcHnFNBaqXYbfC52RxyaxMqIkooIgXaOztYvgqSc-IWfe_uMfcI4NOPgMLTX6htoV2w4J5UuzJPwA2rTfDEQN_gz0J_li1aq6B_aXbjzV1CjzTFko4Y9jBbB96PPC_G9_7YM0Tl_WD0uvgvnYsCQAjHMUmIgjjKwS7kpn4trP3ErGh4OebwpdTJ9yaZy-5anAZxmhg0H9mTQzzCM-sXL5Xz19nYurrtLzdVhFJ1miYVw3q1DCeWXGm5idd1oKI0EWHsrfjELBRNkzwh5pf6v7xRdOR3VctIC__MNDxxStnz4yGNrxkmjJY1ht8CQhNbaLJTlMxT1WxGhtTbH-fKxTVwhYcWymN2mMF2MmHxseTpKMyyogdkzPi8R0HMSBIvlQH3V7w65ShCfF5KOO1QbmH1iuswm6pkCQQRjPLA6dvlhYPm0tNK5YdvtE5JPYMHHTlzSaO0pskhaQHYyxLipMsDqDAIl-ZwozUQw3iV7vnTMl4_vqjAG5i4aLNLu7zTEgxBVSqqBE0t0_Ba4p2KXaMr4rC67Wc_WsDqE8oIxFrZYQ5GzNGMmy4eCJLaZ4XmHURsU2_bJsQromvC2B4v5jzTkJcre7Xl_OtMVbuo9kVv5qgXyT-aEHkfFdFdog80IQX8HWGGLemxusXj1_4OlTXa9LvIGHKLbY1qKA5Sz6EYJWKmMDdm3_izkT-8iBiM968yprNwi4b5079QxQCqMUiikt8zBS8GhSYOmd121DGIHopxEaKi_e_kd5tLLAf45APcB05oiZRgfIyx7lnP8BUpOuo73in4Zv7I0rdWYzAPvNR2aA0siPhJgsIwLkyxrO_AhsmaYrLPCecyaIXXhRg7-7Gp7kwnJOZYF2aPnISc8sIHz3PtccEqfwBMKxC-PPfHBkWaG_BLFN_SsTaqPGX5W3NeygjAnB4Ib-TF2ydmQ1DAnudvQW4LUwWBNYUZr2blHLjs03HxyDU4hJYjOHOfTox3NR5E_vMHZFPEyBdnj1s-Ro2F4UXQtLtJGo2yFRY2dBfR3OjMkd8cVHMQaSRxV_GcQiTsO3wgnOLLt1TMVcmalh8JW2QBE6eYR1UELRXrsU6GF7YmhCm_h32NPjcdEHjWe6MLX_6Y8vkypwqbG4mbyn-xb2R8sODXSKcEY9NNFKYfAsS7ZAd1hsLOS6p1Ylr9M6r3JrJ6jmpmgJ2CSKQuRRoPe6pntMZR2VbheGE0acl9WnkhhIWYHFQVj1EDQDxNiDBChjT9ekc1FwCb1HBk6syYkmZH26ITDEciCVsbw05HUve8pza5dmHNnFn4eCvgNKfWJkSfuGl2fc1uKG-HK1CkqzvayrE80XTRVpyHsfrqWD9fMnJhr7C-Q9vRq5t9J91HO3jRxUyg5jOpW0yZ2cAbprEANh0HtPpYoGou72k29Vk-IotTgGbGq0b4RLvTb8UEosj7XwDuuwIXTZq7SkxEwbrJceEyFTZ8gAiq-N07-LuTGkhSLZ-b2HdfvoEiGA_OH4PhjC6qUUzvz4PuZ4jFIyoYQr3wltDawW6YPqY4wjPTUfeW59MjXokY-SLdHZxr-Xi5Bpto7tH7TZr30pNlGzVqD17TWlQuw0XKl8ZIczzlT0l64uAVobWo5BHjtFXovFN-PufOWkDbgkxGHP57alDzVcwTTF3v-pj8FGRCr50aLmZtIe43hE3KGnSJJZMY3BgdVliZTih6HZ3f4zJawmBVNvBtUf4H6lskHsLYvfFi5eTJRJXw3q4rALqc2j0CK37NgMR2k6xR8APvRNDwLVbD7ttU4LjSfrVMFmZRxZ1ZnlNEkNda9Z6hFBloSGquAL9l4K8TMW2gua61okz3AbOHD_TPcQTfXqqUkN2_bf_ONnq9uyxyLKFTlfbb2zOnGEIcqyN0AHeQKZjPFOCFsYNdaG-zgblT-wqG-hgwNxza3JNjkn93yDptjRMk1lsFBZeWEia0-2drOVjTqivvwIyW8obDx3cVztruyAbjb-zUJpzjWMiK73mqSi7qHcwNuCV-QTiEVcEZcWpxvcpSBT__8CZLNf73pnOMfem4aU5je-x_JdP8neKg=="
+            },
+            {
+              "type": "function_call",
+              "name": "write_file",
+              "arguments": "{\"content\":\"Project summary\\nWe prepare clear, practical reports.\\n\\nReviewed by the project team.\\nNext step: request a quote.\\n\\nReviewed by the project team.\\n\",\"expected_content\":\"Project summary\\nWe prepare clear, practical reports.\\n\\nReviewed by the project team.\\nNext step: request a quote.\\n\"}",
+              "call_id": "call_CUFJwnPL2YbjDDkhIdyXBdh5",
+              "id": "fc_02fbc37f694deedf006ab12b42435087d29ecdf7871d8f0355",
+              "index": 1
+            }
+          ],
+          "tool_calls": [
+            {
+              "name": "write_file",
+              "args": {
+                "content": "Project summary\nWe prepare clear, practical reports.\n\nReviewed by the project team.\nNext step: request a quote.\n\nReviewed by the project team.\n",
+                "expected_content": "Project summary\nWe prepare clear, practical reports.\n\nReviewed by the project team.\nNext step: request a quote.\n"
+              },
+              "id": "call_CUFJwnPL2YbjDDkhIdyXBdh5",
+              "type": "tool_call"
+            }
+          ],
+          "tool_call_id": null
+        },
+        {
+          "role": "tool",
+          "content": "Target written successfully.",
+          "tool_calls": [],
+          "tool_call_id": "call_CUFJwnPL2YbjDDkhIdyXBdh5"
+        },
+        {
+          "role": "ai",
+          "content": [
+            {
+              "type": "function_call",
+              "name": "read_file",
+              "arguments": "{\"document\":\"target\"}",
+              "call_id": "call_eYazGlJt60Ch3Ra9VcS96Xvu",
+              "id": "fc_02fbc37f694deedf006ab12b43d5dc87d2b1702af50e4048f3",
+              "index": 0
+            }
+          ],
+          "tool_calls": [
+            {
+              "name": "read_file",
+              "args": {
+                "document": "target"
+              },
+              "id": "call_eYazGlJt60Ch3Ra9VcS96Xvu",
+              "type": "tool_call"
+            }
+          ],
+          "tool_call_id": null
+        },
+        {
+          "role": "tool",
+          "content": "{\"document\": \"target\", \"content\": \"Project summary\\nWe prepare clear, practical reports.\\n\\nReviewed by the project team.\\nNext step: request a quote.\\n\\nReviewed by the project team.\\n\"}",
+          "tool_calls": [],
+          "tool_call_id": "call_eYazGlJt60Ch3Ra9VcS96Xvu"
+        },
+        {
+          "role": "ai",
+          "content": [
+            {
+              "type": "function_call",
+              "name": "write_file",
+              "arguments": "{\"content\":\"Project summary\\nWe prepare clear, practical reports.\\n\\nReviewed by the project team.\\nNext step: request a quote.\\n\\nReviewed by the project team.\\nNext step: request a quote.\\n\",\"expected_content\":\"Project summary\\nWe prepare clear, practical reports.\\n\\nReviewed by the project team.\\nNext step: request a quote.\\n\\nReviewed by the project team.\\n\"}",
+              "call_id": "call_WGGKB0bGiGxlEMJBhr18KFut",
+              "id": "fc_02fbc37f694deedf006ab12b456fb087d2b7764b9df1fe3eba",
+              "index": 0
+            }
+          ],
+          "tool_calls": [
+            {
+              "name": "write_file",
+              "args": {
+                "content": "Project summary\nWe prepare clear, practical reports.\n\nReviewed by the project team.\nNext step: request a quote.\n\nReviewed by the project team.\nNext step: request a quote.\n",
+                "expected_content": "Project summary\nWe prepare clear, practical reports.\n\nReviewed by the project team.\nNext step: request a quote.\n\nReviewed by the project team.\n"
+              },
+              "id": "call_WGGKB0bGiGxlEMJBhr18KFut",
+              "type": "tool_call"
+            }
+          ],
+          "tool_call_id": null
+        },
+        {
+          "role": "tool",
+          "content": "Target written successfully.",
+          "tool_calls": [],
+          "tool_call_id": "call_WGGKB0bGiGxlEMJBhr18KFut"
+        }
+      ],
+      "response": [
+        {
+          "role": "ai",
+          "content": [
+            {
+              "id": "rs_02fbc37f694deedf006ab12b47e8e087d2b3946dc7bf0f39c7",
+              "summary": [],
+              "type": "reasoning",
+              "content": [],
+              "index": 0,
+              "encrypted_content": "gAAAAABqsStIvz8Yh6zkiZYT3d9qmyVoVbNCeIDc67JRGZL8UsJ04W3_C8hmtnX8dAq-r5dn8g07QtapxRZbUbjY5-3zq6n6M25Kzo0B8QnavsFQwd4IfcQ-Hp5F_0Bhly4yaWhMqUNahtPH-L4KNxAJq3Jsv__WbY11h8J7S7bXaMV7vqJpl4glr8s0E2AMbbxiWhfg9ZUq-0trI_x3KpWYPm9Vu11Az5HAt5Mtxqhv7F7YKtVh1yfI7q3z7c0u0T4Tv1wPCykq4u-fGjF5Khq3ockcXkDsBfimy2xbwXknvAhQp8ik_c9f5kuTI8tMBTsbrteGdysAKN99OQEbGYmtoL0Jrjh6f83KnFuSEgvjK475d2i3eN8SAJxD-dNFf3opvB-cIRgA4150K_8GGmfir473Pwbc2I68o0rl2CSQQQ8w3Ap0uUD-gJqxmtTZ6CC-e0OP3pVOQZAQ4B8m-WnOOfRg-KcwvcUJa0e-y440q2Ez1WNmyBmF2eNn51gO9JVzczkrH9w9bLCxL1dSuNP_RdsDsGXSkyqHfurGDcQLspqWWfJEBphdi_AQL2PjBe4xFuJPd5rY201GGORdYS_cvS7QaYA2I0VAugmGpd6p3DPUjAJ9-PD2jlA8dzQF-UzTaNBpzNMrMnCotWRF9SuKXCKDYS0iT-p7uht5gz_pO-qKlDR5Z-wEtf4PP9VDrfidKaqtowguQPxa4-mnWvfc97fsE_YxfsOeg-QiDRUm0uNd_TttEH0e76kZTrGNsS6oixqh1tOVTjOLgpGJQisiTd17UZroJjPdPwVCfbjMoejE-4oW9OpgVWxouDhBIoW6MrHfpOhcCRY_7VSleBQeGPKFq9wIX6Y_EXsTR32BHtYVS4i1o6FZEFYZ9VCpp5DSYbw6s9EX-ZnPItQIXrbZREHYeikzZWA9RUkpjAguU3OgNUZkhExBpburqLApGt281Y_jkIpk0l1CN2v0MAEpj5hMbnQNx3s4dcLUHeJyBv9u7YD4OvGxidHnYsBtpeksXNBUOTfyov8WaL1U7Ode7nuhrtOocNoSjSHLoWE5JbzC9QBJdnPuWCcvgmDGEwrUhiPvbYRMdn_35zCccSXFG_7zBT2jj97YVcl4yZuN9dVlgo-9cauytd9MM6MyWpaet6-uJuvn_RSuiwVtXi00dGtos8Pz67bGBCnHcSr7Vdi5fHIKvBz82ELoVZV76dlFYqm9xqNVwa9_AEMhnrAnczgyJuDJmqjmGY7nsCRFCXzqLE0MvkXBdBO7PaegX2nbOxxIc-l22j2jUmaybCfW9lh50IUqVRR5oJHP0XISL3jN_5vFAHahzJSidlGiE23dr48dbNyQpoFI7V1y9Ejy6xCWHhauLRJ0ph0kXDtXIP3w-eHMjf2cvuspziTfgDMn1qMyZntcbITcSOd8uEMuWd8nI2p0Bn3tMHO0FxAaEAclNY8PyjQXVdzXbvmKc042L-K7w70J"
+            },
+            {
+              "type": "function_call",
+              "name": "read_file",
+              "arguments": "{\"document\":\"target\"}",
+              "call_id": "call_8ikBtv9Opxuy7DdbQ1RTFJYL",
+              "id": "fc_02fbc37f694deedf006ab12b488ba887d2bc4b40d971d86d09",
+              "index": 1
+            }
+          ],
+          "tool_calls": [
+            {
+              "name": "read_file",
+              "args": {
+                "document": "target"
+              },
+              "id": "call_8ikBtv9Opxuy7DdbQ1RTFJYL",
+              "type": "tool_call"
+            }
+          ],
+          "tool_call_id": null
+        }
+      ],
+      "tool_definitions": [
+        {
+          "type": "function",
+          "function": {
+            "name": "read_file",
+            "description": "Read source or target; return content, or null for a missing target.",
+            "parameters": {
+              "properties": {
+                "document": {
+                  "enum": [
+                    "source",
+                    "target"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "document"
+              ],
+              "type": "object"
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "write_file",
+            "description": "Replace the target if it still matches expected_content; null means absent.",
+            "parameters": {
+              "properties": {
+                "content": {
+                  "type": "string"
+                },
+                "expected_content": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "content",
+                "expected_content"
+              ],
+              "type": "object"
+            }
+          }
+        }
+      ],
+      "context": {
+        "langgraph_node": "model",
+        "langgraph_step": 13,
+        "report_turn": 1,
+        "thread_id": "fceb6904-7729-45c3-8610-66fb17702a56",
+        "cache_ttl": "5m",
+        "tags": [
+          "seq:step:1"
+        ],
+        "description": "Generate the next assistant message or tool request from the current conversation.",
+        "message_count": 11,
+        "message_roles": [
+          "system",
+          "human",
+          "ai",
+          "tool",
+          "tool",
+          "ai",
+          "tool",
+          "ai",
+          "tool",
+          "ai",
+          "tool"
+        ],
+        "requested_tools": [
+          "read_file"
+        ]
+      }
+    },
+    {
+      "id": "01a0c411-158a-7913-91c0-2f4050809ef4",
+      "parent_id": "01a0c411-0aff-77a1-b3d8-a3fab2a89eac",
+      "name": "RestrictedToolApproval.after_model",
+      "kind": "workflow",
+      "start_ns": 1789995849098748000,
+      "end_ns": 1789995849099698000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "RestrictedToolApproval.after_model",
+        "langgraph_step": 14,
+        "report_turn": 1,
+        "thread_id": "fceb6904-7729-45c3-8610-66fb17702a56",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:14"
+        ],
+        "description": "Execute the RestrictedToolApproval.after_model workflow operation and pass its result to the next graph step."
+      }
+    },
+    {
+      "id": "01a0c411-158d-71f3-9401-0d3f7e69d558",
+      "parent_id": "01a0c411-0aff-77a1-b3d8-a3fab2a89eac",
+      "name": "tools",
+      "kind": "workflow",
+      "start_ns": 1789995849101825000,
+      "end_ns": 1789995849106947000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "tools",
+        "langgraph_step": 15,
+        "report_turn": 1,
+        "thread_id": "fceb6904-7729-45c3-8610-66fb17702a56",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:15"
+        ],
+        "description": "Execute tool calls requested by the preceding model response and return their observations."
+      }
+    },
+    {
+      "id": "01a0c411-158e-7f80-8b5b-93b62ba315f3",
+      "parent_id": "01a0c411-158d-71f3-9401-0d3f7e69d558",
+      "name": "read_file",
+      "kind": "tool",
+      "start_ns": 1789995849102901000,
+      "end_ns": 1789995849105502000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [
+        {
+          "role": "tool_call",
+          "content": "{'document': 'target'}"
+        }
+      ],
+      "response": [
+        {
+          "role": "tool",
+          "content": "{\"document\": \"target\", \"content\": \"Project summary\\nWe prepare clear, practical reports.\\n\\nReviewed by the project team.\\nNext step: request a quote.\\n\\nReviewed by the project team.\\nNext step: request a quote.\\n\"}",
+          "tool_calls": [],
+          "tool_call_id": "call_8ikBtv9Opxuy7DdbQ1RTFJYL"
+        }
+      ],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "tools",
+        "langgraph_step": 15,
+        "report_turn": 1,
+        "thread_id": "fceb6904-7729-45c3-8610-66fb17702a56",
+        "cache_ttl": "5m",
+        "tags": [
+          "seq:step:1"
+        ],
+        "description": "Read source or target; return content, or null for a missing target."
+      }
+    },
+    {
+      "id": "01a0c411-1594-7573-9f3d-16638005687d",
+      "parent_id": "01a0c411-0aff-77a1-b3d8-a3fab2a89eac",
+      "name": "model",
+      "kind": "workflow",
+      "start_ns": 1789995849108547000,
+      "end_ns": 1789995850940383000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "model",
+        "langgraph_step": 16,
+        "report_turn": 1,
+        "thread_id": "fceb6904-7729-45c3-8610-66fb17702a56",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:16"
+        ],
+        "description": "Prepare the current conversation, run model middleware, and invoke the chat model."
+      }
+    },
+    {
+      "id": "01a0c411-1595-7572-9ab4-60bca8d1632a",
+      "parent_id": "01a0c411-1594-7573-9f3d-16638005687d",
+      "name": "ChatOpenAI",
+      "kind": "model",
+      "start_ns": 1789995849109729000,
+      "end_ns": 1789995850939337000,
+      "status": "ok",
+      "provider": "openai",
+      "model": "gpt-5.6-luna",
+      "effort": null,
+      "usage": {
+        "input_tokens": 994,
+        "output_tokens": 13,
+        "cache_read": 0,
+        "cache_write": 0,
+        "cache_write_5m": 0,
+        "cache_write_1h": 0,
+        "reasoning": 0
+      },
+      "error": null,
+      "request": [
+        {
+          "role": "system",
+          "content": "You edit a UTF-8 document according to the human's request.\nUse read_file to inspect the source and target as needed. If the target exists,\npreserve its current content unless the human requests replacement; otherwise\nuse the source as the starting document. Make each requested change separately,\nwith one write_file call at a time. Supply the complete resulting content and\nthe exact expected_content from the latest target observation (null if absent).\nAfter each write outcome, read the target again before proposing the next change.\nA rejected tool call did not execute: do not retry or reintroduce that change.\nReport only changes confirmed by tool results. Tool execution policy is enforced\nby the harness; do not ask for permission in prose or invent approval results.\n",
+          "tool_calls": [],
+          "tool_call_id": null
+        },
+        {
+          "role": "human",
+          "content": "Append each of these sentences as a separate change: ['\\nReviewed by the project team.\\n', 'Next step: request a quote.\\n']",
+          "tool_calls": [],
+          "tool_call_id": null
+        },
+        {
+          "role": "ai",
+          "content": [
+            {
+              "id": "rs_02fbc37f694deedf006ab12b3e5c0087d2a8c743973bfa6c7c",
+              "summary": [],
+              "type": "reasoning",
+              "content": [],
+              "index": 0,
+              "encrypted_content": "gAAAAABqsSs_xMzyQt9KlDkEhoWJBLQGA_GYDBDRTAcApadSP8mlCE_QPmHwpjxiiP-t7rX6hLMTWK4DK3RrTp-8jmj0hHXHzAusJhwtQzimZuIRiR5MtLc7tsflc7LIasiDHKygOwadNYVR9FNciAlpp55L-M99HghSI7cOoc6Z4dcrIC6VUz_LtQNoMJJXs1mykTm9G29D4gRDycnANzyo6v6knSz1ffuOiT5zgRFjm7IQhOziZp11sxZZZQCeNKLsTvdbe60XdVOuEN2xUxkyQgx83xio-aqYDqHY2OuIPiR5fHp-bC5rmMxWY_OznYGEe7400QqcsjS5x5_4pzi4yJWQBsxwKm08EQaq3JYrrMDjb4pcBJ42v3WjYKr5-o3gbpXelNQByLNQWkPhnjSN7tJjWehzF3ncGO_RH0WUIacURTPopdEAw8H1HVvlvQHD9tc8XCzrerGoBisuq1Nmw3zcUQNvBBemtpUCVmo9kuKNd5eAFtXCX5jD7ce9keDUMxVSjUh8J6GXd9tI_HAWXPnGObYg1fm2zYBQMgUfS9Drn2cnb14ZA5k4TFXMLQ4kP6Y5c3PRBNxEZZ_iYgFDFGLTI46bEUKMiEPn7OrK9uqQtH4YBpkCT_cszs_aWtqBhy_BonrUcik4HP4CkPgo4JjjlcbwlHcie-6I2kQAVnk7dlVSlv-3wkMbpOAERNCFFfBYI537u5tWgzM0N6vnkOiyH_xibHu5NnZqajlO4tnDIaRdzJFW43rShnbjREgPM-yg81efcKI7tW6sxyj01jm9ypowidAwIR7MKR4eJe-H-n8LpcsmSvvMFfSvEjAfUtfQICdIFVZe1OJU02iJpoNFIRFwzfg-nOsyTHIh4j1I30ug2vqbx8MOosJtA2_mLC62-is-vzoyr-jGLDFefxFY4OmuPgz9nWdZt2h2F5XELSGQnkNKygtjo39OO9jPo3LhVQ0FX6Knlp0922tf-szQyOW5pkofWozLMwZyHIZjB2oifHTCdHnhoarclBVdkrizjcRE8DQ0WOaFCKVM7y6H7_s46Yyo_DCn86F3UkXOso_tQv6O9z-_z8A8QvNsuBrpmo_Xos69mJSuLRiDD5CGjvETlJH30Jnsc8BXWDTX_P4X5RAeww9C0HDIpFsmhqUiEUfbkE-pwJyLwqCIJ0Zye_BQ8hqo59cNuVbtBBcs3S89f-dTBvLZwZ5jEyabxeW75bxi4jGv1vYd6vhjAge8m5h1WsfUrb2s3ubnzL-qD3Bxs48NPBTZBCHRqOWr60dcjLpsWgu8Z9_GsucsglOmCj89cA=="
+            },
+            {
+              "type": "function_call",
+              "name": "read_file",
+              "arguments": "{\"document\":\"source\"}",
+              "call_id": "call_2xQQVqFxMuOiXKFo6RVCHfqE",
+              "id": "fc_02fbc37f694deedf006ab12b3f16a087d2b0fd0aa7d0827d8f",
+              "index": 1
+            },
+            {
+              "type": "function_call",
+              "name": "read_file",
+              "arguments": "{\"document\":\"target\"}",
+              "call_id": "call_0olejKKvYpbXd44bId2wpd21",
+              "id": "fc_02fbc37f694deedf006ab12b3f16b087d2918b7c22735ab048",
+              "index": 2
+            }
+          ],
+          "tool_calls": [
+            {
+              "name": "read_file",
+              "args": {
+                "document": "source"
+              },
+              "id": "call_2xQQVqFxMuOiXKFo6RVCHfqE",
+              "type": "tool_call"
+            },
+            {
+              "name": "read_file",
+              "args": {
+                "document": "target"
+              },
+              "id": "call_0olejKKvYpbXd44bId2wpd21",
+              "type": "tool_call"
+            }
+          ],
+          "tool_call_id": null
+        },
+        {
+          "role": "tool",
+          "content": "{\"document\": \"source\", \"content\": \"Project summary\\nWe prepare clear, practical reports.\\n\"}",
+          "tool_calls": [],
+          "tool_call_id": "call_2xQQVqFxMuOiXKFo6RVCHfqE"
+        },
+        {
+          "role": "tool",
+          "content": "{\"document\": \"target\", \"content\": \"Project summary\\nWe prepare clear, practical reports.\\n\\nReviewed by the project team.\\nNext step: request a quote.\\n\"}",
+          "tool_calls": [],
+          "tool_call_id": "call_0olejKKvYpbXd44bId2wpd21"
+        },
+        {
+          "role": "ai",
+          "content": [
+            {
+              "id": "rs_02fbc37f694deedf006ab12b3ff68c87d286f814f79cc66ac1",
+              "summary": [],
+              "type": "reasoning",
+              "content": [],
+              "index": 0,
+              "encrypted_content": "gAAAAABqsStCwVlTU43bn9EXQxRsg6flyxywqbltXLzY3Z9uNXpr_DBBA0Z1TbC8HKCRdUJyhYvHo8XVaRoziIPKwp7VACGjf9VsA7194HPHc1FJP9ya58YxzGuS86xsm4LLixzpwL4bAwIXvOv9-g6CW2C5G-LRK9Y_AuFL7C7YGDHCHB_jjlQR-mEV5PFQ_Gp3wBVQoNlPcHnFNBaqXYbfC52RxyaxMqIkooIgXaOztYvgqSc-IWfe_uMfcI4NOPgMLTX6htoV2w4J5UuzJPwA2rTfDEQN_gz0J_li1aq6B_aXbjzV1CjzTFko4Y9jBbB96PPC_G9_7YM0Tl_WD0uvgvnYsCQAjHMUmIgjjKwS7kpn4trP3ErGh4OebwpdTJ9yaZy-5anAZxmhg0H9mTQzzCM-sXL5Xz19nYurrtLzdVhFJ1miYVw3q1DCeWXGm5idd1oKI0EWHsrfjELBRNkzwh5pf6v7xRdOR3VctIC__MNDxxStnz4yGNrxkmjJY1ht8CQhNbaLJTlMxT1WxGhtTbH-fKxTVwhYcWymN2mMF2MmHxseTpKMyyogdkzPi8R0HMSBIvlQH3V7w65ShCfF5KOO1QbmH1iuswm6pkCQQRjPLA6dvlhYPm0tNK5YdvtE5JPYMHHTlzSaO0pskhaQHYyxLipMsDqDAIl-ZwozUQw3iV7vnTMl4_vqjAG5i4aLNLu7zTEgxBVSqqBE0t0_Ba4p2KXaMr4rC67Wc_WsDqE8oIxFrZYQ5GzNGMmy4eCJLaZ4XmHURsU2_bJsQromvC2B4v5jzTkJcre7Xl_OtMVbuo9kVv5qgXyT-aEHkfFdFdog80IQX8HWGGLemxusXj1_4OlTXa9LvIGHKLbY1qKA5Sz6EYJWKmMDdm3_izkT-8iBiM968yprNwi4b5079QxQCqMUiikt8zBS8GhSYOmd121DGIHopxEaKi_e_kd5tLLAf45APcB05oiZRgfIyx7lnP8BUpOuo73in4Zv7I0rdWYzAPvNR2aA0siPhJgsIwLkyxrO_AhsmaYrLPCecyaIXXhRg7-7Gp7kwnJOZYF2aPnISc8sIHz3PtccEqfwBMKxC-PPfHBkWaG_BLFN_SsTaqPGX5W3NeygjAnB4Ib-TF2ydmQ1DAnudvQW4LUwWBNYUZr2blHLjs03HxyDU4hJYjOHOfTox3NR5E_vMHZFPEyBdnj1s-Ro2F4UXQtLtJGo2yFRY2dBfR3OjMkd8cVHMQaSRxV_GcQiTsO3wgnOLLt1TMVcmalh8JW2QBE6eYR1UELRXrsU6GF7YmhCm_h32NPjcdEHjWe6MLX_6Y8vkypwqbG4mbyn-xb2R8sODXSKcEY9NNFKYfAsS7ZAd1hsLOS6p1Ylr9M6r3JrJ6jmpmgJ2CSKQuRRoPe6pntMZR2VbheGE0acl9WnkhhIWYHFQVj1EDQDxNiDBChjT9ekc1FwCb1HBk6syYkmZH26ITDEciCVsbw05HUve8pza5dmHNnFn4eCvgNKfWJkSfuGl2fc1uKG-HK1CkqzvayrE80XTRVpyHsfrqWD9fMnJhr7C-Q9vRq5t9J91HO3jRxUyg5jOpW0yZ2cAbprEANh0HtPpYoGou72k29Vk-IotTgGbGq0b4RLvTb8UEosj7XwDuuwIXTZq7SkxEwbrJceEyFTZ8gAiq-N07-LuTGkhSLZ-b2HdfvoEiGA_OH4PhjC6qUUzvz4PuZ4jFIyoYQr3wltDawW6YPqY4wjPTUfeW59MjXokY-SLdHZxr-Xi5Bpto7tH7TZr30pNlGzVqD17TWlQuw0XKl8ZIczzlT0l64uAVobWo5BHjtFXovFN-PufOWkDbgkxGHP57alDzVcwTTF3v-pj8FGRCr50aLmZtIe43hE3KGnSJJZMY3BgdVliZTih6HZ3f4zJawmBVNvBtUf4H6lskHsLYvfFi5eTJRJXw3q4rALqc2j0CK37NgMR2k6xR8APvRNDwLVbD7ttU4LjSfrVMFmZRxZ1ZnlNEkNda9Z6hFBloSGquAL9l4K8TMW2gua61okz3AbOHD_TPcQTfXqqUkN2_bf_ONnq9uyxyLKFTlfbb2zOnGEIcqyN0AHeQKZjPFOCFsYNdaG-zgblT-wqG-hgwNxza3JNjkn93yDptjRMk1lsFBZeWEia0-2drOVjTqivvwIyW8obDx3cVztruyAbjb-zUJpzjWMiK73mqSi7qHcwNuCV-QTiEVcEZcWpxvcpSBT__8CZLNf73pnOMfem4aU5je-x_JdP8neKg=="
+            },
+            {
+              "type": "function_call",
+              "name": "write_file",
+              "arguments": "{\"content\":\"Project summary\\nWe prepare clear, practical reports.\\n\\nReviewed by the project team.\\nNext step: request a quote.\\n\\nReviewed by the project team.\\n\",\"expected_content\":\"Project summary\\nWe prepare clear, practical reports.\\n\\nReviewed by the project team.\\nNext step: request a quote.\\n\"}",
+              "call_id": "call_CUFJwnPL2YbjDDkhIdyXBdh5",
+              "id": "fc_02fbc37f694deedf006ab12b42435087d29ecdf7871d8f0355",
+              "index": 1
+            }
+          ],
+          "tool_calls": [
+            {
+              "name": "write_file",
+              "args": {
+                "content": "Project summary\nWe prepare clear, practical reports.\n\nReviewed by the project team.\nNext step: request a quote.\n\nReviewed by the project team.\n",
+                "expected_content": "Project summary\nWe prepare clear, practical reports.\n\nReviewed by the project team.\nNext step: request a quote.\n"
+              },
+              "id": "call_CUFJwnPL2YbjDDkhIdyXBdh5",
+              "type": "tool_call"
+            }
+          ],
+          "tool_call_id": null
+        },
+        {
+          "role": "tool",
+          "content": "Target written successfully.",
+          "tool_calls": [],
+          "tool_call_id": "call_CUFJwnPL2YbjDDkhIdyXBdh5"
+        },
+        {
+          "role": "ai",
+          "content": [
+            {
+              "type": "function_call",
+              "name": "read_file",
+              "arguments": "{\"document\":\"target\"}",
+              "call_id": "call_eYazGlJt60Ch3Ra9VcS96Xvu",
+              "id": "fc_02fbc37f694deedf006ab12b43d5dc87d2b1702af50e4048f3",
+              "index": 0
+            }
+          ],
+          "tool_calls": [
+            {
+              "name": "read_file",
+              "args": {
+                "document": "target"
+              },
+              "id": "call_eYazGlJt60Ch3Ra9VcS96Xvu",
+              "type": "tool_call"
+            }
+          ],
+          "tool_call_id": null
+        },
+        {
+          "role": "tool",
+          "content": "{\"document\": \"target\", \"content\": \"Project summary\\nWe prepare clear, practical reports.\\n\\nReviewed by the project team.\\nNext step: request a quote.\\n\\nReviewed by the project team.\\n\"}",
+          "tool_calls": [],
+          "tool_call_id": "call_eYazGlJt60Ch3Ra9VcS96Xvu"
+        },
+        {
+          "role": "ai",
+          "content": [
+            {
+              "type": "function_call",
+              "name": "write_file",
+              "arguments": "{\"content\":\"Project summary\\nWe prepare clear, practical reports.\\n\\nReviewed by the project team.\\nNext step: request a quote.\\n\\nReviewed by the project team.\\nNext step: request a quote.\\n\",\"expected_content\":\"Project summary\\nWe prepare clear, practical reports.\\n\\nReviewed by the project team.\\nNext step: request a quote.\\n\\nReviewed by the project team.\\n\"}",
+              "call_id": "call_WGGKB0bGiGxlEMJBhr18KFut",
+              "id": "fc_02fbc37f694deedf006ab12b456fb087d2b7764b9df1fe3eba",
+              "index": 0
+            }
+          ],
+          "tool_calls": [
+            {
+              "name": "write_file",
+              "args": {
+                "content": "Project summary\nWe prepare clear, practical reports.\n\nReviewed by the project team.\nNext step: request a quote.\n\nReviewed by the project team.\nNext step: request a quote.\n",
+                "expected_content": "Project summary\nWe prepare clear, practical reports.\n\nReviewed by the project team.\nNext step: request a quote.\n\nReviewed by the project team.\n"
+              },
+              "id": "call_WGGKB0bGiGxlEMJBhr18KFut",
+              "type": "tool_call"
+            }
+          ],
+          "tool_call_id": null
+        },
+        {
+          "role": "tool",
+          "content": "Target written successfully.",
+          "tool_calls": [],
+          "tool_call_id": "call_WGGKB0bGiGxlEMJBhr18KFut"
+        },
+        {
+          "role": "ai",
+          "content": [
+            {
+              "id": "rs_02fbc37f694deedf006ab12b47e8e087d2b3946dc7bf0f39c7",
+              "summary": [],
+              "type": "reasoning",
+              "content": [],
+              "index": 0,
+              "encrypted_content": "gAAAAABqsStIvz8Yh6zkiZYT3d9qmyVoVbNCeIDc67JRGZL8UsJ04W3_C8hmtnX8dAq-r5dn8g07QtapxRZbUbjY5-3zq6n6M25Kzo0B8QnavsFQwd4IfcQ-Hp5F_0Bhly4yaWhMqUNahtPH-L4KNxAJq3Jsv__WbY11h8J7S7bXaMV7vqJpl4glr8s0E2AMbbxiWhfg9ZUq-0trI_x3KpWYPm9Vu11Az5HAt5Mtxqhv7F7YKtVh1yfI7q3z7c0u0T4Tv1wPCykq4u-fGjF5Khq3ockcXkDsBfimy2xbwXknvAhQp8ik_c9f5kuTI8tMBTsbrteGdysAKN99OQEbGYmtoL0Jrjh6f83KnFuSEgvjK475d2i3eN8SAJxD-dNFf3opvB-cIRgA4150K_8GGmfir473Pwbc2I68o0rl2CSQQQ8w3Ap0uUD-gJqxmtTZ6CC-e0OP3pVOQZAQ4B8m-WnOOfRg-KcwvcUJa0e-y440q2Ez1WNmyBmF2eNn51gO9JVzczkrH9w9bLCxL1dSuNP_RdsDsGXSkyqHfurGDcQLspqWWfJEBphdi_AQL2PjBe4xFuJPd5rY201GGORdYS_cvS7QaYA2I0VAugmGpd6p3DPUjAJ9-PD2jlA8dzQF-UzTaNBpzNMrMnCotWRF9SuKXCKDYS0iT-p7uht5gz_pO-qKlDR5Z-wEtf4PP9VDrfidKaqtowguQPxa4-mnWvfc97fsE_YxfsOeg-QiDRUm0uNd_TttEH0e76kZTrGNsS6oixqh1tOVTjOLgpGJQisiTd17UZroJjPdPwVCfbjMoejE-4oW9OpgVWxouDhBIoW6MrHfpOhcCRY_7VSleBQeGPKFq9wIX6Y_EXsTR32BHtYVS4i1o6FZEFYZ9VCpp5DSYbw6s9EX-ZnPItQIXrbZREHYeikzZWA9RUkpjAguU3OgNUZkhExBpburqLApGt281Y_jkIpk0l1CN2v0MAEpj5hMbnQNx3s4dcLUHeJyBv9u7YD4OvGxidHnYsBtpeksXNBUOTfyov8WaL1U7Ode7nuhrtOocNoSjSHLoWE5JbzC9QBJdnPuWCcvgmDGEwrUhiPvbYRMdn_35zCccSXFG_7zBT2jj97YVcl4yZuN9dVlgo-9cauytd9MM6MyWpaet6-uJuvn_RSuiwVtXi00dGtos8Pz67bGBCnHcSr7Vdi5fHIKvBz82ELoVZV76dlFYqm9xqNVwa9_AEMhnrAnczgyJuDJmqjmGY7nsCRFCXzqLE0MvkXBdBO7PaegX2nbOxxIc-l22j2jUmaybCfW9lh50IUqVRR5oJHP0XISL3jN_5vFAHahzJSidlGiE23dr48dbNyQpoFI7V1y9Ejy6xCWHhauLRJ0ph0kXDtXIP3w-eHMjf2cvuspziTfgDMn1qMyZntcbITcSOd8uEMuWd8nI2p0Bn3tMHO0FxAaEAclNY8PyjQXVdzXbvmKc042L-K7w70J"
+            },
+            {
+              "type": "function_call",
+              "name": "read_file",
+              "arguments": "{\"document\":\"target\"}",
+              "call_id": "call_8ikBtv9Opxuy7DdbQ1RTFJYL",
+              "id": "fc_02fbc37f694deedf006ab12b488ba887d2bc4b40d971d86d09",
+              "index": 1
+            }
+          ],
+          "tool_calls": [
+            {
+              "name": "read_file",
+              "args": {
+                "document": "target"
+              },
+              "id": "call_8ikBtv9Opxuy7DdbQ1RTFJYL",
+              "type": "tool_call"
+            }
+          ],
+          "tool_call_id": null
+        },
+        {
+          "role": "tool",
+          "content": "{\"document\": \"target\", \"content\": \"Project summary\\nWe prepare clear, practical reports.\\n\\nReviewed by the project team.\\nNext step: request a quote.\\n\\nReviewed by the project team.\\nNext step: request a quote.\\n\"}",
+          "tool_calls": [],
+          "tool_call_id": "call_8ikBtv9Opxuy7DdbQ1RTFJYL"
+        }
+      ],
+      "response": [
+        {
+          "role": "ai",
+          "content": [
+            {
+              "type": "text",
+              "text": "Appended the two sentences as separate changes.",
+              "phase": "final_answer",
+              "index": 0,
+              "id": "msg_02fbc37f694deedf006ab12b4a6c6087d2a6c5b1b2fdcf1101"
+            }
+          ],
+          "tool_calls": [],
+          "tool_call_id": null
+        }
+      ],
+      "tool_definitions": [
+        {
+          "type": "function",
+          "function": {
+            "name": "read_file",
+            "description": "Read source or target; return content, or null for a missing target.",
+            "parameters": {
+              "properties": {
+                "document": {
+                  "enum": [
+                    "source",
+                    "target"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "document"
+              ],
+              "type": "object"
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "write_file",
+            "description": "Replace the target if it still matches expected_content; null means absent.",
+            "parameters": {
+              "properties": {
+                "content": {
+                  "type": "string"
+                },
+                "expected_content": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "content",
+                "expected_content"
+              ],
+              "type": "object"
+            }
+          }
+        }
+      ],
+      "context": {
+        "langgraph_node": "model",
+        "langgraph_step": 16,
+        "report_turn": 1,
+        "thread_id": "fceb6904-7729-45c3-8610-66fb17702a56",
+        "cache_ttl": "5m",
+        "tags": [
+          "seq:step:1"
+        ],
+        "description": "Generate the next assistant message or tool request from the current conversation.",
+        "message_count": 13,
+        "message_roles": [
+          "system",
+          "human",
+          "ai",
+          "tool",
+          "tool",
+          "ai",
+          "tool",
+          "ai",
+          "tool",
+          "ai",
+          "tool",
+          "ai",
+          "tool"
+        ]
+      }
+    },
+    {
+      "id": "01a0c411-1cbd-7343-86a0-a19f434b1685",
+      "parent_id": "01a0c411-0aff-77a1-b3d8-a3fab2a89eac",
+      "name": "RestrictedToolApproval.after_model",
+      "kind": "workflow",
+      "start_ns": 1789995850942187000,
+      "end_ns": 1789995850943011000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "RestrictedToolApproval.after_model",
+        "langgraph_step": 17,
+        "report_turn": 1,
+        "thread_id": "fceb6904-7729-45c3-8610-66fb17702a56",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:17"
+        ],
+        "description": "Execute the RestrictedToolApproval.after_model workflow operation and pass its result to the next graph step."
+      }
+    }
+  ],
+  "output": "[{'type': 'text', 'text': 'Appended the two sentences as separate changes.', 'phase': 'final_answer', 'index': 0, 'id': 'msg_02fbc37f694deedf006ab12b4a6c6087d2a6c5b1b2fdcf1101'}]"
+}

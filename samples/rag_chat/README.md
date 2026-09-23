@@ -73,7 +73,7 @@ limit; overlapping passages preserve facts crossing chunk boundaries.
 ## Run the sample
 
 ```sh
-uv run python -m samples.rag_chat.app
+uv run python -m agent_runtime --sample rag_chat
 ```
 
 The default uses a scripted chat model but **real semantic retrieval from Chroma**.
@@ -87,7 +87,7 @@ For arbitrary user questions:
 ```sh
 cp samples/rag_chat/.env.example samples/rag_chat/.env
 # Configure LG_PROVIDER, LG_MODEL and its API key.
-uv run python -m samples.rag_chat.app --client console --live
+uv run python -m agent_runtime --sample rag_chat --client console --live
 ```
 
 Use `/quit` to finish and write the report. `/attach PATH` includes a UTF-8 file in
@@ -98,9 +98,9 @@ pass through the app or workflow. The standard `--prices`,
 
 ## Responsibilities and teaching points
 
-- `platform/rag_index.py`: pinned dataset acquisition, article reconstruction,
+- `harness/rag_index.py`: pinned dataset acquisition, article reconstruction,
   tokenizer-based chunking, resumable ingestion, manifest and storage checks.
-- `tools/search_wikipedia.py`: bounded semantic search with text, titles, source
+- `tools/semantic_search_wikipedia.py`: bounded semantic search with text, titles, source
   references, and stable passage IDs. It exposes no arbitrary filesystem paths.
 - `agents/wikipedia_rag_agent.py`: open the fixed index, create its search tool,
   search before answering, cite passage IDs, abstain when
@@ -157,5 +157,5 @@ retrieved passages enter the second model request, rather than sending the
 millions of indexed units to the chat model. No paid model calls were made.
 
 Local reports default to `report.html`, `run.json`, `spans.jsonl`, and
-`prices.json` in the current working directory. The next default run replaces
-these files. Use `--out reports/saved-run` with a new directory to keep a run.
+`prices.json` in `reports/rag_chat/`. The next default run replaces
+these files. Use `--out reports/saved-run` to choose another reusable report directory.

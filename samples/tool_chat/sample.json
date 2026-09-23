@@ -1,0 +1,11 @@
+{
+  "samples": [
+    {
+      "id": "tool_chat",
+      "name": "Tool chat",
+      "description": "Watch an agent echo your input through a tool.",
+      "workflow": "agent_runtime.workflows.tool_chat:build_workflow",
+      "scripted_run": "samples.tool_chat.scripted_run"
+    }
+  ]
+}

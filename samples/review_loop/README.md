@@ -45,22 +45,22 @@ length, or round number. A live judge can approve immediately or reject repeated
 
 ```sh
 uv sync --locked
-uv run python -m samples.review_loop.app
+uv run python -m agent_runtime --sample review_loop
 ```
 
-This prints a new HTML report at `./report.html` in the current working directory (replacing the previous default run) and saves the
+This prints a new HTML report at `reports/review_loop/report.html` (replacing the previous default run) and saves the
 raw spans, normalized run, and price snapshot. Expect four model calls, no tool
 calls, and one user turn. The report includes both drafts and both judge responses;
 only the final answer is returned to the chat client.
 
-The default simulation makes no provider calls. To avoid price/FX network lookups,
-supply `--prices models.json --fx-file /path/to/rate.json`.
+The default simulation makes no provider calls. To avoid model-price network lookups,
+supply `--prices models.json`. FX reads the saved shared `exchange-rate.json`.
 
 ```sh
 cp samples/review_loop/.env.example samples/review_loop/.env
 # Configure the provider and API key in that file.
-uv run python -m samples.review_loop.app --live
-uv run python -m samples.review_loop.app --client console --live
+uv run python -m agent_runtime --sample review_loop --live
+uv run python -m agent_runtime --sample review_loop --client console --live
 ```
 
 Console mode supports `/attach PATH` for UTF-8 evidence files, `/send`, and `/quit`.
@@ -84,19 +84,26 @@ verdicts are teaching fixtures. Live evaluation quality is not tested by them.
 
 ## Code and state
 
-- `app.py` chooses the shared model, client, and the teaching option.
-- `test_case.py` owns user evidence and prerecorded author/judge responses.
-- `src/lg_report/workflows/review_loop.py` owns the explicit nodes, conditional
+- `sample.json` declares the workflow and its default teaching options; the workflow
+  obtains the shared model through `build_model`.
+- `scripted_run.py` owns user evidence and prerecorded author/judge responses.
+- `src/agent_runtime/workflows/review_loop.py` owns the explicit nodes, conditional
   edge, round counter, and finalization. `max_rounds=3` includes the first draft.
-- `src/lg_report/agents/review_author.py` owns writing/revision instructions.
-- `src/lg_report/agents/evidence_judge.py` owns the rubric and validated verdict schema.
-- `src/lg_report/platform/shared_simulated_model.py` separates offline scripts and
+- `src/agent_runtime/agents/review_author.py` owns writing/revision instructions and
+  converts structured round inputs into model messages.
+- `src/agent_runtime/agents/evidence_judge.py` owns evidence framing, the rubric,
+  and parsing/validation of its model response into a review result.
+- `src/agent_runtime/harness/shared_simulated_model.py` separates offline scripts and
   token accounting by role instruction for agents without tools.
 
 State keeps `messages` (user conversation), `author_history`, `judge_history`,
 `round`, `draft`, `review`, and `outcome`. Role histories grow during revision,
 so subsequent input contains the preceding draft or feedback and its tokens.
-They are not added wholesale to the user conversation.
+They are not added wholesale to the user conversation. Agents return these
+histories; the workflow retains them without building role-specific prompts.
+The harness chooses when to request another draft; the author owns how to express
+that request to its model. The judge returns validated review data, so the
+workflow's conditional edge does not parse JSON or infer approval from prose.
 
 At the limit, `outcome=limit_reached` and the returned answer explicitly says
 **NOT approved**, followed by unresolved feedback. The graph still completed its
@@ -119,7 +126,7 @@ content, and model-cost reconciliation. Model calls—not graph nodes—are char
 
 ## Walk through the code as a lesson
 
-Start at `build_workflow` in `src/lg_report/workflows/review_loop.py`. It defines
+Start at `build_workflow` in `src/agent_runtime/workflows/review_loop.py`. It defines
 node functions and connects them; none runs until the client invokes the compiled
 graph. The functions close over the same model-backed author and judge runnables.
 They do not construct another model on each revision.
@@ -143,7 +150,7 @@ the full new list; combining that with an append reducer would duplicate message
 fields. That is why `begin` is a required node.
 
 The judge's JSON is untrusted model output until `Review.model_validate_json`
-accepts it. That validation checks allowed verdicts, field types, and consistency;
+accepts it inside the judge agent. That validation checks allowed verdicts, field types, and consistency;
 it cannot prove the reasoning is correct. The rubric in `evidence_judge.py` asks
 the LLM to make the semantic assessment. These are two different responsibilities.
 

@@ -11,19 +11,19 @@ import json
 from pathlib import Path
 
 import pytest
+from fixtures.mock_client import MockClient
 from langchain_core.messages import AIMessage
 from pydantic import ValidationError
 
-from lg_report.agents import evidence_judge, review_author
-from lg_report.platform.conversation import Conversation, Request
-from lg_report.platform.shared_simulated_model import SharedSimulatedModel
-from lg_report.platform.simulated_model import ScriptedChatModel
-from lg_report.platform.static_client import StaticClient
-from lg_report.report.pricing import cost, load_prices, summarize
-from lg_report.report.recording import record_run
-from lg_report.report.schema import Run
-from lg_report.workflows.review_loop import build_workflow
-from samples.review_loop.test_case import (
+from agent_runtime.agents import evidence_judge, review_author
+from agent_runtime.harness.conversation import Conversation, Request
+from agent_runtime.harness.shared_simulated_model import SharedSimulatedModel
+from agent_runtime.harness.simulated_model import ScriptedChatModel
+from agent_runtime.workflows.review_loop import build_workflow
+from reporting.execute_runnable import execute_runnable
+from reporting.pricing import cost, load_prices, summarize
+from reporting.schema import Run
+from samples.review_loop.scripted_run import (
     FINAL_REVIEW,
     FIRST_DRAFT,
     FIRST_REVIEW,
@@ -36,10 +36,10 @@ from samples.review_loop.test_case import (
 # Rejection feedback must cause a real second review round and remain
 # traceable in the generated report.
 def test_feedback_drives_real_second_round_and_report(tmp_path):
-    client = StaticClient([Request(USER_PROMPTS[0])])
+    client = MockClient([Request(USER_PROMPTS[0])])
     graph = build_workflow(make_simulated_model(), first_draft_high_level=True)
     prices = load_prices(Path(__file__).parents[1] / "models.json")
-    record_run(
+    execute_runnable(
         Conversation(graph, client),
         {},
         tmp_path / "run",
@@ -157,7 +157,7 @@ def test_new_user_turn_starts_new_review_cycle():
             AIMessage(content=json.dumps(FINAL_REVIEW)),
         ]
     )
-    client = StaticClient([Request("First question"), Request("Second question")])
+    client = MockClient([Request("First question"), Request("Second question")])
     Conversation(build_workflow(model), client).invoke({}, {})
     assert [result["round"] for result in client.results] == [1, 1]
     assert len(client.results[1]["judge_history"]) == 2

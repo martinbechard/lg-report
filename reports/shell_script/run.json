@@ -1,0 +1,282 @@
+{
+  "schema_version": 1,
+  "id": "01a0c6e6-a5f9-7631-b9c4-4639309ed891",
+  "title": "shell_script · turn 4",
+  "demo": false,
+  "status": "ok",
+  "steps": [
+    {
+      "id": "01a0c6e6-a5f9-7631-b9c4-4639309ed891",
+      "parent_id": null,
+      "name": "shell_agent",
+      "kind": "workflow",
+      "start_ns": 1790043399674963000,
+      "end_ns": 1790043403036968000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "report_turn": 4,
+        "thread_id": "d74d2e75-65f3-4728-88a6-39e665184aa7",
+        "description": "Execute the shell_agent workflow operation and pass its result to the next graph step."
+      }
+    },
+    {
+      "id": "01a0c6e6-a5fc-7db2-ad0a-fe01d31fc05c",
+      "parent_id": "01a0c6e6-a5f9-7631-b9c4-4639309ed891",
+      "name": "PatchToolCallsMiddleware.before_agent",
+      "kind": "workflow",
+      "start_ns": 1790043399677145000,
+      "end_ns": 1790043399677838000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "PatchToolCallsMiddleware.before_agent",
+        "langgraph_step": 21,
+        "report_turn": 4,
+        "thread_id": "d74d2e75-65f3-4728-88a6-39e665184aa7",
+        "tags": [
+          "graph:step:21"
+        ],
+        "description": "Check message history and repair missing tool responses before the agent starts."
+      }
+    },
+    {
+      "id": "01a0c6e6-a5fe-7771-b608-13cf8dff3935",
+      "parent_id": "01a0c6e6-a5f9-7631-b9c4-4639309ed891",
+      "name": "model",
+      "kind": "workflow",
+      "start_ns": 1790043399678585000,
+      "end_ns": 1790043401376586000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "model",
+        "langgraph_step": 22,
+        "report_turn": 4,
+        "thread_id": "d74d2e75-65f3-4728-88a6-39e665184aa7",
+        "tags": [
+          "graph:step:22"
+        ],
+        "description": "Prepare the current conversation, run model middleware, and invoke the chat model."
+      }
+    },
+    {
+      "id": "01a0c6e6-a602-7bb2-83d7-b54c55f52fb2",
+      "parent_id": "01a0c6e6-a5fe-7771-b608-13cf8dff3935",
+      "name": "ChatOpenAI",
+      "kind": "model",
+      "start_ns": 1790043399682422000,
+      "end_ns": 1790043401374388000,
+      "status": "ok",
+      "provider": "openai",
+      "model": "gpt-5.6-luna",
+      "effort": null,
+      "usage": {
+        "input_tokens": 2957,
+        "output_tokens": 75,
+        "cache_read": 2287,
+        "cache_write": 667,
+        "cache_write_5m": 0,
+        "cache_write_1h": 0,
+        "reasoning": 50
+      },
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "model",
+        "langgraph_step": 22,
+        "report_turn": 4,
+        "thread_id": "d74d2e75-65f3-4728-88a6-39e665184aa7",
+        "tags": [
+          "seq:step:1"
+        ],
+        "description": "Generate the next assistant message or tool request from the current conversation.",
+        "input_message_bytes": 13688,
+        "message_count": 16,
+        "message_roles": [
+          "system",
+          "human",
+          "ai",
+          "tool",
+          "ai",
+          "tool",
+          "ai",
+          "human",
+          "ai",
+          "tool",
+          "ai",
+          "human",
+          "ai",
+          "tool",
+          "ai",
+          "human"
+        ],
+        "requested_tools": [
+          "execute"
+        ]
+      }
+    },
+    {
+      "id": "01a0c6e6-aca2-7182-a233-de0b5cb031f9",
+      "parent_id": "01a0c6e6-a5f9-7631-b9c4-4639309ed891",
+      "name": "tools",
+      "kind": "workflow",
+      "start_ns": 1790043401378496000,
+      "end_ns": 1790043401470682000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "tools",
+        "langgraph_step": 23,
+        "report_turn": 4,
+        "thread_id": "d74d2e75-65f3-4728-88a6-39e665184aa7",
+        "tags": [
+          "graph:step:23"
+        ],
+        "description": "Execute tool calls requested by the preceding model response and return their observations."
+      }
+    },
+    {
+      "id": "01a0c6e6-aca4-7501-a7ce-05533fdb0fb0",
+      "parent_id": "01a0c6e6-aca2-7182-a233-de0b5cb031f9",
+      "name": "execute",
+      "kind": "tool",
+      "start_ns": 1790043401380593000,
+      "end_ns": 1790043401466378000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "tools",
+        "langgraph_step": 23,
+        "report_turn": 4,
+        "thread_id": "d74d2e75-65f3-4728-88a6-39e665184aa7",
+        "tags": [
+          "seq:step:1"
+        ],
+        "description": "Executes a shell command in an isolated sandbox and returns combined stdout/stderr with the exit code (truncated if very large).\n\nUsage:\n- Quote paths containing spaces (e.g. cd \"/path/with spaces\").\n- Chain commands with ';' or '&&' (use '&&' when a command depends on the previous); do not use newlines except inside quoted strings.\n- Use absolute paths and avoid `cd` so the working directory stays stable; use the optional timeout to override the default.\n- You MUST avoid using search commands like find and grep. Instead use the grep, glob tools to search. Use read_file rather than cat/head/tail.\n    - execute(command=\"find . -name '*.py'\")  # Use glob tool instead\n    - execute(command=\"grep -r 'pattern' .\")  # Use grep tool instead\n\nOnly available on backends implementing SandboxBackendProtocol; otherwise it returns an error."
+      }
+    },
+    {
+      "id": "01a0c6e6-ad03-7cb1-833b-cf7ccd777eab",
+      "parent_id": "01a0c6e6-a5f9-7631-b9c4-4639309ed891",
+      "name": "model",
+      "kind": "workflow",
+      "start_ns": 1790043401476372000,
+      "end_ns": 1790043403036094000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "model",
+        "langgraph_step": 24,
+        "report_turn": 4,
+        "thread_id": "d74d2e75-65f3-4728-88a6-39e665184aa7",
+        "tags": [
+          "graph:step:24"
+        ],
+        "description": "Prepare the current conversation, run model middleware, and invoke the chat model."
+      }
+    },
+    {
+      "id": "01a0c6e6-ad07-7440-b9e7-39159a19e7de",
+      "parent_id": "01a0c6e6-ad03-7cb1-833b-cf7ccd777eab",
+      "name": "ChatOpenAI",
+      "kind": "model",
+      "start_ns": 1790043401479604000,
+      "end_ns": 1790043403034915000,
+      "status": "ok",
+      "provider": "openai",
+      "model": "gpt-5.6-luna",
+      "effort": null,
+      "usage": {
+        "input_tokens": 3062,
+        "output_tokens": 38,
+        "cache_read": 2954,
+        "cache_write": 105,
+        "cache_write_5m": 0,
+        "cache_write_1h": 0,
+        "reasoning": 0
+      },
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "model",
+        "langgraph_step": 24,
+        "report_turn": 4,
+        "thread_id": "d74d2e75-65f3-4728-88a6-39e665184aa7",
+        "tags": [
+          "seq:step:1"
+        ],
+        "description": "Generate the next assistant message or tool request from the current conversation.",
+        "input_message_bytes": 15876,
+        "message_count": 18,
+        "message_roles": [
+          "system",
+          "human",
+          "ai",
+          "tool",
+          "ai",
+          "tool",
+          "ai",
+          "human",
+          "ai",
+          "tool",
+          "ai",
+          "human",
+          "ai",
+          "tool",
+          "ai",
+          "human",
+          "ai",
+          "tool"
+        ]
+      }
+    }
+  ],
+  "output": null
+}

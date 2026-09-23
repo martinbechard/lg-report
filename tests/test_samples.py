@@ -2,7 +2,7 @@
 
 Subprocess checks catch broken package imports, path assumptions, and missing
 output artifacts that direct factory calls would miss. Explicit pricing and FX
-files keep these tests offline; rerun checks protect prior evidence from overwrite.
+files keep these tests offline; rerun checks ensure old generated output is replaced.
 
 AI attribution: Generated with AI assistance.
 
@@ -16,9 +16,9 @@ from pathlib import Path
 
 import pytest
 
-from lg_report.report.pricing import load_prices
-from lg_report.report.render import conversation_turns
-from lg_report.report.schema import Run
+from reporting.pricing import load_prices
+from reporting.render import conversation_turns
+from reporting.schema import Run
 
 
 @pytest.mark.parametrize(
@@ -26,8 +26,10 @@ from lg_report.report.schema import Run
     [
         ("simple_chat", 2, 0, 2),
         ("tool_chat", 4, 2, 2),
+        ("shell_script", 2, 1, 1),
         ("thinking_agent", 7, 6, 1),
         ("subagent_chat", 4, 2, 1),
+        ("context_budget", 17, 6, 2),
         ("expert_dispatch", 12, 6, 3),
         ("review_loop", 4, 0, 1),
     ],
@@ -44,7 +46,9 @@ def test_standalone_application(name, calls, tools, turn_count, tmp_path):
         [
             sys.executable,
             "-m",
-            f"samples.{name}.app",
+            "agent_runtime",
+            "--sample",
+            name,
             "--prices",
             str(Path(__file__).resolve().parents[1] / "models.json"),
             "--fx-file",
@@ -74,13 +78,16 @@ def test_standalone_application(name, calls, tools, turn_count, tmp_path):
         if e["step"].kind == "model"
     ]
     assert labels == [f"R{i + 1}" for i in range(calls)]
-    # Reusing an output directory must not overwrite the original evidence.
+    # Reusing a sample output must replace evidence and discard stale exports.
+    (output / "report.xlsx").write_text("stale workbook")
     before = (output / "run.json").read_bytes()
     again = subprocess.run(
         [
             sys.executable,
             "-m",
-            f"samples.{name}.app",
+            "agent_runtime",
+            "--sample",
+            name,
             "--prices",
             str(Path(__file__).resolve().parents[1] / "models.json"),
             "--fx-file",
@@ -93,8 +100,9 @@ def test_standalone_application(name, calls, tools, turn_count, tmp_path):
         capture_output=True,
         timeout=60,
     )
-    assert again.returncode != 0
-    assert (output / "run.json").read_bytes() == before
+    assert again.returncode == 0, again.stderr
+    assert (output / "run.json").read_bytes() != before
+    assert not (output / "report.xlsx").exists()
 
 
 def test_working_directory_defaults_and_report_commands(tmp_path):
@@ -109,13 +117,15 @@ def test_working_directory_defaults_and_report_commands(tmp_path):
     sentinel.write_text("keep me")
     catalog = Path(__file__).resolve().parents[1] / "models.json"
 
+    working = tmp_path
+
     def execute(*args):
         # Run a documented Python command as a user outside the checkout would.
         # args supplies interpreter arguments. Fail with captured stderr on a nonzero
         # exit; otherwise return stdout for path/report assertions.
         result = subprocess.run(
             [sys.executable, *args],
-            cwd=tmp_path,
+            cwd=working,
             capture_output=True,
             text=True,
             timeout=60,
@@ -128,43 +138,47 @@ def test_working_directory_defaults_and_report_commands(tmp_path):
     for sample, calls in [("simple_chat", 2), ("tool_chat", 4)]:
         stdout = execute(
             "-m",
-            f"samples.{sample}.app",
+            "agent_runtime",
+            "--sample",
+            sample,
             "--prices",
             str(catalog),
             "--fx-file",
             str(rate),
         )
-        assert str(tmp_path / "report.html") in stdout
-        run = Run.model_validate_json((tmp_path / "run.json").read_text())
+        output = tmp_path / "reports" / sample
+        assert str(output / "report.html") in stdout
+        run = Run.model_validate_json((output / "run.json").read_text())
         ids.append(run.id)
         assert sum(step.kind == "model" for step in run.steps) == calls
     assert ids[0] != ids[1]
     assert sentinel.read_text() == "keep me"
     assert rate.exists()
+    working = output
     for name in ("report.html", "run.json", "spans.jsonl", "prices.json"):
-        assert (tmp_path / name).stat().st_size > 0
+        assert (output / name).stat().st_size > 0
 
     # The no-argument commands consume the latest bundle. Explicit input paths
     # place derived outputs beside that input; explicit --out still wins.
-    (tmp_path / "run.json").unlink()
-    execute("-m", "lg_report", "normalize", "--demo")
-    rebuilt = Run.model_validate_json((tmp_path / "run.json").read_text())
+    (output / "run.json").unlink()
+    execute("-m", "reporting", "normalize", "--demo")
+    rebuilt = Run.model_validate_json((output / "run.json").read_text())
     assert rebuilt.demo
     assert sum(step.kind == "model" for step in rebuilt.steps) == 4
-    (tmp_path / "report.html").unlink()
-    execute("-m", "lg_report", "--fx-file", str(rate), "render")
-    assert (tmp_path / "report.html").stat().st_size > 0
-    saved = tmp_path / "saved"
+    (output / "report.html").unlink()
+    execute("-m", "reporting", "--fx-file", str(rate), "render")
+    assert (output / "report.html").stat().st_size > 0
+    saved = output / "saved"
     saved.mkdir()
     for name in ("spans.jsonl", "prices.json"):
-        (saved / name).write_bytes((tmp_path / name).read_bytes())
-    execute("-m", "lg_report", "normalize", "saved/spans.jsonl", "--demo")
-    execute("-m", "lg_report", "--fx-file", str(rate), "render", "saved/run.json")
+        (saved / name).write_bytes((output / name).read_bytes())
+    execute("-m", "reporting", "normalize", "saved/spans.jsonl", "--demo")
+    execute("-m", "reporting", "--fx-file", str(rate), "render", "saved/run.json")
     assert (saved / "report.html").stat().st_size > 0
-    execute("-m", "lg_report", "normalize", "--out", "rebuilt.json")
-    assert (tmp_path / "rebuilt.json").exists()
-    execute("-m", "lg_report", "--fx-file", str(rate), "render", "--out", "other.html")
-    assert (tmp_path / "other.html").exists()
+    execute("-m", "reporting", "normalize", "--out", "rebuilt.json")
+    assert (output / "rebuilt.json").exists()
+    execute("-m", "reporting", "--fx-file", str(rate), "render", "--out", "other.html")
+    assert (output / "other.html").exists()
 
 
 def test_batch_includes_all_local_samples():
@@ -173,10 +187,13 @@ def test_batch_includes_all_local_samples():
 
     root = Path(__file__).resolve().parents[1]
     runner = runpy.run_path(str(root / "scripts/run_samples.py"))
+    import json
+
     local = {
-        p.parent.name
-        for p in (root / "samples").glob("*/app.py")
-        if "langfuse" not in p.parent.name
+        entry["id"]
+        for path in (root / "samples").glob("*/sample.json")
+        for entry in json.loads(path.read_text())["samples"]
+        if entry.get("tracing", "local") == "local"
     }
     assert set(runner["SAMPLES"]) == local
 
@@ -191,6 +208,14 @@ def test_batch_continues_after_failure_and_hides_stale_links(tmp_path, monkeypat
     state = main.__globals__
     monkeypatch.setitem(state, "excel_runtime", lambda: ("node", {}))
     monkeypatch.setitem(state, "SAMPLES", ("simple_chat", "tool_chat"))
+    refreshes = []
+
+    def failed_refresh(command, **kwargs):
+        """A failed FX refresh must not prevent sample execution."""
+        refreshes.append(command)
+        return subprocess.CompletedProcess(command, 1)
+
+    monkeypatch.setattr(subprocess, "run", failed_refresh)
     calls = []
 
     def fake_sample(name, directory, **kwargs):
@@ -204,6 +229,8 @@ def test_batch_continues_after_failure_and_hides_stale_links(tmp_path, monkeypat
     monkeypatch.setattr(sys, "argv", ["run_samples.py", "--out", str(tmp_path)])
     assert main() == 1
     assert calls == ["simple_chat", "tool_chat"]
+    assert len(refreshes) == 1
+    assert refreshes[0][1].endswith("scripts/update_exchange_rate.py")
     index = (tmp_path / "index.html").read_text()
     assert "simple_chat/report.xlsx" not in index
     assert "simple_chat/run.log" in index
@@ -241,3 +268,145 @@ def test_batch_clears_generated_files_before_failed_sample(tmp_path, monkeypatch
     assert not (tmp_path / "run.json").exists()
     assert (tmp_path / "notes.txt").read_text() == "old"
     assert (tmp_path / "run.log").exists()
+
+
+@pytest.mark.parametrize("simulated", [False, True])
+def test_batch_model_mode_and_shared_config(tmp_path, monkeypatch, simulated):
+    """The default must reach real providers; offline execution requires opt-in.
+
+    Replace child execution so this contract test never bills a provider. Check
+    shell precedence and index wording as well as the mode sent to each lesson.
+    """
+    import runpy
+
+    root = Path(__file__).resolve().parents[1]
+    main = runpy.run_path(str(root / "scripts/run_samples.py"))["main"]
+    state = main.__globals__
+    config = tmp_path / "config.env"
+    config.write_text(
+        "LG_PROVIDER=openai\nLG_MODEL=file-model\nOPENAI_API_KEY=test-placeholder\n"
+    )
+    monkeypatch.setitem(
+        state, "excel_runtime", lambda: ("node", {"LG_MODEL": "shell-model"})
+    )
+    monkeypatch.setitem(state, "SAMPLES", ("simple_chat",))
+    refreshes = []
+
+    def refresh(command, **kwargs):
+        """Keep mode/configuration tests independent of live exchange services."""
+        refreshes.append(command)
+        return subprocess.CompletedProcess(command, 0)
+
+    monkeypatch.setattr(subprocess, "run", refresh)
+    calls = []
+
+    def capture(name, directory, **kwargs):
+        """Capture the resolved mode/configuration instead of invoking a model."""
+        calls.append(kwargs)
+
+    monkeypatch.setitem(state, "run_sample", capture)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "run_samples.py",
+            "--out",
+            str(tmp_path),
+            "--env-file",
+            str(config),
+            *(["--simulated"] if simulated else []),
+        ],
+    )
+    assert main() == 0
+    assert len(refreshes) == (0 if simulated else 1)
+    assert calls[0]["fx_file"] == root / "exchange-rate.json"
+    assert calls[0]["simulated"] is simulated
+    assert calls[0]["env"]["LG_MODEL"] == "shell-model"
+    index = (tmp_path / "index.html").read_text()
+    assert ("Simulated models" if simulated else "Real provider models") in index
+    assert ("no paid model calls" in index) is simulated
+
+
+@pytest.mark.parametrize("simulated", [False, True])
+@pytest.mark.parametrize("sample", ["simple_chat", "quote_request"])
+def test_batch_child_model_and_interaction_mode(
+    tmp_path, monkeypatch, simulated, sample
+):
+    """Real calls pass --live; live quote questions retain terminal input/output."""
+    import runpy
+
+    root = Path(__file__).resolve().parents[1]
+    run_sample = runpy.run_path(str(root / "scripts/run_samples.py"))["run_sample"]
+    calls = []
+
+    def child(command, **kwargs):
+        """Simulate completed artifacts while recording actual subprocess options."""
+        calls.append((command, kwargs))
+        for filename in ("report.html", "report.xlsx"):
+            (tmp_path / filename).write_text("generated")
+
+    monkeypatch.setattr(subprocess, "run", child)
+    run_sample(
+        sample,
+        tmp_path,
+        prices=root / "models.json",
+        fx_file=None,
+        node="node",
+        env={},
+        simulated=simulated,
+    )
+    command, options = calls[0]
+    assert ("--live" in command) is not simulated
+    interactive = sample == "quote_request" and not simulated
+    assert command[command.index("--client") + 1] == (
+        "console" if interactive else "static"
+    )
+    assert options["stdin"] == (None if interactive else subprocess.DEVNULL)
+    assert (options["stdout"] is None) is interactive
+    assert all(options["stdin"] == subprocess.DEVNULL for _, options in calls[1:])
+
+
+def test_live_luna_uses_responses_api(monkeypatch):
+    """Luna tool calls need Responses when reasoning is enabled by the provider.
+
+    Construct the real adapter without invoking it, so this regression check
+    verifies endpoint selection without credentials or a billed model request.
+    """
+    from agent_runtime.harness.model_config import configured_model
+
+    monkeypatch.setenv("LG_PROVIDER", "openai")
+    monkeypatch.setenv("LG_MODEL", "gpt-5.6-luna")
+    monkeypatch.setenv("OPENAI_API_KEY", "test-placeholder")
+    monkeypatch.delenv("LG_EFFORT", raising=False)
+    adapter, provider, model = configured_model()
+    assert adapter.use_responses_api is True
+    assert (provider, model) == ("openai", "gpt-5.6-luna")
+
+
+@pytest.mark.parametrize("available", [False, True])
+def test_sample_settings_never_fetch_exchange_rate(tmp_path, monkeypatch, available):
+    """A missing FX file leaves EUR unknown without network or model-start delays."""
+    import urllib.request
+
+    from agent_runtime.harness.argument_parser import argument_parser
+    from agent_runtime.harness.settings import settings_for
+
+    root = Path(__file__).resolve().parents[1]
+    app = tmp_path / "samples/simple_chat/sample.json"
+    rate = tmp_path / "exchange-rate.json"
+    if available:
+        rate.write_text('{"rate":"0.88","date":"2000-01-01"}')
+    monkeypatch.delenv("LG_FX_FILE", raising=False)
+
+    def forbidden(*args, **kwargs):
+        """Fail if settings tries to repair absent FX using a network request."""
+        pytest.fail("Individual samples must never fetch exchange rates")
+
+    monkeypatch.setattr(urllib.request, "urlopen", forbidden)
+    args = argument_parser(str(app), "FX boundary test").parse_args(
+        ["--prices", str(root / "models.json")]
+    )
+    settings = settings_for(str(app), "FX boundary test", args=args)
+    assert (settings.prices.exchange is not None) is available
+    if not available:
+        assert "FileNotFoundError" in settings.prices.exchange_error

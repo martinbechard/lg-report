@@ -13,7 +13,7 @@ import tarfile
 
 import pytest
 
-from lg_report.platform import rag_archives
+from agent_runtime.harness import rag_archives
 
 
 # Build a controlled archive with real tar metadata so extraction
@@ -89,7 +89,7 @@ def test_failed_restore_does_not_publish(tmp_path, monkeypatch, damage):
 # Verify the configured bundled source is selected before any network
 # download, while still exercising the production builder's next dependency.
 def test_build_uses_bundled_dataset(tmp_path, monkeypatch):
-    from lg_report.platform import rag_index
+    from agent_runtime.harness import rag_index
 
     bundle(
         tmp_path,

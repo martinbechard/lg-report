@@ -1,0 +1,167 @@
+<!-- A single chat surface for end-user sample demonstrations.
+AI attribution: Generated with AI assistance by Northstar.
+Copyright (c) 2026 Martin.Bechard@DevConsult.ca -->
+<main class="chat" (dragover)="$event.preventDefault(); dragging.set(true)"
+      (dragleave)="dragging.set(false)" (drop)="drop($event)">
+  <header>
+    <label class="sr-only" for="sample">Sample</label>
+    <select id="sample" [ngModel]="sampleId()" (ngModelChange)="chooseSample($event)"
+            [disabled]="busy() || readingFiles()" aria-label="Sample">
+      @for (item of chat.samples(); track item.id) { <option [value]="item.id">{{ item.title }}</option> }
+    </select>
+    <label class="sr-only" for="mode">Response mode</label>
+    <select id="mode" [ngModel]="live()" (ngModelChange)="chooseMode($event)"
+            [disabled]="busy() || readingFiles() || !sample()" aria-label="Response mode"
+            title="Changing mode starts a new chat">
+      <option [ngValue]="true">Use real LLM</option>
+      <option [ngValue]="false">Use scripted responses</option>
+    </select>
+    <button class="new-chat" (click)="newChat()" [disabled]="busy() || readingFiles() || !sample()" aria-label="New chat" title="New chat">＋</button>
+  </header>
+
+  <section class="transcript" #transcript (scroll)="onScroll()" aria-label="Conversation" tabindex="0">
+    @if (!chat.messages().length) {
+      <div class="welcome">
+        <h1>{{ sample()?.title || 'Chat' }}</h1>
+        <p>{{ live() ? 'What would you like to ask?' : 'Try a conversation with this sample.' }}</p>
+        @if (nextPrompt()) {
+          <button class="suggestion" (click)="sendExample()" [disabled]="chat.status() !== 'ready' || readingFiles()">{{ nextPrompt() }} <span aria-hidden="true">↗</span></button>
+        }
+      </div>
+    }
+    <ng-container *ngTemplateOutlet="conversation; context: { $implicit: chat.messages() }" />
+    @if (busy()) { <p class="working" role="status">{{ chat.status() === 'stopping' ? 'Stopping…' : 'Thinking…' }}</p> }
+  </section>
+
+  <footer>
+    <section class="context-usage" aria-label="Context usage">
+      <div class="context-summary">
+        <span>Context for next request</span>
+        <strong>{{ chat.contextUsage()?.utilization ? (chat.contextUsage()!.utilization!.percent | number:'1.0-2') + '% estimated' : 'Not available' }}</strong>
+      </div>
+      @if (chat.contextUsage()?.utilization; as usage) {
+        <meter min="0" max="100" [value]="usage.percent" aria-label="Context used"
+          [attr.aria-valuetext]="(usage.percent | number:'1.0-2') + '%'"></meter>
+      } @else {
+        <div class="context-unavailable" aria-label="Context usage unavailable"></div>
+      }
+      <div class="context-scale" aria-hidden="true"><span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span></div>
+      <p>{{ chat.contextUsage()?.bytes == null ? 'Bytes not available' : (chat.contextUsage()!.bytes | number) + ' bytes' }} · UTF-8 context JSON</p>
+      @if (chat.contextUsage()?.utilization; as usage) {
+        <p>{{ usage.tokens | number }} / {{ usage.capacity | number }} tokens (estimated){{ usage.illustrative ? ' · Illustrative' : '' }} · {{ chat.contextUsage()?.model }}</p>
+      }
+      @if (chat.contextUsage(); as context) {
+        <details class="context-details">
+          <summary>View retained context</summary>
+          <p>{{ context.note }}</p>
+          @if (context.messages.length) {
+            <h3>Messages and instructions</h3>
+            <pre>{{ chat.format(context.messages) }}</pre>
+            <h3>Tool definitions</h3>
+            <pre>{{ context.tools === null ? 'Not available' : chat.format(context.tools) }}</pre>
+          }
+        </details>
+      } @else { <p>Available after the first turn. Excludes your next message.</p> }
+    </section>
+    @for (item of chat.pending(); track item.id) {
+      <section class="interaction" aria-label="Pending interaction">
+        @if (item.payload['kind'] === 'approval') {
+          <h2>Approve file change</h2>
+          <p>{{ item.payload['target'] }}</p>
+          <pre>{{ chat.format(item.payload['arguments']) }}</pre>
+          <button (click)="chat.answer(item.id, 'approve')" [disabled]="chat.status() !== 'waiting'">Approve</button>
+          <button (click)="chat.answer(item.id, 'reject')" [disabled]="chat.status() !== 'waiting'">Reject</button>
+          <button (click)="chat.answer(item.id, 'cancel')" [disabled]="chat.status() !== 'waiting'">Cancel workflow</button>
+        } @else {
+          <h2>Clarification needed</h2>
+          <p>{{ item.payload['question'] }}</p>
+          <p>{{ item.payload['reason'] }}</p>
+          <input #answer (input)="clarification.set(answer.value)" type="text" aria-label="Clarification answer" [disabled]="chat.status() !== 'waiting'">
+          <button (click)="chat.answer(item.id, answer.value)" [disabled]="chat.status() !== 'waiting' || !answer.value.trim()">Submit answer</button>
+          <button (click)="chat.answer(item.id, '/cancel')" [disabled]="chat.status() !== 'waiting'">Cancel workflow</button>
+        }
+      </section>
+    }
+    @if (chat.contextUrl() && chat.completedTurns()) {
+      <a [href]="chat.contextUrl()" target="_blank" rel="noopener">View context audit</a>
+    }
+    @if (chat.outputAvailable()) {
+      <a [href]="chat.outputUrl()" download>Download approved output</a>
+    }
+
+    @if (chat.error()) {
+      <div class="error" role="alert">{{ chat.error() }}
+        @if (!chat.samples().length) { <button (click)="ngOnInit()">Retry</button> }
+      </div>
+    }
+    <div class="composer" [class.dragging]="dragging()">
+      @if (files().length) {
+        <div class="attachments" aria-label="Queued attachments">
+          @for (file of files(); track $index) {
+            <span class="file-chip">▤ {{ file.name }}<button [attr.aria-label]="'Remove ' + file.name" (click)="removeFile($index)">×</button></span>
+          }
+        </div>
+      }
+      <label class="sr-only" for="message">Message</label>
+      <textarea id="message" rows="2" [ngModel]="live() ? draft() : nextPrompt()" (ngModelChange)="draft.set($event)"
+        (keydown)="onKey($event)" [readOnly]="!live()" [disabled]="chat.status() !== 'ready' || readingFiles()"
+        [placeholder]="!live() && !nextPrompt() ? 'Example complete. Choose another sample or start a new chat.' : 'Write a message…'"></textarea>
+      <div class="composer-tools">
+        <input #fileInput type="file" multiple class="sr-only" tabindex="-1" (change)="fileSelected($event)">
+        <button class="attach" (click)="fileInput.click()" [disabled]="busy() || readingFiles()" aria-label="Attach text files" title="Attach UTF-8 text files">
+          <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="m8 13 7-7a3 3 0 0 1 4 4L9 20a5 5 0 0 1-7-7L13 2"/><path d="m16 9-7 7a1 1 0 0 1-2-2l8-8"/></svg>
+        </button>
+        <span class="hint" role="status">{{ readingFiles() ? 'Reading file…' : chat.status() === 'connecting' ? 'Opening sample…' : '' }}</span>
+        @if (busy()) { <button class="send" (click)="chat.stop()" [disabled]="chat.status() === 'stopping'" aria-label="Stop response" title="Stop response">■</button> }
+        @else { <button class="send" (click)="send()" [disabled]="chat.status() !== 'ready' || readingFiles() || (!live() ? !nextPrompt() : !draft().trim() && !files().length)" aria-label="Send message" title="Send message">↑</button> }
+      </div>
+    </div>
+  </footer>
+</main>
+
+<!-- Reuse the same conversation renderer at every delegation depth. Child
+messages remain inspectable without mixing speakers into the parent's answer. -->
+<ng-template #conversation let-entries let-owner="owner">
+    @for (message of entries; track message.id) {
+      <article class="message" [class.user]="message.role === 'user'" [attr.aria-label]="message.role === 'user' ? 'Your message' : 'Assistant response'">
+        @if (message.role === 'assistant' && message.name) {
+          <p class="agent-name">{{ owner ? 'Subagent' : 'Agent' }} {{ message.name }}</p>
+        }
+        @for (tool of message.tools; track tool.id) {
+          <div class="tool-task">
+          <details class="tool-execution" [open]="chat.children(owner, tool.id).length > 0">
+            <summary><span aria-hidden="true">⚙</span> {{ tool.mcp ? 'MCP ' : 'Tool ' }}{{ tool.name }}
+              <span class="tool-status">{{ tool.result !== undefined ? 'Result received' : busy() ? 'Running…' : 'No result received' }}</span>
+            </summary>
+            <div class="tool-details">
+              <p>Arguments</p><pre>{{ tool.arguments || 'Preparing…' }}</pre>
+              @for (child of chat.children(owner, tool.id); track child.id) {
+                <ng-container *ngTemplateOutlet="subagent; context: { $implicit: child }" />
+              }
+              @if (tool.result !== undefined) { <p>Result</p><pre>{{ tool.result }}</pre> }
+            </div>
+          </details>
+          </div>
+        }
+        @if (message.role === 'assistant') {
+          @if (message.text) { <div class="prose" [innerHTML]="message.text | markdown"></div> }
+        }
+        @else { <div class="user-text">{{ message.text || 'Attached context' }}</div> }
+        @for (file of message.files; track $index) { <span class="sent-file">▤ {{ file }}</span> }
+      </article>
+    }
+  @for (child of chat.children(owner); track child.id) {
+    <ng-container *ngTemplateOutlet="subagent; context: { $implicit: child }" />
+  }
+</ng-template>
+<ng-template #subagent let-child>
+  <details class="subagent-conversation">
+    <summary>Subagent {{ child.name }} · {{ child.status }} <span class="view-conversation">View conversation</span></summary>
+    <div class="subagent-body">
+      @if (child.description) { <p class="delegated-task">{{ child.description }}</p> }
+      @if (child.error) { <p role="alert">{{ child.error }}</p> }
+      <ng-container *ngTemplateOutlet="conversation; context: { $implicit: child.messages, owner: child.id }" />
+      @if (!child.messages.length) { <p>No conversation messages received yet.</p> }
+    </div>
+  </details>
+</ng-template>
