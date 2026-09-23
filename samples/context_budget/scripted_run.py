@@ -33,7 +33,7 @@ class CompactingDemoModel(MeteredDemoModel):
 # boundary, while a summary preserves the meaningful language constraint.
 USER_PROMPTS = [
     "PARENT_ONLY_DETAIL: Answer in French. Explain agent workflow delegation. "
-    + "This is repeated background for the compaction demonstration. " * 35,
+    + "This is repeated background for the compaction demonstration. " * 200,
     "Now explain how the specialist's tool observations return to its parent.",
 ]
 PEER_BRIEF = "Preserve the French language requirement; obtain a specialist echo summary and explain delegation."
@@ -67,7 +67,7 @@ def make_simulated_models():
                         {
                             "name": "task",
                             "args": {
-                                "subagent_type": "workflow-specialist",
+                                "subagent_type": "isolated-subagent",
                                 "description": ASSIGNMENT,
                             },
                             "id": f"delegate-{turn}",
@@ -82,7 +82,7 @@ def make_simulated_models():
         # older complete tool exchange to compact without splitting a call/result.
         for lookup, topic in enumerate(
             [
-                "CHILD_ONLY_DETAIL: " + "delegation reference background " * 45,
+                "CHILD_ONLY_DETAIL: " + "delegation reference background " * 105,
                 "tool observations",
             ]
         ):
@@ -124,7 +124,7 @@ def build_models(options):
     names = (
         "planner",
         "responder",
-        "workflow-specialist",
+        "isolated-subagent",
         "workflow-summary",
         "subagent-summary",
     )

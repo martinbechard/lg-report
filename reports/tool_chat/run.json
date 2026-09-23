@@ -1,17 +1,17 @@
 {
   "schema_version": 1,
-  "id": "01a0cc5a-133d-7d70-a7a8-c7574189a3b7",
+  "id": "01a0cce3-7c59-7500-9bb3-9e974c30762a",
   "title": "Tool chat",
   "demo": false,
   "status": "ok",
   "steps": [
     {
-      "id": "01a0cc5a-133d-7d70-a7a8-c7574189a3b7",
+      "id": "01a0cce3-7c59-7500-9bb3-9e974c30762a",
       "parent_id": null,
       "name": "reference_chat_agent",
       "kind": "workflow",
-      "start_ns": 1790134850366661000,
-      "end_ns": 1790134853041429000,
+      "start_ns": 1790143855707318000,
+      "end_ns": 1790143858207657000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -23,18 +23,18 @@
       "tool_definitions": null,
       "context": {
         "report_turn": 1,
-        "thread_id": "498991e7-b0ba-4e5f-a8c1-57dfd224b852",
+        "thread_id": "e969d7e8-f66c-4d19-bee2-75a2a17bae9b",
         "cache_ttl": "5m",
         "description": "Execute the reference_chat_agent workflow operation and pass its result to the next graph step."
       }
     },
     {
-      "id": "01a0cc5a-133f-7620-8444-cb47a6814fbd",
-      "parent_id": "01a0cc5a-133d-7d70-a7a8-c7574189a3b7",
+      "id": "01a0cce3-7c5c-7951-9197-1c8eb94e74cd",
+      "parent_id": "01a0cce3-7c59-7500-9bb3-9e974c30762a",
       "name": "PatchToolCallsMiddleware.before_agent",
       "kind": "workflow",
-      "start_ns": 1790134850367850000,
-      "end_ns": 1790134850368259000,
+      "start_ns": 1790143855708544000,
+      "end_ns": 1790143855708925000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -48,7 +48,7 @@
         "langgraph_node": "PatchToolCallsMiddleware.before_agent",
         "langgraph_step": 1,
         "report_turn": 1,
-        "thread_id": "498991e7-b0ba-4e5f-a8c1-57dfd224b852",
+        "thread_id": "e969d7e8-f66c-4d19-bee2-75a2a17bae9b",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:1"
@@ -57,12 +57,12 @@
       }
     },
     {
-      "id": "01a0cc5a-1340-7e12-b717-479275fbf018",
-      "parent_id": "01a0cc5a-133d-7d70-a7a8-c7574189a3b7",
+      "id": "01a0cce3-7c5d-7d42-82e3-ec536975feca",
+      "parent_id": "01a0cce3-7c59-7500-9bb3-9e974c30762a",
       "name": "model",
       "kind": "workflow",
-      "start_ns": 1790134850368855000,
-      "end_ns": 1790134851465133000,
+      "start_ns": 1790143855709611000,
+      "end_ns": 1790143856973931000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -76,7 +76,7 @@
         "langgraph_node": "model",
         "langgraph_step": 2,
         "report_turn": 1,
-        "thread_id": "498991e7-b0ba-4e5f-a8c1-57dfd224b852",
+        "thread_id": "e969d7e8-f66c-4d19-bee2-75a2a17bae9b",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:2"
@@ -85,12 +85,12 @@
       }
     },
     {
-      "id": "01a0cc5a-1346-7611-99e8-b4878ab9ac1b",
-      "parent_id": "01a0cc5a-1340-7e12-b717-479275fbf018",
+      "id": "01a0cce3-7c62-7600-b525-c91ab3e30b57",
+      "parent_id": "01a0cce3-7c5d-7d42-82e3-ec536975feca",
       "name": "ChatOpenAI",
       "kind": "model",
-      "start_ns": 1790134850374407000,
-      "end_ns": 1790134851463342000,
+      "start_ns": 1790143855714928000,
+      "end_ns": 1790143856972622000,
       "status": "ok",
       "provider": "openai",
       "model": "gpt-5.6-luna",
@@ -127,8 +127,8 @@
               "type": "function_call",
               "name": "echo_tool",
               "arguments": "{\"text\":\"ReAct\"}",
-              "call_id": "call_N3tIiLfCsL87adnZuJLU4z1t",
-              "id": "fc_05e0c4a49feda864006ab34a4330b887d285a8810bf7fb41b0",
+              "call_id": "call_aqkxBJdFbfYxEHqTsjw3OgFh",
+              "id": "fc_08d6966ad3cb0e2d006ab36d70b7f487d28768709fe626665a",
               "index": 0
             }
           ],
@@ -138,7 +138,7 @@
               "args": {
                 "text": "ReAct"
               },
-              "id": "call_N3tIiLfCsL87adnZuJLU4z1t",
+              "id": "call_aqkxBJdFbfYxEHqTsjw3OgFh",
               "type": "tool_call"
             }
           ],
@@ -416,7 +416,7 @@
         "langgraph_node": "model",
         "langgraph_step": 2,
         "report_turn": 1,
-        "thread_id": "498991e7-b0ba-4e5f-a8c1-57dfd224b852",
+        "thread_id": "e969d7e8-f66c-4d19-bee2-75a2a17bae9b",
         "cache_ttl": "5m",
         "tags": [
           "seq:step:1"
@@ -434,12 +434,12 @@
       }
     },
     {
-      "id": "01a0cc5a-178a-7050-bf38-ac8e9677d71b",
-      "parent_id": "01a0cc5a-133d-7d70-a7a8-c7574189a3b7",
+      "id": "01a0cce3-814e-7602-b73a-bd236698d2b2",
+      "parent_id": "01a0cce3-7c59-7500-9bb3-9e974c30762a",
       "name": "tools",
       "kind": "workflow",
-      "start_ns": 1790134851466752000,
-      "end_ns": 1790134851470974000,
+      "start_ns": 1790143856975038000,
+      "end_ns": 1790143856976992000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -453,7 +453,7 @@
         "langgraph_node": "tools",
         "langgraph_step": 3,
         "report_turn": 1,
-        "thread_id": "498991e7-b0ba-4e5f-a8c1-57dfd224b852",
+        "thread_id": "e969d7e8-f66c-4d19-bee2-75a2a17bae9b",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:3"
@@ -462,12 +462,12 @@
       }
     },
     {
-      "id": "01a0cc5a-178b-7961-af54-0594e2d118f3",
-      "parent_id": "01a0cc5a-178a-7050-bf38-ac8e9677d71b",
+      "id": "01a0cce3-814f-7662-9b6a-9b765682d148",
+      "parent_id": "01a0cce3-814e-7602-b73a-bd236698d2b2",
       "name": "echo_tool",
       "kind": "tool",
-      "start_ns": 1790134851467613000,
-      "end_ns": 1790134851468267000,
+      "start_ns": 1790143856975704000,
+      "end_ns": 1790143856976208000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -485,7 +485,7 @@
           "role": "tool",
           "content": "Your input was: ReAct",
           "tool_calls": [],
-          "tool_call_id": "call_N3tIiLfCsL87adnZuJLU4z1t"
+          "tool_call_id": "call_aqkxBJdFbfYxEHqTsjw3OgFh"
         }
       ],
       "tool_definitions": null,
@@ -493,7 +493,7 @@
         "langgraph_node": "tools",
         "langgraph_step": 3,
         "report_turn": 1,
-        "thread_id": "498991e7-b0ba-4e5f-a8c1-57dfd224b852",
+        "thread_id": "e969d7e8-f66c-4d19-bee2-75a2a17bae9b",
         "cache_ttl": "5m",
         "tags": [
           "seq:step:1"
@@ -502,12 +502,12 @@
       }
     },
     {
-      "id": "01a0cc5a-178f-7fb2-a6a0-23a30ba82704",
-      "parent_id": "01a0cc5a-133d-7d70-a7a8-c7574189a3b7",
+      "id": "01a0cce3-8151-7152-8f62-bae49ced4d10",
+      "parent_id": "01a0cce3-7c59-7500-9bb3-9e974c30762a",
       "name": "model",
       "kind": "workflow",
-      "start_ns": 1790134851471904000,
-      "end_ns": 1790134853040751000,
+      "start_ns": 1790143856977667000,
+      "end_ns": 1790143858206751000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -521,7 +521,7 @@
         "langgraph_node": "model",
         "langgraph_step": 4,
         "report_turn": 1,
-        "thread_id": "498991e7-b0ba-4e5f-a8c1-57dfd224b852",
+        "thread_id": "e969d7e8-f66c-4d19-bee2-75a2a17bae9b",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:4"
@@ -530,19 +530,19 @@
       }
     },
     {
-      "id": "01a0cc5a-1793-7632-878e-7d9f6b57f0d0",
-      "parent_id": "01a0cc5a-178f-7fb2-a6a0-23a30ba82704",
+      "id": "01a0cce3-8153-7ff3-bd84-ba4dd62a9af7",
+      "parent_id": "01a0cce3-8151-7152-8f62-bae49ced4d10",
       "name": "ChatOpenAI",
       "kind": "model",
-      "start_ns": 1790134851475916000,
-      "end_ns": 1790134853039851000,
+      "start_ns": 1790143856980331000,
+      "end_ns": 1790143858205594000,
       "status": "ok",
       "provider": "openai",
       "model": "gpt-5.6-luna",
       "effort": null,
       "usage": {
         "input_tokens": 2078,
-        "output_tokens": 10,
+        "output_tokens": 6,
         "cache_read": 2039,
         "cache_write": 36,
         "cache_write_5m": 0,
@@ -570,8 +570,8 @@
               "type": "function_call",
               "name": "echo_tool",
               "arguments": "{\"text\":\"ReAct\"}",
-              "call_id": "call_N3tIiLfCsL87adnZuJLU4z1t",
-              "id": "fc_05e0c4a49feda864006ab34a4330b887d285a8810bf7fb41b0",
+              "call_id": "call_aqkxBJdFbfYxEHqTsjw3OgFh",
+              "id": "fc_08d6966ad3cb0e2d006ab36d70b7f487d28768709fe626665a",
               "index": 0
             }
           ],
@@ -581,7 +581,7 @@
               "args": {
                 "text": "ReAct"
               },
-              "id": "call_N3tIiLfCsL87adnZuJLU4z1t",
+              "id": "call_aqkxBJdFbfYxEHqTsjw3OgFh",
               "type": "tool_call"
             }
           ],
@@ -591,7 +591,7 @@
           "role": "tool",
           "content": "Your input was: ReAct",
           "tool_calls": [],
-          "tool_call_id": "call_N3tIiLfCsL87adnZuJLU4z1t"
+          "tool_call_id": "call_aqkxBJdFbfYxEHqTsjw3OgFh"
         }
       ],
       "response": [
@@ -600,10 +600,10 @@
           "content": [
             {
               "type": "text",
-              "text": "Your input was: ReAct",
+              "text": "ReAct",
               "phase": "final_answer",
               "index": 0,
-              "id": "msg_05e0c4a49feda864006ab34a44c25487d2986301b1ec0f3385"
+              "id": "msg_08d6966ad3cb0e2d006ab36d71e44487d293994b9490428e9d"
             }
           ],
           "tool_calls": [],
@@ -881,7 +881,7 @@
         "langgraph_node": "model",
         "langgraph_step": 4,
         "report_turn": 1,
-        "thread_id": "498991e7-b0ba-4e5f-a8c1-57dfd224b852",
+        "thread_id": "e969d7e8-f66c-4d19-bee2-75a2a17bae9b",
         "cache_ttl": "5m",
         "tags": [
           "seq:step:1"
@@ -898,12 +898,12 @@
       }
     },
     {
-      "id": "01a0cc5a-1dc3-7021-abb1-561851a31374",
+      "id": "01a0cce3-863c-7092-9e70-ed4dbf898a6e",
       "parent_id": null,
       "name": "reference_chat_agent",
       "kind": "workflow",
-      "start_ns": 1790134853059706000,
-      "end_ns": 1790134856212306000,
+      "start_ns": 1790143858236376000,
+      "end_ns": 1790143860372427000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -915,18 +915,18 @@
       "tool_definitions": null,
       "context": {
         "report_turn": 2,
-        "thread_id": "498991e7-b0ba-4e5f-a8c1-57dfd224b852",
+        "thread_id": "e969d7e8-f66c-4d19-bee2-75a2a17bae9b",
         "cache_ttl": "5m",
         "description": "Execute the reference_chat_agent workflow operation and pass its result to the next graph step."
       }
     },
     {
-      "id": "01a0cc5a-1dc4-7801-ab29-de1c3584e9f8",
-      "parent_id": "01a0cc5a-1dc3-7021-abb1-561851a31374",
+      "id": "01a0cce3-863d-7742-af5c-a2c2463f1722",
+      "parent_id": "01a0cce3-863c-7092-9e70-ed4dbf898a6e",
       "name": "PatchToolCallsMiddleware.before_agent",
       "kind": "workflow",
-      "start_ns": 1790134853060656000,
-      "end_ns": 1790134853060934000,
+      "start_ns": 1790143858237767000,
+      "end_ns": 1790143858238166000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -940,7 +940,7 @@
         "langgraph_node": "PatchToolCallsMiddleware.before_agent",
         "langgraph_step": 7,
         "report_turn": 2,
-        "thread_id": "498991e7-b0ba-4e5f-a8c1-57dfd224b852",
+        "thread_id": "e969d7e8-f66c-4d19-bee2-75a2a17bae9b",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:7"
@@ -949,12 +949,12 @@
       }
     },
     {
-      "id": "01a0cc5a-1dc5-75a3-9e07-905a3aee5d09",
-      "parent_id": "01a0cc5a-1dc3-7021-abb1-561851a31374",
+      "id": "01a0cce3-863e-7bc2-910f-0dd0771f117e",
+      "parent_id": "01a0cce3-863c-7092-9e70-ed4dbf898a6e",
       "name": "model",
       "kind": "workflow",
-      "start_ns": 1790134853061470000,
-      "end_ns": 1790134855357236000,
+      "start_ns": 1790143858239015000,
+      "end_ns": 1790143859254125000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -968,7 +968,7 @@
         "langgraph_node": "model",
         "langgraph_step": 8,
         "report_turn": 2,
-        "thread_id": "498991e7-b0ba-4e5f-a8c1-57dfd224b852",
+        "thread_id": "e969d7e8-f66c-4d19-bee2-75a2a17bae9b",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:8"
@@ -977,528 +977,21 @@
       }
     },
     {
-      "id": "01a0cc5a-1dc7-7672-aca2-7611626ff48f",
-      "parent_id": "01a0cc5a-1dc5-75a3-9e07-905a3aee5d09",
+      "id": "01a0cce3-8641-7331-a98e-1aa32356ee5c",
+      "parent_id": "01a0cce3-863e-7bc2-910f-0dd0771f117e",
       "name": "ChatOpenAI",
       "kind": "model",
-      "start_ns": 1790134853063465000,
-      "end_ns": 1790134855353679000,
+      "start_ns": 1790143858242182000,
+      "end_ns": 1790143859252411000,
       "status": "ok",
       "provider": "openai",
       "model": "gpt-5.6-luna",
       "effort": null,
       "usage": {
-        "input_tokens": 2100,
-        "output_tokens": 37,
+        "input_tokens": 2096,
+        "output_tokens": 19,
         "cache_read": 2075,
-        "cache_write": 22,
-        "cache_write_5m": 0,
-        "cache_write_1h": 0,
-        "reasoning": 16
-      },
-      "error": null,
-      "request": [
-        {
-          "role": "system",
-          "content": "Call echo_tool with the user's text, then answer concisely using the returned echo. The tool repeats input; it provides no independent factual evidence.",
-          "tool_calls": [],
-          "tool_call_id": null
-        },
-        {
-          "role": "human",
-          "content": "Echo this text: ReAct",
-          "tool_calls": [],
-          "tool_call_id": null
-        },
-        {
-          "role": "ai",
-          "content": [
-            {
-              "type": "function_call",
-              "name": "echo_tool",
-              "arguments": "{\"text\":\"ReAct\"}",
-              "call_id": "call_N3tIiLfCsL87adnZuJLU4z1t",
-              "id": "fc_05e0c4a49feda864006ab34a4330b887d285a8810bf7fb41b0",
-              "index": 0
-            }
-          ],
-          "tool_calls": [
-            {
-              "name": "echo_tool",
-              "args": {
-                "text": "ReAct"
-              },
-              "id": "call_N3tIiLfCsL87adnZuJLU4z1t",
-              "type": "tool_call"
-            }
-          ],
-          "tool_call_id": null
-        },
-        {
-          "role": "tool",
-          "content": "Your input was: ReAct",
-          "tool_calls": [],
-          "tool_call_id": "call_N3tIiLfCsL87adnZuJLU4z1t"
-        },
-        {
-          "role": "ai",
-          "content": [
-            {
-              "type": "text",
-              "text": "Your input was: ReAct",
-              "phase": "final_answer",
-              "index": 0,
-              "id": "msg_05e0c4a49feda864006ab34a44c25487d2986301b1ec0f3385"
-            }
-          ],
-          "tool_calls": [],
-          "tool_call_id": null
-        },
-        {
-          "role": "human",
-          "content": "Echo this text: Tool observations",
-          "tool_calls": [],
-          "tool_call_id": null
-        }
-      ],
-      "response": [
-        {
-          "role": "ai",
-          "content": [
-            {
-              "id": "rs_05e0c4a49feda864006ab34a46cc4487d28e566ce19612d6d1",
-              "summary": [],
-              "type": "reasoning",
-              "content": [],
-              "index": 0,
-              "encrypted_content": "gAAAAABqs0pGzD0rG6YkanBRpjuU_8pNDlVfJ6tyxsRvdtMzNZD5WuwkY9-qPg8JQ8XlTOpONBOPbN9t2VRAvaYc1Jd4YSg3Dxzfh4EfIZn3dAYjPAtZftNA_wH9RDGqYkGttCDqCWLkwzE4viYRXi12qTEDeAN7QhWOPpwJ1_55vEvaLV9L2-gGzqPAe2YXvXcv0wuQvXDtVRKSiB-FGaClpSGaJCu9SAW9UVBckgm-KFd8bd1qTWiVeSuglomDv8OdAAaOs9jdzbQRUAFe_x7MK5AEj4zqGZl5_sWR2pK5hRP8NCrWeGwB7Saj6cS0pK0_RWAkXQRh8HL7uDbbkVHBItnAu_XwydIB_xmq2zQTpYtabN9vsxzwObq5i-t5lHRcoVAqpFx8Eb-bXsLGk6qquU-J10xMpQGK2Sip8PrcNiAYdRVbhDjZtfrqTcMG7gykF4p-pEqkn8dFcs2ieEeBvTbGTg2UXLL0rkG3L5QnOsi9RoQJ967zBs26tcAdLjPr-WusYaTTTQgsMKpHl1o_j_EDAeVCnKYef2I_6bfzgZGnhbXOsAgfiEjbEljF-BIZBO-Mcr6oulZk7JtJhQDrytgP4DnvsOTz5jYDVpP2o2TG9V5NYVjafdyIhyjjwiW4J1c1IW3-2QJ1hBKw0ReWLpe8XrAYZKR2W8iQBUSW3NSjs09yclB7xiq9DtMN3kWCkfrOfOPUQY3Sq8cd4kPhNth9KhzLApDdJLgTaMjcJdECuvzenp3-2PlkiPrgHxuOAU3m5vYQMaViVPoZAJIeMnRCi_ch7bShfunOhH2wwzhiyplT8Se8U5dFv1DvVOFi0fl38HoAI2F8Kt0MhIoJAov14ZpPLsDh59Gsn14-AJTrupzcD0T1UGtNvg4B8STfqDCGroqqT-rl_O_w44ci1gYIBmaGHGBA52KNsgOlqD4zQfDu_UIIvsi0YGwp1ja4P8ix8OxajhYRqHnnkFiugJCwMRCnQw5Gw4xZPOAdclL08w_LFEc4QLEKBMC057kjA51FVA8CtG1hs7LGigaVhO3hTI90iyzM3eXx42qGFIJajK9mAuLLUsGksW6sWGE136ixZvsZRQNpEWjKvbMFGOH36b173GzKLwaoq8X1l4RxHjsdcOtm0LYv4a1XCjZhExfFV9jnO6PC8Nug25jA0VRioUnJKrh7y_7Pfh7NSGotm5mhAsDemsaJ3c8R2AlN7CIlj4_C8K2eJmDsO0nh6Uh32L2U_OsuMvCGCqqVB8U2pKKZTX4="
-            },
-            {
-              "type": "function_call",
-              "name": "echo_tool",
-              "arguments": "{\"text\":\"Tool observations\"}",
-              "call_id": "call_BywrswZzTXovyCJataXXnhR7",
-              "id": "fc_05e0c4a49feda864006ab34a46ff4087d284f0b93cee93fdb3",
-              "index": 1
-            }
-          ],
-          "tool_calls": [
-            {
-              "name": "echo_tool",
-              "args": {
-                "text": "Tool observations"
-              },
-              "id": "call_BywrswZzTXovyCJataXXnhR7",
-              "type": "tool_call"
-            }
-          ],
-          "tool_call_id": null
-        }
-      ],
-      "tool_definitions": [
-        {
-          "type": "function",
-          "function": {
-            "name": "ls",
-            "description": "Lists all files in a directory.\n\nThis is useful for exploring the filesystem and finding the right file to read or edit.\nYou should almost ALWAYS use this tool before using the read_file or edit_file tools.",
-            "parameters": {
-              "properties": {
-                "path": {
-                  "description": "Absolute path to the directory to list. Must be absolute, not relative.",
-                  "type": "string"
-                }
-              },
-              "required": [
-                "path"
-              ],
-              "type": "object"
-            }
-          }
-        },
-        {
-          "type": "function",
-          "function": {
-            "name": "read_file",
-            "description": "Reads a file from the filesystem. Assume any path the user provides is valid; reading a missing file returns an error.\n\nUsage:\n- By default, it reads up to 100 lines starting from the beginning of the file. Use `offset`/`limit` to page through large files instead of reading them whole.\n- A status header, `@@ field | field | ... @@`, sits above the file content, and every line after it is verbatim file content. When content is truncated, there may be an explanation before the header. Never include the header when editing.\n- Speculatively batch multiple `read_file` calls in one response when several files may be useful.\n- An empty file returns a system-reminder warning in place of contents.\n- Large tool results may be offloaded to a file; the tool message gives the path. Read that path here, paging with `offset`/`limit`.\n- Images (`.png`, `.jpg`, etc.), audio, video, and PDFs return multimodal content blocks (https://docs.langchain.com/oss/python/langchain/messages#multimodal).\n- For images and PDFs, pagination via `offset`/`limit` is text-only - supply `file_path` only\n- Always read a file before editing it.",
-            "parameters": {
-              "properties": {
-                "file_path": {
-                  "description": "Absolute path to the file to read. Must be absolute, not relative.",
-                  "type": "string"
-                },
-                "offset": {
-                  "default": 0,
-                  "description": "Line number to start reading from (0-indexed). Use for pagination of large files.",
-                  "type": "integer"
-                },
-                "limit": {
-                  "default": 100,
-                  "description": "Maximum number of lines to read. Use for pagination of large files.",
-                  "type": "integer"
-                }
-              },
-              "required": [
-                "file_path"
-              ],
-              "type": "object"
-            }
-          }
-        },
-        {
-          "type": "function",
-          "function": {
-            "name": "write_file",
-            "description": "Writes content to a file. Creates the file if it does not exist; replaces it entirely if it does.\n\nUsage:\n- Use this tool when you intend to create a new file or replace the whole file. You do not need to read the file first.\n- Prefer to edit existing files (with the edit_file tool) over creating new ones when possible.",
-            "parameters": {
-              "properties": {
-                "file_path": {
-                  "description": "Absolute path where the file should be written. Must be absolute, not relative.",
-                  "type": "string"
-                },
-                "content": {
-                  "description": "The text content to write to the file. This parameter is required.",
-                  "type": "string"
-                }
-              },
-              "required": [
-                "file_path",
-                "content"
-              ],
-              "type": "object"
-            }
-          }
-        },
-        {
-          "type": "function",
-          "function": {
-            "name": "edit_file",
-            "description": "Performs exact string replacements in files.\n\nUsage:\n- You must read the file before editing; this tool errors otherwise.\n- Preserve the exact source indentation from the read output, and never include the read status header in old_string or new_string.\n- Prefer editing an existing file over creating a new one.\n- Only use emojis if the user explicitly requests it.",
-            "parameters": {
-              "properties": {
-                "file_path": {
-                  "description": "Absolute path to the file to edit. Must be absolute, not relative.",
-                  "type": "string"
-                },
-                "old_string": {
-                  "description": "The exact text to find and replace. Must be unique in the file unless replace_all is True.",
-                  "type": "string"
-                },
-                "new_string": {
-                  "description": "The text to replace old_string with. Must be different from old_string.",
-                  "type": "string"
-                },
-                "replace_all": {
-                  "default": false,
-                  "description": "If True, replace all occurrences of old_string. If False (default), old_string must be unique.",
-                  "type": "boolean"
-                }
-              },
-              "required": [
-                "file_path",
-                "old_string",
-                "new_string"
-              ],
-              "type": "object"
-            }
-          }
-        },
-        {
-          "type": "function",
-          "function": {
-            "name": "delete",
-            "description": "Deletes a file or directory from the filesystem.\n\nUsage:\n- Permanently removes the file or directory at the given absolute path.\n- Deleting a directory removes it and everything inside it, recursively. Prefer\n  deleting a directory in one call over deleting each file individually.\n- This cannot be undone, so only delete paths you are sure are no longer needed.",
-            "parameters": {
-              "properties": {
-                "file_path": {
-                  "description": "Absolute path to the file to delete. Must be absolute, not relative.",
-                  "type": "string"
-                }
-              },
-              "required": [
-                "file_path"
-              ],
-              "type": "object"
-            }
-          }
-        },
-        {
-          "type": "function",
-          "function": {
-            "name": "glob",
-            "description": "Find files matching a glob pattern, returning absolute paths.\n\nSupports `*` (any characters within a path segment), `**` (any directories), `?` (single character), `[abc]` (one character from a set), and `{a,b}` (alternatives), e.g. `*.py`, `src/**/*.py`, `*.{yml,yaml}`.\n\nA pattern without `/` matches the file name at any depth under the search root (`*.py` matches `src/app/main.py`). A pattern containing `/` matches the search-root-relative path (`src/**/*.py`). A leading `/` anchors to the search root (`/*.py` matches only top-level Python files).\n\nLeading-dot names are only matched when the pattern segment itself starts with `.` (use `.env`, or `.github/**/*.yml`). Because `**` will not descend into dot-directories, the bare form `*.yml` is *broader* than `**/*.yml` and is usually what you want.",
-            "parameters": {
-              "properties": {
-                "pattern": {
-                  "description": "Glob pattern to match files (e.g., '*.py', '**/*.py', '/subdir/**/*.md'). A pattern without '/' matches the file name at any depth; a pattern containing '/' matches the search-root-relative path; a leading '/' anchors to the search root ('/*.py' matches only top-level files). Leading-dot names are excluded unless the pattern segment starts with '.', so prefer the bare form '*.py' over '**/*.py' -- '**' will not descend into dot-directories like '.github'.",
-                  "type": "string"
-                },
-                "path": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ],
-                  "default": null,
-                  "description": "Base directory to search from. Defaults to the backend's default root."
-                }
-              },
-              "required": [
-                "pattern"
-              ],
-              "type": "object"
-            }
-          }
-        },
-        {
-          "type": "function",
-          "function": {
-            "name": "grep",
-            "description": "Search for a LITERAL text pattern across files (NOT regex).\n\nThe pattern is matched verbatim: regex metacharacters are ordinary characters, not operators. To match any of several strings, run a separate grep for each; `grep(pattern=\"foo|bar\")` searches for the literal text \"foo|bar\", and `.*` or `\\.` match those characters literally.\n\nReturns matching files or content per `output_mode`. Offloaded large tool results live under the artifacts root (`/large_tool_results/` by default); grep that directory to search them when you do not know the exact path.",
-            "parameters": {
-              "properties": {
-                "pattern": {
-                  "description": "Text pattern to search for (literal string, not regex).",
-                  "type": "string"
-                },
-                "path": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ],
-                  "default": null,
-                  "description": "Directory to search in. Defaults to current working directory."
-                },
-                "glob": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ],
-                  "default": null,
-                  "description": "Glob pattern (NOT regex) limiting which files are searched (e.g. '*.py', '*.ts'). A pattern without '/' matches the file name at any depth; a pattern containing '/' matches the search-root-relative path (e.g. 'src/**/*.py'). This is an in-tool file filter, not a call to the separate glob tool. Brace expansion (e.g. '*.{ts,tsx}') is not supported on all backends; run a separate search per extension for reliable results."
-                },
-                "output_mode": {
-                  "default": "files_with_matches",
-                  "description": "Shape of the returned text. 'files_with_matches' (default): newline-separated matching file paths. 'content': matching lines grouped by file under a '<path>:' header, each line indented and formatted '<line_number>: <line text>' (only the matched line, no surrounding context). 'count': one '<path>: <match_count>' line per file.",
-                  "enum": [
-                    "files_with_matches",
-                    "content",
-                    "count"
-                  ],
-                  "type": "string"
-                },
-                "max_count": {
-                  "anyOf": [
-                    {
-                      "exclusiveMinimum": 0,
-                      "type": "integer"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ],
-                  "default": null,
-                  "description": "Optional cap on the total number of matches returned across all files. Leave unset to use the configured default. When the cap is hit, results are truncated and a note says so; narrow the pattern or path to see the rest."
-                }
-              },
-              "required": [
-                "pattern"
-              ],
-              "type": "object"
-            }
-          }
-        },
-        {
-          "type": "function",
-          "function": {
-            "name": "task",
-            "description": "Launch an ephemeral subagent to handle a complex, multi-step task.\n\nAvailable agent types and the tools they have access to:\n- general-purpose: General-purpose agent for researching complex questions, searching for files and content, and executing multi-step tasks. When you are searching for a keyword or file and are not confident that you will find the right match in the first few tries use this agent to perform the search for you. This agent has access to all tools as the main agent.\n\nSpecify subagent_type to select the agent. Usage notes:\n- Launch multiple agents concurrently when their tasks are independent, using a single message with multiple tool calls.\n- Each invocation is stateless by default: the agent sees only the prompt you give it and returns a single final report. Put full detail in the prompt and state exactly what it should return — unless an agent type below says it inherits your conversation instead.\n- The agent's report is not shown to the user; relay a summary yourself.\n- Tell the agent whether to create content, analyze, or only research, since it can't necessarily see the user's intent unless it inherits your conversation, as noted per agent type below.\n- If an agent's description says to use it proactively, do so without waiting to be asked.\n- When only general-purpose is available, use it for any complex, context-heavy task; it has the same capabilities as the main agent.",
-            "parameters": {
-              "properties": {
-                "description": {
-                  "description": "A detailed description of the task for the subagent to perform autonomously. Include all necessary context and specify the expected output format.",
-                  "type": "string"
-                },
-                "subagent_type": {
-                  "description": "The type of subagent to use. Must be one of the available agent types listed in the tool description.",
-                  "type": "string"
-                }
-              },
-              "required": [
-                "description",
-                "subagent_type"
-              ],
-              "type": "object"
-            }
-          }
-        },
-        {
-          "type": "function",
-          "function": {
-            "name": "echo_tool",
-            "description": "Return the provided text prefixed with \"Your input was: \".",
-            "parameters": {
-              "properties": {
-                "text": {
-                  "description": "The string to echo unchanged after the prefix.",
-                  "type": "string"
-                }
-              },
-              "required": [
-                "text"
-              ],
-              "type": "object"
-            }
-          }
-        }
-      ],
-      "context": {
-        "langgraph_node": "model",
-        "langgraph_step": 8,
-        "report_turn": 2,
-        "thread_id": "498991e7-b0ba-4e5f-a8c1-57dfd224b852",
-        "cache_ttl": "5m",
-        "tags": [
-          "seq:step:1"
-        ],
-        "description": "Generate the next assistant message or tool request from the current conversation.",
-        "input_message_bytes": 1077,
-        "message_count": 6,
-        "message_roles": [
-          "system",
-          "human",
-          "ai",
-          "tool",
-          "ai",
-          "human"
-        ],
-        "requested_tools": [
-          "echo_tool"
-        ]
-      }
-    },
-    {
-      "id": "01a0cc5a-26bf-7382-aa90-c362d505c483",
-      "parent_id": "01a0cc5a-1dc3-7021-abb1-561851a31374",
-      "name": "tools",
-      "kind": "workflow",
-      "start_ns": 1790134855360217000,
-      "end_ns": 1790134855363903000,
-      "status": "ok",
-      "provider": null,
-      "model": null,
-      "effort": null,
-      "usage": null,
-      "error": null,
-      "request": [],
-      "response": [],
-      "tool_definitions": null,
-      "context": {
-        "langgraph_node": "tools",
-        "langgraph_step": 9,
-        "report_turn": 2,
-        "thread_id": "498991e7-b0ba-4e5f-a8c1-57dfd224b852",
-        "cache_ttl": "5m",
-        "tags": [
-          "graph:step:9"
-        ],
-        "description": "Execute tool calls requested by the preceding model response and return their observations."
-      }
-    },
-    {
-      "id": "01a0cc5a-26c1-7043-a54b-b0aa692fcf0a",
-      "parent_id": "01a0cc5a-26bf-7382-aa90-c362d505c483",
-      "name": "echo_tool",
-      "kind": "tool",
-      "start_ns": 1790134855361553000,
-      "end_ns": 1790134855362683000,
-      "status": "ok",
-      "provider": null,
-      "model": null,
-      "effort": null,
-      "usage": null,
-      "error": null,
-      "request": [
-        {
-          "role": "tool_call",
-          "content": "{'text': 'Tool observations'}"
-        }
-      ],
-      "response": [
-        {
-          "role": "tool",
-          "content": "Your input was: Tool observations",
-          "tool_calls": [],
-          "tool_call_id": "call_BywrswZzTXovyCJataXXnhR7"
-        }
-      ],
-      "tool_definitions": null,
-      "context": {
-        "langgraph_node": "tools",
-        "langgraph_step": 9,
-        "report_turn": 2,
-        "thread_id": "498991e7-b0ba-4e5f-a8c1-57dfd224b852",
-        "cache_ttl": "5m",
-        "tags": [
-          "seq:step:1"
-        ],
-        "description": "Return the provided text prefixed with \"Your input was: \"."
-      }
-    },
-    {
-      "id": "01a0cc5a-26c4-7843-8214-e6d90a5cf77e",
-      "parent_id": "01a0cc5a-1dc3-7021-abb1-561851a31374",
-      "name": "model",
-      "kind": "workflow",
-      "start_ns": 1790134855364978000,
-      "end_ns": 1790134856210677000,
-      "status": "ok",
-      "provider": null,
-      "model": null,
-      "effort": null,
-      "usage": null,
-      "error": null,
-      "request": [],
-      "response": [],
-      "tool_definitions": null,
-      "context": {
-        "langgraph_node": "model",
-        "langgraph_step": 10,
-        "report_turn": 2,
-        "thread_id": "498991e7-b0ba-4e5f-a8c1-57dfd224b852",
-        "cache_ttl": "5m",
-        "tags": [
-          "graph:step:10"
-        ],
-        "description": "Prepare the current conversation, run model middleware, and invoke the chat model."
-      }
-    },
-    {
-      "id": "01a0cc5a-26c8-7502-af8b-20ad6dcc4b4d",
-      "parent_id": "01a0cc5a-26c4-7843-8214-e6d90a5cf77e",
-      "name": "ChatOpenAI",
-      "kind": "model",
-      "start_ns": 1790134855369306000,
-      "end_ns": 1790134856208915000,
-      "status": "ok",
-      "provider": "openai",
-      "model": "gpt-5.6-luna",
-      "effort": null,
-      "usage": {
-        "input_tokens": 2154,
-        "output_tokens": 10,
-        "cache_read": 2097,
-        "cache_write": 54,
+        "cache_write": 18,
         "cache_write_5m": 0,
         "cache_write_1h": 0,
         "reasoning": 0
@@ -1524,8 +1017,8 @@
               "type": "function_call",
               "name": "echo_tool",
               "arguments": "{\"text\":\"ReAct\"}",
-              "call_id": "call_N3tIiLfCsL87adnZuJLU4z1t",
-              "id": "fc_05e0c4a49feda864006ab34a4330b887d285a8810bf7fb41b0",
+              "call_id": "call_aqkxBJdFbfYxEHqTsjw3OgFh",
+              "id": "fc_08d6966ad3cb0e2d006ab36d70b7f487d28768709fe626665a",
               "index": 0
             }
           ],
@@ -1535,7 +1028,7 @@
               "args": {
                 "text": "ReAct"
               },
-              "id": "call_N3tIiLfCsL87adnZuJLU4z1t",
+              "id": "call_aqkxBJdFbfYxEHqTsjw3OgFh",
               "type": "tool_call"
             }
           ],
@@ -1545,17 +1038,516 @@
           "role": "tool",
           "content": "Your input was: ReAct",
           "tool_calls": [],
-          "tool_call_id": "call_N3tIiLfCsL87adnZuJLU4z1t"
+          "tool_call_id": "call_aqkxBJdFbfYxEHqTsjw3OgFh"
         },
         {
           "role": "ai",
           "content": [
             {
               "type": "text",
-              "text": "Your input was: ReAct",
+              "text": "ReAct",
               "phase": "final_answer",
               "index": 0,
-              "id": "msg_05e0c4a49feda864006ab34a44c25487d2986301b1ec0f3385"
+              "id": "msg_08d6966ad3cb0e2d006ab36d71e44487d293994b9490428e9d"
+            }
+          ],
+          "tool_calls": [],
+          "tool_call_id": null
+        },
+        {
+          "role": "human",
+          "content": "Echo this text: Tool observations",
+          "tool_calls": [],
+          "tool_call_id": null
+        }
+      ],
+      "response": [
+        {
+          "role": "ai",
+          "content": [
+            {
+              "type": "function_call",
+              "name": "echo_tool",
+              "arguments": "{\"text\":\"Tool observations\"}",
+              "call_id": "call_lUpZKgYZeq9OnvMQ1tkhu6Jj",
+              "id": "fc_08d6966ad3cb0e2d006ab36d72f54087d28b9950f0c6f69249",
+              "index": 0
+            }
+          ],
+          "tool_calls": [
+            {
+              "name": "echo_tool",
+              "args": {
+                "text": "Tool observations"
+              },
+              "id": "call_lUpZKgYZeq9OnvMQ1tkhu6Jj",
+              "type": "tool_call"
+            }
+          ],
+          "tool_call_id": null
+        }
+      ],
+      "tool_definitions": [
+        {
+          "type": "function",
+          "function": {
+            "name": "ls",
+            "description": "Lists all files in a directory.\n\nThis is useful for exploring the filesystem and finding the right file to read or edit.\nYou should almost ALWAYS use this tool before using the read_file or edit_file tools.",
+            "parameters": {
+              "properties": {
+                "path": {
+                  "description": "Absolute path to the directory to list. Must be absolute, not relative.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "path"
+              ],
+              "type": "object"
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "read_file",
+            "description": "Reads a file from the filesystem. Assume any path the user provides is valid; reading a missing file returns an error.\n\nUsage:\n- By default, it reads up to 100 lines starting from the beginning of the file. Use `offset`/`limit` to page through large files instead of reading them whole.\n- A status header, `@@ field | field | ... @@`, sits above the file content, and every line after it is verbatim file content. When content is truncated, there may be an explanation before the header. Never include the header when editing.\n- Speculatively batch multiple `read_file` calls in one response when several files may be useful.\n- An empty file returns a system-reminder warning in place of contents.\n- Large tool results may be offloaded to a file; the tool message gives the path. Read that path here, paging with `offset`/`limit`.\n- Images (`.png`, `.jpg`, etc.), audio, video, and PDFs return multimodal content blocks (https://docs.langchain.com/oss/python/langchain/messages#multimodal).\n- For images and PDFs, pagination via `offset`/`limit` is text-only - supply `file_path` only\n- Always read a file before editing it.",
+            "parameters": {
+              "properties": {
+                "file_path": {
+                  "description": "Absolute path to the file to read. Must be absolute, not relative.",
+                  "type": "string"
+                },
+                "offset": {
+                  "default": 0,
+                  "description": "Line number to start reading from (0-indexed). Use for pagination of large files.",
+                  "type": "integer"
+                },
+                "limit": {
+                  "default": 100,
+                  "description": "Maximum number of lines to read. Use for pagination of large files.",
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "file_path"
+              ],
+              "type": "object"
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "write_file",
+            "description": "Writes content to a file. Creates the file if it does not exist; replaces it entirely if it does.\n\nUsage:\n- Use this tool when you intend to create a new file or replace the whole file. You do not need to read the file first.\n- Prefer to edit existing files (with the edit_file tool) over creating new ones when possible.",
+            "parameters": {
+              "properties": {
+                "file_path": {
+                  "description": "Absolute path where the file should be written. Must be absolute, not relative.",
+                  "type": "string"
+                },
+                "content": {
+                  "description": "The text content to write to the file. This parameter is required.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "file_path",
+                "content"
+              ],
+              "type": "object"
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "edit_file",
+            "description": "Performs exact string replacements in files.\n\nUsage:\n- You must read the file before editing; this tool errors otherwise.\n- Preserve the exact source indentation from the read output, and never include the read status header in old_string or new_string.\n- Prefer editing an existing file over creating a new one.\n- Only use emojis if the user explicitly requests it.",
+            "parameters": {
+              "properties": {
+                "file_path": {
+                  "description": "Absolute path to the file to edit. Must be absolute, not relative.",
+                  "type": "string"
+                },
+                "old_string": {
+                  "description": "The exact text to find and replace. Must be unique in the file unless replace_all is True.",
+                  "type": "string"
+                },
+                "new_string": {
+                  "description": "The text to replace old_string with. Must be different from old_string.",
+                  "type": "string"
+                },
+                "replace_all": {
+                  "default": false,
+                  "description": "If True, replace all occurrences of old_string. If False (default), old_string must be unique.",
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "file_path",
+                "old_string",
+                "new_string"
+              ],
+              "type": "object"
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "delete",
+            "description": "Deletes a file or directory from the filesystem.\n\nUsage:\n- Permanently removes the file or directory at the given absolute path.\n- Deleting a directory removes it and everything inside it, recursively. Prefer\n  deleting a directory in one call over deleting each file individually.\n- This cannot be undone, so only delete paths you are sure are no longer needed.",
+            "parameters": {
+              "properties": {
+                "file_path": {
+                  "description": "Absolute path to the file to delete. Must be absolute, not relative.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "file_path"
+              ],
+              "type": "object"
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "glob",
+            "description": "Find files matching a glob pattern, returning absolute paths.\n\nSupports `*` (any characters within a path segment), `**` (any directories), `?` (single character), `[abc]` (one character from a set), and `{a,b}` (alternatives), e.g. `*.py`, `src/**/*.py`, `*.{yml,yaml}`.\n\nA pattern without `/` matches the file name at any depth under the search root (`*.py` matches `src/app/main.py`). A pattern containing `/` matches the search-root-relative path (`src/**/*.py`). A leading `/` anchors to the search root (`/*.py` matches only top-level Python files).\n\nLeading-dot names are only matched when the pattern segment itself starts with `.` (use `.env`, or `.github/**/*.yml`). Because `**` will not descend into dot-directories, the bare form `*.yml` is *broader* than `**/*.yml` and is usually what you want.",
+            "parameters": {
+              "properties": {
+                "pattern": {
+                  "description": "Glob pattern to match files (e.g., '*.py', '**/*.py', '/subdir/**/*.md'). A pattern without '/' matches the file name at any depth; a pattern containing '/' matches the search-root-relative path; a leading '/' anchors to the search root ('/*.py' matches only top-level files). Leading-dot names are excluded unless the pattern segment starts with '.', so prefer the bare form '*.py' over '**/*.py' -- '**' will not descend into dot-directories like '.github'.",
+                  "type": "string"
+                },
+                "path": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "Base directory to search from. Defaults to the backend's default root."
+                }
+              },
+              "required": [
+                "pattern"
+              ],
+              "type": "object"
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "grep",
+            "description": "Search for a LITERAL text pattern across files (NOT regex).\n\nThe pattern is matched verbatim: regex metacharacters are ordinary characters, not operators. To match any of several strings, run a separate grep for each; `grep(pattern=\"foo|bar\")` searches for the literal text \"foo|bar\", and `.*` or `\\.` match those characters literally.\n\nReturns matching files or content per `output_mode`. Offloaded large tool results live under the artifacts root (`/large_tool_results/` by default); grep that directory to search them when you do not know the exact path.",
+            "parameters": {
+              "properties": {
+                "pattern": {
+                  "description": "Text pattern to search for (literal string, not regex).",
+                  "type": "string"
+                },
+                "path": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "Directory to search in. Defaults to current working directory."
+                },
+                "glob": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "Glob pattern (NOT regex) limiting which files are searched (e.g. '*.py', '*.ts'). A pattern without '/' matches the file name at any depth; a pattern containing '/' matches the search-root-relative path (e.g. 'src/**/*.py'). This is an in-tool file filter, not a call to the separate glob tool. Brace expansion (e.g. '*.{ts,tsx}') is not supported on all backends; run a separate search per extension for reliable results."
+                },
+                "output_mode": {
+                  "default": "files_with_matches",
+                  "description": "Shape of the returned text. 'files_with_matches' (default): newline-separated matching file paths. 'content': matching lines grouped by file under a '<path>:' header, each line indented and formatted '<line_number>: <line text>' (only the matched line, no surrounding context). 'count': one '<path>: <match_count>' line per file.",
+                  "enum": [
+                    "files_with_matches",
+                    "content",
+                    "count"
+                  ],
+                  "type": "string"
+                },
+                "max_count": {
+                  "anyOf": [
+                    {
+                      "exclusiveMinimum": 0,
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "Optional cap on the total number of matches returned across all files. Leave unset to use the configured default. When the cap is hit, results are truncated and a note says so; narrow the pattern or path to see the rest."
+                }
+              },
+              "required": [
+                "pattern"
+              ],
+              "type": "object"
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "task",
+            "description": "Launch an ephemeral subagent to handle a complex, multi-step task.\n\nAvailable agent types and the tools they have access to:\n- general-purpose: General-purpose agent for researching complex questions, searching for files and content, and executing multi-step tasks. When you are searching for a keyword or file and are not confident that you will find the right match in the first few tries use this agent to perform the search for you. This agent has access to all tools as the main agent.\n\nSpecify subagent_type to select the agent. Usage notes:\n- Launch multiple agents concurrently when their tasks are independent, using a single message with multiple tool calls.\n- Each invocation is stateless by default: the agent sees only the prompt you give it and returns a single final report. Put full detail in the prompt and state exactly what it should return — unless an agent type below says it inherits your conversation instead.\n- The agent's report is not shown to the user; relay a summary yourself.\n- Tell the agent whether to create content, analyze, or only research, since it can't necessarily see the user's intent unless it inherits your conversation, as noted per agent type below.\n- If an agent's description says to use it proactively, do so without waiting to be asked.\n- When only general-purpose is available, use it for any complex, context-heavy task; it has the same capabilities as the main agent.",
+            "parameters": {
+              "properties": {
+                "description": {
+                  "description": "A detailed description of the task for the subagent to perform autonomously. Include all necessary context and specify the expected output format.",
+                  "type": "string"
+                },
+                "subagent_type": {
+                  "description": "The type of subagent to use. Must be one of the available agent types listed in the tool description.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "description",
+                "subagent_type"
+              ],
+              "type": "object"
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "echo_tool",
+            "description": "Return the provided text prefixed with \"Your input was: \".",
+            "parameters": {
+              "properties": {
+                "text": {
+                  "description": "The string to echo unchanged after the prefix.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "text"
+              ],
+              "type": "object"
+            }
+          }
+        }
+      ],
+      "context": {
+        "langgraph_node": "model",
+        "langgraph_step": 8,
+        "report_turn": 2,
+        "thread_id": "e969d7e8-f66c-4d19-bee2-75a2a17bae9b",
+        "cache_ttl": "5m",
+        "tags": [
+          "seq:step:1"
+        ],
+        "description": "Generate the next assistant message or tool request from the current conversation.",
+        "input_message_bytes": 1061,
+        "message_count": 6,
+        "message_roles": [
+          "system",
+          "human",
+          "ai",
+          "tool",
+          "ai",
+          "human"
+        ],
+        "requested_tools": [
+          "echo_tool"
+        ]
+      }
+    },
+    {
+      "id": "01a0cce3-8a36-7491-9150-044fd5daba7f",
+      "parent_id": "01a0cce3-863c-7092-9e70-ed4dbf898a6e",
+      "name": "tools",
+      "kind": "workflow",
+      "start_ns": 1790143859255110000,
+      "end_ns": 1790143859256769000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "tools",
+        "langgraph_step": 9,
+        "report_turn": 2,
+        "thread_id": "e969d7e8-f66c-4d19-bee2-75a2a17bae9b",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:9"
+        ],
+        "description": "Execute tool calls requested by the preceding model response and return their observations."
+      }
+    },
+    {
+      "id": "01a0cce3-8a37-7ed2-8f87-da3bfa8b6e11",
+      "parent_id": "01a0cce3-8a36-7491-9150-044fd5daba7f",
+      "name": "echo_tool",
+      "kind": "tool",
+      "start_ns": 1790143859255611000,
+      "end_ns": 1790143859256077000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [
+        {
+          "role": "tool_call",
+          "content": "{'text': 'Tool observations'}"
+        }
+      ],
+      "response": [
+        {
+          "role": "tool",
+          "content": "Your input was: Tool observations",
+          "tool_calls": [],
+          "tool_call_id": "call_lUpZKgYZeq9OnvMQ1tkhu6Jj"
+        }
+      ],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "tools",
+        "langgraph_step": 9,
+        "report_turn": 2,
+        "thread_id": "e969d7e8-f66c-4d19-bee2-75a2a17bae9b",
+        "cache_ttl": "5m",
+        "tags": [
+          "seq:step:1"
+        ],
+        "description": "Return the provided text prefixed with \"Your input was: \"."
+      }
+    },
+    {
+      "id": "01a0cce3-8a39-71f0-bfab-6793cbfd78be",
+      "parent_id": "01a0cce3-863c-7092-9e70-ed4dbf898a6e",
+      "name": "model",
+      "kind": "workflow",
+      "start_ns": 1790143859257354000,
+      "end_ns": 1790143860371684000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "model",
+        "langgraph_step": 10,
+        "report_turn": 2,
+        "thread_id": "e969d7e8-f66c-4d19-bee2-75a2a17bae9b",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:10"
+        ],
+        "description": "Prepare the current conversation, run model middleware, and invoke the chat model."
+      }
+    },
+    {
+      "id": "01a0cce3-8a3b-7210-9e13-45ba0f8cba7b",
+      "parent_id": "01a0cce3-8a39-71f0-bfab-6793cbfd78be",
+      "name": "ChatOpenAI",
+      "kind": "model",
+      "start_ns": 1790143859259392000,
+      "end_ns": 1790143860370120000,
+      "status": "ok",
+      "provider": "openai",
+      "model": "gpt-5.6-luna",
+      "effort": null,
+      "usage": {
+        "input_tokens": 2132,
+        "output_tokens": 6,
+        "cache_read": 2093,
+        "cache_write": 36,
+        "cache_write_5m": 0,
+        "cache_write_1h": 0,
+        "reasoning": 0
+      },
+      "error": null,
+      "request": [
+        {
+          "role": "system",
+          "content": "Call echo_tool with the user's text, then answer concisely using the returned echo. The tool repeats input; it provides no independent factual evidence.",
+          "tool_calls": [],
+          "tool_call_id": null
+        },
+        {
+          "role": "human",
+          "content": "Echo this text: ReAct",
+          "tool_calls": [],
+          "tool_call_id": null
+        },
+        {
+          "role": "ai",
+          "content": [
+            {
+              "type": "function_call",
+              "name": "echo_tool",
+              "arguments": "{\"text\":\"ReAct\"}",
+              "call_id": "call_aqkxBJdFbfYxEHqTsjw3OgFh",
+              "id": "fc_08d6966ad3cb0e2d006ab36d70b7f487d28768709fe626665a",
+              "index": 0
+            }
+          ],
+          "tool_calls": [
+            {
+              "name": "echo_tool",
+              "args": {
+                "text": "ReAct"
+              },
+              "id": "call_aqkxBJdFbfYxEHqTsjw3OgFh",
+              "type": "tool_call"
+            }
+          ],
+          "tool_call_id": null
+        },
+        {
+          "role": "tool",
+          "content": "Your input was: ReAct",
+          "tool_calls": [],
+          "tool_call_id": "call_aqkxBJdFbfYxEHqTsjw3OgFh"
+        },
+        {
+          "role": "ai",
+          "content": [
+            {
+              "type": "text",
+              "text": "ReAct",
+              "phase": "final_answer",
+              "index": 0,
+              "id": "msg_08d6966ad3cb0e2d006ab36d71e44487d293994b9490428e9d"
             }
           ],
           "tool_calls": [],
@@ -1571,20 +1563,12 @@
           "role": "ai",
           "content": [
             {
-              "id": "rs_05e0c4a49feda864006ab34a46cc4487d28e566ce19612d6d1",
-              "summary": [],
-              "type": "reasoning",
-              "content": [],
-              "index": 0,
-              "encrypted_content": "gAAAAABqs0pGzD0rG6YkanBRpjuU_8pNDlVfJ6tyxsRvdtMzNZD5WuwkY9-qPg8JQ8XlTOpONBOPbN9t2VRAvaYc1Jd4YSg3Dxzfh4EfIZn3dAYjPAtZftNA_wH9RDGqYkGttCDqCWLkwzE4viYRXi12qTEDeAN7QhWOPpwJ1_55vEvaLV9L2-gGzqPAe2YXvXcv0wuQvXDtVRKSiB-FGaClpSGaJCu9SAW9UVBckgm-KFd8bd1qTWiVeSuglomDv8OdAAaOs9jdzbQRUAFe_x7MK5AEj4zqGZl5_sWR2pK5hRP8NCrWeGwB7Saj6cS0pK0_RWAkXQRh8HL7uDbbkVHBItnAu_XwydIB_xmq2zQTpYtabN9vsxzwObq5i-t5lHRcoVAqpFx8Eb-bXsLGk6qquU-J10xMpQGK2Sip8PrcNiAYdRVbhDjZtfrqTcMG7gykF4p-pEqkn8dFcs2ieEeBvTbGTg2UXLL0rkG3L5QnOsi9RoQJ967zBs26tcAdLjPr-WusYaTTTQgsMKpHl1o_j_EDAeVCnKYef2I_6bfzgZGnhbXOsAgfiEjbEljF-BIZBO-Mcr6oulZk7JtJhQDrytgP4DnvsOTz5jYDVpP2o2TG9V5NYVjafdyIhyjjwiW4J1c1IW3-2QJ1hBKw0ReWLpe8XrAYZKR2W8iQBUSW3NSjs09yclB7xiq9DtMN3kWCkfrOfOPUQY3Sq8cd4kPhNth9KhzLApDdJLgTaMjcJdECuvzenp3-2PlkiPrgHxuOAU3m5vYQMaViVPoZAJIeMnRCi_ch7bShfunOhH2wwzhiyplT8Se8U5dFv1DvVOFi0fl38HoAI2F8Kt0MhIoJAov14ZpPLsDh59Gsn14-AJTrupzcD0T1UGtNvg4B8STfqDCGroqqT-rl_O_w44ci1gYIBmaGHGBA52KNsgOlqD4zQfDu_UIIvsi0YGwp1ja4P8ix8OxajhYRqHnnkFiugJCwMRCnQw5Gw4xZPOAdclL08w_LFEc4QLEKBMC057kjA51FVA8CtG1hs7LGigaVhO3hTI90iyzM3eXx42qGFIJajK9mAuLLUsGksW6sWGE136ixZvsZRQNpEWjKvbMFGOH36b173GzKLwaoq8X1l4RxHjsdcOtm0LYv4a1XCjZhExfFV9jnO6PC8Nug25jA0VRioUnJKrh7y_7Pfh7NSGotm5mhAsDemsaJ3c8R2AlN7CIlj4_C8K2eJmDsO0nh6Uh32L2U_OsuMvCGCqqVB8U2pKKZTX4="
-            },
-            {
               "type": "function_call",
               "name": "echo_tool",
               "arguments": "{\"text\":\"Tool observations\"}",
-              "call_id": "call_BywrswZzTXovyCJataXXnhR7",
-              "id": "fc_05e0c4a49feda864006ab34a46ff4087d284f0b93cee93fdb3",
-              "index": 1
+              "call_id": "call_lUpZKgYZeq9OnvMQ1tkhu6Jj",
+              "id": "fc_08d6966ad3cb0e2d006ab36d72f54087d28b9950f0c6f69249",
+              "index": 0
             }
           ],
           "tool_calls": [
@@ -1593,7 +1577,7 @@
               "args": {
                 "text": "Tool observations"
               },
-              "id": "call_BywrswZzTXovyCJataXXnhR7",
+              "id": "call_lUpZKgYZeq9OnvMQ1tkhu6Jj",
               "type": "tool_call"
             }
           ],
@@ -1603,7 +1587,7 @@
           "role": "tool",
           "content": "Your input was: Tool observations",
           "tool_calls": [],
-          "tool_call_id": "call_BywrswZzTXovyCJataXXnhR7"
+          "tool_call_id": "call_lUpZKgYZeq9OnvMQ1tkhu6Jj"
         }
       ],
       "response": [
@@ -1612,10 +1596,10 @@
           "content": [
             {
               "type": "text",
-              "text": "Your input was: Tool observations",
+              "text": "Tool observations",
               "phase": "final_answer",
               "index": 0,
-              "id": "msg_05e0c4a49feda864006ab34a48031c87d29082d6c79b726828"
+              "id": "msg_08d6966ad3cb0e2d006ab36d7406ec87d2ae7db333402af419"
             }
           ],
           "tool_calls": [],
@@ -1893,13 +1877,13 @@
         "langgraph_node": "model",
         "langgraph_step": 10,
         "report_turn": 2,
-        "thread_id": "498991e7-b0ba-4e5f-a8c1-57dfd224b852",
+        "thread_id": "e969d7e8-f66c-4d19-bee2-75a2a17bae9b",
         "cache_ttl": "5m",
         "tags": [
           "seq:step:1"
         ],
         "description": "Generate the next assistant message or tool request from the current conversation.",
-        "input_message_bytes": 2993,
+        "input_message_bytes": 1564,
         "message_count": 8,
         "message_roles": [
           "system",
@@ -1914,5 +1898,5 @@
       }
     }
   ],
-  "output": "[{'type': 'text', 'text': 'Your input was: Tool observations', 'phase': 'final_answer', 'index': 0, 'id': 'msg_05e0c4a49feda864006ab34a48031c87d29082d6c79b726828'}]"
+  "output": "[{'type': 'text', 'text': 'Tool observations', 'phase': 'final_answer', 'index': 0, 'id': 'msg_08d6966ad3cb0e2d006ab36d7406ec87d2ae7db333402af419'}]"
 }

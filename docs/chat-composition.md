@@ -240,12 +240,12 @@ The sample's `ContextBudget` maps its settings to LangChain's
 
 | Budget setting | Middleware option | Meaning |
 | --- | --- | --- |
-| `trigger_tokens` | `trigger=("tokens", value)` | Start summarization when the estimated history size reaches this threshold and an older portion can be summarized. |
+| `trigger_tokens` | `trigger=("tokens", value)` | Start summarization when reported input + output plus estimated new messages reaches this threshold and older messages can be summarized. |
 | `keep_tokens` | `keep=("tokens", value)` | Target how much recent history remains unsummarized. Complete messages and tool call/result pairs can exceed this target. |
 | `max_input_tokens` | Separate input-budget guard | Reject an agent call when the final estimated input still exceeds this ceiling after compaction. Includes instructions and tool schemas. |
 
 For example, `trigger=("tokens", 16000)` and `keep=("tokens", 4000)` request
-summarization at about 16,000 history tokens while retaining about 4,000 recent
+summarization at about 16,000 estimated context tokens while retaining about 4,000 recent
 tokens. Subsequent input contains **the summary plus retained messages**, as
 well as role instructions and tool definitions. It is not capped at 4,000 tokens.
 
@@ -264,7 +264,12 @@ The threshold and ceiling serve different purposes. A large latest message or
 an indivisible tool exchange can remain too large after summarization. The
 guard rejects that request instead of silently truncating user input.
 
-These settings use local token estimates, not a provider-exact tokenizer.
+The trigger uses the latest valid input + output receipt, including cache and
+reasoning, plus local estimates for newly added messages. A stored fingerprint
+invalidates that receipt when history is compacted or edited. Without valid
+usage, local estimates apply. The final-input guard adjusts the baseline for
+changes to system instructions and tools between peers. These remain estimates
+of the next context, not a provider-exact tokenizer.
 They do not change the model's physical context capacity. Input budgets must
 leave room for generated output; `LG_MAX_TOKENS` controls output allowance.
 Summarization also invokes a model and contributes to usage and cost. Those
@@ -289,7 +294,7 @@ peer boundaries and later checkpointed turns.
 The specialist's middleware is registered on its **subagent specification**:
 
 ```python
-specialist = workflow_specialist.build_agent(
+specialist = isolated_subagent.build_agent(
     {
         "model": specialist_model,
         "middleware": subagent_budget.middleware(subagent_summary_model),
@@ -310,7 +315,7 @@ Implementation and verification are located here:
 src/agent_runtime/
   context_budget.py             # Compaction policy and estimated input guard
   workflows/context_budget.py   # Shared history, budgets, and child registration
-  agents/workflow_specialist.py # Child instructions, tool, and middleware specification
+  agents/isolated_subagent.py # Child instructions, tool, and middleware specification
 tests/
   test_context_budget.py        # Actual model inputs, isolation, and budget checks
 ```

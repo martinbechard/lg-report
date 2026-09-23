@@ -604,20 +604,47 @@ def test_context_chart_gaps_axes_and_thinner_line(tmp_path, prices):
         ],
     )
     chart = cost_chart(conversation_turns(run, prices), prices)
-    assert len(chart["context_lines"]) == 2
+    assert len(chart["context_lines"]) == 3
     assert chart["context_missing"] and chart["context_illustrative"]
-    assert chart["bars"][0]["context"]["percent"] == 50
-    assert chart["bars"][2]["context_y"] == 290
+    assert chart["bars"][0]["context"]["percent"] == pytest.approx(525_010 / 1_050_000 * 100)
+    assert chart["bars"][2]["context_y"] < 290
     assert chart["bars"][3]["context_y"] == 30
-    assert chart["context_ticks"][-1]["value"] == 150
+    assert chart["context_ticks"][-1]["value"] == pytest.approx(1_575_010 / 1_050_000 * 100)
+    assert len(chart["token_lines"]) == 3
+    assert chart["token_max"] == 1_800_000
+    assert chart["bars"][2]["token_y"] < 290
+    assert chart["bars"][3]["token_y"] > 30
     destination = tmp_path / "context.html"
     render(run, prices, destination)
     html = destination.read_text()
     assert 'stroke="#17734b" stroke-width="1.5"' in html
     assert 'stroke="#912c42" stroke-width="3"' in html
-    assert "50.000%" in html and "0.000%" in html
+    assert "50.001%" in html and "0.001%" in html
     assert "Illustrative context used" in html and "Context %" in html
     assert "gaps are not zero" in html
+    assert '<input type="checkbox" id="context-percent-toggle">' in html
+    assert 'data-context-mode="percent" style="display:none"' in html
+    assert 'data-context-mode="tokens"' in html
+
+
+@pytest.mark.parametrize("count", [None, 0, 1, 1226])
+def test_raw_context_chart_does_not_require_known_capacity(prices, count):
+    """Raw usage stays available for unknown models; empty/zero axes stay finite."""
+    from reporting.render import conversation_turns, cost_chart
+
+    prices.exchange = ExchangeRate(rate="0.8", date="2026-09-20")
+    run = Run(id="raw", title="Raw", status="ok", steps=[
+        Step(id="m", name="model", kind="model", start_ns=0, end_ns=1,
+             status="ok", provider="unknown", model="unknown",
+             usage=None if count is None else Usage(input_tokens=count, output_tokens=0))
+    ])
+    chart = cost_chart(conversation_turns(run, prices), prices)
+    assert chart["context_missing"]
+    assert chart["bars"][0]["context_tokens"] == count
+    assert chart["token_missing"] is (count is None)
+    assert chart["token_max"] > (count or 0)
+    if count == 1226:
+        assert chart["token_max"] == 1400
 
 
 def test_context_capacity_resolves_explicit_alias(prices):
@@ -637,3 +664,21 @@ def test_context_capacity_resolves_explicit_alias(prices):
         usage=Usage(input_tokens=105_000, output_tokens=0),
     )
     assert context_utilization(step, prices)["percent"] == 10
+
+
+@pytest.mark.parametrize("before,after,expected", [
+    (726, 794, "Estimated history grew by 68 tokens; no size reduction"),
+    (1189, 846, "Estimated history reduced by 343 tokens"),
+    (500, 500, "Estimated history size unchanged"),
+])
+def test_compaction_description_reports_actual_size_effect(before, after, expected):
+    """A completed replacement must not imply savings when history grew."""
+    from reporting.context import compaction_description
+
+    step = Step(id="compact", name="summary", kind="workflow", start_ns=0,
+                end_ns=1, status="ok", context={
+                    "compaction_event": "completed",
+                    "compaction_before_tokens": before,
+                    "compaction_after_tokens": after,
+                })
+    assert expected in compaction_description(step)

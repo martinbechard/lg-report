@@ -1,17 +1,17 @@
 {
   "schema_version": 1,
-  "id": "01a0cc57-c207-7272-b7d9-b01bf2e20214",
+  "id": "01a0cce1-39d5-7553-bf10-ba7be380d1bf",
   "title": "MCP Wikipedia RAG",
   "demo": false,
   "status": "ok",
   "steps": [
     {
-      "id": "01a0cc57-c207-7272-b7d9-b01bf2e20214",
+      "id": "01a0cce1-39d5-7553-bf10-ba7be380d1bf",
       "parent_id": null,
       "name": "wikipedia_mcp_agent",
       "kind": "workflow",
-      "start_ns": 1790134698506466000,
-      "end_ns": 1790134703624495000,
+      "start_ns": 1790143707607456000,
+      "end_ns": 1790143713543899000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -23,18 +23,18 @@
       "tool_definitions": null,
       "context": {
         "report_turn": 1,
-        "thread_id": "89b1f5fd-bee1-4f31-8011-6a15e0d76a41",
+        "thread_id": "ad2cde9e-9c7a-4768-be1d-7995e1955394",
         "cache_ttl": "5m",
         "description": "Execute the wikipedia_mcp_agent workflow operation and pass its result to the next graph step."
       }
     },
     {
-      "id": "01a0cc57-c20b-7fc0-965b-50ad7b5cdcd0",
-      "parent_id": "01a0cc57-c207-7272-b7d9-b01bf2e20214",
+      "id": "01a0cce1-39d8-7a90-bb13-4d2d7c300900",
+      "parent_id": "01a0cce1-39d5-7553-bf10-ba7be380d1bf",
       "name": "PatchToolCallsMiddleware.before_agent",
       "kind": "workflow",
-      "start_ns": 1790134698508021000,
-      "end_ns": 1790134698508563000,
+      "start_ns": 1790143707609010000,
+      "end_ns": 1790143707609650000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -48,7 +48,7 @@
         "langgraph_node": "PatchToolCallsMiddleware.before_agent",
         "langgraph_step": 1,
         "report_turn": 1,
-        "thread_id": "89b1f5fd-bee1-4f31-8011-6a15e0d76a41",
+        "thread_id": "ad2cde9e-9c7a-4768-be1d-7995e1955394",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:1"
@@ -57,12 +57,12 @@
       }
     },
     {
-      "id": "01a0cc57-c20d-7ac2-8958-d0e280cc2895",
-      "parent_id": "01a0cc57-c207-7272-b7d9-b01bf2e20214",
+      "id": "01a0cce1-39da-7802-b000-58e5f73860b3",
+      "parent_id": "01a0cce1-39d5-7553-bf10-ba7be380d1bf",
       "name": "model",
       "kind": "workflow",
-      "start_ns": 1790134698509499000,
-      "end_ns": 1790134700070742000,
+      "start_ns": 1790143707610834000,
+      "end_ns": 1790143709368457000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -76,7 +76,7 @@
         "langgraph_node": "model",
         "langgraph_step": 2,
         "report_turn": 1,
-        "thread_id": "89b1f5fd-bee1-4f31-8011-6a15e0d76a41",
+        "thread_id": "ad2cde9e-9c7a-4768-be1d-7995e1955394",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:2"
@@ -85,24 +85,24 @@
       }
     },
     {
-      "id": "01a0cc57-c214-7ef3-ba41-7fb3b94f0d33",
-      "parent_id": "01a0cc57-c20d-7ac2-8958-d0e280cc2895",
+      "id": "01a0cce1-39e1-75e1-bb1a-f84928a7af57",
+      "parent_id": "01a0cce1-39da-7802-b000-58e5f73860b3",
       "name": "ChatOpenAI",
       "kind": "model",
-      "start_ns": 1790134698516516000,
-      "end_ns": 1790134700069200000,
+      "start_ns": 1790143707617574000,
+      "end_ns": 1790143709367033000,
       "status": "ok",
       "provider": "openai",
       "model": "gpt-5.6-luna",
       "effort": null,
       "usage": {
         "input_tokens": 2123,
-        "output_tokens": 52,
+        "output_tokens": 44,
         "cache_read": 0,
         "cache_write": 2120,
         "cache_write_5m": 0,
         "cache_write_1h": 0,
-        "reasoning": 9
+        "reasoning": 11
       },
       "error": null,
       "request": [
@@ -124,19 +124,19 @@
           "role": "ai",
           "content": [
             {
-              "id": "rs_0521a1d043594e59006ab349ab657087d29786bc4a0f003c21",
+              "id": "rs_0d6e74723e59c0ee006ab36cdc92a487d2828611dae5364d21",
               "summary": [],
               "type": "reasoning",
               "content": [],
               "index": 0,
-              "encrypted_content": "gAAAAABqs0mr2GPBIL7N_upp8SRvTN4YgpTQj4Y7VrKYBtiVpwjdcFmrg59fPGDkTqXCbLHYHzKtudFRriiOdSPMJ2kspw_oClO2geS-AH3YHDX08W66gG_qwYyRrbXE9gN0z8kVvLQm7mj9HahGv0KWM9d-H7og1qW_ZMUKcXdfFjyOVcxOprUjYTuKYuSHoDTchkG6wnZukUvSKpMIjNmye9BuUSvSyL3gtqLfwF0mStMgBV7Dqp0zoUnZ2TmDpDya5FoPSL1gYb7alH1Ub2kLVclws005nOGaEn7LZ2Fgh47o-mGmGSuD9NQdvUPgIctl8MIZ5dhhhF5L9o7MVrGuRMKpzL2QyMCj1MD-AD6H2vnJzERtswF_IuPBs45KbrI0ojqNSZuJlY1miOXAucv1a7szww8lnwLoss8qEdrmoqUnQCTegWzaxIat7r9fJxGSlysL9DujO60-p8FM1gRP9CuyKrcZ5pUJsUXYwwndfjl3jmheEg7UjxnMLfynZKc5zLbiGzHSy02WkSOmozJ3-bZezUbaGdT7p4cIT0W1GqrHuEPJuM9ten_LZm3rxufS1FhyDi4altTSk3NuOL-1lbZXGv8AKtnBAR_xEi5UPPS9ROFKhpRZquYm75vxL-AN-zRvWLCs-aMAXuE60lTa-xR4b5L3B38kZNYu7eeHzCk8O2Z8yQvn4PGFL83-dCwjSqh52EiVXtLgy3JYfojS0eJ6j9GAaq9Ptb21kpc5sMgLcU0NBnttZHfUgqOE3skLo1OKH_UZaooY6nFDd7nAYrhLe4npihKTGjSm1zQ3OUgAG1DxdatZDDo2DeQCBVMbl8kXLjdyE_BxwMCqLtM3WDutuLsyCFiVMDKgCCWm7hUj-Fj4gLKScdHmAKR22pAertdMiBoH0OYZYsGZlQ_rTHlAEaXZOr8xVyzF3wg0Yy4zqhdxGJ6-v-Y8gn2pKkh1X-80rdaOdPEyvMFhAYJURsAKjZt-2Vopxhl8No79zeYMgVN0SPLYUxqWuEepr8P8ispDBJe3CQ2RdCiypeJVHoluh1ayWNJAZK6VtMhnSFj5pDtNXzckKATcMXrlRtMYEgFEzRHJjMFMZQJXHUCXyou2MEn90PBaaiihxFaFlWSc2iA_2L3iwI2QIJbMupBkGy1d2vX4CXceIeOX8a5H0bkCG1zx8jjaFUWYLR4E761MpVa9QElHybGNobAc80sPm_1k3sWN"
+              "encrypted_content": "gAAAAABqs2zcmzWgZ1MujL2Qad03VH6_xX-OAdJ0mJvKRf_7vZCaOLnrS6KWnVISB2fdr3hsiDOczyX6xHzj0kvTBKTk-jjnpLSYmXfqerYOfL20oeCmFWep3RunLeJ62lRLF4wJabgohXUewPH-MSzJ2kj5t_ZOZ7GGOqnxhX49eYv99l2N8rkbvgO065A-8QDvOMYsDcb9GLRdtcWRND5YDsIya45G6myEl88F4VpySu0hLYXwM7VYw9o5fCREENmFjct4TF9ypNVw1FRlfPDGSiuUcDzUK38pHZWwRr_hRTAD4MtvOWjBJcgMeYpdbJNSIsOc4PRsTPTiowTfOGZCvfcP3BP-TWjLfml-aJyYRvXcU2C4EjdjJz-R3tJp5JDVn26paU18bB3KIscPfw6o9no5d0loqW6lMa0ejLGJd9dh5iubKAp3HBr7yWdcPMMy0wxRZs9G-_Dm--rOY8On4ubFNlztCSuiF_d2lveUWYJKfsxMPfu7aVddMfqzBfazF5KiAhrhFTZUdMzKfSLAwMLiu_bxdOto3Gmj8zJ2GO6pA846iJ0tQDFtMNMWFKsp1H4aNBTeBkhraxXqAgpq7Zg7jP7CEKsiEFegTx-mjQ07QAAuYkfLlEGESwmp7WIX6VFfaWLqg3XT7azVJNo29D7xAA_JxYAZsPtOQIVjHGGbcIAhPKnZmFEEgqcjj2JAN1QPi4HL7K0lDJaEKmUxGqGHWfeN1bEDGv2MFZbzXO-nxgHLyqltZtuULoJJJz9xdkklukEFQVjhnkfrd3_8eaBW3QVSfdpj2qqWNr1r25nFeZOyayLqocLUUPzwI-5EkGuMbQu7XXHC7YIoPAxRDA3cBlFfm1Bfm8lnnlxBZlAI5GyIkB0RscNfVxfRlTVhNIHVxbQNJhASfLmdXJNBbAiaV9qLGyI1EwEJR0UiEt0yts5dyFsZxHimJAHhzZOKZn2kfJvf37_kxuwmwq1IL5r8GfKfQO3uE5mTMCscfsdqnMDsLZNwHlLbhmiqaCPj2b1Ze9-mU1PPUn1cJss3vzOwa_WR5BYt16wAlhapbOF5Pteo79Afyduyp1XNrKH_XxQMfGESHVMMxoSJ58DQLBsUtTfXxTia41hCA1S8Cc1Bj8gJ2w_pKaEWA_p-hJ8xlpFIduhUe1GOV5faFaWsca5WFowujZy1IfIYC5wNhHGZUJ1QBf9Fix8qUoswbJtyxM14-yb2"
             },
             {
               "type": "function_call",
               "name": "semantic_search_wikipedia",
-              "arguments": "{\"query\":\"How has the Australian raven adapted to urban environments, including diet, nesting, behavior, and interactions with people?\"}",
-              "call_id": "call_2MLmizN2t3EpCPeQujhCwtqW",
-              "id": "fc_0521a1d043594e59006ab349aba16087d2b70d760321a654ee",
+              "arguments": "{\"query\":\"Australian raven adaptations to urban environments behavior diet nesting and human settlements\"}",
+              "call_id": "call_4cRMu4DK9fw8bwB8s4gdOfGF",
+              "id": "fc_0d6e74723e59c0ee006ab36cdcd33c87d28bd2f99106e0de6f",
               "index": 1
             }
           ],
@@ -144,9 +144,9 @@
             {
               "name": "semantic_search_wikipedia",
               "args": {
-                "query": "How has the Australian raven adapted to urban environments, including diet, nesting, behavior, and interactions with people?"
+                "query": "Australian raven adaptations to urban environments behavior diet nesting and human settlements"
               },
-              "id": "call_2MLmizN2t3EpCPeQujhCwtqW",
+              "id": "call_4cRMu4DK9fw8bwB8s4gdOfGF",
               "type": "tool_call"
             }
           ],
@@ -425,7 +425,7 @@
         "langgraph_node": "model",
         "langgraph_step": 2,
         "report_turn": 1,
-        "thread_id": "89b1f5fd-bee1-4f31-8011-6a15e0d76a41",
+        "thread_id": "ad2cde9e-9c7a-4768-be1d-7995e1955394",
         "cache_ttl": "5m",
         "tags": [
           "seq:step:1"
@@ -443,12 +443,12 @@
       }
     },
     {
-      "id": "01a0cc57-c828-7bc0-a1f0-944178e44a24",
-      "parent_id": "01a0cc57-c207-7272-b7d9-b01bf2e20214",
+      "id": "01a0cce1-40b9-7b43-bf99-bfd6fec209b9",
+      "parent_id": "01a0cce1-39d5-7553-bf10-ba7be380d1bf",
       "name": "tools",
       "kind": "workflow",
-      "start_ns": 1790134700072330000,
-      "end_ns": 1790134700846909000,
+      "start_ns": 1790143709369724000,
+      "end_ns": 1790143709573185000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -462,7 +462,7 @@
         "langgraph_node": "tools",
         "langgraph_step": 3,
         "report_turn": 1,
-        "thread_id": "89b1f5fd-bee1-4f31-8011-6a15e0d76a41",
+        "thread_id": "ad2cde9e-9c7a-4768-be1d-7995e1955394",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:3"
@@ -471,12 +471,12 @@
       }
     },
     {
-      "id": "01a0cc57-c829-7a32-93f7-954972f53788",
-      "parent_id": "01a0cc57-c828-7bc0-a1f0-944178e44a24",
+      "id": "01a0cce1-40ba-7660-9c6e-1128da8f37ee",
+      "parent_id": "01a0cce1-40b9-7b43-bf99-bfd6fec209b9",
       "name": "semantic_search_wikipedia",
       "kind": "tool",
-      "start_ns": 1790134700073272000,
-      "end_ns": 1790134700846155000,
+      "start_ns": 1790143709370572000,
+      "end_ns": 1790143709571753000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -486,7 +486,7 @@
       "request": [
         {
           "role": "tool_call",
-          "content": "{'query': 'How has the Australian raven adapted to urban environments, including diet, nesting, behavior, and interactions with people?'}"
+          "content": "{'query': 'Australian raven adaptations to urban environments behavior diet nesting and human settlements'}"
         }
       ],
       "response": [
@@ -495,12 +495,12 @@
           "content": [
             {
               "type": "text",
-              "text": "{\"passages\": [{\"id\": \"passage-00016828\", \"text\": \"1827, its species name highlighting its similarity with the carrion crow ( c. corone ). two subspecies are recognised, which differ slightly in calls and are quite divergent genetically. the preferred habitat is open woodland and transitional zones. it has adapted well to urban environments and is a common city bird in sydney, canberra and perth. an omnivorous and opportunistic feeder, it eats a wide variety of plant and animal material, as well as food waste from urban areas. in eastern australia its range is strongly correlated with the presence of sheep, and it has been blamed for killing lambs. however, this is very rare, and the raven most often scavenges for afterbirth and stillborn animals as well as newborn lamb faeces. the australian raven is territorial, with pairs generally bonding for life. breeding takes place between july and september, with almost no variation across its range. the nest is a bowl @ - @ shaped structure of sticks sited high in a tree, or occasionally in a man @ - @ made structure such as a windmill or other building. = =\", \"title\": \"Australian raven\", \"source_row\": 49964, \"source\": \"https://huggingface.co/datasets/Salesforce/wikitext/tree/b08601e04326c79dfdd32d625aee71d232d685c3/wikitext-103-raw-v1\", \"license\": \"CC-BY-SA-3.0\", \"token_start\": 188, \"token_end\": 408, \"cosine_distance\": 0.2283846139907837}, {\"id\": \"passage-00016844\", \"text\": \"areas. similarly, in inland australia it can share range with the little crow, as the two do not appear to compete. however, the ranges of similar @ - @ sized forest raven and torresian crow only narrowly overlap with the australian raven as all three compete with each other. in central and western regions, australian ravens and torresian crows vye for the scattered uncommon trees and outcrops, and only one or the other are found there. it co @ - @ occurs with the forest raven in northeastern new south wales from port stephens northwards. the australian raven has adapted very well to human habitation in some cities and is the most common corvid in canberra, sydney and perth ; in melbourne and adelaide it is replaced by the little raven, and by the torresian crow in brisbane. its large range, abundance and increasing population mean it is classified as least concern on the iucn red list. = = behaviour = = difficulties in distinguishing australian corvids has hampered understanding of seasonal movements. the australian raven is thought to be largely sedentary, with most movement of over 16 km\", \"token_end\": 3416, \"source\": \"https://huggingface.co/datasets/Salesforce/wikitext/tree/b08601e04326c79dfdd32d625aee71d232d685c3/wikitext-103-raw-v1\", \"token_start\": 3196, \"source_row\": 49964, \"title\": \"Australian raven\", \"license\": \"CC-BY-SA-3.0\", \"cosine_distance\": 0.3086702227592468}, {\"id\": \"passage-00016845\", \"text\": \"distinguishing australian corvids has hampered understanding of seasonal movements. the australian raven is thought to be largely sedentary, with most movement of over 16 km ( 9 @. @ 9 mi ) due to flocks of non @ - @ breeding subadult birds. juvenile birds leave their parents and join flocks when they are four or five months old. smaller flocks of 8 \\u2013 30 birds stay within an area of around 260 square kilometres, while larger flocks of up to 300 birds may travel hundreds of kilometres seeking food. a single breeding pair and their brood can occupy a territory of up to around 120 hectares ( 300 acres ) and remains there year @ - @ round, though groups of ravens may enter this area to forage. australian ravens will defend their territory by chasing, dive @ - @ bombing and occasionally striking the backs of birds of prey, foxes or even people. they generally mate for life, though occasionally one male has been found to be mated with two females in adjacent territories. if the female dies, the male australian raven maintains the territory and finds another mate, while\", \"title\": \"Australian raven\", \"source\": \"https://huggingface.co/datasets/Salesforce/wikitext/tree/b08601e04326c79dfdd32d625aee71d232d685c3/wikitext-103-raw-v1\", \"token_end\": 3604, \"license\": \"CC-BY-SA-3.0\", \"source_row\": 49964, \"token_start\": 3384, \"cosine_distance\": 0.31045806407928467}, {\"id\": \"passage-00016850\", \"text\": \"or restaurants, abattoirs, piggeries and farmyards. in one isolated study, they were observed feeding on nectar from eucalypt flowers. australian ravens sometimes forage in mixed @ - @ species flocks with any of the other four species of australian corvids. sometimes they are aggressive with little ravens if both are at a food source and drive them off, though not if the smaller species greatly outnumbers the larger. = = = breeding = = = australian ravens begin breeding once they are three years old. breeding season is from july to september, with no substantial difference in timing across its range around the country despite it inhabiting a range of diverse climates and habitats across 19 degrees of latitude. rowley has pointed out this is unusual for a bird species with a wide range and has postulated that breeding is initiated by day length. rarely, breeding can take place in may, june or october. australian ravens generally nest in tall trees, never near to the ground as some species do. the nest also functions as a lookout post and so tall or emergent\", \"license\": \"CC-BY-SA-3.0\", \"token_start\": 4324, \"source_row\": 49964, \"source\": \"https://huggingface.co/datasets/Salesforce/wikitext/tree/b08601e04326c79dfdd32d625aee71d232d685c3/wikitext-103-raw-v1\", \"title\": \"Australian raven\", \"token_end\": 4544, \"cosine_distance\": 0.32437366247177124}], \"note\": \"Nearest passages are candidates, not proof of relevance; abstain if they do not answer the question.\"}",
-              "id": "lc_3ad87f80-67b3-440f-a024-a9fe0749defa"
+              "text": "{\"passages\": [{\"id\": \"passage-00016828\", \"text\": \"1827, its species name highlighting its similarity with the carrion crow ( c. corone ). two subspecies are recognised, which differ slightly in calls and are quite divergent genetically. the preferred habitat is open woodland and transitional zones. it has adapted well to urban environments and is a common city bird in sydney, canberra and perth. an omnivorous and opportunistic feeder, it eats a wide variety of plant and animal material, as well as food waste from urban areas. in eastern australia its range is strongly correlated with the presence of sheep, and it has been blamed for killing lambs. however, this is very rare, and the raven most often scavenges for afterbirth and stillborn animals as well as newborn lamb faeces. the australian raven is territorial, with pairs generally bonding for life. breeding takes place between july and september, with almost no variation across its range. the nest is a bowl @ - @ shaped structure of sticks sited high in a tree, or occasionally in a man @ - @ made structure such as a windmill or other building. = =\", \"license\": \"CC-BY-SA-3.0\", \"source\": \"https://huggingface.co/datasets/Salesforce/wikitext/tree/b08601e04326c79dfdd32d625aee71d232d685c3/wikitext-103-raw-v1\", \"title\": \"Australian raven\", \"token_end\": 408, \"token_start\": 188, \"source_row\": 49964, \"cosine_distance\": 0.2461528778076172}, {\"id\": \"passage-00016848\", \"text\": \"##worms are rarely eaten. australian ravens have been reported killing birds of such size as young galahs ( eolophus roseicapillus ) and starlings ( sturnus vulgaris ). most mammals are eaten as carrion, as many species are too large for the raven to kill, though young rabbits are a frequent prey item. australian ravens drink water frequently, up to ten times a day in hot weather. birds have been observed dunking pieces of meat in water before eating them, as well as doing the same with hard biscuits to make them soggy and soft. australian ravens are intelligent birds, and like many other corvids have innovative methods of seeking out food. foraging takes place in the early morning or late afternoon ; birds rest in the hotter part of the day. food is taken mainly from the ground, birds either finding objects while flying overhead, or by walking along and looking. however, they occasionally feed in trees \\u2014 australian ravens forage eucalypt foliage for christmas beetles ( anoplognathus ), and devote a substantial amount of time to look\", \"source_row\": 49964, \"token_end\": 4168, \"license\": \"CC-BY-SA-3.0\", \"source\": \"https://huggingface.co/datasets/Salesforce/wikitext/tree/b08601e04326c79dfdd32d625aee71d232d685c3/wikitext-103-raw-v1\", \"title\": \"Australian raven\", \"token_start\": 3948, \"cosine_distance\": 0.3018946051597595}, {\"id\": \"passage-00016847\", \"text\": \"neck. this takes place particularly in autumn, winter and spring, and is important in pair bonding. either member may initiate it, generally by landing near the other bird, shuffling next to its mate, then bending its head forward and presenting its nape. = = = feeding = = = the australian raven is omnivorous, though eats more meat than smaller corvids. its diet in summer contains a high proportion of insects, while more plant items are eaten in autumn. flesh makes up over half its diet in winter. invertebrates commonly eaten include spiders, millipedes, centipedes ( which ravens behead before eating ), grasshoppers, cicadas and caterpillars ( especially of the family noctuidae ), which are important in feeding nestlings. australian ravens sometimes eat yabbies ( cherax destructor ) from the edges of dams. unusually for a ground @ - @ feeding omnivore, earthworms are rarely eaten. australian ravens have been reported killing birds of such size as young galahs ( eolophus roseicapillus ) and starlings\", \"license\": \"CC-BY-SA-3.0\", \"token_end\": 3980, \"token_start\": 3760, \"title\": \"Australian raven\", \"source\": \"https://huggingface.co/datasets/Salesforce/wikitext/tree/b08601e04326c79dfdd32d625aee71d232d685c3/wikitext-103-raw-v1\", \"source_row\": 49964, \"cosine_distance\": 0.3070254921913147}, {\"id\": \"passage-00016845\", \"text\": \"distinguishing australian corvids has hampered understanding of seasonal movements. the australian raven is thought to be largely sedentary, with most movement of over 16 km ( 9 @. @ 9 mi ) due to flocks of non @ - @ breeding subadult birds. juvenile birds leave their parents and join flocks when they are four or five months old. smaller flocks of 8 \\u2013 30 birds stay within an area of around 260 square kilometres, while larger flocks of up to 300 birds may travel hundreds of kilometres seeking food. a single breeding pair and their brood can occupy a territory of up to around 120 hectares ( 300 acres ) and remains there year @ - @ round, though groups of ravens may enter this area to forage. australian ravens will defend their territory by chasing, dive @ - @ bombing and occasionally striking the backs of birds of prey, foxes or even people. they generally mate for life, though occasionally one male has been found to be mated with two females in adjacent territories. if the female dies, the male australian raven maintains the territory and finds another mate, while\", \"license\": \"CC-BY-SA-3.0\", \"source_row\": 49964, \"source\": \"https://huggingface.co/datasets/Salesforce/wikitext/tree/b08601e04326c79dfdd32d625aee71d232d685c3/wikitext-103-raw-v1\", \"token_end\": 3604, \"title\": \"Australian raven\", \"token_start\": 3384, \"cosine_distance\": 0.31016993522644043}], \"note\": \"Nearest passages are candidates, not proof of relevance; abstain if they do not answer the question.\"}",
+              "id": "lc_a058f38d-0e0d-4b23-94ac-d7ccefcfc794"
             }
           ],
           "tool_calls": [],
-          "tool_call_id": "call_2MLmizN2t3EpCPeQujhCwtqW"
+          "tool_call_id": "call_4cRMu4DK9fw8bwB8s4gdOfGF"
         }
       ],
       "tool_definitions": null,
@@ -508,7 +508,7 @@
         "langgraph_node": "tools",
         "langgraph_step": 3,
         "report_turn": 1,
-        "thread_id": "89b1f5fd-bee1-4f31-8011-6a15e0d76a41",
+        "thread_id": "ad2cde9e-9c7a-4768-be1d-7995e1955394",
         "cache_ttl": "5m",
         "tags": [
           "seq:step:1"
@@ -517,12 +517,12 @@
       }
     },
     {
-      "id": "01a0cc57-cb2f-76a3-bd15-ee15093a988a",
-      "parent_id": "01a0cc57-c207-7272-b7d9-b01bf2e20214",
+      "id": "01a0cce1-4186-7110-8d49-f4bfb6630d0a",
+      "parent_id": "01a0cce1-39d5-7553-bf10-ba7be380d1bf",
       "name": "model",
       "kind": "workflow",
-      "start_ns": 1790134700847707000,
-      "end_ns": 1790134703622028000,
+      "start_ns": 1790143709574257000,
+      "end_ns": 1790143713543015000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -536,7 +536,7 @@
         "langgraph_node": "model",
         "langgraph_step": 4,
         "report_turn": 1,
-        "thread_id": "89b1f5fd-bee1-4f31-8011-6a15e0d76a41",
+        "thread_id": "ad2cde9e-9c7a-4768-be1d-7995e1955394",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:4"
@@ -545,21 +545,21 @@
       }
     },
     {
-      "id": "01a0cc57-cb32-77f3-a198-6f670137cc00",
-      "parent_id": "01a0cc57-cb2f-76a3-bd15-ee15093a988a",
+      "id": "01a0cce1-4188-7db0-b4f0-7773d17964e0",
+      "parent_id": "01a0cce1-4186-7110-8d49-f4bfb6630d0a",
       "name": "ChatOpenAI",
       "kind": "model",
-      "start_ns": 1790134700850477000,
-      "end_ns": 1790134703618999000,
+      "start_ns": 1790143709577101000,
+      "end_ns": 1790143713541545000,
       "status": "ok",
       "provider": "openai",
       "model": "gpt-5.6-luna",
       "effort": null,
       "usage": {
-        "input_tokens": 3628,
-        "output_tokens": 177,
+        "input_tokens": 3614,
+        "output_tokens": 167,
         "cache_read": 2120,
-        "cache_write": 1505,
+        "cache_write": 1491,
         "cache_write_5m": 0,
         "cache_write_1h": 0,
         "reasoning": 0
@@ -582,19 +582,19 @@
           "role": "ai",
           "content": [
             {
-              "id": "rs_0521a1d043594e59006ab349ab657087d29786bc4a0f003c21",
+              "id": "rs_0d6e74723e59c0ee006ab36cdc92a487d2828611dae5364d21",
               "summary": [],
               "type": "reasoning",
               "content": [],
               "index": 0,
-              "encrypted_content": "gAAAAABqs0mr2GPBIL7N_upp8SRvTN4YgpTQj4Y7VrKYBtiVpwjdcFmrg59fPGDkTqXCbLHYHzKtudFRriiOdSPMJ2kspw_oClO2geS-AH3YHDX08W66gG_qwYyRrbXE9gN0z8kVvLQm7mj9HahGv0KWM9d-H7og1qW_ZMUKcXdfFjyOVcxOprUjYTuKYuSHoDTchkG6wnZukUvSKpMIjNmye9BuUSvSyL3gtqLfwF0mStMgBV7Dqp0zoUnZ2TmDpDya5FoPSL1gYb7alH1Ub2kLVclws005nOGaEn7LZ2Fgh47o-mGmGSuD9NQdvUPgIctl8MIZ5dhhhF5L9o7MVrGuRMKpzL2QyMCj1MD-AD6H2vnJzERtswF_IuPBs45KbrI0ojqNSZuJlY1miOXAucv1a7szww8lnwLoss8qEdrmoqUnQCTegWzaxIat7r9fJxGSlysL9DujO60-p8FM1gRP9CuyKrcZ5pUJsUXYwwndfjl3jmheEg7UjxnMLfynZKc5zLbiGzHSy02WkSOmozJ3-bZezUbaGdT7p4cIT0W1GqrHuEPJuM9ten_LZm3rxufS1FhyDi4altTSk3NuOL-1lbZXGv8AKtnBAR_xEi5UPPS9ROFKhpRZquYm75vxL-AN-zRvWLCs-aMAXuE60lTa-xR4b5L3B38kZNYu7eeHzCk8O2Z8yQvn4PGFL83-dCwjSqh52EiVXtLgy3JYfojS0eJ6j9GAaq9Ptb21kpc5sMgLcU0NBnttZHfUgqOE3skLo1OKH_UZaooY6nFDd7nAYrhLe4npihKTGjSm1zQ3OUgAG1DxdatZDDo2DeQCBVMbl8kXLjdyE_BxwMCqLtM3WDutuLsyCFiVMDKgCCWm7hUj-Fj4gLKScdHmAKR22pAertdMiBoH0OYZYsGZlQ_rTHlAEaXZOr8xVyzF3wg0Yy4zqhdxGJ6-v-Y8gn2pKkh1X-80rdaOdPEyvMFhAYJURsAKjZt-2Vopxhl8No79zeYMgVN0SPLYUxqWuEepr8P8ispDBJe3CQ2RdCiypeJVHoluh1ayWNJAZK6VtMhnSFj5pDtNXzckKATcMXrlRtMYEgFEzRHJjMFMZQJXHUCXyou2MEn90PBaaiihxFaFlWSc2iA_2L3iwI2QIJbMupBkGy1d2vX4CXceIeOX8a5H0bkCG1zx8jjaFUWYLR4E761MpVa9QElHybGNobAc80sPm_1k3sWN"
+              "encrypted_content": "gAAAAABqs2zcmzWgZ1MujL2Qad03VH6_xX-OAdJ0mJvKRf_7vZCaOLnrS6KWnVISB2fdr3hsiDOczyX6xHzj0kvTBKTk-jjnpLSYmXfqerYOfL20oeCmFWep3RunLeJ62lRLF4wJabgohXUewPH-MSzJ2kj5t_ZOZ7GGOqnxhX49eYv99l2N8rkbvgO065A-8QDvOMYsDcb9GLRdtcWRND5YDsIya45G6myEl88F4VpySu0hLYXwM7VYw9o5fCREENmFjct4TF9ypNVw1FRlfPDGSiuUcDzUK38pHZWwRr_hRTAD4MtvOWjBJcgMeYpdbJNSIsOc4PRsTPTiowTfOGZCvfcP3BP-TWjLfml-aJyYRvXcU2C4EjdjJz-R3tJp5JDVn26paU18bB3KIscPfw6o9no5d0loqW6lMa0ejLGJd9dh5iubKAp3HBr7yWdcPMMy0wxRZs9G-_Dm--rOY8On4ubFNlztCSuiF_d2lveUWYJKfsxMPfu7aVddMfqzBfazF5KiAhrhFTZUdMzKfSLAwMLiu_bxdOto3Gmj8zJ2GO6pA846iJ0tQDFtMNMWFKsp1H4aNBTeBkhraxXqAgpq7Zg7jP7CEKsiEFegTx-mjQ07QAAuYkfLlEGESwmp7WIX6VFfaWLqg3XT7azVJNo29D7xAA_JxYAZsPtOQIVjHGGbcIAhPKnZmFEEgqcjj2JAN1QPi4HL7K0lDJaEKmUxGqGHWfeN1bEDGv2MFZbzXO-nxgHLyqltZtuULoJJJz9xdkklukEFQVjhnkfrd3_8eaBW3QVSfdpj2qqWNr1r25nFeZOyayLqocLUUPzwI-5EkGuMbQu7XXHC7YIoPAxRDA3cBlFfm1Bfm8lnnlxBZlAI5GyIkB0RscNfVxfRlTVhNIHVxbQNJhASfLmdXJNBbAiaV9qLGyI1EwEJR0UiEt0yts5dyFsZxHimJAHhzZOKZn2kfJvf37_kxuwmwq1IL5r8GfKfQO3uE5mTMCscfsdqnMDsLZNwHlLbhmiqaCPj2b1Ze9-mU1PPUn1cJss3vzOwa_WR5BYt16wAlhapbOF5Pteo79Afyduyp1XNrKH_XxQMfGESHVMMxoSJ58DQLBsUtTfXxTia41hCA1S8Cc1Bj8gJ2w_pKaEWA_p-hJ8xlpFIduhUe1GOV5faFaWsca5WFowujZy1IfIYC5wNhHGZUJ1QBf9Fix8qUoswbJtyxM14-yb2"
             },
             {
               "type": "function_call",
               "name": "semantic_search_wikipedia",
-              "arguments": "{\"query\":\"How has the Australian raven adapted to urban environments, including diet, nesting, behavior, and interactions with people?\"}",
-              "call_id": "call_2MLmizN2t3EpCPeQujhCwtqW",
-              "id": "fc_0521a1d043594e59006ab349aba16087d2b70d760321a654ee",
+              "arguments": "{\"query\":\"Australian raven adaptations to urban environments behavior diet nesting and human settlements\"}",
+              "call_id": "call_4cRMu4DK9fw8bwB8s4gdOfGF",
+              "id": "fc_0d6e74723e59c0ee006ab36cdcd33c87d28bd2f99106e0de6f",
               "index": 1
             }
           ],
@@ -602,9 +602,9 @@
             {
               "name": "semantic_search_wikipedia",
               "args": {
-                "query": "How has the Australian raven adapted to urban environments, including diet, nesting, behavior, and interactions with people?"
+                "query": "Australian raven adaptations to urban environments behavior diet nesting and human settlements"
               },
-              "id": "call_2MLmizN2t3EpCPeQujhCwtqW",
+              "id": "call_4cRMu4DK9fw8bwB8s4gdOfGF",
               "type": "tool_call"
             }
           ],
@@ -615,12 +615,12 @@
           "content": [
             {
               "type": "text",
-              "text": "{\"passages\": [{\"id\": \"passage-00016828\", \"text\": \"1827, its species name highlighting its similarity with the carrion crow ( c. corone ). two subspecies are recognised, which differ slightly in calls and are quite divergent genetically. the preferred habitat is open woodland and transitional zones. it has adapted well to urban environments and is a common city bird in sydney, canberra and perth. an omnivorous and opportunistic feeder, it eats a wide variety of plant and animal material, as well as food waste from urban areas. in eastern australia its range is strongly correlated with the presence of sheep, and it has been blamed for killing lambs. however, this is very rare, and the raven most often scavenges for afterbirth and stillborn animals as well as newborn lamb faeces. the australian raven is territorial, with pairs generally bonding for life. breeding takes place between july and september, with almost no variation across its range. the nest is a bowl @ - @ shaped structure of sticks sited high in a tree, or occasionally in a man @ - @ made structure such as a windmill or other building. = =\", \"title\": \"Australian raven\", \"source_row\": 49964, \"source\": \"https://huggingface.co/datasets/Salesforce/wikitext/tree/b08601e04326c79dfdd32d625aee71d232d685c3/wikitext-103-raw-v1\", \"license\": \"CC-BY-SA-3.0\", \"token_start\": 188, \"token_end\": 408, \"cosine_distance\": 0.2283846139907837}, {\"id\": \"passage-00016844\", \"text\": \"areas. similarly, in inland australia it can share range with the little crow, as the two do not appear to compete. however, the ranges of similar @ - @ sized forest raven and torresian crow only narrowly overlap with the australian raven as all three compete with each other. in central and western regions, australian ravens and torresian crows vye for the scattered uncommon trees and outcrops, and only one or the other are found there. it co @ - @ occurs with the forest raven in northeastern new south wales from port stephens northwards. the australian raven has adapted very well to human habitation in some cities and is the most common corvid in canberra, sydney and perth ; in melbourne and adelaide it is replaced by the little raven, and by the torresian crow in brisbane. its large range, abundance and increasing population mean it is classified as least concern on the iucn red list. = = behaviour = = difficulties in distinguishing australian corvids has hampered understanding of seasonal movements. the australian raven is thought to be largely sedentary, with most movement of over 16 km\", \"token_end\": 3416, \"source\": \"https://huggingface.co/datasets/Salesforce/wikitext/tree/b08601e04326c79dfdd32d625aee71d232d685c3/wikitext-103-raw-v1\", \"token_start\": 3196, \"source_row\": 49964, \"title\": \"Australian raven\", \"license\": \"CC-BY-SA-3.0\", \"cosine_distance\": 0.3086702227592468}, {\"id\": \"passage-00016845\", \"text\": \"distinguishing australian corvids has hampered understanding of seasonal movements. the australian raven is thought to be largely sedentary, with most movement of over 16 km ( 9 @. @ 9 mi ) due to flocks of non @ - @ breeding subadult birds. juvenile birds leave their parents and join flocks when they are four or five months old. smaller flocks of 8 \\u2013 30 birds stay within an area of around 260 square kilometres, while larger flocks of up to 300 birds may travel hundreds of kilometres seeking food. a single breeding pair and their brood can occupy a territory of up to around 120 hectares ( 300 acres ) and remains there year @ - @ round, though groups of ravens may enter this area to forage. australian ravens will defend their territory by chasing, dive @ - @ bombing and occasionally striking the backs of birds of prey, foxes or even people. they generally mate for life, though occasionally one male has been found to be mated with two females in adjacent territories. if the female dies, the male australian raven maintains the territory and finds another mate, while\", \"title\": \"Australian raven\", \"source\": \"https://huggingface.co/datasets/Salesforce/wikitext/tree/b08601e04326c79dfdd32d625aee71d232d685c3/wikitext-103-raw-v1\", \"token_end\": 3604, \"license\": \"CC-BY-SA-3.0\", \"source_row\": 49964, \"token_start\": 3384, \"cosine_distance\": 0.31045806407928467}, {\"id\": \"passage-00016850\", \"text\": \"or restaurants, abattoirs, piggeries and farmyards. in one isolated study, they were observed feeding on nectar from eucalypt flowers. australian ravens sometimes forage in mixed @ - @ species flocks with any of the other four species of australian corvids. sometimes they are aggressive with little ravens if both are at a food source and drive them off, though not if the smaller species greatly outnumbers the larger. = = = breeding = = = australian ravens begin breeding once they are three years old. breeding season is from july to september, with no substantial difference in timing across its range around the country despite it inhabiting a range of diverse climates and habitats across 19 degrees of latitude. rowley has pointed out this is unusual for a bird species with a wide range and has postulated that breeding is initiated by day length. rarely, breeding can take place in may, june or october. australian ravens generally nest in tall trees, never near to the ground as some species do. the nest also functions as a lookout post and so tall or emergent\", \"license\": \"CC-BY-SA-3.0\", \"token_start\": 4324, \"source_row\": 49964, \"source\": \"https://huggingface.co/datasets/Salesforce/wikitext/tree/b08601e04326c79dfdd32d625aee71d232d685c3/wikitext-103-raw-v1\", \"title\": \"Australian raven\", \"token_end\": 4544, \"cosine_distance\": 0.32437366247177124}], \"note\": \"Nearest passages are candidates, not proof of relevance; abstain if they do not answer the question.\"}",
-              "id": "lc_3ad87f80-67b3-440f-a024-a9fe0749defa"
+              "text": "{\"passages\": [{\"id\": \"passage-00016828\", \"text\": \"1827, its species name highlighting its similarity with the carrion crow ( c. corone ). two subspecies are recognised, which differ slightly in calls and are quite divergent genetically. the preferred habitat is open woodland and transitional zones. it has adapted well to urban environments and is a common city bird in sydney, canberra and perth. an omnivorous and opportunistic feeder, it eats a wide variety of plant and animal material, as well as food waste from urban areas. in eastern australia its range is strongly correlated with the presence of sheep, and it has been blamed for killing lambs. however, this is very rare, and the raven most often scavenges for afterbirth and stillborn animals as well as newborn lamb faeces. the australian raven is territorial, with pairs generally bonding for life. breeding takes place between july and september, with almost no variation across its range. the nest is a bowl @ - @ shaped structure of sticks sited high in a tree, or occasionally in a man @ - @ made structure such as a windmill or other building. = =\", \"license\": \"CC-BY-SA-3.0\", \"source\": \"https://huggingface.co/datasets/Salesforce/wikitext/tree/b08601e04326c79dfdd32d625aee71d232d685c3/wikitext-103-raw-v1\", \"title\": \"Australian raven\", \"token_end\": 408, \"token_start\": 188, \"source_row\": 49964, \"cosine_distance\": 0.2461528778076172}, {\"id\": \"passage-00016848\", \"text\": \"##worms are rarely eaten. australian ravens have been reported killing birds of such size as young galahs ( eolophus roseicapillus ) and starlings ( sturnus vulgaris ). most mammals are eaten as carrion, as many species are too large for the raven to kill, though young rabbits are a frequent prey item. australian ravens drink water frequently, up to ten times a day in hot weather. birds have been observed dunking pieces of meat in water before eating them, as well as doing the same with hard biscuits to make them soggy and soft. australian ravens are intelligent birds, and like many other corvids have innovative methods of seeking out food. foraging takes place in the early morning or late afternoon ; birds rest in the hotter part of the day. food is taken mainly from the ground, birds either finding objects while flying overhead, or by walking along and looking. however, they occasionally feed in trees \\u2014 australian ravens forage eucalypt foliage for christmas beetles ( anoplognathus ), and devote a substantial amount of time to look\", \"source_row\": 49964, \"token_end\": 4168, \"license\": \"CC-BY-SA-3.0\", \"source\": \"https://huggingface.co/datasets/Salesforce/wikitext/tree/b08601e04326c79dfdd32d625aee71d232d685c3/wikitext-103-raw-v1\", \"title\": \"Australian raven\", \"token_start\": 3948, \"cosine_distance\": 0.3018946051597595}, {\"id\": \"passage-00016847\", \"text\": \"neck. this takes place particularly in autumn, winter and spring, and is important in pair bonding. either member may initiate it, generally by landing near the other bird, shuffling next to its mate, then bending its head forward and presenting its nape. = = = feeding = = = the australian raven is omnivorous, though eats more meat than smaller corvids. its diet in summer contains a high proportion of insects, while more plant items are eaten in autumn. flesh makes up over half its diet in winter. invertebrates commonly eaten include spiders, millipedes, centipedes ( which ravens behead before eating ), grasshoppers, cicadas and caterpillars ( especially of the family noctuidae ), which are important in feeding nestlings. australian ravens sometimes eat yabbies ( cherax destructor ) from the edges of dams. unusually for a ground @ - @ feeding omnivore, earthworms are rarely eaten. australian ravens have been reported killing birds of such size as young galahs ( eolophus roseicapillus ) and starlings\", \"license\": \"CC-BY-SA-3.0\", \"token_end\": 3980, \"token_start\": 3760, \"title\": \"Australian raven\", \"source\": \"https://huggingface.co/datasets/Salesforce/wikitext/tree/b08601e04326c79dfdd32d625aee71d232d685c3/wikitext-103-raw-v1\", \"source_row\": 49964, \"cosine_distance\": 0.3070254921913147}, {\"id\": \"passage-00016845\", \"text\": \"distinguishing australian corvids has hampered understanding of seasonal movements. the australian raven is thought to be largely sedentary, with most movement of over 16 km ( 9 @. @ 9 mi ) due to flocks of non @ - @ breeding subadult birds. juvenile birds leave their parents and join flocks when they are four or five months old. smaller flocks of 8 \\u2013 30 birds stay within an area of around 260 square kilometres, while larger flocks of up to 300 birds may travel hundreds of kilometres seeking food. a single breeding pair and their brood can occupy a territory of up to around 120 hectares ( 300 acres ) and remains there year @ - @ round, though groups of ravens may enter this area to forage. australian ravens will defend their territory by chasing, dive @ - @ bombing and occasionally striking the backs of birds of prey, foxes or even people. they generally mate for life, though occasionally one male has been found to be mated with two females in adjacent territories. if the female dies, the male australian raven maintains the territory and finds another mate, while\", \"license\": \"CC-BY-SA-3.0\", \"source_row\": 49964, \"source\": \"https://huggingface.co/datasets/Salesforce/wikitext/tree/b08601e04326c79dfdd32d625aee71d232d685c3/wikitext-103-raw-v1\", \"token_end\": 3604, \"title\": \"Australian raven\", \"token_start\": 3384, \"cosine_distance\": 0.31016993522644043}], \"note\": \"Nearest passages are candidates, not proof of relevance; abstain if they do not answer the question.\"}",
+              "id": "lc_a058f38d-0e0d-4b23-94ac-d7ccefcfc794"
             }
           ],
           "tool_calls": [],
-          "tool_call_id": "call_2MLmizN2t3EpCPeQujhCwtqW"
+          "tool_call_id": "call_4cRMu4DK9fw8bwB8s4gdOfGF"
         }
       ],
       "response": [
@@ -629,10 +629,10 @@
           "content": [
             {
               "type": "text",
-              "text": "The Australian raven has adapted to cities in several ways:\n\n- **Flexible diet:** It is an opportunistic omnivore, eating plant and animal matter as well as food waste from urban areas. [passage-00016828]\n- **Use of built structures:** Although it usually nests high in trees, it sometimes builds nests on human-made structures such as windmills or buildings. [passage-00016828]\n- **Tolerance of human habitation:** It has adapted particularly well to cities and is common in Sydney, Canberra, and Perth. [passage-00016828]\n- **Territorial behavior:** Breeding pairs maintain territories year-round and may defend them aggressively, including from people. [passage-00016845]\n\nOverall, its generalist feeding habits, ability to exploit urban nesting sites, and territorial adaptability help it thrive in Australian cities.",
+              "text": "The Australian raven has adapted to cities in several ways:\n\n- **Flexible feeding:** It is an opportunistic omnivore, eating plant and animal matter as well as **food waste from urban areas**.[passage-00016828]\n- **Use of artificial structures:** Although it usually nests high in trees, it sometimes builds nests on **human-made structures**, including windmills and other buildings.[passage-00016828]\n- **Behavioral flexibility:** Its intelligence and innovative foraging methods help it locate and process varied food sources; it may even soften hard food by dunking it in water.[passage-00016848]\n- **Tolerance of urban conditions:** These adaptations have enabled it to become a common city bird in **Sydney, Canberra, and Perth**.[passage-00016828]",
               "phase": "final_answer",
               "index": 0,
-              "id": "msg_0521a1d043594e59006ab349ad947487d2bcc5a30f4d0811a8"
+              "id": "msg_0d6e74723e59c0ee006ab36cde8c7887d2806ced061893bbf2"
             }
           ],
           "tool_calls": [],
@@ -911,13 +911,13 @@
         "langgraph_node": "model",
         "langgraph_step": 4,
         "report_turn": 1,
-        "thread_id": "89b1f5fd-bee1-4f31-8011-6a15e0d76a41",
+        "thread_id": "ad2cde9e-9c7a-4768-be1d-7995e1955394",
         "cache_ttl": "5m",
         "tags": [
           "seq:step:1"
         ],
         "description": "Generate the next assistant message or tool request from the current conversation.",
-        "input_message_bytes": 8595,
+        "input_message_bytes": 8424,
         "message_count": 4,
         "message_roles": [
           "system",
@@ -928,5 +928,5 @@
       }
     }
   ],
-  "output": "[{'type': 'text', 'text': 'The Australian raven has adapted to cities in several ways:\\n\\n- **Flexible diet:** It is an opportunistic omnivore, eating plant and animal matter as well as food waste from urban areas. [passage-00016828]\\n- **Use of built structures:** Although it usually nests high in trees, it sometimes builds nests on human-made structures such as windmills or buildings. [passage-00016828]\\n- **Tolerance of human habitation:** It has adapted particularly well to cities and is common in Sydney, Canberra, and Perth. [passage-00016828]\\n- **Territorial behavior:** Breeding pairs maintain territories year-round and may defend them aggressively, including from people. [passage-00016845]\\n\\nOverall, its generalist feeding habits, ability to exploit urban nesting sites, and territorial adaptability help it thrive in Australian cities.', 'phase': 'final_answer', 'index': 0, 'id': 'msg_0521a1d043594e59006ab349ad947487d2bcc5a30f4d0811a8'}]"
+  "output": "[{'type': 'text', 'text': 'The Australian raven has adapted to cities in several ways:\\n\\n- **Flexible feeding:** It is an opportunistic omnivore, eating plant and animal matter as well as **food waste from urban areas**.[passage-00016828]\\n- **Use of artificial structures:** Although it usually nests high in trees, it sometimes builds nests on **human-made structures**, including windmills and other buildings.[passage-00016828]\\n- **Behavioral flexibility:** Its intelligence and innovative foraging methods help it locate and process varied food sources; it may even soften hard food by dunking it in water.[passage-00016848]\\n- **Tolerance of urban conditions:** These adaptations have enabled it to become a common city bird in **Sydney, Canberra, and Perth**.[passage-00016828]', 'phase': 'final_answer', 'index': 0, 'id': 'msg_0d6e74723e59c0ee006ab36cde8c7887d2806ced061893bbf2'}]"
 }

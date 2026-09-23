@@ -2,7 +2,7 @@
 # Application tools
 
 `echo_tool.py` supplies `echo_tool(text: str)`, used by the reference-chat
-agent and workflow specialist. It returns `Your input was: ` followed by the
+agent and isolated subagent. It returns `Your input was: ` followed by the
 provided string unchanged. It makes no network or model calls and supplies no
 independent factual evidence. `service_evidence.py` supplies the
 fictional inspection and plan checks used by the investigation agent.

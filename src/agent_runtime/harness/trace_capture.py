@@ -144,6 +144,7 @@ class TraceCapture(BaseCallbackHandler):
                 "report_description",
                 "report_purpose",
                 "report_turn",
+                "report_history_id",
                 "thread_id",
                 "cache_ttl",
             ):
@@ -260,6 +261,27 @@ class TraceCapture(BaseCallbackHandler):
         LangChain supplies ``inputs`` for the starting chain, but this handler
         records only its span/ancestry; workflow inputs are not saved here."""
         self._start("workflow", serialized, run_id, parent_run_id, **kwargs)
+
+    def on_custom_event(self, name, data, *, run_id, **kwargs):
+        """Attach count-only compaction evidence to its existing middleware span.
+
+        Custom events use their enclosing runnable's ID. Whitelist the event
+        fields so arbitrary event payloads cannot enter content-disabled traces.
+        The event has no usage of its own; summary model calls remain billable.
+        """
+        if name != "context_compaction" or run_id not in self.active:
+            return
+        fields = {
+            "compaction_event", "compaction_before_tokens", "compaction_after_tokens",
+            "compaction_before_basis", "compaction_after_basis",
+            "compaction_before_messages", "compaction_after_messages",
+            "compaction_trigger_tokens", "compaction_keep_tokens",
+            "compaction_max_input_tokens",
+        }
+        self._annotate(run_id, {
+            key: value for key, value in data.items()
+            if key in fields and type(value) in (str, int)
+        })
 
     def on_chat_model_start(
         self, serialized, messages, *, run_id, parent_run_id=None, **kwargs

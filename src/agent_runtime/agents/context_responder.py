@@ -11,7 +11,7 @@ from langchain.agents import create_agent
 
 SYSTEM_PROMPT = (
     "You are the responding peer. Read the user's request and the planning brief. "
-    "Delegate an echo demonstration to workflow-specialist using task with "
+    "Delegate an echo demonstration to isolated-subagent using task with "
     "a self-contained assignment. Then answer concisely using the returned summary. "
     "Preserve user constraints from the shared conversation or its summary."
 )

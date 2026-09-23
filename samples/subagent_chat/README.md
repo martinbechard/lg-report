@@ -42,10 +42,10 @@ number of calls. Environment variables override the sample's `.env`.
 - `src/agent_runtime/workflows/subagent_chat.py` composes the participating agents.
 - `src/agent_runtime/agents/delegating_parent.py` owns the agent instructions and registration.
 - `src/agent_runtime/tools/echo_tool.py` owns the local echo tool.
-- `src/agent_runtime/agents/workflow_specialist.py` owns the child role and echo tool.
+- `src/agent_runtime/agents/isolated_subagent.py` owns the child role and echo tool.
 - `scripted_run.py` describes one conversation in execution order. `client` entries
   supply static prompts; `ai` entries supply the workflow-created model;
-  `workflow-specialist` entries supply the model created by that agent.
+  `isolated-subagent` entries supply the model created by that agent.
   Tool entries document expected observations; actual tools still run.
 - `src/agent_runtime/harness/model_factory.py` provides
   `build_model(model_name=None, *, caller)`. Omit the name to use `LG_MODEL`.
@@ -63,7 +63,7 @@ number of calls. Environment variables override the sample's `.env`.
   requests are needed, attaching a `ScriptPrompter` to that client.
 
 The workflow calls `build_model(caller="workflow")` and passes that model to the
-parent. The specialist calls `build_model(caller="workflow-specialist")` itself.
+parent. The specialist calls `build_model(caller="isolated-subagent")` itself.
 Both calls use the same factory in live and simulated runs. Outside the runtime's
 construction scope the factory defaults to real models; live errors propagate.
 A model retains its mode and independent response cursor after the scope ends.
@@ -72,7 +72,7 @@ does not infer separate response streams for multiple agents sharing one object.
 
 The specialist dictionary explicitly supplies its own system prompt, model, and
 echo tool. The parent does not have that echo tool. Its generated `task`
-request selects `workflow-specialist` and supplies a self-contained assignment.
+request selects `isolated-subagent` and supplies a self-contained assignment.
 DeepAgents performs the invocation and returns the specialist's final message as
 the parent's tool result. The application never calls the specialist manually.
 
@@ -84,7 +84,7 @@ uses only the named specialist and the echo tool.
 
 One user turn contains **four model requests and two tool executions**:
 
-1. Parent R1 emits a `task` request for `workflow-specialist`.
+1. Parent R1 emits a `task` request for `isolated-subagent`.
 2. Inside that task, specialist R2 requests `echo_tool`.
 3. The echo executes; specialist R3 consumes the result and returns a summary.
 4. Parent R4 consumes that summary and produces the final answer.

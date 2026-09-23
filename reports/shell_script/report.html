@@ -3,6 +3,8 @@
 <style>
 :root{color-scheme:light;--ink:#193e42;--muted:#617679;--line:#d5e0dc;--accent:#087d6c}*{box-sizing:border-box}body{margin:0;background:#f4f6f2;color:var(--ink);font:14px/1.5 system-ui,sans-serif}main{padding:16px 32px;max-width:1800px;margin:auto}header{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;border-top:3px solid var(--accent);padding:8px 0}.eyebrow{text-transform:uppercase;font-size:11px;letter-spacing:.15em;color:var(--accent)}h1{font-size:24px;margin:0}h2{font-size:22px}p{color:var(--muted)}.cards{display:flex;gap:12px 28px;flex-wrap:wrap;margin:8px 0 16px;padding:8px 0;border-bottom:1px solid var(--line)}.card{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}.card strong{font-size:16px}.card span,small{color:var(--muted)}.error-row td,.error-event{background:#ffd3d3!important;color:#8b1010!important}.span-id{font:10px/1.4 monospace;overflow-wrap:anywhere;max-width:120px;min-width:100px;text-align:left}.description-cell{min-width:280px;max-width:380px;text-align:left;white-space:normal}.turn{background:white;border:1px solid var(--line);border-radius:8px;padding:18px;margin:16px 0}.event{padding:12px 16px;margin:12px 0}.llm-event{background:#f5f8fd}.tool-event{border-left:2px solid #c4cbd2;margin-left:20px}.llm-event>.event-heading{color:#173b70}.event pre{margin:8px 0}.rate-date{display:block;font-size:10px;margin-top:3px}.notice{background:#fff1d4;padding:12px 16px;border-radius:8px}.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:15px 0}button{border:1px solid var(--line);border-radius:5px;background:white;color:var(--ink);padding:7px 12px;cursor:pointer}button:focus-visible,summary:focus-visible{outline:3px solid #007cb0;outline-offset:2px}.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:10px;background:white;max-height:75vh}table{border-collapse:separate;border-spacing:0;width:100%;min-width:1500px}th,td{padding:13px 10px;border-bottom:1px solid var(--line);text-align:right;vertical-align:top;min-width:112px}th{position:sticky;top:0;background:#eaf0eb;z-index:2;font-size:11px;text-transform:uppercase;text-align:right}th:first-child,td:first-child{position:sticky;left:0;text-align:left;min-width:310px;max-width:390px;background:#fff;z-index:1;border-right:1px solid var(--line)}th:first-child{z-index:3;background:#eaf0eb}.tokens{font-size:17px;font-weight:600;font-variant-numeric:tabular-nums}.euro,.dollar{font-size:12px;font-weight:400}.euro{color:var(--accent)}.dollar{color:var(--muted)}.kind{font-size:10px;text-transform:uppercase;color:var(--accent)}.step-name{font-weight:600;overflow-wrap:anywhere}.toggle{padding:1px 5px;margin-right:5px}.context{margin-top:6px;font-size:12px;white-space:normal}.context summary{cursor:pointer;color:var(--accent)}dl{margin:8px 0}dt{font-weight:600}dd{margin:0 0 8px;overflow-wrap:anywhere}.status{font-size:11px}.error,.partial{color:#a44c10}.tree-row[hidden]{display:none}.subtree{font-size:10px;color:var(--muted)}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:white;padding:20px;border:1px solid var(--line)}footer{font-size:12px;color:var(--muted);margin-top:24px}@media(max-width:700px){main{padding:16px}h1{font-size:26px}th:first-child,td:first-child{min-width:240px;max-width:270px}}@media print{.toolbar{display:none}.table-wrap{overflow:visible;max-height:none}.tree-row[hidden]{display:table-row}th,td{position:static!important}main{padding:0}table{font-size:9px;min-width:0}}
 
+.compaction-marker{cursor:pointer}.compaction-marker[aria-pressed="true"] line:first-child{stroke-width:3}
+
 /* Conversation metrics use the full card width; reference dates remain in the pricing section. */
 .turn-heading,.event-heading{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
 .turn-heading{justify-content:space-between;margin-bottom:12px}.turn-heading h3{margin:0}
@@ -44,7 +46,7 @@ summary::-webkit-details-marker{display:none}
 </style></head><body><main>
 <header><h1>Shell script</h1><span>ok</span></header>
 
-<div class="cards"><div class="card"><span>Estimated model cost</span><strong>0.000619 EUR</strong><strong>0.000709 USD</strong><small>all calls priced</small></div><div class="card"><span>Input tokens · including cache</span><strong>4,687</strong></div><div class="card"><span>Output tokens · including reasoning</span><strong>57</strong></div><div class="card"><span>Model calls / elapsed</span><strong>2 / 2.46s</strong></div></div>
+<div class="cards"><div class="card"><span>Estimated model cost</span><strong>0.000624 EUR</strong><strong>0.000715 USD</strong><small>all calls priced</small></div><div class="card"><span>Input tokens · including cache</span><strong>4,687</strong></div><div class="card"><span>Output tokens · including reasoning</span><strong>62</strong></div><div class="card"><span>Model calls / elapsed</span><strong>2 / 4.46s</strong></div></div>
 
 
 
@@ -53,19 +55,33 @@ summary::-webkit-details-marker{display:none}
 
 
 <h2>LLM costs by request</h2>
-<p>EUR per LLM invocation, including its response. The thick red line shows cumulative cost on the EUR scale. The thin green line shows input tokens (including cache) as a percentage of model context capacity on the right axis. Hover or focus for details.</p>
+<p>EUR per LLM invocation, including its response. The thick red line shows cumulative cost on the EUR scale. Each colored line follows one retained history. Points show total input + output after each response, including cache and reasoning. Gray points are separate summary calls. Compaction uses this baseline plus estimates for newly added messages; after history replacement, a local estimate is used until fresh usage arrives. Select the option below to show percentage of model context capacity. Thin orange vertical lines mark completed compactions between requests; spacing represents request order, not elapsed time. Hover or focus for details. Click a compaction line to pin its tooltip; click again, click elsewhere, or press Escape to dismiss.</p>
 
 
-<div style="display:flex;gap:18px;flex-wrap:wrap"><span><span style="display:inline-block;width:12px;height:12px;background:#2458a6;margin-right:6px"></span>Fresh input</span><span><span style="display:inline-block;width:12px;height:12px;background:#35a6a0;margin-right:6px"></span>Cache read</span><span><span style="display:inline-block;width:12px;height:12px;background:#dc7952;margin-right:6px"></span>Cache write</span><span><span style="display:inline-block;width:12px;height:12px;background:#658d35;margin-right:6px"></span>Output · non-reasoning</span><span><span style="display:inline-block;width:12px;height:12px;background:#c25989;margin-right:6px"></span>Reasoning</span><span><span style="display:inline-block;width:20px;border-top:3px solid #912c42;margin-right:6px"></span>Cumulative total</span><span><span style="display:inline-block;width:20px;border-top:1.5px solid #17734b;margin-right:6px"></span>Context used (%)</span></div>
-<div style="overflow-x:auto"><svg viewBox="0 0 680 440" style="width:100%;min-width:680px" role="img" aria-label="Stacked EUR costs and context used percentage for each LLM request"><text x="8" y="16" font-size="12">EUR</text>
-<line x1="75" x2="615" y1="290" y2="290" stroke="#d5e0dc"/><text x="68" y="294" text-anchor="end" font-size="10">0.000000</text><line x1="75" x2="615" y1="225" y2="225" stroke="#d5e0dc"/><text x="68" y="229" text-anchor="end" font-size="10">0.000178</text><line x1="75" x2="615" y1="160" y2="160" stroke="#d5e0dc"/><text x="68" y="164" text-anchor="end" font-size="10">0.000356</text><line x1="75" x2="615" y1="95" y2="95" stroke="#d5e0dc"/><text x="68" y="99" text-anchor="end" font-size="10">0.000534</text><line x1="75" x2="615" y1="30" y2="30" stroke="#d5e0dc"/><text x="68" y="34" text-anchor="end" font-size="10">0.000712</text>
+<label><input type="checkbox" id="context-percent-toggle"> Show context out of 100%</label>
+<div style="display:flex;gap:18px;flex-wrap:wrap"><span><span style="display:inline-block;width:12px;height:12px;background:#2458a6;margin-right:6px"></span>Fresh input</span><span><span style="display:inline-block;width:12px;height:12px;background:#35a6a0;margin-right:6px"></span>Cache read</span><span><span style="display:inline-block;width:12px;height:12px;background:#dc7952;margin-right:6px"></span>Cache write</span><span><span style="display:inline-block;width:12px;height:12px;background:#658d35;margin-right:6px"></span>Output · non-reasoning</span><span><span style="display:inline-block;width:12px;height:12px;background:#c25989;margin-right:6px"></span>Reasoning</span><span><span style="display:inline-block;width:20px;border-top:3px solid #912c42;margin-right:6px"></span>Cumulative total</span><span><span style="display:inline-block;width:20px;border-top:1.5px solid #17734b;margin-right:6px"></span><span id="context-legend">Context estimate (input + output)</span></span></div>
+<div style="overflow-x:auto"><svg viewBox="0 0 680 440" style="width:100%;min-width:680px" role="img" id="request-cost-chart" aria-label="Stacked EUR costs and context tokens for each LLM request"><text x="8" y="16" font-size="12">EUR</text>
+<line x1="75" x2="615" y1="290" y2="290" stroke="#d5e0dc"/><text x="68" y="294" text-anchor="end" font-size="10">0.000000</text><line x1="75" x2="615" y1="225" y2="225" stroke="#d5e0dc"/><text x="68" y="229" text-anchor="end" font-size="10">0.000179</text><line x1="75" x2="615" y1="160" y2="160" stroke="#d5e0dc"/><text x="68" y="164" text-anchor="end" font-size="10">0.000359</text><line x1="75" x2="615" y1="95" y2="95" stroke="#d5e0dc"/><text x="68" y="99" text-anchor="end" font-size="10">0.000538</text><line x1="75" x2="615" y1="30" y2="30" stroke="#d5e0dc"/><text x="68" y="34" text-anchor="end" font-size="10">0.000718</text>
 
+<g data-context-mode="tokens">
+<text x="672" y="16" text-anchor="end" font-size="12" fill="#17734b">Context tokens</text>
+<text x="625" y="294.0" font-size="10" fill="#17734b">0</text><text x="625" y="229.0" font-size="10" fill="#17734b">675</text><text x="625" y="164.0" font-size="10" fill="#17734b">1,350</text><text x="625" y="99.0" font-size="10" fill="#17734b">2,025</text><text x="625" y="34.0" font-size="10" fill="#17734b">2,700</text>
+</g>
+<g data-context-mode="percent" style="display:none">
 <text x="672" y="16" text-anchor="end" font-size="12" fill="#17734b">Context %</text>
 <text x="625" y="294" font-size="10" fill="#17734b">0%</text><text x="625" y="229" font-size="10" fill="#17734b">25%</text><text x="625" y="164" font-size="10" fill="#17734b">50%</text><text x="625" y="99" font-size="10" fill="#17734b">75%</text><text x="625" y="34" font-size="10" fill="#17734b">100%</text>
-<rect x="85" y="289.808735866684" width="16" height="0.19126413331600514" fill="#2458a6" tabindex="0" data-cost-tip="Request 1 · Turn 1 · shell_agent | Fresh input | 3 tokens | 0.00000052 EUR"></rect><rect x="85" y="105.95608771667406" width="16" height="183.85264815000994" fill="#dc7952" tabindex="0" data-cost-tip="Request 1 · Turn 1 · shell_agent | Cache write | 2307 tokens | 0.00050314 EUR"></rect><rect x="85" y="95.24529625097777" width="16" height="10.710791465696287" fill="#658d35" tabindex="0" data-cost-tip="Request 1 · Turn 1 · shell_agent | Output · non-reasoning | 28 tokens | 0.00002931 EUR"></rect><rect x="85" y="91.80254185128969" width="16" height="3.4427543996880923" fill="#c25989" tabindex="0" data-cost-tip="Request 1 · Turn 1 · shell_agent | Reasoning | 9 tokens | 0.00000942 EUR"></rect><text x="93.0" y="310" text-anchor="middle" font-size="11">R1</text><text transform="translate(93.0, 322) rotate(-90)" text-anchor="end" dominant-baseline="middle" font-family="monospace" font-size="9" fill="#684296">shell_agent</text><rect x="109" y="289.808735866684" width="16" height="0.19126413331600514" fill="#2458a6" tabindex="0" data-cost-tip="Request 2 · Turn 1 · shell_agent | Fresh input | 3 tokens | 0.00000052 EUR"></rect><rect x="109" y="275.10052401468323" width="16" height="14.708211852000796" fill="#35a6a0" tabindex="0" data-cost-tip="Request 2 · Turn 1 · shell_agent | Cache read | 2307 tokens | 0.00004025 EUR"></rect><rect x="109" y="269.76106695961136" width="16" height="5.339457055071811" fill="#dc7952" tabindex="0" data-cost-tip="Request 2 · Turn 1 · shell_agent | Cache write | 67 tokens | 0.00001461 EUR"></rect><rect x="109" y="262.1105016269712" width="16" height="7.6505653326402046" fill="#658d35" tabindex="0" data-cost-tip="Request 2 · Turn 1 · shell_agent | Output · non-reasoning | 20 tokens | 0.00002094 EUR"></rect><text x="117.0" y="310" text-anchor="middle" font-size="11">R2</text><text transform="translate(117.0, 322) rotate(-90)" text-anchor="end" dominant-baseline="middle" font-family="monospace" font-size="9" fill="#684296">shell_agent</text><line x1="85" x2="125" y1="400" y2="400" stroke="#617679"/><text x="105.0" y="419" text-anchor="middle" font-size="12">Turn 1</text><polyline points="93.0,91.80254185128967 117.0,63.913043478260875" fill="none" stroke="#912c42" stroke-width="3" pointer-events="none"/><circle cx="93.0" cy="91.80254185128967" r="5" fill="#912c42" stroke="white" stroke-width="2" tabindex="0" data-cost-tip="Request 1 · Turn 1 · shell_agent | Cumulative total | 0.00054240 EUR"/><circle cx="117.0" cy="63.913043478260875" r="5" fill="#912c42" stroke="white" stroke-width="2" tabindex="0" data-cost-tip="Request 2 · Turn 1 · shell_agent | Cumulative total | 0.00061872 EUR"/>
+</g>
+<rect x="85" y="289.81034034182505" width="16" height="0.18965965817493913" fill="#2458a6" tabindex="0" data-cost-tip="Request 1 · Turn 1 · shell_agent | Fresh input | 3 tokens | 0.00000052 EUR"></rect><rect x="85" y="107.49999392116482" width="16" height="182.31034642066024" fill="#dc7952" tabindex="0" data-cost-tip="Request 1 · Turn 1 · shell_agent | Cache write | 2307 tokens | 0.00050314 EUR"></rect><rect x="85" y="96.87905306336822" width="16" height="10.620940857796592" fill="#658d35" tabindex="0" data-cost-tip="Request 1 · Turn 1 · shell_agent | Output · non-reasoning | 28 tokens | 0.00002931 EUR"></rect><rect x="85" y="93.46517921621931" width="16" height="3.413873847148905" fill="#c25989" tabindex="0" data-cost-tip="Request 1 · Turn 1 · shell_agent | Reasoning | 9 tokens | 0.00000942 EUR"></rect><text x="93.0" y="310" text-anchor="middle" font-size="11">R1</text><text transform="translate(93.0, 322) rotate(-90)" text-anchor="end" dominant-baseline="middle" font-family="monospace" font-size="9" fill="#684296">shell_agent</text><rect x="109" y="289.81034034182505" width="16" height="0.18965965817493913" fill="#2458a6" tabindex="0" data-cost-tip="Request 2 · Turn 1 · shell_agent | Fresh input | 3 tokens | 0.00000052 EUR"></rect><rect x="109" y="275.2255126281722" width="16" height="14.584827713652821" fill="#35a6a0" tabindex="0" data-cost-tip="Request 2 · Turn 1 · shell_agent | Cache read | 2307 tokens | 0.00004025 EUR"></rect><rect x="109" y="269.9308471707885" width="16" height="5.294665457383719" fill="#dc7952" tabindex="0" data-cost-tip="Request 2 · Turn 1 · shell_agent | Cache write | 67 tokens | 0.00001461 EUR"></rect><rect x="109" y="260.44786426204155" width="16" height="9.482982908746957" fill="#658d35" tabindex="0" data-cost-tip="Request 2 · Turn 1 · shell_agent | Output · non-reasoning | 25 tokens | 0.00002617 EUR"></rect><text x="117.0" y="310" text-anchor="middle" font-size="11">R2</text><text transform="translate(117.0, 322) rotate(-90)" text-anchor="end" dominant-baseline="middle" font-family="monospace" font-size="9" fill="#684296">shell_agent</text><line x1="85" x2="125" y1="400" y2="400" stroke="#617679"/><text x="105.0" y="419" text-anchor="middle" font-size="12">Turn 1</text><polyline points="93.0,93.4651792162193 117.0,63.913043478260875" fill="none" stroke="#912c42" stroke-width="3" pointer-events="none"/><circle cx="93.0" cy="93.4651792162193" r="5" fill="#912c42" stroke="white" stroke-width="2" tabindex="0" data-cost-tip="Request 1 · Turn 1 · shell_agent | Cumulative total | 0.00054240 EUR"/><circle cx="117.0" cy="63.913043478260875" r="5" fill="#912c42" stroke="white" stroke-width="2" tabindex="0" data-cost-tip="Request 2 · Turn 1 · shell_agent | Cumulative total | 0.00062395 EUR"/>
 
-<polyline class="context-line" points="93.0,289.428 117.0,289.41140952380954" fill="none" stroke="#17734b" stroke-width="1.5" pointer-events="none"/>
-<circle cx="93.0" cy="289.428" r="3" fill="#17734b" stroke="white" stroke-width="1" tabindex="0" data-cost-tip="Request 1 · Turn 1 · shell_agent | Context used | 0.220% (2,310 input tokens) | Capacity: 1,050,000 tokens | openai:gpt-5.6-luna | Capacity verified 2026-09-20: https://developers.openai.com/api/docs/models/gpt-5.6-luna"/><circle cx="117.0" cy="289.41140952380954" r="3" fill="#17734b" stroke="white" stroke-width="1" tabindex="0" data-cost-tip="Request 2 · Turn 1 · shell_agent | Context used | 0.226% (2,377 input tokens) | Capacity: 1,050,000 tokens | openai:gpt-5.6-luna | Capacity verified 2026-09-20: https://developers.openai.com/api/docs/models/gpt-5.6-luna"/></svg></div>
+<g data-context-mode="percent" style="display:none">
+<polyline class="context-line" points="93.0,289.4188380952381 117.0,289.405219047619" fill="none" stroke="#17734b" stroke-width="1.5" pointer-events="none"/>
+<circle cx="93.0" cy="289.4188380952381" r="3" fill="#17734b" stroke="white" stroke-width="1" tabindex="0" data-cost-tip="Request 1 · Turn 1 · shell_agent history | Context used | 0.224% (2,347 input + output tokens) | Capacity: 1,050,000 tokens | openai:gpt-5.6-luna | Capacity verified 2026-09-20: https://developers.openai.com/api/docs/models/gpt-5.6-luna.md"/><circle cx="117.0" cy="289.405219047619" r="3" fill="#17734b" stroke="white" stroke-width="1" tabindex="0" data-cost-tip="Request 2 · Turn 1 · shell_agent history | Context used | 0.229% (2,402 input + output tokens) | Capacity: 1,050,000 tokens | openai:gpt-5.6-luna | Capacity verified 2026-09-20: https://developers.openai.com/api/docs/models/gpt-5.6-luna.md"/></g>
+<g data-context-mode="tokens">
+<polyline class="context-token-line" points="93.0,63.99259259259259 117.0,58.69629629629628" fill="none" stroke="#17734b" stroke-width="1.5" pointer-events="none"/>
+<circle cx="93.0" cy="63.99259259259259" r="3" fill="#17734b" stroke="white" stroke-width="1" tabindex="0" data-cost-tip="Request 1 · Turn 1 · shell_agent history | Reported input + output tokens: 2,347"/><circle cx="117.0" cy="58.69629629629628" r="3" fill="#17734b" stroke="white" stroke-width="1" tabindex="0" data-cost-tip="Request 2 · Turn 1 · shell_agent history | Reported input + output tokens: 2,402"/>
+</g>
+
+</svg></div>
 
 
 
@@ -74,11 +90,11 @@ summary::-webkit-details-marker{display:none}
 
 <div class="toolbar"><button type="button" data-disclosure-target="agent-activity-list" data-expand="true">Expand all agents</button><button type="button" data-disclosure-target="agent-activity-list" data-expand="false">Collapse all agents</button></div>
 <div id="agent-activity-list">
-<details open class="agent-activity" id="agent-01a0cc59-7664-76b0-b6ff-10345890c21e">
+<details open class="agent-activity" id="agent-01a0cce2-c5fd-78d0-921d-07549798c762">
 <summary><strong>shell_agent</strong> · Turn 1 · ok</summary>
 <div>Top-level agent · Turn 1</div>
-<div>Started +0.00s · Duration 2.46s · Status: ok · 2 model call(s)</div>
-<div class="cost-line">Own model cost <div class="euro">0.000619 EUR</div><div class="dollar">0.000709 USD</div></div>
+<div>Started +0.00s · Duration 4.46s · Status: ok · 2 model call(s)</div>
+<div class="cost-line">Own model cost <div class="euro">0.000624 EUR</div><div class="dollar">0.000715 USD</div></div>
 
 </details>
 </div>
@@ -86,7 +102,7 @@ summary::-webkit-details-marker{display:none}
 
 <section aria-labelledby="collaboration-heading">
 <h3 id="collaboration-heading">Agent collaboration</h3>
-<p>Read downward in time order. Each lifeline represents a named agent within its caller path; activation bars mark individual invocations. Arrows show calls and successful returns. Boxes show model and tool activity with their recorded outcome. Timestamps mark activity starts or returns, not a proportional time scale. Click an activation bar for invocation details.</p>
+<p>Read downward in time order. Each lifeline represents a named agent within its caller path; activation bars mark individual invocations. Arrows show calls and successful returns. Boxes show model, tool, and recorded compaction activity. Hover or focus a compaction box for history estimates and configured limits. Timestamps mark activity starts or returns, not a proportional time scale. Click an activation bar for invocation details.</p>
 
 <h4>Turn 1</h4>
 <div style="overflow-x:auto">
@@ -95,7 +111,7 @@ summary::-webkit-details-marker{display:none}
 
 
 <line x1="220" x2="220" y1="81" y2="401" stroke="#c7b8db" stroke-dasharray="4 4"></line>
-<a href="#agent-01a0cc59-7664-76b0-b6ff-10345890c21e" aria-label="Activity details for shell_agent">
+<a href="#agent-01a0cce2-c5fd-78d0-921d-07549798c762" aria-label="Activity details for shell_agent">
 <rect x="95" y="4" width="250" height="73" rx="8" fill="#f6f1fb" stroke="#8462a7"></rect>
 <text x="220" y="26" text-anchor="middle" font-size="13" font-weight="600" fill="#684296">shell_agent</text>
 <text x="220" y="47" text-anchor="middle" font-size="11">1 invocation(s)</text>
@@ -103,39 +119,54 @@ summary::-webkit-details-marker{display:none}
 </a>
 
 
-<a href="#agent-01a0cc59-7664-76b0-b6ff-10345890c21e" aria-label="Invocation details for shell_agent">
-<rect class="agent-activation" x="214" y="111" width="12" height="232" fill="#e5d7f2" stroke="#8462a7"><title>shell_agent · ok · 2463.70 ms</title></rect>
+<a href="#agent-01a0cce2-c5fd-78d0-921d-07549798c762" aria-label="Invocation details for shell_agent">
+<rect class="agent-activation" x="214" y="111" width="12" height="232" fill="#e5d7f2" stroke="#8462a7"><title>shell_agent · ok · 4456.80 ms</title></rect>
 </a>
 
 
 <text x="8" y="115" font-size="10" fill="#617679">+0.00 ms</text>
 
+<g >
+
 <rect x="100" y="97" width="240" height="28" rx="5" fill="#f5f8fd" stroke="#8096b4"></rect>
 <text x="220" y="115" text-anchor="middle" font-size="11">Started</text>
+</g>
 
 
-<text x="8" y="173" font-size="10" fill="#617679">+7.75 ms</text>
+<text x="8" y="173" font-size="10" fill="#617679">+7.93 ms</text>
+
+<g >
 
 <rect x="100" y="155" width="240" height="28" rx="5" fill="#f5f8fd" stroke="#8096b4"></rect>
 <text x="220" y="173" text-anchor="middle" font-size="11">R1 · LLM · ok</text>
+</g>
 
 
-<text x="8" y="231" font-size="10" fill="#617679">+1508.24 ms</text>
+<text x="8" y="231" font-size="10" fill="#617679">+2612.31 ms</text>
+
+<g >
 
 <rect x="100" y="213" width="240" height="28" rx="5" fill="#f5f8fd" stroke="#8096b4"></rect>
 <text x="220" y="231" text-anchor="middle" font-size="11">Tool · execute · ok</text>
+</g>
 
 
-<text x="8" y="289" font-size="10" fill="#617679">+1560.23 ms</text>
+<text x="8" y="289" font-size="10" fill="#617679">+2657.24 ms</text>
+
+<g >
 
 <rect x="100" y="271" width="240" height="28" rx="5" fill="#f5f8fd" stroke="#8096b4"></rect>
 <text x="220" y="289" text-anchor="middle" font-size="11">R2 · LLM · ok</text>
+</g>
 
 
-<text x="8" y="347" font-size="10" fill="#617679">+2463.70 ms</text>
+<text x="8" y="347" font-size="10" fill="#617679">+4456.80 ms</text>
+
+<g >
 
 <rect x="100" y="329" width="240" height="28" rx="5" fill="#f5f8fd" stroke="#8096b4"></rect>
 <text x="220" y="347" text-anchor="middle" font-size="11">Finished · ok</text>
+</g>
 
 
 </svg>
@@ -148,8 +179,8 @@ summary::-webkit-details-marker{display:none}
 <div class="toolbar"><button type="button" data-disclosure-target="conversation-list" data-expand="true">Expand all conversation</button><button type="button" data-disclosure-target="conversation-list" data-expand="false">Collapse all conversation</button></div>
 
 
-<div id="conversation-list"><details open class="turn"><summary class="turn-heading"><strong>Turn 1</strong><span class="turn-cost">Turn cost <div class="euro">0.000619 EUR</div><div class="dollar">0.000709 USD</div></span></summary>
-<div class="conversation-thread"><details open class="conversation-agent" aria-label="Agent shell_agent"><summary class="agent-label">Agent · shell_agent · ok</summary><details open class="event llm-event "><summary class="event-heading"><strong>R1 · LLM request · 2310 tokens</strong> · gpt-5.6-luna<span class="status">· ok</span><span class="span-id">01a0cc59-766d-7760-a5b3-d40c966889aa</span></summary><div class="agent-label">Agent · <a href="#agent-01a0cc59-7664-76b0-b6ff-10345890c21e">shell_agent</a></div>
+<div id="conversation-list"><details open class="turn"><summary class="turn-heading"><strong>Turn 1</strong><span class="turn-cost">Turn cost <div class="euro">0.000624 EUR</div><div class="dollar">0.000715 USD</div></span></summary>
+<div class="conversation-thread"><details open class="conversation-agent" aria-label="Agent shell_agent"><summary class="agent-label">Agent · shell_agent · ok</summary><details open class="event llm-event "><summary class="event-heading"><strong>R1 · LLM request · 2310 tokens</strong> · gpt-5.6-luna<span class="status">· ok</span><span class="span-id">01a0cce2-c607-7773-85f0-ba9b232ed984</span></summary><div class="agent-label">Agent · <a href="#agent-01a0cce2-c5fd-78d0-921d-07549798c762">shell_agent</a></div>
 
 <div class="request-costs" aria-label="Input token costs"><div class="cost-line"><strong>Fresh input · 3 tokens</strong><div class="euro">0.000001 EUR</div><div class="dollar">0.000001 USD</div></div><div class="cost-line"><strong>Cache write · 2307 tokens</strong><div class="euro">0.000503 EUR</div><div class="dollar">0.000577 USD</div></div></div>
 <div class="input-detail">
@@ -475,8 +506,8 @@ not success. Do not invent script results or rerun a failed script unless asked.
 <h5 class="llm-response-heading">LLM response · 37 tokens</h5><div class="reasoning-section"><div class="cost-line"><strong>Reasoning · 9 tokens</strong><div class="euro">0.000009 EUR</div><div class="dollar">0.000011 USD</div></div></div><div class="response-costs" aria-label="Output token costs"><div class="cost-line"><strong>Output · including tool calls · 28 tokens</strong><div class="euro">0.000029 EUR</div><div class="dollar">0.000034 USD</div></div></div><pre>[
   {
     "arguments": "{\"command\":\"sh ./summarize.sh\",\"timeout\":120}",
-    "call_id": "call_AYk1RqU3vaNO6osRnAExUeK8",
-    "id": "fc_042281872ec49cf6006ab34a1b6ba087d2a53aadf185bcf139",
+    "call_id": "call_Q66W87QSm7grtEa7O5oUdksk",
+    "id": "fc_0967585e220fda42006ab36d434a2087d2b56f51d294a32f8e",
     "index": 1,
     "name": "execute",
     "type": "function_call"
@@ -486,16 +517,16 @@ not success. Do not invent script results or rerun a failed script unless asked.
     "command": "sh ./summarize.sh",
     "timeout": 120
   },
-  "id": "call_AYk1RqU3vaNO6osRnAExUeK8",
+  "id": "call_Q66W87QSm7grtEa7O5oUdksk",
   "name": "execute",
   "type": "tool_call"
-}</pre><div class="cost-line"><strong>Call cost</strong><div class="euro">0.000542 EUR</div><div class="dollar">0.000622 USD</div></div><h5>Tool call: execute</h5><div class="status">Status: ok</div></details><details open class="event tool-event "><summary class="event-heading"><strong>Tool · execute</strong><span class="status">· ok</span><span class="span-id">01a0cc59-7c4a-7461-9e7a-d40e79735ec8</span></summary><div class="agent-label">Agent · <a href="#agent-01a0cc59-7664-76b0-b6ff-10345890c21e">shell_agent</a></div><h5>Tool arguments</h5><pre>{&#39;command&#39;: &#39;sh ./summarize.sh&#39;, &#39;timeout&#39;: 120}</pre>
+}</pre><div class="cost-line"><strong>Call cost</strong><div class="euro">0.000542 EUR</div><div class="dollar">0.000622 USD</div></div><h5>Tool call: execute</h5><div class="status">Status: ok</div></details><details open class="event tool-event "><summary class="event-heading"><strong>Tool · execute</strong><span class="status">· ok</span><span class="span-id">01a0cce2-d033-78c2-b1a4-dc06cd1ac6bc</span></summary><div class="agent-label">Agent · <a href="#agent-01a0cce2-c5fd-78d0-921d-07549798c762">shell_agent</a></div><h5>Tool arguments</h5><pre>{&#39;command&#39;: &#39;sh ./summarize.sh&#39;, &#39;timeout&#39;: 120}</pre>
 
 
 <h5 class="">Tool result</h5><pre>Orders: 3
 Total units: 9
 
-[Command succeeded with exit code 0]</pre><div class="status">Status: ok</div></details><details open class="event llm-event "><summary class="event-heading"><strong>R2 · LLM request · 2377 tokens</strong> · gpt-5.6-luna<span class="status">· ok</span><span class="span-id">01a0cc59-7c7e-7ae0-9682-39c0c81cdbd7</span></summary><div class="agent-label">Agent · <a href="#agent-01a0cc59-7664-76b0-b6ff-10345890c21e">shell_agent</a></div>
+[Command succeeded with exit code 0]</pre><div class="status">Status: ok</div></details><details open class="event llm-event "><summary class="event-heading"><strong>R2 · LLM request · 2377 tokens</strong> · gpt-5.6-luna<span class="status">· ok</span><span class="span-id">01a0cce2-d060-7183-be50-f3539cfcd9b5</span></summary><div class="agent-label">Agent · <a href="#agent-01a0cce2-c5fd-78d0-921d-07549798c762">shell_agent</a></div>
 <div class="cost-line"><strong>Conversation history · cache read · 2307 tokens</strong><div class="euro">0.000040 EUR</div><div class="dollar">0.000046 USD</div></div>
 <div class="request-costs" aria-label="Input token costs"><div class="cost-line"><strong>Fresh input · 3 tokens</strong><div class="euro">0.000001 EUR</div><div class="dollar">0.000001 USD</div></div><div class="cost-line"><strong>Cache write · 67 tokens</strong><div class="euro">0.000015 EUR</div><div class="dollar">0.000017 USD</div></div></div>
 <div class="input-detail">
@@ -816,22 +847,22 @@ Total units: 9
 
 
 
-<h5 class="llm-response-heading">LLM response · 20 tokens</h5><div class="response-costs" aria-label="Output token costs"><div class="cost-line"><strong>Output · non-reasoning · 20 tokens</strong><div class="euro">0.000021 EUR</div><div class="dollar">0.000024 USD</div></div></div><pre>[
+<h5 class="llm-response-heading">LLM response · 25 tokens</h5><div class="response-costs" aria-label="Output token costs"><div class="cost-line"><strong>Output · non-reasoning · 25 tokens</strong><div class="euro">0.000026 EUR</div><div class="dollar">0.000030 USD</div></div></div><pre>[
   {
-    "id": "msg_042281872ec49cf6006ab34a1c59bc87d2a5c6fa45392c3195",
+    "id": "msg_0967585e220fda42006ab36d445d4487d2b0db9897a9c06878",
     "index": 0,
     "phase": "final_answer",
-    "text": "Orders: 3  \nTotal units: 9  \n\nExit status: 0",
+    "text": "Order totals:\n- Orders: 3\n- Total units: 9\n\nExit status: 0",
     "type": "text"
   }
-]</pre><div class="cost-line"><strong>Call cost</strong><div class="euro">0.000076 EUR</div><div class="dollar">0.000087 USD</div></div><div class="status">Status: ok</div></details></details></div></details></div>
+]</pre><div class="cost-line"><strong>Call cost</strong><div class="euro">0.000082 EUR</div><div class="dollar">0.000093 USD</div></div><div class="status">Status: ok</div></details></details></div></details></div>
 
 <h2>Execution tree</h2><p>Workflow steps, agents, model calls, and tools are shown by default. Enable all details to include internal adapters, routing callbacks, span IDs, and graph-step counters. Each token category has its own column with EUR and USD cost underneath. Categories are disjoint: fresh input excludes cache; output excludes reasoning.</p>
 <div class="toolbar"><label><input id="show-execution-details" type="checkbox" aria-controls="execution-tree"> Show all execution details</label><button id="expand-all" type="button">Expand all</button><button id="collapse-all" type="button">Collapse all</button><span>8 spans · parent rows show subtree totals; do not add parent and child rows together.</span></div>
 
 
 <div class="table-wrap"><table id="execution-tree" class="summary-view" aria-label="Expandable execution trace and token costs"><thead><tr><th>Operation</th><th class="full-detail">Span ID</th><th>Description</th><th>Elapsed</th><th>Fresh input</th><th>Cache read</th><th>Cache write</th><th>Output · non-reasoning</th><th>Reasoning</th><th>Total cost<br>EUR / USD</th></tr></thead><tbody>
-<tr class="tree-row  " data-index="0" data-detail-only="false" data-summary-parent="" data-depth="0" data-summary-depth="0" data-summary-children="true" data-parent=""><td><div class="tree-indent" style="padding-left:0px"><div class="kind">agent <span class="status ">· ok</span></div><div class="step-name"><button type="button" class="toggle" aria-expanded="true" aria-label="Toggle children of shell_agent">−</button>shell_agent</div><div class="subtree">Includes descendant model costs</div></div></td><td class="span-id full-detail">01a0cc59-7664-76b0-b6ff-10345890c21e</td><td class="description-cell">Execute the shell_agent workflow operation and pass its result to the next graph step.</td><td>2463.70 ms</td><td><div class="tokens">6 <small>tokens</small></div><div class="euro">0.000001 EUR</div><div class="dollar">0.000001 USD</div></td><td><div class="tokens">2,307 <small>tokens</small></div><div class="euro">0.000040 EUR</div><div class="dollar">0.000046 USD</div></td><td><div class="tokens">2,374 <small>tokens</small></div><div class="euro">0.000518 EUR</div><div class="dollar">0.000593 USD</div></td><td><div class="tokens">48 <small>tokens</small></div><div class="euro">0.000050 EUR</div><div class="dollar">0.000058 USD</div></td><td><div class="tokens">9 <small>tokens</small></div><div class="euro">0.000009 EUR</div><div class="dollar">0.000011 USD</div></td><td><div class="euro">0.000619 EUR</div><div class="dollar">0.000709 USD</div></td></tr><tr class="tree-row  " data-index="1" data-detail-only="false" data-summary-parent="0" data-depth="1" data-summary-depth="1" data-summary-children="false" data-parent="0"><td><div class="tree-indent" style="padding-left:21px"><div class="kind">workflow <span class="status ">· ok</span></div><div class="step-name">PatchToolCallsMiddleware.before_agent</div></div></td><td class="span-id full-detail">01a0cc59-7667-7301-b029-dd4181ed2865</td><td class="description-cell">Check message history and repair missing tool responses before the agent starts.<div class="context full-detail">Graph step 1</div></td><td>0.41 ms</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr class="tree-row detail-only " data-index="2" data-detail-only="true" data-summary-parent="0" data-depth="1" data-summary-depth="1" data-summary-children="false" data-parent="0"><td><div class="tree-indent" style="padding-left:21px"><div class="kind">workflow <span class="status ">· ok</span></div><div class="step-name"><button type="button" class="toggle" aria-expanded="true" aria-label="Toggle children of model">−</button>model</div><div class="subtree">Includes descendant model costs</div></div></td><td class="span-id full-detail">01a0cc59-7668-7361-accd-ddaa45c0c98c</td><td class="description-cell">Prepare the current conversation, run model middleware, and invoke the chat model.<div class="context full-detail">Graph step 2</div></td><td>1502.61 ms</td><td><div class="tokens">3 <small>tokens</small></div><div class="euro">0.000001 EUR</div><div class="dollar">0.000001 USD</div></td><td><div class="tokens">0 <small>tokens</small></div><div class="euro">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="tokens">2,307 <small>tokens</small></div><div class="euro">0.000503 EUR</div><div class="dollar">0.000577 USD</div></td><td><div class="tokens">28 <small>tokens</small></div><div class="euro">0.000029 EUR</div><div class="dollar">0.000034 USD</div></td><td><div class="tokens">9 <small>tokens</small></div><div class="euro">0.000009 EUR</div><div class="dollar">0.000011 USD</div></td><td><div class="euro">0.000542 EUR</div><div class="dollar">0.000622 USD</div></td></tr><tr class="tree-row  " data-index="3" data-detail-only="false" data-summary-parent="0" data-depth="2" data-summary-depth="1" data-summary-children="false" data-parent="2"><td><div class="tree-indent" style="padding-left:21px"><div class="kind">model <span class="status ">· ok</span></div><div class="step-name">gpt-5.6-luna</div><div class="context">openai</div></div></td><td class="span-id full-detail">01a0cc59-766d-7760-a5b3-d40c966889aa</td><td class="description-cell">Generate the next assistant message or tool request from the current conversation.<div class="context full-detail">Graph step 2</div><div class="context">Requested: execute</div></td><td>1494.56 ms</td><td><div class="tokens">3 <small>tokens</small></div><div class="euro">0.000001 EUR</div><div class="dollar">0.000001 USD</div></td><td><div class="tokens">0 <small>tokens</small></div><div class="euro">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="tokens">2,307 <small>tokens</small></div><div class="euro">0.000503 EUR</div><div class="dollar">0.000577 USD</div></td><td><div class="tokens">28 <small>tokens</small></div><div class="euro">0.000029 EUR</div><div class="dollar">0.000034 USD</div></td><td><div class="tokens">9 <small>tokens</small></div><div class="euro">0.000009 EUR</div><div class="dollar">0.000011 USD</div></td><td><div class="euro">0.000542 EUR</div><div class="dollar">0.000622 USD</div></td></tr><tr class="tree-row detail-only " data-index="4" data-detail-only="true" data-summary-parent="0" data-depth="1" data-summary-depth="1" data-summary-children="false" data-parent="0"><td><div class="tree-indent" style="padding-left:21px"><div class="kind">workflow <span class="status ">· ok</span></div><div class="step-name"><button type="button" class="toggle" aria-expanded="true" aria-label="Toggle children of tools">−</button>tools</div><div class="subtree">Includes descendant model costs</div></div></td><td class="span-id full-detail">01a0cc59-7c48-79a3-802c-8fd967d70237</td><td class="description-cell">Execute tool calls requested by the preceding model response and return their observations.<div class="context full-detail">Graph step 3</div></td><td>50.15 ms</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr class="tree-row  " data-index="5" data-detail-only="false" data-summary-parent="0" data-depth="2" data-summary-depth="1" data-summary-children="false" data-parent="4"><td><div class="tree-indent" style="padding-left:21px"><div class="kind">tool <span class="status ">· ok</span></div><div class="step-name">execute</div></div></td><td class="span-id full-detail">01a0cc59-7c4a-7461-9e7a-d40e79735ec8</td><td class="description-cell">Executes a shell command in an isolated sandbox and returns combined stdout/stderr with the exit code (truncated if very large).
+<tr class="tree-row  " data-index="0" data-detail-only="false" data-summary-parent="" data-depth="0" data-summary-depth="0" data-summary-children="true" data-parent=""><td><div class="tree-indent" style="padding-left:0px"><div class="kind">agent <span class="status ">· ok</span></div><div class="step-name"><button type="button" class="toggle" aria-expanded="true" aria-label="Toggle children of shell_agent">−</button>shell_agent</div><div class="subtree">Includes descendant model costs</div></div></td><td class="span-id full-detail">01a0cce2-c5fd-78d0-921d-07549798c762</td><td class="description-cell">Execute the shell_agent workflow operation and pass its result to the next graph step.</td><td>4456.80 ms</td><td><div class="tokens">6 <small>tokens</small></div><div class="euro">0.000001 EUR</div><div class="dollar">0.000001 USD</div></td><td><div class="tokens">2,307 <small>tokens</small></div><div class="euro">0.000040 EUR</div><div class="dollar">0.000046 USD</div></td><td><div class="tokens">2,374 <small>tokens</small></div><div class="euro">0.000518 EUR</div><div class="dollar">0.000593 USD</div></td><td><div class="tokens">53 <small>tokens</small></div><div class="euro">0.000055 EUR</div><div class="dollar">0.000064 USD</div></td><td><div class="tokens">9 <small>tokens</small></div><div class="euro">0.000009 EUR</div><div class="dollar">0.000011 USD</div></td><td><div class="euro">0.000624 EUR</div><div class="dollar">0.000715 USD</div></td></tr><tr class="tree-row  " data-index="1" data-detail-only="false" data-summary-parent="0" data-depth="1" data-summary-depth="1" data-summary-children="false" data-parent="0"><td><div class="tree-indent" style="padding-left:21px"><div class="kind">workflow <span class="status ">· ok</span></div><div class="step-name">PatchToolCallsMiddleware.before_agent</div></div></td><td class="span-id full-detail">01a0cce2-c600-70b3-bba3-a4088cc2c75c</td><td class="description-cell">Check message history and repair missing tool responses before the agent starts.<div class="context full-detail">Graph step 1</div></td><td>0.43 ms</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr class="tree-row detail-only " data-index="2" data-detail-only="true" data-summary-parent="0" data-depth="1" data-summary-depth="1" data-summary-children="false" data-parent="0"><td><div class="tree-indent" style="padding-left:21px"><div class="kind">workflow <span class="status ">· ok</span></div><div class="step-name"><button type="button" class="toggle" aria-expanded="true" aria-label="Toggle children of model">−</button>model</div><div class="subtree">Includes descendant model costs</div></div></td><td class="span-id full-detail">01a0cce2-c601-77d3-9bac-2a73cea15bc7</td><td class="description-cell">Prepare the current conversation, run model middleware, and invoke the chat model.<div class="context full-detail">Graph step 2</div></td><td>2607.99 ms</td><td><div class="tokens">3 <small>tokens</small></div><div class="euro">0.000001 EUR</div><div class="dollar">0.000001 USD</div></td><td><div class="tokens">0 <small>tokens</small></div><div class="euro">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="tokens">2,307 <small>tokens</small></div><div class="euro">0.000503 EUR</div><div class="dollar">0.000577 USD</div></td><td><div class="tokens">28 <small>tokens</small></div><div class="euro">0.000029 EUR</div><div class="dollar">0.000034 USD</div></td><td><div class="tokens">9 <small>tokens</small></div><div class="euro">0.000009 EUR</div><div class="dollar">0.000011 USD</div></td><td><div class="euro">0.000542 EUR</div><div class="dollar">0.000622 USD</div></td></tr><tr class="tree-row  " data-index="3" data-detail-only="false" data-summary-parent="0" data-depth="2" data-summary-depth="1" data-summary-children="false" data-parent="2"><td><div class="tree-indent" style="padding-left:21px"><div class="kind">model <span class="status ">· ok</span></div><div class="step-name">gpt-5.6-luna</div><div class="context">openai</div></div></td><td class="span-id full-detail">01a0cce2-c607-7773-85f0-ba9b232ed984</td><td class="description-cell">Generate the next assistant message or tool request from the current conversation.<div class="context full-detail">Graph step 2</div><div class="context">Requested: execute</div></td><td>2601.20 ms</td><td><div class="tokens">3 <small>tokens</small></div><div class="euro">0.000001 EUR</div><div class="dollar">0.000001 USD</div></td><td><div class="tokens">0 <small>tokens</small></div><div class="euro">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="tokens">2,307 <small>tokens</small></div><div class="euro">0.000503 EUR</div><div class="dollar">0.000577 USD</div></td><td><div class="tokens">28 <small>tokens</small></div><div class="euro">0.000029 EUR</div><div class="dollar">0.000034 USD</div></td><td><div class="tokens">9 <small>tokens</small></div><div class="euro">0.000009 EUR</div><div class="dollar">0.000011 USD</div></td><td><div class="euro">0.000542 EUR</div><div class="dollar">0.000622 USD</div></td></tr><tr class="tree-row detail-only " data-index="4" data-detail-only="true" data-summary-parent="0" data-depth="1" data-summary-depth="1" data-summary-children="false" data-parent="0"><td><div class="tree-indent" style="padding-left:21px"><div class="kind">workflow <span class="status ">· ok</span></div><div class="step-name"><button type="button" class="toggle" aria-expanded="true" aria-label="Toggle children of tools">−</button>tools</div><div class="subtree">Includes descendant model costs</div></div></td><td class="span-id full-detail">01a0cce2-d032-76c2-8f9f-25c9264a81ae</td><td class="description-cell">Execute tool calls requested by the preceding model response and return their observations.<div class="context full-detail">Graph step 3</div></td><td>42.34 ms</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr class="tree-row  " data-index="5" data-detail-only="false" data-summary-parent="0" data-depth="2" data-summary-depth="1" data-summary-children="false" data-parent="4"><td><div class="tree-indent" style="padding-left:21px"><div class="kind">tool <span class="status ">· ok</span></div><div class="step-name">execute</div></div></td><td class="span-id full-detail">01a0cce2-d033-78c2-b1a4-dc06cd1ac6bc</td><td class="description-cell">Executes a shell command in an isolated sandbox and returns combined stdout/stderr with the exit code (truncated if very large).
 
 Usage:
 - Quote paths containing spaces (e.g. cd &#34;/path/with spaces&#34;).
@@ -841,20 +872,64 @@ Usage:
     - execute(command=&#34;find . -name &#39;*.py&#39;&#34;)  # Use glob tool instead
     - execute(command=&#34;grep -r &#39;pattern&#39; .&#34;)  # Use grep tool instead
 
-Only available on backends implementing SandboxBackendProtocol; otherwise it returns an error.<div class="context full-detail">Graph step 3</div></td><td>46.92 ms</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr class="tree-row detail-only " data-index="6" data-detail-only="true" data-summary-parent="0" data-depth="1" data-summary-depth="1" data-summary-children="false" data-parent="0"><td><div class="tree-indent" style="padding-left:21px"><div class="kind">workflow <span class="status ">· ok</span></div><div class="step-name"><button type="button" class="toggle" aria-expanded="true" aria-label="Toggle children of model">−</button>model</div><div class="subtree">Includes descendant model costs</div></div></td><td class="span-id full-detail">01a0cc59-7c7c-7ec3-8722-973bba848f13</td><td class="description-cell">Prepare the current conversation, run model middleware, and invoke the chat model.<div class="context full-detail">Graph step 4</div></td><td>903.27 ms</td><td><div class="tokens">3 <small>tokens</small></div><div class="euro">0.000001 EUR</div><div class="dollar">0.000001 USD</div></td><td><div class="tokens">2,307 <small>tokens</small></div><div class="euro">0.000040 EUR</div><div class="dollar">0.000046 USD</div></td><td><div class="tokens">67 <small>tokens</small></div><div class="euro">0.000015 EUR</div><div class="dollar">0.000017 USD</div></td><td><div class="tokens">20 <small>tokens</small></div><div class="euro">0.000021 EUR</div><div class="dollar">0.000024 USD</div></td><td><div class="tokens">0 <small>tokens</small></div><div class="euro">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="euro">0.000076 EUR</div><div class="dollar">0.000087 USD</div></td></tr><tr class="tree-row  " data-index="7" data-detail-only="false" data-summary-parent="0" data-depth="2" data-summary-depth="1" data-summary-children="false" data-parent="6"><td><div class="tree-indent" style="padding-left:21px"><div class="kind">model <span class="status ">· ok</span></div><div class="step-name">gpt-5.6-luna</div><div class="context">openai</div></div></td><td class="span-id full-detail">01a0cc59-7c7e-7ae0-9682-39c0c81cdbd7</td><td class="description-cell">Generate the next assistant message or tool request from the current conversation.<div class="context full-detail">Graph step 4</div></td><td>899.31 ms</td><td><div class="tokens">3 <small>tokens</small></div><div class="euro">0.000001 EUR</div><div class="dollar">0.000001 USD</div></td><td><div class="tokens">2,307 <small>tokens</small></div><div class="euro">0.000040 EUR</div><div class="dollar">0.000046 USD</div></td><td><div class="tokens">67 <small>tokens</small></div><div class="euro">0.000015 EUR</div><div class="dollar">0.000017 USD</div></td><td><div class="tokens">20 <small>tokens</small></div><div class="euro">0.000021 EUR</div><div class="dollar">0.000024 USD</div></td><td><div class="tokens">0 <small>tokens</small></div><div class="euro">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="euro">0.000076 EUR</div><div class="dollar">0.000087 USD</div></td></tr>
+Only available on backends implementing SandboxBackendProtocol; otherwise it returns an error.<div class="context full-detail">Graph step 3</div></td><td>40.04 ms</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr class="tree-row detail-only " data-index="6" data-detail-only="true" data-summary-parent="0" data-depth="1" data-summary-depth="1" data-summary-children="false" data-parent="0"><td><div class="tree-indent" style="padding-left:21px"><div class="kind">workflow <span class="status ">· ok</span></div><div class="step-name"><button type="button" class="toggle" aria-expanded="true" aria-label="Toggle children of model">−</button>model</div><div class="subtree">Includes descendant model costs</div></div></td><td class="span-id full-detail">01a0cce2-d05e-7ea2-9e8f-10fa6f7a360c</td><td class="description-cell">Prepare the current conversation, run model middleware, and invoke the chat model.<div class="context full-detail">Graph step 4</div></td><td>1801.01 ms</td><td><div class="tokens">3 <small>tokens</small></div><div class="euro">0.000001 EUR</div><div class="dollar">0.000001 USD</div></td><td><div class="tokens">2,307 <small>tokens</small></div><div class="euro">0.000040 EUR</div><div class="dollar">0.000046 USD</div></td><td><div class="tokens">67 <small>tokens</small></div><div class="euro">0.000015 EUR</div><div class="dollar">0.000017 USD</div></td><td><div class="tokens">25 <small>tokens</small></div><div class="euro">0.000026 EUR</div><div class="dollar">0.000030 USD</div></td><td><div class="tokens">0 <small>tokens</small></div><div class="euro">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="euro">0.000082 EUR</div><div class="dollar">0.000093 USD</div></td></tr><tr class="tree-row  " data-index="7" data-detail-only="false" data-summary-parent="0" data-depth="2" data-summary-depth="1" data-summary-children="false" data-parent="6"><td><div class="tree-indent" style="padding-left:21px"><div class="kind">model <span class="status ">· ok</span></div><div class="step-name">gpt-5.6-luna</div><div class="context">openai</div></div></td><td class="span-id full-detail">01a0cce2-d060-7183-be50-f3539cfcd9b5</td><td class="description-cell">Generate the next assistant message or tool request from the current conversation.<div class="context full-detail">Graph step 4</div></td><td>1797.87 ms</td><td><div class="tokens">3 <small>tokens</small></div><div class="euro">0.000001 EUR</div><div class="dollar">0.000001 USD</div></td><td><div class="tokens">2,307 <small>tokens</small></div><div class="euro">0.000040 EUR</div><div class="dollar">0.000046 USD</div></td><td><div class="tokens">67 <small>tokens</small></div><div class="euro">0.000015 EUR</div><div class="dollar">0.000017 USD</div></td><td><div class="tokens">25 <small>tokens</small></div><div class="euro">0.000026 EUR</div><div class="dollar">0.000030 USD</div></td><td><div class="tokens">0 <small>tokens</small></div><div class="euro">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="euro">0.000082 EUR</div><div class="dollar">0.000093 USD</div></td></tr>
 </tbody></table></div>
 <h2>Token price references</h2>
 
-<p>1 USD = 0.87237 EUR · Rate reference date <strong>2026-09-22</strong> · fetched 2026-09-23T03:35:56.284466+00:00 · source https://api.frankfurter.dev/v2/rate/usd/eur?providers=ecb. Recorded daily reference; publication can precede retrieval on weekends, holidays, or before the daily update.</p>
+<p>1 USD = 0.87237 EUR · Rate reference date <strong>2026-09-22</strong> · fetched 2026-09-23T06:06:28.037095+00:00 · source https://api.frankfurter.dev/v2/rate/usd/eur?providers=ecb. Recorded daily reference; publication can precede retrieval on weekends, holidays, or before the daily update.</p>
 <p>USD per million tokens · verification dates apply to every rate in the row. Dates record price verification, not when this HTML was generated. These are saved reference prices; an earlier date alone does not mean retrieval failed.</p>
 <div class="table-wrap"><table aria-label="Token price references and dates"><thead><tr><th>Model / verification date</th><th>Input</th><th>Cache read</th><th>Cache write</th><th>Output / reasoning</th></tr></thead><tbody><tr><td>openai:gpt-5.5<strong class="rate-date">Verified 2026-09-18</strong><div class="context">https://developers.openai.com/api/docs/models/gpt-5.5.md</div></td><td><div class="dollar">5 USD / 1M tokens</div><div class="euro">4.361850 EUR / 1M tokens</div></td><td><div class="dollar">0.5 USD / 1M tokens</div><div class="euro">0.436185 EUR / 1M tokens</div></td><td>Unknown</td><td><div class="dollar">30 USD / 1M tokens</div><div class="euro">26.171100 EUR / 1M tokens</div></td></tr><tr><td>openai:gpt-5.6-luna<strong class="rate-date">Verified 2026-09-18</strong><div class="context">https://developers.openai.com/api/docs/models/gpt-5.6-luna.md</div></td><td><div class="dollar">0.2 USD / 1M tokens</div><div class="euro">0.174474 EUR / 1M tokens</div></td><td><div class="dollar">0.02 USD / 1M tokens</div><div class="euro">0.017447 EUR / 1M tokens</div></td><td><div class="dollar">0.250 USD / 1M tokens</div><div class="euro">0.218092 EUR / 1M tokens</div></td><td><div class="dollar">1.2 USD / 1M tokens</div><div class="euro">1.046844 EUR / 1M tokens</div></td></tr><tr><td>openai:gpt-5.6-sol<strong class="rate-date">Verified 2026-09-18</strong><div class="context">https://developers.openai.com/api/docs/models/gpt-5.6-sol.md</div></td><td><div class="dollar">4 USD / 1M tokens</div><div class="euro">3.489480 EUR / 1M tokens</div></td><td><div class="dollar">0.4 USD / 1M tokens</div><div class="euro">0.348948 EUR / 1M tokens</div></td><td><div class="dollar">5.00 USD / 1M tokens</div><div class="euro">4.361850 EUR / 1M tokens</div></td><td><div class="dollar">20 USD / 1M tokens</div><div class="euro">17.447400 EUR / 1M tokens</div></td></tr><tr><td>anthropic:claude-sonnet-5<strong class="rate-date">Verified 2026-09-18</strong><div class="context">https://platform.claude.com/docs/en/about-claude/pricing</div></td><td><div class="dollar">2 USD / 1M tokens</div><div class="euro">1.744740 EUR / 1M tokens</div></td><td><div class="dollar">0.20 USD / 1M tokens</div><div class="euro">0.174474 EUR / 1M tokens</div></td><td><div class="dollar">2.50 USD / 1M tokens</div><div class="euro">2.180925 EUR / 1M tokens</div></td><td><div class="dollar">10 USD / 1M tokens</div><div class="euro">8.723700 EUR / 1M tokens</div></td></tr><tr><td>anthropic:claude-opus-4-8<strong class="rate-date">Verified 2026-09-18</strong><div class="context">https://platform.claude.com/docs/en/about-claude/pricing</div></td><td><div class="dollar">5 USD / 1M tokens</div><div class="euro">4.361850 EUR / 1M tokens</div></td><td><div class="dollar">0.50 USD / 1M tokens</div><div class="euro">0.436185 EUR / 1M tokens</div></td><td><div class="dollar">6.25 USD / 1M tokens</div><div class="euro">5.452312 EUR / 1M tokens</div></td><td><div class="dollar">25 USD / 1M tokens</div><div class="euro">21.809250 EUR / 1M tokens</div></td></tr><tr><td>anthropic:claude-fable-5-1<strong class="rate-date">Verified 2026-09-18</strong><div class="context">https://platform.claude.com/docs/en/about-claude/pricing</div></td><td><div class="dollar">10 USD / 1M tokens</div><div class="euro">8.723700 EUR / 1M tokens</div></td><td><div class="dollar">0.25 USD / 1M tokens</div><div class="euro">0.218092 EUR / 1M tokens</div></td><td><div class="dollar">12.50 USD / 1M tokens</div><div class="euro">10.904625 EUR / 1M tokens</div></td><td><div class="dollar">50 USD / 1M tokens</div><div class="euro">43.618500 EUR / 1M tokens</div></td></tr><tr><td>demo:scripted-chat<strong class="rate-date">Verified 2026-09-18</strong><div class="context">Illustrative demo rates based on openai:gpt-5.6-luna; no provider billing</div></td><td><div class="dollar">0.2 USD / 1M tokens</div><div class="euro">0.174474 EUR / 1M tokens</div></td><td><div class="dollar">0.02 USD / 1M tokens</div><div class="euro">0.017447 EUR / 1M tokens</div></td><td><div class="dollar">0.250 USD / 1M tokens</div><div class="euro">0.218092 EUR / 1M tokens</div></td><td><div class="dollar">1.2 USD / 1M tokens</div><div class="euro">1.046844 EUR / 1M tokens</div></td></tr></tbody></table></div>
 <details><summary>Complete pricing and exchange-rate data</summary><p>Standard online token rates. Verify rates and model access before use. Cache writes with unspecified lifetime use the 5-minute rate unless an explicit cache_write rate is configured. No batch, regional, long-context, tool, or negotiated pricing adjustments are applied.</p><pre>{
+  &#34;calibrations&#34;: {
+    &#34;openai:gpt-5.5&#34;: {
+      &#34;checked_at&#34;: &#34;2026-09-23T04:25:31.720508Z&#34;,
+      &#34;capacity&#34;: 1050000,
+      &#34;source&#34;: &#34;https://developers.openai.com/api/docs/models/gpt-5.5.md&#34;,
+      &#34;resolved_model&#34;: &#34;gpt-5.5&#34;,
+      &#34;error&#34;: null
+    },
+    &#34;openai:gpt-5.6-luna&#34;: {
+      &#34;checked_at&#34;: &#34;2026-09-23T04:25:33.677629Z&#34;,
+      &#34;capacity&#34;: 1050000,
+      &#34;source&#34;: &#34;https://developers.openai.com/api/docs/models/gpt-5.6-luna.md&#34;,
+      &#34;resolved_model&#34;: &#34;gpt-5.6-luna&#34;,
+      &#34;error&#34;: null
+    },
+    &#34;openai:gpt-5.6-sol&#34;: {
+      &#34;checked_at&#34;: &#34;2026-09-23T04:25:34.476314Z&#34;,
+      &#34;capacity&#34;: null,
+      &#34;source&#34;: null,
+      &#34;resolved_model&#34;: null,
+      &#34;error&#34;: &#34;Verification failed (NotFoundError); capacity unavailable.&#34;
+    },
+    &#34;anthropic:claude-sonnet-5&#34;: {
+      &#34;checked_at&#34;: &#34;2026-09-23T04:25:34.955686Z&#34;,
+      &#34;capacity&#34;: null,
+      &#34;source&#34;: null,
+      &#34;resolved_model&#34;: null,
+      &#34;error&#34;: &#34;Verification failed (KeyError); capacity unavailable.&#34;
+    },
+    &#34;anthropic:claude-opus-4-8&#34;: {
+      &#34;checked_at&#34;: &#34;2026-09-23T04:25:34.955710Z&#34;,
+      &#34;capacity&#34;: null,
+      &#34;source&#34;: null,
+      &#34;resolved_model&#34;: null,
+      &#34;error&#34;: &#34;Verification failed (KeyError); capacity unavailable.&#34;
+    },
+    &#34;anthropic:claude-fable-5-1&#34;: {
+      &#34;checked_at&#34;: &#34;2026-09-23T04:25:34.955715Z&#34;,
+      &#34;capacity&#34;: null,
+      &#34;source&#34;: null,
+      &#34;resolved_model&#34;: null,
+      &#34;error&#34;: &#34;Verification failed (KeyError); capacity unavailable.&#34;
+    }
+  },
   &#34;refresh_errors&#34;: {},
   &#34;currency&#34;: &#34;USD&#34;,
   &#34;exchange&#34;: {
     &#34;rate&#34;: &#34;0.87237&#34;,
     &#34;date&#34;: &#34;2026-09-22&#34;,
-    &#34;fetched_at&#34;: &#34;2026-09-23T03:35:56.284466Z&#34;,
+    &#34;fetched_at&#34;: &#34;2026-09-23T06:06:28.037095Z&#34;,
     &#34;source&#34;: &#34;https://api.frankfurter.dev/v2/rate/usd/eur?providers=ecb&#34;,
     &#34;base&#34;: &#34;USD&#34;,
     &#34;quote&#34;: &#34;EUR&#34;
@@ -959,12 +1034,48 @@ Only available on backends implementing SandboxBackendProtocol; otherwise it ret
     &#34;openai:gpt-5.6&#34;: &#34;openai:gpt-5.6-sol&#34;
   }
 }</pre></details>
-<footer><div>Run 01a0cc59-7664-76b0-b6ff-10345890c21e</div><p>Turn costs sum model calls once. Tool fees are outside this model-token estimate.</p>Only model calls contribute token charges. Reasoning is priced at the output-token rate. Missing usage or prices are never assumed free. Context is framework metadata or application-authored annotations, not inferred private reasoning. Token estimates exclude tool fees, infrastructure, taxes, and discounts. Schema 1.</footer>
-<div id="cost-tooltip" role="tooltip" hidden style="position:fixed;z-index:20;pointer-events:none;background:#173b70;color:white;padding:10px 14px;border-radius:6px;box-shadow:0 3px 12px #0003;white-space:pre-line;font-size:13px;max-width:280px"></div>
+<footer><div>Run 01a0cce2-c5fd-78d0-921d-07549798c762</div><p>Turn costs sum model calls once. Tool fees are outside this model-token estimate.</p>Only model calls contribute token charges. Reasoning is priced at the output-token rate. Missing usage or prices are never assumed free. Context is framework metadata or application-authored annotations, not inferred private reasoning. Token estimates exclude tool fees, infrastructure, taxes, and discounts. Schema 1.</footer>
+<div id="cost-tooltip" role="tooltip" hidden style="position:fixed;z-index:20;pointer-events:none;background:#173b70;color:white;padding:10px 14px;border-radius:6px;box-shadow:0 3px 12px #0003;white-space:pre-line;font-size:13px;max-width:min(420px,calc(100vw - 16px))"></div>
 </main><script>
 const costTip = document.getElementById('cost-tooltip');
+// Selection owns the shared popup until dismissed. Hovering other chart marks
+// must not replace its text or move its fixed viewport position.
+let selectedCompaction = null;
+function clearCompactionSelection() {
+  if (selectedCompaction) selectedCompaction.setAttribute('aria-pressed', 'false');
+  selectedCompaction = null;
+  costTip.hidden = true;
+}
+function toggleCompactionSelection(marker, event) {
+  const wasSelected = selectedCompaction === marker;
+  clearCompactionSelection();
+  if (wasSelected) return;
+  showCostTip(marker, event);
+  selectedCompaction = marker;
+  marker.setAttribute('aria-pressed', 'true');
+}
+// Both scales use saved geometry. Switching units never changes token evidence,
+// cost accounting, or compaction positions. Start with the unchecked raw view.
+const contextToggle = document.getElementById('context-percent-toggle');
+function updateContextScale() {
+  const percent = contextToggle.checked;
+  document.querySelectorAll('[data-context-mode]').forEach(element => {
+    element.style.display = (element.dataset.contextMode === (percent ? 'percent' : 'tokens')) ? '' : 'none';
+  });
+  document.getElementById('context-legend').textContent = percent ? 'Context estimate (% capacity)' : 'Context estimate (input + output)';
+  document.getElementById('request-cost-chart').setAttribute('aria-label',
+    'Stacked EUR costs and context ' + (percent ? 'used percentage' : 'tokens') + ' for each LLM request');
+  clearCompactionSelection();
+}
+if (contextToggle) {
+  contextToggle.checked = false;
+  contextToggle.addEventListener('change', updateContextScale);
+  updateContextScale();
+}
+
 /** Show one shared tooltip for a bar segment, cumulative-cost point, or context point. */
 function showCostTip(segment, event) {
+  if (selectedCompaction) return;
   costTip.textContent = segment.dataset.costTip.split(' | ').join('\n');
   costTip.hidden = false;
   const rect = segment.getBoundingClientRect();
@@ -979,11 +1090,29 @@ document.querySelectorAll('[data-cost-tip]').forEach(segment => {
   segment.setAttribute('aria-label', segment.dataset.costTip);
   segment.addEventListener('pointerenter', event => showCostTip(segment, event));
   segment.addEventListener('pointermove', event => showCostTip(segment, event));
-  segment.addEventListener('pointerleave', () => costTip.hidden = true);
+  segment.addEventListener('pointerleave', () => { if (!selectedCompaction) costTip.hidden = true; });
   segment.addEventListener('focus', () => showCostTip(segment, {}));
-  segment.addEventListener('blur', () => costTip.hidden = true);
+  segment.addEventListener('blur', () => {
+    // A pinned selection outlives keyboard focus, including switching windows.
+    // Only transient hover/focus tooltips disappear when their element blurs.
+    if (!selectedCompaction) costTip.hidden = true;
+  });
+  if (segment.classList.contains('compaction-marker')) {
+    segment.addEventListener('click', event => toggleCompactionSelection(segment, event));
+    // SVG groups do not implement a button's Enter/Space activation themselves.
+    segment.addEventListener('keydown', event => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        toggleCompactionSelection(segment, {});
+      }
+    });
+  }
 });
-document.addEventListener('keydown', event => { if (event.key === 'Escape') costTip.hidden = true; });
+document.addEventListener('keydown', event => { if (event.key === 'Escape') clearCompactionSelection(); });
+
+document.addEventListener('click', event => {
+  if (selectedCompaction && !selectedCompaction.contains(event.target)) clearCompactionSelection();
+});
 
 // Row indices are template-local identifiers, not provider span IDs. Parent
 // indices let visibility follow the execution hierarchy without altering totals.

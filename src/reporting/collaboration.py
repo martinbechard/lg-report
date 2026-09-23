@@ -12,6 +12,8 @@ Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 
 from textwrap import wrap
 
+from reporting.context import compaction_description
+
 
 def collaboration_diagrams(run, agents, turns):
     """Help readers follow who called whom during each recorded conversation turn.
@@ -179,6 +181,19 @@ def collaboration_diagrams(run, agents, turns):
                     step.status,
                     1,
                 )
+        # A compaction completes on the owning agent's history, after the
+        # summarizer returns. Its middleware span contains count-only evidence;
+        # it introduces neither another model call nor another token charge.
+        for step in run.steps:
+            description = compaction_description(step)
+            if not description:
+                continue
+            owner = agents["owners"].get(step.id)
+            if owner in by_id:
+                event = add(
+                    step.end_ns, owner, owner, "Compaction completed", step.status, 1
+                )
+                event["tooltip"] = description
         # Each event dictionary carries its clock time and phase order: calls
         # precede local work, which precedes returns at an identical timestamp.
         # This sorting lambda only selects that key; it does not run an action.

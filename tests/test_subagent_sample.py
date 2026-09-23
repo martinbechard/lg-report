@@ -73,7 +73,7 @@ def test_delegation_context_and_costs(tmp_path):
     assert len(activities) == 2
     assert [a["model_calls"] for a in activities] == [2, 2]
     assert activities[1]["caller"].id == activities[0]["step"].id
-    assert activities[1]["step"].name == "workflow-specialist"
+    assert activities[1]["step"].name == "isolated-subagent"
     assert sum(a["total"] for a in activities) == summarize(run, prices)["known_cost"]
     events = [
         e

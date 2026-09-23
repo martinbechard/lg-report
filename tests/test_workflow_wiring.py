@@ -82,7 +82,7 @@ def test_native_delegation_retains_parent_approval():
                         "name": "task",
                         "id": "delegate",
                         "args": {
-                            "subagent_type": "workflow-specialist",
+                            "subagent_type": "isolated-subagent",
                             "description": "Record a note",
                         },
                     }
@@ -111,7 +111,7 @@ def test_native_delegation_retains_parent_approval():
             "checkpointer": InMemorySaver(),
         },
         {
-            "name": "workflow-specialist",
+            "name": "isolated-subagent",
             "description": "Records notes",
             "system_prompt": "Record the requested note",
             "model": child,

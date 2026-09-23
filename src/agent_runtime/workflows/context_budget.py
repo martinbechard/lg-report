@@ -15,17 +15,17 @@ from langchain_core.runnables import RunnableLambda
 from langgraph.graph import END, START, MessagesState, StateGraph
 from langgraph.graph.message import REMOVE_ALL_MESSAGES
 
-from agent_runtime.agents import context_planner, context_responder, workflow_specialist
+from agent_runtime.agents import context_planner, context_responder, isolated_subagent
 from agent_runtime.context_budget import ContextBudget
 from agent_runtime.harness.model_factory import build_model
 
 # Small teaching budgets make compaction visible without a long conversation.
 # These are input estimates, not changes to the provider's physical capacity.
 WORKFLOW_BUDGET = ContextBudget(
-    max_input_tokens=4000, trigger_tokens=500, keep_tokens=120
+    max_input_tokens=4000, trigger_tokens=1500, keep_tokens=500
 )
 SUBAGENT_BUDGET = ContextBudget(
-    max_input_tokens=2000, trigger_tokens=180, keep_tokens=60
+    max_input_tokens=2000, trigger_tokens=1200, keep_tokens=300
 )
 
 
@@ -77,12 +77,23 @@ def build_workflow(
     if responder_model is None:
         responder_model = build_model(caller="responder")
     if specialist_model is None:
-        specialist_model = build_model(caller="workflow-specialist")
+        specialist_model = build_model(caller="isolated-subagent")
     if workflow_summary_model is None:
         workflow_summary_model = build_model(caller="workflow-summary")
     if subagent_summary_model is None:
         subagent_summary_model = build_model(caller="subagent-summary")
-    specialist = workflow_specialist.build_agent(
+    # SummarizationMiddleware wraps these models in a native retry runnable.
+    # Its execution scope inherits the model's name, so identify the work rather
+    # than exposing an adapter class such as ChatOpenAI as an anonymous agent.
+    # Copy once per history boundary without mutating caller-owned adapters;
+    # both peers still share one summary model and its scripted response cursor.
+    workflow_summary_model = workflow_summary_model.model_copy(
+        update={"name": "workflow_history_summarizer"}
+    )
+    subagent_summary_model = subagent_summary_model.model_copy(
+        update={"name": "specialist_history_summarizer"}
+    )
+    specialist = isolated_subagent.build_agent(
         {
             "model": specialist_model,
             "middleware": subagent_budget.middleware(subagent_summary_model),
@@ -106,9 +117,33 @@ def build_workflow(
             ),
         }
     )
+    # Workflow nodes and edges (solid arrows are outer StateGraph transitions):
+    #
+    # START -> planning_peer -> responding_peer -> END
+    #          context_planner  context_responder
+    #                                :  ^
+    #               task(assignment) :  : final answer as tool result
+    #                                v  :
+    #                         isolated-subagent
+    #                                :  ^
+    #                      echo_tool :  : echo result
+    #                                v  :
+    #                             echo_tool
+    #
+    # Dotted arrows show optional, model-selected calls and returns inside the
+    # responding peer, not extra outer graph edges. The peer resumes after task
+    # returns and produces its answer before the outer graph reaches END.
+    # planning_peer publishes its retained history for responding_peer; both
+    # replace the shared history after compaction. The isolated specialist sees
+    # only its assignment and owns a separate history and subagent budget.
+    # workflow_history_summarizer serves each peer's budget middleware;
+    # specialist_history_summarizer serves the child's. These conditional model
+    # calls compact history inside the agents; they are not outer graph nodes.
     graph = StateGraph(MessagesState)
-    graph.add_node("planning_peer", _shared_history_node(planner))
-    graph.add_node("responding_peer", _shared_history_node(responder))
+    graph.add_node("planning_peer", _shared_history_node(planner),
+                   metadata={"report_history_id": "shared-workflow"})
+    graph.add_node("responding_peer", _shared_history_node(responder),
+                   metadata={"report_history_id": "shared-workflow"})
     graph.add_edge(START, "planning_peer")
     graph.add_edge("planning_peer", "responding_peer")
     graph.add_edge("responding_peer", END)

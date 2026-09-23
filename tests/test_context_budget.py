@@ -7,14 +7,22 @@ Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
 
 import asyncio
+from types import SimpleNamespace
 
 import pytest
 from langchain.agents import create_agent
 from langchain_core.callbacks import BaseCallbackHandler
-from langchain_core.messages import AIMessage, HumanMessage
+from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, ToolMessage
+from langchain_core.messages.utils import count_tokens_approximately
+from langchain_core.runnables import RunnableLambda
 from langgraph.checkpoint.memory import InMemorySaver
 
-from agent_runtime.context_budget import ContextBudget, ContextBudgetExceeded
+from agent_runtime.context_budget import (
+    ContextBudget,
+    ContextBudgetExceeded,
+    InputBudgetMiddleware,
+    context_estimate,
+)
 from agent_runtime.harness.simulated_model import ScriptedChatModel
 from agent_runtime.tools.echo_tool import echo_tool
 from agent_runtime.workflows.context_budget import build_workflow
@@ -33,10 +41,136 @@ class Requests(BaseCallbackHandler):
 
     def __init__(self):
         self.calls = []
+        self.compactions = []
+
+    def on_custom_event(self, name, data, **kwargs):
+        """Observe completed replacements independently of model responses."""
+        if name == "context_compaction":
+            self.compactions.append(data)
 
     def on_chat_model_start(self, serialized, messages, **kwargs):
         """Keep a snapshot before mutable graph state advances to another peer."""
         self.calls.append((kwargs.get("metadata", {}), str(messages)))
+
+
+def test_usage_baseline_controls_trigger_even_when_character_estimate_disagrees():
+    """Use a measured receipt, not a larger character guess or cached-token sum.
+
+    An intentionally exaggerated string makes the two counters disagree. The
+    usage receipt includes 60 cached input tokens and 20 reasoning output tokens;
+    both are already included in their parent totals and must not be added twice.
+    """
+    history = [HumanMessage("background " * 100)]
+    answer = AIMessage(content="answer", usage_metadata={
+        "input_tokens": 100, "output_tokens": 50, "total_tokens": 150,
+        "input_token_details": {"cache_read": 60},
+        "output_token_details": {"reasoning": 20},
+    })
+    request = SimpleNamespace(messages=history, system_message=SystemMessage("role"), tools=[])
+    InputBudgetMiddleware(1000)._record_receipt(request, SimpleNamespace(result=[answer]))
+    retained = [*history, answer]
+    middleware = ContextBudget(1000, 200, 40).middleware(ScriptedChatModel(responses=[]))[0]
+    assert count_tokens_approximately(retained) > 200
+    assert context_estimate(retained) == (150, "reported input + output")
+    assert not middleware._should_summarize(retained, 999)
+
+    # Actual new observations were not in the provider's receipt. Estimate only
+    # this suffix, rather than recounting the entire history with characters/4.
+    observation = ToolMessage(content="observation " * 30, tool_call_id="lookup")
+    expected = 150 + count_tokens_approximately([observation])
+    assert context_estimate([*retained, observation])[0] == expected
+    assert middleware._should_summarize([*retained, observation], 0)
+
+
+def test_replacement_invalidates_usage_but_graph_ids_do_not():
+    """A retained assistant receipt must never resurrect compacted-away tokens."""
+    history = [HumanMessage("original background")]
+    answer = AIMessage(content="answer", usage_metadata={
+        "input_tokens": 900, "output_tokens": 50, "total_tokens": 950,
+    })
+    request = SimpleNamespace(messages=history, system_message=SystemMessage("role"), tools=[])
+    InputBudgetMiddleware(2000)._record_receipt(request, SimpleNamespace(result=[answer]))
+    history[0].id = "assigned-by-reducer"
+    assert context_estimate([*history, answer])[0] == 950
+    replaced = [HumanMessage("summary"), answer]
+    count, basis = context_estimate(replaced)
+    assert count == count_tokens_approximately(replaced) + count_tokens_approximately([request.system_message])
+    assert basis == "local estimate after history replacement"
+    middleware = ContextBudget(1000, 200, 40).middleware(ScriptedChatModel(responses=[]))[0]
+    assert not middleware._should_summarize(replaced, 950)
+
+
+def test_input_guard_reuses_usage_and_adjusts_changed_peer_instructions():
+    """Do not reject measured small context because an encoded block looks large.
+
+    A role switch must still account for new instructions. This distinguishes
+    legitimate reuse of measured history from simply disabling the input guard.
+    """
+    history = [HumanMessage("hello")]
+    answer = AIMessage(content=[{"type": "reasoning", "encrypted_content": "x" * 12000}],
+                       usage_metadata={"input_tokens": 100, "output_tokens": 50,
+                                       "total_tokens": 150})
+    request = SimpleNamespace(messages=history, system_message=SystemMessage("short role"), tools=[])
+    guard = InputBudgetMiddleware(1000)
+    guard._record_receipt(request, SimpleNamespace(result=[answer]))
+    request.messages = [*history, answer]
+    assert count_tokens_approximately(request.messages) > 1000
+    guard.check(request)
+    request.system_message = SystemMessage("long new instructions " * 300)
+    with pytest.raises(ContextBudgetExceeded):
+        guard.check(request)
+
+
+@pytest.mark.parametrize("asynchronous", [False, True])
+def test_compaction_counts_match_replaced_history_and_failure_is_not_completion(
+    asynchronous, monkeypatch
+):
+    """Compare emitted counts to real native output, then force summary failure."""
+    budget = ContextBudget(max_input_tokens=1000, trigger_tokens=150, keep_tokens=40)
+    middleware = budget.middleware(
+        ScriptedChatModel(responses=[AIMessage(content="A short summary.")])
+    )[0]
+    messages = [HumanMessage("Older background. " * 100), AIMessage("Noted."),
+                HumanMessage("Continue.")]
+    requests = Requests()
+
+    def run(_):
+        """Supply a native callback scope for synchronous custom events."""
+        return middleware.before_model({"messages": messages}, None)
+
+    async def arun(_):
+        """Supply the equivalent scope for asynchronous custom events."""
+        return await middleware.abefore_model({"messages": messages}, None)
+
+    runnable = RunnableLambda(run, afunc=arun)
+    config = {"callbacks": [requests]}
+    result = (asyncio.run(runnable.ainvoke({}, config)) if asynchronous
+              else runnable.invoke({}, config))
+    assert len(requests.compactions) == 1
+    event = requests.compactions[0]
+    assert event["compaction_before_tokens"] == count_tokens_approximately(messages)
+    retained = result["messages"][1:]
+    assert event["compaction_after_tokens"] == count_tokens_approximately(retained)
+    assert event["compaction_after_messages"] == len(retained)
+    assert event["compaction_keep_tokens"] == 40
+    assert event["compaction_max_input_tokens"] == 1000
+
+    def fail(*args):
+        """Fail the summary boundary without exercising provider retry delays."""
+        raise RuntimeError("summary unavailable")
+
+    async def afail(*args):
+        """Fail the asynchronous summary boundary identically."""
+        fail()
+
+    monkeypatch.setattr(middleware, "_create_summary", fail)
+    monkeypatch.setattr(middleware, "_acreate_summary", afail)
+    with pytest.raises(RuntimeError, match="summary unavailable"):
+        if asynchronous:
+            asyncio.run(runnable.ainvoke({}, config))
+        else:
+            runnable.invoke({}, config)
+    assert len(requests.compactions) == 1
 
 
 @pytest.mark.parametrize("asynchronous", [False, True])
@@ -79,10 +213,22 @@ def test_peer_compaction_and_child_isolation_across_turns(asynchronous):
     assert all("PARENT_ONLY_DETAIL" not in call for call in children)
     assert all("CHILD_ONLY_DETAIL" not in call for call in responders)
     assert CHILD_SUMMARY in children[2]
-    assert "CHILD_ONLY_DETAIL" not in children[2]
+    # The last complete tool pair is retained even when it exceeds keep_tokens.
+    assert "CHILD_ONLY_DETAIL" in children[2]
     assert result["messages"][-1].content == FINAL_ANSWER
+    assert "context_budget_receipt" in result["messages"][-1].response_metadata
     assert "PARENT_ONLY_DETAIL" not in str(result["messages"])
     assert graph.get_state(config).values["messages"] == result["messages"]
+    # Both lifecycle paths publish count-only events after native replacement.
+    # Three fixture summaries imply three successful compactions, not one event
+    # for every before-model check or every ordinary model invocation.
+    assert len(requests.compactions) == 3
+    assert {c["compaction_trigger_tokens"] for c in requests.compactions} == {1500, 1200}
+    # A replacement can grow when a summary plus its framing is longer than
+    # the removed messages; reporting must retain that evidence honestly.
+    assert all(c["compaction_before_tokens"] > 0 and c["compaction_after_tokens"] > 0
+               for c in requests.compactions)
+    assert all(c["compaction_event"] == "completed" for c in requests.compactions)
 
 
 @pytest.mark.parametrize("asynchronous", [False, True])
@@ -103,6 +249,7 @@ def test_oversized_latest_input_is_rejected_before_agent_call(asynchronous):
         else:
             agent.invoke(payload, {"callbacks": [requests]})
     assert requests.calls == []
+    assert requests.compactions == []
 
 
 def test_budget_counts_system_instructions_too():

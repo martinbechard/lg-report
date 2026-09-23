@@ -31,6 +31,26 @@ def build_workflow(model: BaseChatModel | None = None) -> CompiledStateGraph:
     history. Sharing the LLM does not merge those conversations.
     Construction makes no model requests; Conversation invokes the returned graph.
     """
+    # Agent delegation flow (middleware owns task routing and return edges):
+    #
+    # input messages -> dispatcher -> final answer
+    #                      |  ^
+    #     task(assignment) |  | selected expert's final answer as tool result
+    #                      v  |
+    #              +-------+--+-------+
+    #              |       |          |
+    #              v       v          v
+    #       movie_expert sports_expert history_expert
+    #              | ^     | ^        | ^
+    #              v |     v |        v |
+    #         movie lookup sports lookup history lookup
+    #
+    # The three branches are available choices, not a mandatory fan-out or a
+    # sequence. Each selected expert returns to the same dispatcher, which may
+    # delegate again or answer. Each lookup is that expert's own reference tool;
+    # model-selected tool calls return evidence to the calling expert's loop.
+    # These are nested agent/tool calls, not custom outer StateGraph nodes.
+    # All roles share one model adapter but retain separate message histories.
     # Model selection belongs to the factory; the workflow supplies its role.
     if model is None:
         model = build_model(caller="workflow")

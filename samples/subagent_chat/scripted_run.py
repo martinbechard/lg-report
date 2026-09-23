@@ -33,7 +33,7 @@ CONVERSATION = [
             {
                 "name": "task",
                 "args": {
-                    "subagent_type": "workflow-specialist",
+                    "subagent_type": "isolated-subagent",
                     "description": DELEGATED_TASK,
                 },
                 "id": "delegate-1",
@@ -41,7 +41,7 @@ CONVERSATION = [
         ],
     },
     {
-        "role": "workflow-specialist",
+        "role": "isolated-subagent",
         "content": "",
         "tool_calls": [
             {
@@ -57,7 +57,7 @@ CONVERSATION = [
         "tool_call_id": "specialist-lookup-1",
         "content": "Your input was: ReAct",
     },
-    {"role": "workflow-specialist", "content": SPECIALIST_SUMMARY},
+    {"role": "isolated-subagent", "content": SPECIALIST_SUMMARY},
     {
         "role": "tool",
         "name": "task",

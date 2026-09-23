@@ -1,10 +1,54 @@
 {
+  "calibrations": {
+    "openai:gpt-5.5": {
+      "checked_at": "2026-09-23T04:25:31.720508Z",
+      "capacity": 1050000,
+      "source": "https://developers.openai.com/api/docs/models/gpt-5.5.md",
+      "resolved_model": "gpt-5.5",
+      "error": null
+    },
+    "openai:gpt-5.6-luna": {
+      "checked_at": "2026-09-23T04:25:33.677629Z",
+      "capacity": 1050000,
+      "source": "https://developers.openai.com/api/docs/models/gpt-5.6-luna.md",
+      "resolved_model": "gpt-5.6-luna",
+      "error": null
+    },
+    "openai:gpt-5.6-sol": {
+      "checked_at": "2026-09-23T04:25:34.476314Z",
+      "capacity": null,
+      "source": null,
+      "resolved_model": null,
+      "error": "Verification failed (NotFoundError); capacity unavailable."
+    },
+    "anthropic:claude-sonnet-5": {
+      "checked_at": "2026-09-23T04:25:34.955686Z",
+      "capacity": null,
+      "source": null,
+      "resolved_model": null,
+      "error": "Verification failed (KeyError); capacity unavailable."
+    },
+    "anthropic:claude-opus-4-8": {
+      "checked_at": "2026-09-23T04:25:34.955710Z",
+      "capacity": null,
+      "source": null,
+      "resolved_model": null,
+      "error": "Verification failed (KeyError); capacity unavailable."
+    },
+    "anthropic:claude-fable-5-1": {
+      "checked_at": "2026-09-23T04:25:34.955715Z",
+      "capacity": null,
+      "source": null,
+      "resolved_model": null,
+      "error": "Verification failed (KeyError); capacity unavailable."
+    }
+  },
   "refresh_errors": {},
   "currency": "USD",
   "exchange": {
     "rate": "0.87237",
     "date": "2026-09-22",
-    "fetched_at": "2026-09-23T03:35:56.284466Z",
+    "fetched_at": "2026-09-23T06:06:28.037095Z",
     "source": "https://api.frankfurter.dev/v2/rate/usd/eur?providers=ecb",
     "base": "USD",
     "quote": "EUR"

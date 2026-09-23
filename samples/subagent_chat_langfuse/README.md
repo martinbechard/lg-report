@@ -62,7 +62,7 @@ subagent-chat-langfuse
     delegating-parent
       model → parent generation (task request)
       tools → task
-        workflow-specialist
+        isolated-subagent
           model → specialist generation (echo request)
           tools → echo_tool
           model → specialist generation (summary)

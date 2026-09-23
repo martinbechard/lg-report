@@ -1,17 +1,17 @@
 {
   "schema_version": 1,
-  "id": "01a0cc59-7664-76b0-b6ff-10345890c21e",
+  "id": "01a0cce2-c5fd-78d0-921d-07549798c762",
   "title": "Shell script",
   "demo": false,
   "status": "ok",
   "steps": [
     {
-      "id": "01a0cc59-7664-76b0-b6ff-10345890c21e",
+      "id": "01a0cce2-c5fd-78d0-921d-07549798c762",
       "parent_id": null,
       "name": "shell_agent",
       "kind": "workflow",
-      "start_ns": 1790134810213982000,
-      "end_ns": 1790134812677677000,
+      "start_ns": 1790143809023594000,
+      "end_ns": 1790143813480394000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -23,18 +23,18 @@
       "tool_definitions": null,
       "context": {
         "report_turn": 1,
-        "thread_id": "b0672718-b909-4615-8ecb-1fa56f32d7ff",
+        "thread_id": "069c44df-ac25-4b68-82a2-b620bf7c2312",
         "cache_ttl": "5m",
         "description": "Execute the shell_agent workflow operation and pass its result to the next graph step."
       }
     },
     {
-      "id": "01a0cc59-7667-7301-b029-dd4181ed2865",
-      "parent_id": "01a0cc59-7664-76b0-b6ff-10345890c21e",
+      "id": "01a0cce2-c600-70b3-bba3-a4088cc2c75c",
+      "parent_id": "01a0cce2-c5fd-78d0-921d-07549798c762",
       "name": "PatchToolCallsMiddleware.before_agent",
       "kind": "workflow",
-      "start_ns": 1790134810215219000,
-      "end_ns": 1790134810215627000,
+      "start_ns": 1790143809024837000,
+      "end_ns": 1790143809025263000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -48,7 +48,7 @@
         "langgraph_node": "PatchToolCallsMiddleware.before_agent",
         "langgraph_step": 1,
         "report_turn": 1,
-        "thread_id": "b0672718-b909-4615-8ecb-1fa56f32d7ff",
+        "thread_id": "069c44df-ac25-4b68-82a2-b620bf7c2312",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:1"
@@ -57,12 +57,12 @@
       }
     },
     {
-      "id": "01a0cc59-7668-7361-accd-ddaa45c0c98c",
-      "parent_id": "01a0cc59-7664-76b0-b6ff-10345890c21e",
+      "id": "01a0cce2-c601-77d3-9bac-2a73cea15bc7",
+      "parent_id": "01a0cce2-c5fd-78d0-921d-07549798c762",
       "name": "model",
       "kind": "workflow",
-      "start_ns": 1790134810216254000,
-      "end_ns": 1790134811718861000,
+      "start_ns": 1790143809025907000,
+      "end_ns": 1790143811633898000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -76,7 +76,7 @@
         "langgraph_node": "model",
         "langgraph_step": 2,
         "report_turn": 1,
-        "thread_id": "b0672718-b909-4615-8ecb-1fa56f32d7ff",
+        "thread_id": "069c44df-ac25-4b68-82a2-b620bf7c2312",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:2"
@@ -85,12 +85,12 @@
       }
     },
     {
-      "id": "01a0cc59-766d-7760-a5b3-d40c966889aa",
-      "parent_id": "01a0cc59-7668-7361-accd-ddaa45c0c98c",
+      "id": "01a0cce2-c607-7773-85f0-ba9b232ed984",
+      "parent_id": "01a0cce2-c601-77d3-9bac-2a73cea15bc7",
       "name": "ChatOpenAI",
       "kind": "model",
-      "start_ns": 1790134810221729000,
-      "end_ns": 1790134811716284000,
+      "start_ns": 1790143809031520000,
+      "end_ns": 1790143811632718000,
       "status": "ok",
       "provider": "openai",
       "model": "gpt-5.6-luna",
@@ -124,19 +124,19 @@
           "role": "ai",
           "content": [
             {
-              "id": "rs_042281872ec49cf6006ab34a1b3f0c87d2b4664d7e21a3d97f",
+              "id": "rs_0967585e220fda42006ab36d430e3c87d2b7c939b8f5a054dd",
               "summary": [],
               "type": "reasoning",
               "content": [],
               "index": 0,
-              "encrypted_content": "gAAAAABqs0obmfE5rLHoPc2Q8CA1pWSImS8yT-lr2CHuzzW2Kaq1AJCQPxiA5xzZHltiBqBPWTHvGDyNzzTS8Pd1NxL8RKdKLbgoUCtuXTfpBHELtcFShfc4k_CC-YrrSN9dOQXhijQqSJmy8mrxYHJjoosIyT3LVIZG9LtcvfSTBIH_CKcKpAWzUBBgPnSb1d3poEa8mzVYQajJpPO3JnX8QWW3cFqnui03M4FOMwgbKFX1bUXN4MVrTVdgVLbTQrtqqtDex-MoiIhJNOrneWiTVNkSwtZV44ZjrAp17h3ryRG-DrLo8pZW_vl5euImjdftixG0Fb_ttl4kCDrolUdgEO0KjgWFsXbhwRfBRJXzg1fKeMndI4df0_72M3LK2Yci0zLjN7eSHYUMkgTpEVlaFC1WSMc-RLogQ7UJTbjV720hAbZGmPKBMEueICRK1T3cixyi-_1LiqawwxmI-hKuie1-MwTxlTzgteZBoeFyo0_L2EvPBTmtx6EzQKfHHpH8g9boZOuUXVItUzdDcwAvXLeP2BNX1Nk00-5x2HS_o_mAW6L-1YeV7ulQmYTz8owBAWXMLoEOQ0QXzl13AGBnFIpPCuptWIsrivkJ8Aw-47OyfO7kT9pOKHWCHbMeEVH9xk33GH0iZWie5QQy_a1td2MwHnG_qAThAIXzbFkD7ybib0V9O4GN5olyoS6iClLz7MfH6A27qih3aW3GLsLInBKaVj0D0LX2Ky2t29PFk25zHiLoabHNOOELrUx8lLMuRw8lw5x-XG6o7qhI8iPIqKTWAv_JBnO5OQBZuXXAsosJyOsmXrgZ--AxPkH6rGJYQfP6Uk00EaVbo7K239x62XWIW-jAg9MqoPRL9cKBvbwZ-01G3zPvq6bnJfVLpNjlpAUbD4vH8wO6zuNEtB9RJYEgc9EHexqePbNlwbtmnd7CTeFqEJ8zZrHEOF44uIo3g4aHc2i7zYXDOPpbH9lQKhfkIOg3w_JNr1fFc9qowHr8-NESCKuSUE8m6XyVez0xiG_WzMVbkmoNcePb3Vw7ZvR0pEjWnQ8o5GPOArM3v3niNrhR4-tCijfmf3OU0A4LRqm2bSQRHFFDkmaBss95NBLJd4BcIJx0_E3t-k6Bw5dEYFrrxwH-Ode2fqPq8kj0U2nFo0bno4cyGbOB51dCqZTB5AAN9-ica5IrRtECGdGsX7n116eDcTQProirtsKdYmxGAkdd"
+              "encrypted_content": "gAAAAABqs21DI4VJMv699J-YjN9sGPspsQp6Ve4s3Xd3eVoIUShuESZPf9MU7W-bdMhcn-9dKyNzvh2d24tDr0rxfueVqcqGwQGYBFQOwvPmaYQtpZIuxujrIbNTXbNRTz96DiWFgNiV9OBlZUpRYUBbtK2VsqNms2qTT8XT10kgVpoCT7XOd7mXCwvHJaVzTwc5KlMyAPAdOnhsxu7j15nZgZpXDEF8zoOL-YGPZ6jAnyrlxexRGCuIUc7LZmntoBiFCwrq7XussfMZpp-kdBSDUWCGZif1q8A15tvPRpC6LOxdXdLjX1VHGTjR_BBStDMhI4tOvhQMZ6nt6Hw61rbJwo8ZDaQO_T4oVUiwjofM9qaWNiKsLKxMHspRcTgWcFIajmuFLTK8AqDXmT6tLNjOUgUBAyzQOKkX39fkRE0G5wMGpKTbM9bq_pH_PJLdjZIYdtai5mawnuu2ytyNFtd2F7uYqW66WFsJ2VvYjaNuW8mSe7LriUjiHsTMIBXIhjkLaqJVEGKYE8AfUT7clf8xsKVXMS1qfLcFeDiCWpIB08WjgDybtgoMXtJTLLIAKfk4Seqs_vl_LZ3PkP8kiHLI3RF6cs6TZMU0DO9cxf9bZVE3Y4kAEfMpuWULdNh66lPMeQJr94g-_Nwl2zVqZWyzVcxBQzPyidt_IFvjgGZDQcEQ_3bQ80ppwJHOIRR8gLVqRwjcX2SCNeKWh1gW_VD1ZicbTC3FC-hJ9NbceLh8eOHyjRtuRaOr6z54HHnJ3iTMguoX3qM4DJYHPh_1ydi6Agwd3e5OTZ_EKLt1stpCioZ8hnZUvC9NVccTW3HI57HZthMUaDAbxUo2W0Nl5bY_UEkzIx9zj5sOM1bLhrBcxx4kibBhLamepDyM5yN9bJCXPIfFuOtY7Jv9bVYpw5XexfP1D2gm7EDsYVHGfu6poEYnTe6n4uNkaPazFL3QMpHKyyppcthCD2l-AVtkPkjfMV4uVKmC-ypPfkLsyOLFRx035LFLQtoFcMr6M51zbAmecpEjaYnzE8bm_jyx0DkUU-mnpSZpvzcRN5nmIZFAeTlt7zMc6XZEte-VgqB-QBQfFS1iK-qiEIwdZjqD_80vY_e0DrgEA7-yRO3MNqRD4psYeDA_9Oi-KVA79OKLpPEpGIzhIHovTExVJ-1gN912qkHpPXfdQRCDb2VELcleXzykM35mm6gV38sC-SjscpJ2QF866TyT"
             },
             {
               "type": "function_call",
               "name": "execute",
               "arguments": "{\"command\":\"sh ./summarize.sh\",\"timeout\":120}",
-              "call_id": "call_AYk1RqU3vaNO6osRnAExUeK8",
-              "id": "fc_042281872ec49cf6006ab34a1b6ba087d2a53aadf185bcf139",
+              "call_id": "call_Q66W87QSm7grtEa7O5oUdksk",
+              "id": "fc_0967585e220fda42006ab36d434a2087d2b56f51d294a32f8e",
               "index": 1
             }
           ],
@@ -147,7 +147,7 @@
                 "command": "sh ./summarize.sh",
                 "timeout": 120
               },
-              "id": "call_AYk1RqU3vaNO6osRnAExUeK8",
+              "id": "call_Q66W87QSm7grtEa7O5oUdksk",
               "type": "tool_call"
             }
           ],
@@ -437,7 +437,7 @@
         "langgraph_node": "model",
         "langgraph_step": 2,
         "report_turn": 1,
-        "thread_id": "b0672718-b909-4615-8ecb-1fa56f32d7ff",
+        "thread_id": "069c44df-ac25-4b68-82a2-b620bf7c2312",
         "cache_ttl": "5m",
         "tags": [
           "seq:step:1"
@@ -455,12 +455,12 @@
       }
     },
     {
-      "id": "01a0cc59-7c48-79a3-802c-8fd967d70237",
-      "parent_id": "01a0cc59-7664-76b0-b6ff-10345890c21e",
+      "id": "01a0cce2-d032-76c2-8f9f-25c9264a81ae",
+      "parent_id": "01a0cce2-c5fd-78d0-921d-07549798c762",
       "name": "tools",
       "kind": "workflow",
-      "start_ns": 1790134811720871000,
-      "end_ns": 1790134811771019000,
+      "start_ns": 1790143811635067000,
+      "end_ns": 1790143811677410000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -474,7 +474,7 @@
         "langgraph_node": "tools",
         "langgraph_step": 3,
         "report_turn": 1,
-        "thread_id": "b0672718-b909-4615-8ecb-1fa56f32d7ff",
+        "thread_id": "069c44df-ac25-4b68-82a2-b620bf7c2312",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:3"
@@ -483,12 +483,12 @@
       }
     },
     {
-      "id": "01a0cc59-7c4a-7461-9e7a-d40e79735ec8",
-      "parent_id": "01a0cc59-7c48-79a3-802c-8fd967d70237",
+      "id": "01a0cce2-d033-78c2-b1a4-dc06cd1ac6bc",
+      "parent_id": "01a0cce2-d032-76c2-8f9f-25c9264a81ae",
       "name": "execute",
       "kind": "tool",
-      "start_ns": 1790134811722223000,
-      "end_ns": 1790134811769142000,
+      "start_ns": 1790143811635906000,
+      "end_ns": 1790143811675947000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -506,7 +506,7 @@
           "role": "tool",
           "content": "Orders: 3\nTotal units: 9\n\n[Command succeeded with exit code 0]",
           "tool_calls": [],
-          "tool_call_id": "call_AYk1RqU3vaNO6osRnAExUeK8"
+          "tool_call_id": "call_Q66W87QSm7grtEa7O5oUdksk"
         }
       ],
       "tool_definitions": null,
@@ -514,7 +514,7 @@
         "langgraph_node": "tools",
         "langgraph_step": 3,
         "report_turn": 1,
-        "thread_id": "b0672718-b909-4615-8ecb-1fa56f32d7ff",
+        "thread_id": "069c44df-ac25-4b68-82a2-b620bf7c2312",
         "cache_ttl": "5m",
         "tags": [
           "seq:step:1"
@@ -523,12 +523,12 @@
       }
     },
     {
-      "id": "01a0cc59-7c7c-7ec3-8722-973bba848f13",
-      "parent_id": "01a0cc59-7664-76b0-b6ff-10345890c21e",
+      "id": "01a0cce2-d05e-7ea2-9e8f-10fa6f7a360c",
+      "parent_id": "01a0cce2-c5fd-78d0-921d-07549798c762",
       "name": "model",
       "kind": "workflow",
-      "start_ns": 1790134811772205000,
-      "end_ns": 1790134812675480000,
+      "start_ns": 1790143811678673000,
+      "end_ns": 1790143813479684000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -542,7 +542,7 @@
         "langgraph_node": "model",
         "langgraph_step": 4,
         "report_turn": 1,
-        "thread_id": "b0672718-b909-4615-8ecb-1fa56f32d7ff",
+        "thread_id": "069c44df-ac25-4b68-82a2-b620bf7c2312",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:4"
@@ -551,19 +551,19 @@
       }
     },
     {
-      "id": "01a0cc59-7c7e-7ae0-9682-39c0c81cdbd7",
-      "parent_id": "01a0cc59-7c7c-7ec3-8722-973bba848f13",
+      "id": "01a0cce2-d060-7183-be50-f3539cfcd9b5",
+      "parent_id": "01a0cce2-d05e-7ea2-9e8f-10fa6f7a360c",
       "name": "ChatOpenAI",
       "kind": "model",
-      "start_ns": 1790134811774215000,
-      "end_ns": 1790134812673527000,
+      "start_ns": 1790143811680830000,
+      "end_ns": 1790143813478698000,
       "status": "ok",
       "provider": "openai",
       "model": "gpt-5.6-luna",
       "effort": null,
       "usage": {
         "input_tokens": 2377,
-        "output_tokens": 20,
+        "output_tokens": 25,
         "cache_read": 2307,
         "cache_write": 67,
         "cache_write_5m": 0,
@@ -588,19 +588,19 @@
           "role": "ai",
           "content": [
             {
-              "id": "rs_042281872ec49cf6006ab34a1b3f0c87d2b4664d7e21a3d97f",
+              "id": "rs_0967585e220fda42006ab36d430e3c87d2b7c939b8f5a054dd",
               "summary": [],
               "type": "reasoning",
               "content": [],
               "index": 0,
-              "encrypted_content": "gAAAAABqs0obmfE5rLHoPc2Q8CA1pWSImS8yT-lr2CHuzzW2Kaq1AJCQPxiA5xzZHltiBqBPWTHvGDyNzzTS8Pd1NxL8RKdKLbgoUCtuXTfpBHELtcFShfc4k_CC-YrrSN9dOQXhijQqSJmy8mrxYHJjoosIyT3LVIZG9LtcvfSTBIH_CKcKpAWzUBBgPnSb1d3poEa8mzVYQajJpPO3JnX8QWW3cFqnui03M4FOMwgbKFX1bUXN4MVrTVdgVLbTQrtqqtDex-MoiIhJNOrneWiTVNkSwtZV44ZjrAp17h3ryRG-DrLo8pZW_vl5euImjdftixG0Fb_ttl4kCDrolUdgEO0KjgWFsXbhwRfBRJXzg1fKeMndI4df0_72M3LK2Yci0zLjN7eSHYUMkgTpEVlaFC1WSMc-RLogQ7UJTbjV720hAbZGmPKBMEueICRK1T3cixyi-_1LiqawwxmI-hKuie1-MwTxlTzgteZBoeFyo0_L2EvPBTmtx6EzQKfHHpH8g9boZOuUXVItUzdDcwAvXLeP2BNX1Nk00-5x2HS_o_mAW6L-1YeV7ulQmYTz8owBAWXMLoEOQ0QXzl13AGBnFIpPCuptWIsrivkJ8Aw-47OyfO7kT9pOKHWCHbMeEVH9xk33GH0iZWie5QQy_a1td2MwHnG_qAThAIXzbFkD7ybib0V9O4GN5olyoS6iClLz7MfH6A27qih3aW3GLsLInBKaVj0D0LX2Ky2t29PFk25zHiLoabHNOOELrUx8lLMuRw8lw5x-XG6o7qhI8iPIqKTWAv_JBnO5OQBZuXXAsosJyOsmXrgZ--AxPkH6rGJYQfP6Uk00EaVbo7K239x62XWIW-jAg9MqoPRL9cKBvbwZ-01G3zPvq6bnJfVLpNjlpAUbD4vH8wO6zuNEtB9RJYEgc9EHexqePbNlwbtmnd7CTeFqEJ8zZrHEOF44uIo3g4aHc2i7zYXDOPpbH9lQKhfkIOg3w_JNr1fFc9qowHr8-NESCKuSUE8m6XyVez0xiG_WzMVbkmoNcePb3Vw7ZvR0pEjWnQ8o5GPOArM3v3niNrhR4-tCijfmf3OU0A4LRqm2bSQRHFFDkmaBss95NBLJd4BcIJx0_E3t-k6Bw5dEYFrrxwH-Ode2fqPq8kj0U2nFo0bno4cyGbOB51dCqZTB5AAN9-ica5IrRtECGdGsX7n116eDcTQProirtsKdYmxGAkdd"
+              "encrypted_content": "gAAAAABqs21DI4VJMv699J-YjN9sGPspsQp6Ve4s3Xd3eVoIUShuESZPf9MU7W-bdMhcn-9dKyNzvh2d24tDr0rxfueVqcqGwQGYBFQOwvPmaYQtpZIuxujrIbNTXbNRTz96DiWFgNiV9OBlZUpRYUBbtK2VsqNms2qTT8XT10kgVpoCT7XOd7mXCwvHJaVzTwc5KlMyAPAdOnhsxu7j15nZgZpXDEF8zoOL-YGPZ6jAnyrlxexRGCuIUc7LZmntoBiFCwrq7XussfMZpp-kdBSDUWCGZif1q8A15tvPRpC6LOxdXdLjX1VHGTjR_BBStDMhI4tOvhQMZ6nt6Hw61rbJwo8ZDaQO_T4oVUiwjofM9qaWNiKsLKxMHspRcTgWcFIajmuFLTK8AqDXmT6tLNjOUgUBAyzQOKkX39fkRE0G5wMGpKTbM9bq_pH_PJLdjZIYdtai5mawnuu2ytyNFtd2F7uYqW66WFsJ2VvYjaNuW8mSe7LriUjiHsTMIBXIhjkLaqJVEGKYE8AfUT7clf8xsKVXMS1qfLcFeDiCWpIB08WjgDybtgoMXtJTLLIAKfk4Seqs_vl_LZ3PkP8kiHLI3RF6cs6TZMU0DO9cxf9bZVE3Y4kAEfMpuWULdNh66lPMeQJr94g-_Nwl2zVqZWyzVcxBQzPyidt_IFvjgGZDQcEQ_3bQ80ppwJHOIRR8gLVqRwjcX2SCNeKWh1gW_VD1ZicbTC3FC-hJ9NbceLh8eOHyjRtuRaOr6z54HHnJ3iTMguoX3qM4DJYHPh_1ydi6Agwd3e5OTZ_EKLt1stpCioZ8hnZUvC9NVccTW3HI57HZthMUaDAbxUo2W0Nl5bY_UEkzIx9zj5sOM1bLhrBcxx4kibBhLamepDyM5yN9bJCXPIfFuOtY7Jv9bVYpw5XexfP1D2gm7EDsYVHGfu6poEYnTe6n4uNkaPazFL3QMpHKyyppcthCD2l-AVtkPkjfMV4uVKmC-ypPfkLsyOLFRx035LFLQtoFcMr6M51zbAmecpEjaYnzE8bm_jyx0DkUU-mnpSZpvzcRN5nmIZFAeTlt7zMc6XZEte-VgqB-QBQfFS1iK-qiEIwdZjqD_80vY_e0DrgEA7-yRO3MNqRD4psYeDA_9Oi-KVA79OKLpPEpGIzhIHovTExVJ-1gN912qkHpPXfdQRCDb2VELcleXzykM35mm6gV38sC-SjscpJ2QF866TyT"
             },
             {
               "type": "function_call",
               "name": "execute",
               "arguments": "{\"command\":\"sh ./summarize.sh\",\"timeout\":120}",
-              "call_id": "call_AYk1RqU3vaNO6osRnAExUeK8",
-              "id": "fc_042281872ec49cf6006ab34a1b6ba087d2a53aadf185bcf139",
+              "call_id": "call_Q66W87QSm7grtEa7O5oUdksk",
+              "id": "fc_0967585e220fda42006ab36d434a2087d2b56f51d294a32f8e",
               "index": 1
             }
           ],
@@ -611,7 +611,7 @@
                 "command": "sh ./summarize.sh",
                 "timeout": 120
               },
-              "id": "call_AYk1RqU3vaNO6osRnAExUeK8",
+              "id": "call_Q66W87QSm7grtEa7O5oUdksk",
               "type": "tool_call"
             }
           ],
@@ -621,7 +621,7 @@
           "role": "tool",
           "content": "Orders: 3\nTotal units: 9\n\n[Command succeeded with exit code 0]",
           "tool_calls": [],
-          "tool_call_id": "call_AYk1RqU3vaNO6osRnAExUeK8"
+          "tool_call_id": "call_Q66W87QSm7grtEa7O5oUdksk"
         }
       ],
       "response": [
@@ -630,10 +630,10 @@
           "content": [
             {
               "type": "text",
-              "text": "Orders: 3  \nTotal units: 9  \n\nExit status: 0",
+              "text": "Order totals:\n- Orders: 3\n- Total units: 9\n\nExit status: 0",
               "phase": "final_answer",
               "index": 0,
-              "id": "msg_042281872ec49cf6006ab34a1c59bc87d2a5c6fa45392c3195"
+              "id": "msg_0967585e220fda42006ab36d445d4487d2b0db9897a9c06878"
             }
           ],
           "tool_calls": [],
@@ -923,7 +923,7 @@
         "langgraph_node": "model",
         "langgraph_step": 4,
         "report_turn": 1,
-        "thread_id": "b0672718-b909-4615-8ecb-1fa56f32d7ff",
+        "thread_id": "069c44df-ac25-4b68-82a2-b620bf7c2312",
         "cache_ttl": "5m",
         "tags": [
           "seq:step:1"
@@ -940,5 +940,5 @@
       }
     }
   ],
-  "output": "[{'type': 'text', 'text': 'Orders: 3  \\nTotal units: 9  \\n\\nExit status: 0', 'phase': 'final_answer', 'index': 0, 'id': 'msg_042281872ec49cf6006ab34a1c59bc87d2a5c6fa45392c3195'}]"
+  "output": "[{'type': 'text', 'text': 'Order totals:\\n- Orders: 3\\n- Total units: 9\\n\\nExit status: 0', 'phase': 'final_answer', 'index': 0, 'id': 'msg_0967585e220fda42006ab36d445d4487d2b0db9897a9c06878'}]"
 }

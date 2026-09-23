@@ -1,4 +1,4 @@
-"""Define the workflow specialist's isolated role and echo tool.
+"""Define the isolated subagent's role and echo tool.
 
 DeepAgents compiles this specification under the parent's native task tool.
 Only the delegated assignment enters its context; its final answer returns.
@@ -35,7 +35,7 @@ def build_agent(parameters: dict | None = None) -> SubAgent:
     # Preserve explicit models used by other lessons without constructing an
     # unused provider client (which would also require credentials).
     if "model" not in parameters:
-        parameters["model"] = build_model(caller="workflow-specialist")
+        parameters["model"] = build_model(caller="isolated-subagent")
     # This dictionary is configuration, not an invoked child or tool response.
     # Once registered, the parent's task tool invokes the child on an assignment
     # and returns its final answer as an observation for the parent to consume.
@@ -43,7 +43,7 @@ def build_agent(parameters: dict | None = None) -> SubAgent:
     # choose this role. system_prompt guides the child after selection. Keeping
     # the echo tool here gives the child capabilities independent of its parent.
     return {
-        "name": "workflow-specialist",
+        "name": "isolated-subagent",
         "description": "Echoes assigned text with a local tool and summarizes its result.",
         "system_prompt": SPECIALIST_PROMPT,
         **parameters,

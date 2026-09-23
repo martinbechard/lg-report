@@ -11,6 +11,7 @@ import json
 from ast import literal_eval
 from decimal import Decimal
 from importlib.resources import files
+from math import ceil, floor, log10
 from pathlib import Path
 
 from jinja2 import Environment, select_autoescape
@@ -18,7 +19,11 @@ from jinja2 import Environment, select_autoescape
 from agent_runtime.harness.demo_meter import message_units, units
 from reporting.annotations import describe
 from reporting.collaboration import collaboration_diagrams
-from reporting.context import context_change, context_utilization
+from reporting.context import (
+    compaction_description,
+    context_change,
+    context_utilization,
+)
 from reporting.pricing import CATEGORIES, Prices, breakdown, summarize
 from reporting.schema import Run
 
@@ -103,7 +108,7 @@ def tree_rows(run: Run, prices: Prices) -> list[dict]:
         index = len(rows)
         row = {
             "step": step,
-            "description": step.context.get("description")
+            "description": compaction_description(step) or step.context.get("description")
             or describe(step.kind, step.name, step.context, {}),
             "index": index,
             "parent": parent,
@@ -143,6 +148,7 @@ def execution_tree_view(rows, scopes):
             and step.kind == "workflow"
             and row["parent"] is not None
             and step.id not in scopes
+            and not compaction_description(step)
             and (step.name != node or node in {"model", "tools"})
         )
     # Resolve visible children from the leaves upward. A workflow with its own
@@ -164,6 +170,7 @@ def execution_tree_view(rows, scopes):
             and step.kind == "workflow"
             and step.status == "ok"
             and step.id not in scopes
+            and not compaction_description(step)
             and len(contained) == 1
         ):
             child = rows[contained[0]]["step"]
@@ -385,6 +392,34 @@ def conversation_turns(run: Run, prices: Prices) -> list[dict]:
         metrics = model_metrics(models, prices)
         owner = agents["scopes"].get(agents["owners"].get(step.id))
         event = {"step": step, "cost": metrics["total"], "agent": owner, **metrics}
+        lineage = []
+        ancestor = step
+        by_id = {item.id: item for item in run.steps}
+        while ancestor is not None:
+            lineage.append(ancestor)
+            ancestor = by_id.get(ancestor.parent_id)
+        summary = any(item.name == "SummarizationMiddleware.before_model" for item in lineage)
+        task = next((item for item in lineage if item.kind == "tool" and item.name == "task"), None)
+        declared = next((item.context["report_history_id"] for item in lineage
+                         if item.context.get("report_history_id")), None)
+        # The context-budget lesson explicitly shares outer messages between
+        # peers. Older saved traces predate report_history_id; support that
+        # documented workflow contract without merging arbitrary agent paths.
+        shared_lesson = any(item.name == "context_budget_workflow" for item in lineage)
+        if summary:
+            history_id, history_label = step.id, "Summary request (separate input)"
+        elif task:
+            history_id, history_label = (owner.id if owner else task.id), f"Isolated task / turn {number}"
+        elif declared or shared_lesson:
+            history_id = str(declared or "shared-workflow") + ":" + str(step.context.get("thread_id", "run"))
+            history_label = "Shared workflow history"
+        else:
+            # No evidence of cross-invocation sharing: keep scopes separate.
+            history_id = owner.id if owner else step.id
+            history_label = f"{owner.name if owner else 'Unassigned'} history"
+        event["history_id"] = history_id
+        event["history_label"] = history_label
+        event["summary_request"] = summary
         event["delegated_agents"] = [
             activity["step"]
             for activity in agents["activities"]
@@ -517,6 +552,15 @@ def conversation_turns(run: Run, prices: Prices) -> list[dict]:
     by_id = {step.id: step for step in run.steps}
     for turn in turns.values():
         turn.update(model_metrics(turn.pop("models"), prices))
+        # Compactions are completed history changes, not model/tool messages.
+        # Keep them separate from the flat accounting/export event ledger.
+        turn["compactions"] = [
+            {"step": step, "description": compaction_description(step),
+             "agent": agents["scopes"].get(agents["owners"].get(step.id))}
+            for step in run.steps
+            if step.context.get("report_turn", 1) == turn["number"]
+            and compaction_description(step)
+        ]
         # Keep the flat event list for accounting and charts. HTML additionally
         # nests tools and agent invocations by ancestry, skipping framework nodes.
         nodes = {}
@@ -531,7 +575,13 @@ def conversation_turns(run: Run, prices: Prices) -> list[dict]:
                     nodes.setdefault(parent, {"step": ancestor, "children": []})
                 parent = ancestor.parent_id
         turn["conversation_nodes"] = []
-        for node in sorted(nodes.values(), key=lambda n: n["step"].start_ns):
+        for compaction in turn["compactions"]:
+            nodes[compaction["step"].id + "-completion"] = {
+                "step": compaction["step"], "compaction": compaction, "children": []
+            }
+        for node in sorted(nodes.values(), key=lambda n: (
+            n["step"].end_ns if "compaction" in n else n["step"].start_ns
+        )):
             parent = node["step"].parent_id
             while parent and parent not in nodes:
                 parent = by_id[parent].parent_id
@@ -550,7 +600,7 @@ def cost_chart(turns, prices):
 
     Each bar includes one model request and its response, split by billed token
     category; tools have no independent bar. Bars and the cumulative line share
-    the EUR scale; context occupancy uses a separate percentage axis. Return None
+    the EUR scale; context uses a separate raw-token or percentage axis. Return None
     when FX is unavailable rather than labeling USD as EUR.
     Partial accounting remains flagged in the projection; no amounts are rounded.
     """
@@ -580,8 +630,17 @@ def cost_chart(turns, prices):
                     "turn": turn["number"],
                     "agent": event.get("agent"),
                     "id": event["step"].id,
+                    "history_id": event["history_id"],
+                    "history_label": event["history_label"],
+                    "summary_request": event["summary_request"],
+                    "start_ns": event["step"].start_ns,
+                    # Each point is the measured baseline after the response,
+                    # matching the trigger's input + output basis. New user/tool
+                    # messages may subsequently increase the trigger estimate.
+                    "context_tokens": (event["step"].usage.input_tokens + event["step"].usage.output_tokens
+                                       if event["step"].usage is not None else None),
                     "partial": event["partial"],
-                    "context": context_utilization(event["step"], prices),
+                    "context": context_utilization(event["step"], prices, include_output=True),
                     "segments": [
                         {
                             "label": CATEGORIES[i][1],
@@ -652,10 +711,101 @@ def cost_chart(turns, prices):
             context_points = []
     if context_points:
         context_lines.append(" ".join(context_points))
+    # Raw counts need no known model capacity. Give the largest observed input
+    # 10% headroom, rounded upward to a readable decimal unit. Missing receipts
+    # break the line in both modes; an explicit zero remains a valid point.
+    maximum_tokens = max((b["context_tokens"] for b in bars
+                          if b["context_tokens"] is not None), default=0)
+    unit = 10 ** max(0, floor(log10(maximum_tokens or 1)) - 1)
+    token_max = max(4, ceil(maximum_tokens * 1.1 / unit) * unit)
+    token_lines, points = [], []
+    for bar in bars:
+        if bar["context_tokens"] is not None:
+            bar["token_y"] = 290 - bar["context_tokens"] / token_max * 260
+            points.append(f"{bar['center']},{bar['token_y']}")
+        elif points:
+            token_lines.append(" ".join(points))
+            points = []
+    if points:
+        token_lines.append(" ".join(points))
+    # Connect only requests belonging to the same retained history. Summary
+    # inputs are standalone gray points, never bridges between contexts.
+    histories = {}
+    palette = ["#17734b", "#2468b4", "#8a4da0", "#b35c16", "#17858c"]
+    for bar in bars:
+        key = bar["history_id"]
+        if bar["summary_request"]:
+            bar["history_color"] = "#777777"
+            continue
+        if key not in histories:
+            histories[key] = {"label": bar["history_label"],
+                              "color": palette[len(histories) % len(palette)], "bars": []}
+        histories[key]["bars"].append(bar)
+        bar["history_color"] = histories[key]["color"]
+    context_lines, token_lines = [], []
+    for history in histories.values():
+        for field, destination in (("token_y", token_lines), ("context_y", context_lines)):
+            points = []
+            for bar in history["bars"]:
+                if field in bar:
+                    points.append(f"{bar['center']},{bar[field]}")
+                elif points:
+                    destination.append({"points": " ".join(points), "color": history["color"]})
+                    points = []
+            if points:
+                destination.append({"points": " ".join(points), "color": history["color"]})
+    # This is a request-order axis, not elapsed time. Place each completion
+    # between the requests that started before/after it. Spread events sharing
+    # a gap so separate recorded compactions do not hide one another.
+    marker_groups = {}
+    for turn in turns:
+        for event in turn.get("compactions", []):
+            index = sum(b["start_ns"] <= event["step"].end_ns for b in bars)
+            marker_groups.setdefault(index, []).append(event)
+    markers = []
+    history_budgets = {}
+    for index, events in marker_groups.items():
+        left = bars[index - 1]["x"] + bar_width if index else 75
+        right = bars[index]["x"] if index < len(bars) else left + 8
+        for offset, event in enumerate(sorted(events, key=lambda e: e["step"].end_ns)):
+            # Keep the popup about the history replacement, not unrelated
+            # requests either side of its chronological position.
+            context = event["step"].context
+            owner_id = event["agent"].id if event["agent"] else None
+            history_bar = next((b for b in bars if b["agent"] and b["agent"].id == owner_id
+                                and not b["summary_request"]), None)
+            label = history_bar["history_label"] if history_bar else "Unassigned history"
+            history_budgets[label] = {"label": label,
+                                     "trigger": context.get("compaction_trigger_tokens", "unreported"),
+                                     "limit": context.get("compaction_max_input_tokens", "unreported")}
+            before = context.get("compaction_before_tokens", "unreported")
+            after = context.get("compaction_after_tokens", "unreported")
+            effect = (f"Change: {after - before:+,} estimated tokens"
+                      if isinstance(before, int) and isinstance(after, int)
+                      else "Change: unreported")
+            # The compact popup shows why this trigger fired. Do not present a
+            # provider baseline -> local fallback as a measured size reduction;
+            # the following model point supplies fresh usage after replacement.
+            description = (label + " | "
+                           + f"Compacted at {before:,} tokens ({context['compaction_before_basis']}) | "
+                           + f"Trigger: {context.get('compaction_trigger_tokens', 'unreported')} context tokens | "
+                           + f"Input error limit: {context.get('compaction_max_input_tokens', 'unreported')} estimated tokens"
+                           if "compaction_before_basis" in context else
+                           label + " | "
+                           + f"History compaction (local estimate): {before} -> {after} tokens | "
+                           + effect + " | "
+                           + f"Compaction trigger: {context.get('compaction_trigger_tokens', 'unreported')} history tokens | "
+                           + f"Error limit: {context.get('compaction_max_input_tokens', 'unreported')} full-input tokens")
+            markers.append({
+                "x": left + (right - left) * (offset + 1) / (len(events) + 1),
+                "description": description,
+            })
     # Legend entries require a nonzero plotted segment somewhere; absent
     # categories would otherwise suggest bars contain costs they do not have.
     return {
         "bars": bars,
+        "histories": list(histories.values()),
+        "has_summaries": any(b["summary_request"] for b in bars),
         "width": width,
         "bar_width": bar_width,
         "height": chart_height,
@@ -663,6 +813,16 @@ def cost_chart(turns, prices):
         "groups": groups,
         "line_points": " ".join(f"{b['center']},{b['cumulative_y']}" for b in bars),
         "context_lines": context_lines,
+        "token_lines": token_lines,
+        "token_max": token_max,
+        "token_ticks": [
+            {"value": round(token_max * i / 4),
+             "y": 290 - round(token_max * i / 4) / token_max * 260}
+            for i in range(5)
+        ],
+        "compactions": markers,
+        "history_budgets": list(history_budgets.values()),
+        "token_missing": any(b["context_tokens"] is None for b in bars),
         "context_ticks": [
             {"y": 290 - i * 65, "value": context_max * i / 4} for i in range(5)
         ],

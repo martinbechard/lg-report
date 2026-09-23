@@ -7,6 +7,7 @@ like deleted or replaced history.
 
 Matching visible messages does not prove a provider cache hit. This module keeps
 message comparisons separate from the provider's token usage and billing data.
+Explicit compaction events carry their own local estimates and policy limits.
 
 AI attribution: Generated with AI assistance.
 
@@ -16,7 +17,64 @@ Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 from collections import Counter
 
 
-def context_utilization(step, prices):
+def compaction_description(step):
+    """Explain explicit replacement evidence without inferring missing counts.
+
+    This text is shared by diagram tooltips and HTML/Excel execution tables.
+    Local history estimates are never added to provider usage or billed tokens.
+    Older traces have no event and receive no fabricated compaction annotation.
+    """
+    context = step.context
+    if context.get("compaction_event") != "completed":
+        return None
+
+    def count(field):
+        """Retain unavailable values rather than displaying them as zero."""
+        value = context.get(f"compaction_{field}")
+        return f"{value:,}" if isinstance(value, int) else "unreported"
+
+    # New recordings disclose each counter's basis instead of suggesting that
+    # a provider receipt and a post-replacement local estimate are identical.
+    # Keep legacy recordings truthful: their numbers remain history-only counts.
+    if "compaction_before_basis" in context:
+        return (
+            f"Compaction completed | Trigger context: {count('before_tokens')} tokens "
+            f"({context['compaction_before_basis']}) | "
+            f"After replacement: {count('after_tokens')} tokens "
+            f"({context['compaction_after_basis']}) | "
+            f"Compact at: {count('trigger_tokens')} context tokens | "
+            f"Input error limit: {count('max_input_tokens')} estimated tokens"
+        )
+
+    # Completion means history was replaced, not that the replacement shrank.
+    # Small histories can grow when summary prose and its wrapper exceed the
+    # removed content, while recent tool exchanges must still be retained.
+    before = context.get("compaction_before_tokens")
+    after = context.get("compaction_after_tokens")
+    effect = ""
+    if isinstance(before, int) and isinstance(after, int):
+        delta = after - before
+        effect = (
+            f"Estimated history grew by {delta:,} tokens; no size reduction"
+            if delta > 0 else
+            f"Estimated history reduced by {-delta:,} tokens"
+            if delta < 0 else "Estimated history size unchanged"
+        ) + " | "
+    return (
+        "Compaction completed | Estimated history tokens: "
+        f"{count('before_tokens')} → {count('after_tokens')} | "
+        f"{effect}"
+        f"Messages: {count('before_messages')} → {count('after_messages')} | "
+        f"Trigger threshold: {count('trigger_tokens')} tokens | "
+        f"Recent-history retention target: {count('keep_tokens')} tokens | "
+        f"Maximum agent input: {count('max_input_tokens')} estimated tokens "
+        "(separate guard, includes system instructions and tool definitions) | "
+        "History estimates exclude system/tool envelopes; retained history includes the summary. "
+        "Trigger may also use matching-provider reported usage."
+    )
+
+
+def context_utilization(step, prices, *, include_output=False):
     """Measure request occupancy against a verified model context capacity.
 
     Input usage already includes cached tokens. Output is excluded because this
@@ -28,10 +86,14 @@ def context_utilization(step, prices):
     capacity = context_capacity(step.provider, step.model, prices)
     if capacity is None or step.usage is None:
         return None
+    # The request view measures input alone; the history plot shows occupancy
+    # after this response. Output is already inclusive of reasoning. Neither
+    # mode adds cached tokens again: they are part of usage.input_tokens.
+    tokens = step.usage.input_tokens + (step.usage.output_tokens if include_output else 0)
     return {
         **capacity,
-        "percent": step.usage.input_tokens / capacity["capacity"] * 100,
-        "tokens": step.usage.input_tokens,
+        "percent": tokens / capacity["capacity"] * 100,
+        "tokens": tokens,
     }
 
 

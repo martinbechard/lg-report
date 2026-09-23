@@ -18,7 +18,7 @@ def test_conversation_routing_and_fresh_models():
     """Interleaved child and tool entries never consume the parent's next answer."""
     with model_factory.model_factory_scope(live=False, conversation=CONVERSATION):
         parent = model_factory.build_model("example-model", caller="workflow")
-        child = model_factory.build_model("example-model", caller="workflow-specialist")
+        child = model_factory.build_model("example-model", caller="isolated-subagent")
         second_parent = model_factory.build_model(caller="workflow")
     # Invocation after scope exit proves existing graphs retain their mode.
     request = HumanMessage(content="delegate")

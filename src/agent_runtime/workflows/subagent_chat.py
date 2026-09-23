@@ -13,7 +13,7 @@ from deepagents.backends import StateBackend
 from langgraph.graph.state import CompiledStateGraph
 
 from agent_runtime.agents.delegating_parent import build_agent as build_parent
-from agent_runtime.agents.workflow_specialist import build_agent as build_specialist
+from agent_runtime.agents.isolated_subagent import build_agent as build_specialist
 from agent_runtime.harness.model_factory import build_model
 
 
@@ -24,6 +24,23 @@ def build_workflow() -> CompiledStateGraph:
     The factory resolves provider settings; specialization comes from each
     agent's instructions and tools. Construction does not invoke either agent.
     """
+    # Agent delegation flow (DeepAgents owns the internal model/tool graph):
+    #
+    # input messages -> delegating_parent -> final answer
+    #                         |  ^
+    #        task(assignment) |  | specialist's final answer as tool result
+    #                         v  |
+    #                  isolated-subagent
+    #                         |  ^
+    #               echo_tool |  | echo result
+    #                         v  |
+    #                      echo_tool
+    #
+    # These arrows describe calls and returns, not a custom StateGraph's edges.
+    # The parent chooses task calls at runtime and continues after each return;
+    # its prompt requests delegation, but construction does not force a call.
+    # The specialist receives a self-contained assignment in isolated context,
+    # not the parent's conversation. echo_tool is a tool, not another agent.
     parent_model = build_model(caller="workflow")
     # The child owns its model and tools. DeepAgents compiles this specification
     # and later invokes it when the parent requests its registered task name.

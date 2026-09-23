@@ -1,4 +1,4 @@
-"""Define the parent that delegates the echo demonstration to workflow-specialist.
+"""Define the parent that delegates the echo demonstration to isolated-subagent.
 
 The task tool executes the specialist graph and returns its final summary.
 No user scenarios, provider configuration, or recording belong in this module.
@@ -14,7 +14,7 @@ from deepagents.middleware.subagents import SubAgent
 from langgraph.graph.state import CompiledStateGraph
 
 # The parent delegates the echo demonstration instead of duplicating the child's tools.
-PARENT_PROMPT = "Delegate echoing the supplied text to workflow-specialist using task. Provide a self-contained assignment. After its summary returns, answer the user concisely. The specialist uses an echo tool, which supplies no independent factual evidence."
+PARENT_PROMPT = "Delegate echoing the supplied text to isolated-subagent using task. Provide a self-contained assignment. After its summary returns, answer the user concisely. The specialist uses an echo tool, which supplies no independent factual evidence."
 
 # The parent prompt is kept separate from the child specification so the
 # delegation boundary remains inspectable and child evidence is not preloaded.
