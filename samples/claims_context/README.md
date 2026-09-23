@@ -91,8 +91,8 @@ Failed edits alone do not invalidate anything.
 ## Run the comparison
 
 ```bash
-uv run python -m agent_runtime --sample claims_context_naive --show-context --out reports/claims-naive
-uv run python -m agent_runtime --sample claims_context_managed --show-context --out reports/claims-managed
+uv run python -m agent_runtime --sample claims_context_naive --show-context --out reports/claims-naive --demo
+uv run python -m agent_runtime --sample claims_context_managed --show-context --out reports/claims-managed --demo
 ```
 
 The demonstration asks five questions:
@@ -116,7 +116,7 @@ usage counts the actual inputs; neither mode models provider cache reuse.
 Output directories are reused. Omit `--out` to replace the report bundle and
 `context.json` in `reports/claims_context_naive/` or `reports/claims_context_managed/`. Use `--prices models.json` and
 `--fx-file PATH` for supplied pricing and exchange snapshots. FX otherwise reads the shared
-`exchange-rate.json` without a lookup. Model calls stay offline unless `--live` is selected.
+`exchange-rate.json` without a lookup. Use `--demo` to keep model calls scripted even when an API key is configured.
 
 ## Compare actual agent decisions
 
@@ -129,7 +129,7 @@ uv run python -m agent_runtime --sample claims_context_naive --live --mode manag
 
 These runs share user questions, tools, and agent instructions. The real model
 chooses which record to load, when to edit, whether to reread, and how to answer.
-For your own queries, add `--client console --live`; `/quit` ends the session.
+For your own queries, replace `--demo` with `--client console --live`; `/quit` ends the session.
 Console `/attach` supplies ordinary text context, not a stored claim or policy.
 
 A live model may answer correctly in both modes, reread proactively, or make a

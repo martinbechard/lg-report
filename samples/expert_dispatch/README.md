@@ -30,7 +30,7 @@ From the repository root:
 
 ```sh
 uv sync --locked
-uv run python -m agent_runtime --sample expert_dispatch
+uv run python -m agent_runtime --sample expert_dispatch --demo
 ```
 
 The default test case asks three questions in one conversation, one per domain.
@@ -53,7 +53,7 @@ files alone, and `/quit` ends the session. All four agents share one configured 
 is phrase-based retrieval, not an embedding/vector database or live web search.
 Unmatched questions produce an explicit retrieval miss; experts are instructed
 to explain the coverage limit.
-For the fixed three-question scenario with a provider, use `--live` alone.
+For the fixed three-question scenario with a provider, use `--live --client static`.
 
 ## Read the code
 

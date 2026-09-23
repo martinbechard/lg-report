@@ -27,9 +27,9 @@ See [composition diagrams](../docs/chat-composition.md).
 Run from the repository root after `uv sync`:
 
 ```bash
-uv run python -m agent_runtime --sample simple_chat
-uv run python -m agent_runtime --sample tool_chat
-uv run python -m agent_runtime --sample thinking_agent
+uv run python -m agent_runtime --sample simple_chat --demo
+uv run python -m agent_runtime --sample tool_chat --demo
+uv run python -m agent_runtime --sample thinking_agent --demo
 ```
 
 Each command writes **`reports/<sample>/report.html`** and prints its absolute
@@ -68,7 +68,7 @@ the local report bundle. Its simulated model still requires a Langfuse project.
 ```sh
 uv run python -m agent_runtime --list
 uv run python -m agent_runtime --sample simple_chat --client console --live
-uv run python -m agent_runtime --sample subagent_chat --client angular
+uv run python -m agent_runtime --sample subagent_chat --client angular --demo
 ```
 
 The console accepts `/samples`, `/sample tool_chat`, and `/new`. Selection closes
@@ -95,7 +95,7 @@ reads JSON without importing workflows or creating models. IDs must be unique.
 One folder can declare multiple variants, as `claims_context` does. Optional
 `tracing: "langfuse"`, `interaction: "approval"` or `"clarification"`, and
 `mcp_tools` describe harness behavior. `default_client` defaults to `static`;
-file approval declares `console` so its default still asks a human before editing. No shared registration code changes.
+file approval declares `console` so, without a key or an explicit mode, it still asks a human before editing. Live mode defaults to `console`; explicit `--demo` defaults to fixed prompts and scripted answers. An explicit `--client` overrides these defaults. No shared registration code changes.
 
 Workflows obtain models through `build_model`; agents may request their own with
 a named caller. A script can provide `CONVERSATION` entries (`client`, `ai`, named
@@ -116,8 +116,7 @@ the catalog only supplies data. Neither prompter supplies model responses.
 6. **`src/agent_runtime/harness/`** provides the common client loop and tracing lifecycle.
 7. **`src/reporting/`** captures, normalizes, prices, and exports local traces.
 
-Model-based applications use `--client static` by default. The file-approval sample defaults to console approval with scripted model decisions; `--live` uses the configured model with the same tool gate.
-Quote-request clarification uses `--live --client console` for model judgment; its default is an explicitly scripted offline demonstration.
+With the selected provider’s API key configured, applications default to live console execution. Use `--demo` for scripted model decisions and fixed prompts. Without a key, applications use scripted models and their declared client default. File approval retains human approval in that case; `--demo --client console` also keeps human approval with scripted model decisions.
 For chat applications, use `--client console --live`
 for interactive prompts and UTF-8 text attachments. `/attach PATH` queues a file,
 `/send` submits attachments alone, and `/quit` ends the session. Console mode
@@ -127,9 +126,7 @@ All samples use LangGraphAgent. Console and scripted clients consume AG-UI event
 
 ## Model selection and configuration
 
-Default model-based runs use an offline model with a stateful context simulator. No LLM API
-key is required. To use a provider, copy the application's `.env.example` to its
-own `.env`, set an OpenAI or Anthropic key, and run that application with `--live`.
+Demo runs use an offline model with a stateful context simulator and need no LLM API key. To enable live execution by default, copy the application’s `.env.example` to its own `.env` and configure `LG_PROVIDER` and its API key. `--demo` forces scripted execution even with credentials; `--live` forces real execution and reports missing or invalid credentials as errors. The two flags are mutually exclusive.
 Shell environment variables take precedence. `--env-file` selects another file.
 Provider behavior, reasoning visibility, cache hits, and call counts can differ
 from the offline sequence; the report uses actual reported provider usage.

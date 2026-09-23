@@ -45,7 +45,7 @@ length, or round number. A live judge can approve immediately or reject repeated
 
 ```sh
 uv sync --locked
-uv run python -m agent_runtime --sample review_loop
+uv run python -m agent_runtime --sample review_loop --demo
 ```
 
 This prints a new HTML report at `reports/review_loop/report.html` (replacing the previous default run) and saves the
@@ -53,7 +53,7 @@ raw spans, normalized run, and price snapshot. Expect four model calls, no tool
 calls, and one user turn. The report includes both drafts and both judge responses;
 only the final answer is returned to the chat client.
 
-The default simulation makes no provider calls. To avoid model-price network lookups,
+The explicit `--demo` mode makes no provider calls. To avoid model-price network lookups,
 supply `--prices models.json`. FX reads the saved shared `exchange-rate.json`.
 
 ```sh

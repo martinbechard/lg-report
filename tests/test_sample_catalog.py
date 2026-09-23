@@ -277,8 +277,7 @@ def test_launcher_delegates_terminal_script_policy_to_console_application(
     )
     monkeypatch.setattr(server, "start_workflow_api_listener", lambda **kw: None)
     argv = ["agent_runtime", "--sample", "simple_chat", "--client", client_mode]
-    if live:
-        argv.append("--live")
+    argv.append("--live" if live else "--demo")
     monkeypatch.setattr(sys, "argv", argv)
     app.main()
     assert len(configured) == expected_scripts
@@ -321,3 +320,73 @@ def test_static_console_application_exits_when_script_is_exhausted(monkeypatch):
     ).run(args.sample)
     assert len(received) == 1
     assert received[0] is not None
+
+
+@pytest.mark.parametrize(
+    "provider,key,flags,live,client",
+    [
+        ("openai", "", [], False, "static"),
+        ("openai", "   ", [], False, "static"),
+        ("openai", "test-key", [], True, "console"),
+        ("anthropic", "test-key", [], True, "console"),
+        ("openai", "test-key", ["--demo"], False, "static"),
+        ("openai", "", ["--live"], True, "console"),
+        ("openai", "test-key", ["--demo", "--client", "angular"], False, "angular"),
+        ("openai", "test-key", ["--live", "--client", "static"], True, "static"),
+    ],
+)
+def test_launcher_selects_demo_or_live_from_provider_key(
+    tmp_path, monkeypatch, provider, key, flags, live, client
+):
+    """Credential detection respects provider, dotenv scope, and explicit modes."""
+    from agent_runtime.harness.argument_parser import parse_arguments
+
+    directory = register(tmp_path, "lesson", "lesson")
+    key_name = "OPENAI_API_KEY" if provider == "openai" else "ANTHROPIC_API_KEY"
+    for name in ("OPENAI_API_KEY", "ANTHROPIC_API_KEY", "LG_PROVIDER"):
+        monkeypatch.delenv(name, raising=False)
+    (directory / ".env").write_text(f'LG_PROVIDER={provider}\n{key_name}="{key}"\n')
+    _, args = parse_arguments(SampleCatalog(tmp_path), ["--sample", "lesson", *flags])
+    assert (args.live, args.client) == (live, client)
+
+
+def test_launcher_env_override_and_conflicting_modes(tmp_path, monkeypatch):
+    """Explicit env files and shell precedence match actual model construction."""
+    from agent_runtime.harness.argument_parser import parse_arguments
+
+    directory = register(tmp_path, "lesson", "lesson")
+    (directory / ".env").write_text("OPENAI_API_KEY=sample-key\n")
+    override = tmp_path / "alternate.env"
+    override.write_text("LG_PROVIDER=anthropic\nANTHROPIC_API_KEY=file-key\n")
+    monkeypatch.delenv("LG_PROVIDER", raising=False)
+    monkeypatch.setenv("OPENAI_API_KEY", "unrelated-provider-key")
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "")
+    catalog = SampleCatalog(tmp_path)
+    argv = ["--sample", "lesson", "--env-file", str(override)]
+    _, args = parse_arguments(catalog, argv)
+    assert args.live is False
+    monkeypatch.delenv("ANTHROPIC_API_KEY")
+    _, args = parse_arguments(catalog, argv)
+    assert args.live is True
+    with pytest.raises(SystemExit):
+        parse_arguments(catalog, [*argv, "--demo", "--live"])
+
+
+def test_file_approval_demo_is_explicit_and_no_key_keeps_human_approval(
+    tmp_path, monkeypatch
+):
+    """Only explicit demo mode replaces this lesson's default human answers."""
+    from agent_runtime.harness.argument_parser import parse_arguments
+
+    monkeypatch.delenv("LG_PROVIDER", raising=False)
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    empty_env = tmp_path / "empty.env"
+    empty_env.write_text("")
+    argv = ["--sample", "file_approval", "--env-file", str(empty_env)]
+    catalog = SampleCatalog()
+    _, args = parse_arguments(catalog, argv)
+    assert (args.live, args.client) == (False, "console")
+    _, args = parse_arguments(catalog, [*argv, "--demo"])
+    assert (args.live, args.client) == (False, "static")
+    _, args = parse_arguments(catalog, [*argv, "--demo", "--client", "console"])
+    assert (args.live, args.client) == (False, "console")

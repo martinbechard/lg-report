@@ -1,20 +1,21 @@
 """Define launcher arguments and validate sample-specific command-line choices.
 
 Console, scripted, and browser launches share one option vocabulary. Parsing
-selects defaults from catalog metadata without constructing workflows or loading
-prices. Runtime errors remain the launcher's responsibility.
+selects defaults from catalog metadata and provider configuration without
+constructing workflows or loading prices. Runtime errors remain the launcher's responsibility.
 AI attribution: Generated with AI assistance by Northstar.
 Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
 
 import argparse
 import json
+import os
 from pathlib import Path
 
 
 def argument_parser(
     app_file: str | None = None,
-    description: str = "Run a discovered agent sample through console, static input, or web chat.",
+    description: str = "Run an agent sample interactively, as a scripted demo, or in web chat.",
 ) -> argparse.ArgumentParser:
     """Build options without reading configuration or starting a workflow.
 
@@ -31,9 +32,20 @@ def argument_parser(
     parser.add_argument(
         "--client",
         choices=("console", "static", "angular"),
-        help="Client to use (default comes from sample metadata)",
+        help="Client: console for live chat, angular for browser chat, static for fixed prompts",
     )
-    parser.add_argument("--live", action="store_true")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument(
+        "--live",
+        action="store_true",
+        default=None,
+        help="Use the real model (default when the selected provider has an API key)",
+    )
+    mode.add_argument(
+        "--demo",
+        action="store_true",
+        help="Use scripted responses and fixed terminal prompts, even with an API key",
+    )
     parser.add_argument("--out", type=Path)
     parser.add_argument(
         "--env-file",
@@ -82,10 +94,18 @@ def parse_arguments(catalog, argv=None):
             key, value = option.split("=", 1)
             args.options[key] = json.loads(value)
         sample = catalog.get(args.sample)
-        args.client = args.client or sample.default_client
+        args.live = resolve_live_mode(
+            args, catalog.configuration(args.sample, args.env_file)
+        )
+        # A demo must finish its authored prompts rather than accept arbitrary
+        # questions that a scripted model cannot answer. Explicit clients still
+        # support browser demos and fixed-prompt live batch runs.
+        args.client = args.client or (
+            "console" if args.live else "static" if args.demo else sample.default_client
+        )
         if args.client == "console" and not args.live and not sample.interaction:
             parser.error(
-                "Console conversation requires --live; use --client static for scripted prompts"
+                "Console conversation requires a provider API key or --live; use --demo for scripted prompts"
             )
         if (
             args.live
@@ -102,3 +122,22 @@ def parse_arguments(catalog, argv=None):
     except (ValueError, KeyError) as exc:
         parser.error(str(exc))
     return parser, args
+
+
+def resolve_live_mode(args, settings):
+    """Select demo explicitly, otherwise detect the selected provider's key.
+
+    Shell values override the selected dotenv file, matching model construction.
+    Detection only checks presence; invalid live credentials must still fail in
+    the provider adapter and must never silently fall back to scripted answers.
+    """
+    from .model_config import configured_identity
+
+    if args.demo:
+        return False
+    if args.live is not None:
+        return args.live
+    values = {**settings, **os.environ}
+    provider, _ = configured_identity(settings=values)
+    key = "OPENAI_API_KEY" if provider == "openai" else "ANTHROPIC_API_KEY"
+    return bool((values.get(key) or "").strip())

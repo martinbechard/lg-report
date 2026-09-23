@@ -304,8 +304,10 @@ def test_complete_multiturn_sample(tmp_path, prices):
     assert all(e["step"].response for t in turns for e in t["events"])
     html = (out / "report.html").read_text()
     assert "No annotations" not in html and "Operation context" not in html
-    assert "Span ID" in html and "Description" in html and "Model · effort" in html
-    assert "scripted-chat-fast" in html and "Turn 2" in html
+    assert "Span ID" in html and "Description" in html
+    # Model identity and reported effort now belong to the operation cell.
+    assert "<th>Model · effort</th>" not in html
+    assert "scripted-chat · fast" in html and "Turn 2" in html
     assert "Tool arguments" in html and "Tool call: echo_tool" in html
     conversation = html.split("<h2>Conversation</h2>")[1].split(
         "<h2>Execution tree</h2>"

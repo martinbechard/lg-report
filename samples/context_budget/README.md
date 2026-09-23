@@ -88,7 +88,7 @@ The child returns only its final answer to that shared conversation.
 From the repository root:
 
 ```sh
-uv run python -m agent_runtime --sample context_budget --prices models.json
+uv run python -m agent_runtime --sample context_budget --prices models.json --demo
 ```
 
 Open [`reports/context_budget/report.html`](../../reports/context_budget/report.html).
@@ -113,7 +113,7 @@ is rewritten. It does not validate a live model's summary quality.
 The shared launcher also supports:
 
 ```sh
-uv run python -m agent_runtime --sample context_budget --client angular
+uv run python -m agent_runtime --sample context_budget --client angular --demo
 uv run python -m agent_runtime --sample context_budget --live --client console --env-file .env.local
 ```
 

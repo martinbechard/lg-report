@@ -1,10 +1,103 @@
 # LG Report
 
-Run every sample through the shared launcher: `uv run python -m agent_runtime --list`
-lists the discovered IDs. Use `--sample subagent_chat` for a scripted run, or
-`--sample simple_chat --client console --live` for interactive chat. The console
-supports `/samples`, `/sample ID`, and `/new`. Sample folders register themselves
-through `sample.json`; see [adding a sample](samples/README.md#shared-launcher-and-discovery).
+## Getting started
+
+Run LangGraph / DeepAgents samples and inspect local reports of conversations,
+token usage, and estimated model costs. Run the commands below from the repository root.
+
+Install Python 3.11+ and [uv](https://docs.astral.sh/uv/), then install the project dependencies:
+
+```sh
+uv sync --locked
+```
+
+For a destination that uses **pip only**, use the [prebuilt distribution guide](PIP-INSTALL.md).
+It includes the compiled browser interface, so Node.js and npm are needed only
+on the machine that builds the distribution.
+
+### Run all samples as a batch
+
+The batch runs all local samples and produces HTML reports, Excel workbooks,
+and a clickable report index. Langfuse samples require separate tracing setup and are excluded.
+
+Configure your provider in `.env.local` before a live batch. For example, set
+`LG_PROVIDER=openai` and `OPENAI_API_KEY` there, or use `LG_PROVIDER=anthropic`
+and `ANTHROPIC_API_KEY`. Shell environment variables take precedence.
+
+```sh
+uv run scripts/run_samples.py
+```
+
+Open [reports/index.html](reports/index.html) when the batch finishes.
+Each sample has a `report.html` and `report.xlsx` under `reports/<sample>/`.
+The live quote sample asks clarification questions in the terminal.
+
+For an unattended batch with scripted model responses and no provider key:
+
+```sh
+uv run scripts/run_samples.py --simulated
+```
+
+Excel export uses XlsxWriter, installed by `uv sync --locked`. The batch needs no
+Codex installation, Node.js, or `LG_EXCEL_RUNTIME` setting.
+See [batch setup and output details](#run-all-local-samples-and-export-excel).
+
+### Run one sample from the command line
+
+Use `--demo` to run a sample's fixed prompts and scripted responses:
+
+```sh
+uv run python -m agent_runtime --sample simple_chat --demo
+```
+
+Open [reports/simple_chat/report.html](reports/simple_chat/report.html) after the run.
+Individual sample commands produce HTML and supporting run data; the batch also exports Excel.
+Rerunning replaces that sample's previous report bundle.
+
+For live console chat, use your provider configuration and omit `--demo`:
+
+```sh
+uv run python -m agent_runtime --sample simple_chat --env-file .env.local
+```
+
+A configured key for the selected provider enables live mode automatically.
+Without a key, the launcher uses scripted responses. `--live` explicitly requires
+real execution; `--demo` forces scripted responses even when a key is configured.
+If you omit `--env-file`, the launcher reads the sample's own `.env` instead.
+
+Use `/quit` to end console chat and write its report. `/samples` lists samples,
+`/sample ID` switches samples, and `/new` starts a fresh conversation.
+List available sample IDs from the command line:
+
+```sh
+uv run python -m agent_runtime --list
+```
+
+### Start the web server and Uvicorn API
+
+The web launcher starts one Uvicorn server that serves both the Angular chat
+and the FastAPI API. Install Node.js with npm, then build the frontend:
+
+```sh
+uv sync --locked --extra chat
+npm --prefix frontend ci
+npm --prefix frontend run build
+```
+
+Start the server with your provider configuration:
+
+```sh
+uv run --extra chat python -m agent_runtime --sample simple_chat --client angular --env-file .env.local
+```
+
+Add `--demo` for scripted responses. The same provider-key detection applies as
+in the console. Use `--port 8001` to select another port; stop the server with Ctrl-C.
+
+- [Chat](http://127.0.0.1:8000/): select a sample and send messages.
+- [API documentation](http://127.0.0.1:8000/docs): inspect the FastAPI endpoints.
+- [Sample catalog API](http://127.0.0.1:8000/api/samples): inspect the available samples as JSON.
+
+See the [frontend guide](frontend/README.md) for development and browser verification.
 
 ## Project structure
 
@@ -35,16 +128,7 @@ peer histories, isolated or forked subagents, and summarization `trigger` and
 `keep` settings. The [context-budget sample](samples/context_budget/README.md)
 demonstrates independent workflow and subagent budgets.
 
-
-A single-user Python library that captures LangGraph / DeepAgents execution and produces local HTML and Excel reports of conversations, spans, token usage, and estimated model costs.
-
 ## Training applications
-
-Requires Python 3.11+ and [uv](https://docs.astral.sh/uv/). Install once:
-
-```sh
-uv sync --locked
-```
 
 Each sample wires a workflow to its client and tracing backend; its test case owns prompts and scripted responses. Run commands from the repository root:
 
@@ -67,22 +151,7 @@ Langfuse project. It has separate setup instructions and adds Langfuse traces al
 The parent/subagent lesson also has matching [local-report](samples/subagent_chat/README.md)
 and [Langfuse](samples/subagent_chat_langfuse/README.md) applications.
 
-Start with the [sample catalog](samples/README.md). Default execution uses a real graph with a simulated model and makes no model-provider request. To run live, copy that sample's `.env.example` to its own `.env`, configure the selected provider, and add `--live` to its command. Existing environment variables take precedence. There is no automatic switch between live and simulated execution.
-
-### Run the same sample with Angular
-
-The [Angular chat frontend](frontend/README.md) uses standard AG-UI SSE streaming and the
-same sample factories and UTF-8 attachment formatting as the console.
-Build it once with `npm --prefix frontend ci` and `npm --prefix frontend run build`.
-Then select the frontend without changing the sample's workflow or agent:
-
-```sh
-uv run --extra chat python -m agent_runtime --sample simple_chat --live --client console
-uv run --extra chat python -m agent_runtime --sample simple_chat --live --client angular
-```
-
-Open [the local chat](http://127.0.0.1:8000). Omit `--live` for a labelled scripted
-demo. See the frontend README for supported samples, development, and parity tests.
+Start with the [sample catalog](samples/README.md). The launcher defaults to live, interactive execution when the selected provider has an API key; otherwise it uses scripted responses and the sample’s default client (usually fixed prompts; file approval still asks a human). Use `--demo` to force demo mode even when a key is configured. Copy the sample’s `.env.example` to its own `.env`, or select `--env-file PATH`; shell variables take precedence. `LG_PROVIDER` selects OpenAI (the default) or Anthropic, and only that provider’s key enables automatic live mode. `--live` explicitly requires real execution; provider errors never fall back to demo mode. `--demo` and `--live` cannot be combined. For fixed prompts against a real model, use `--live --client static`.
 
 ### Run all local samples and export Excel
 
@@ -110,7 +179,7 @@ on first use. The file-approval lesson writes only its own `edited-summary.txt`.
 
 Outputs default to `reports/<sample>/report.html` and `report.xlsx`, relative
 to your working directory. Each folder also contains the run evidence,
-`excel-data.json`, workbook previews, and `run.log`. Repeating the command refreshes
+`excel-data.json` and `run.log`. Repeating the command refreshes
 these outputs. Use `--out reports/another-batch` to keep a separate batch.
 Failures are listed in the index, remaining samples still run, and the command
 exits nonzero if any sample or export fails.
@@ -122,12 +191,10 @@ only read that file; missing or invalid FX leaves EUR unavailable without stoppi
 model execution. `--fx-file path/to/rate.json` and `--simulated` skip the refresh. `--prices path/to/models.json` overrides the catalog. The first RAG
 execution may need the local embedding model downloaded if it is not cached.
 
-Excel generation uses the existing `@oai/artifact-tool` exporter. The runner
-finds the standard Codex desktop runtime automatically. On another installation,
-set `LG_EXCEL_RUNTIME` to the directory containing its `node_modules`, with Node.js
-on `PATH`. Dependencies are checked before samples start; nothing is installed
-automatically. The generated HTML and `.xlsx` files can be opened independently
-of Python, Node.js, Codex, and Langfuse.
+Excel generation uses the project's Python dependencies. Users of Claude Code,
+Codex, or an ordinary terminal run the same commands. A live Anthropic run still
+requires `ANTHROPIC_API_KEY`; the launcher reads the configured provider key.
+The generated HTML and `.xlsx` files can be opened independently of Python.
 
 ### Where files go
 
@@ -269,10 +336,13 @@ The workbook has Turns, Execution tree, and Reference data sheets. All freeze ro
 
 ```sh
 uv run python -m reporting.excel_data run.json --out .cache/excel/data.json
-node src/reporting/export_excel.mjs .cache/excel/data.json outputs/lg-report-excel/report.xlsx
+uv run python -m reporting.export_excel .cache/excel/data.json outputs/lg-report-excel/report.xlsx
 ```
 
-The builder uses the desktop's bundled `@oai/artifact-tool`. Set `LG_EXCEL_RUNTIME` to the directory whose `node_modules` contains it. The exported workbook is independent of that runtime.
+XlsxWriter writes formulas with cached results from the saved accounting data.
+Excel recalculates them when you edit the execution count, tariffs, or exchange
+rate. Unknown costs stay explicit. Export does not generate PNG workbook previews;
+open the workbook to inspect its layout. Node.js is needed only for the Angular frontend.
 
 ## Development checks
 

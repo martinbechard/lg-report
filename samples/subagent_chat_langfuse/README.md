@@ -20,7 +20,7 @@ From the repository root:
 
 ```sh
 uv sync --locked
-uv run python -m agent_runtime --sample subagent_chat_langfuse --public-trace
+uv run python -m agent_runtime --sample subagent_chat_langfuse --public-trace --demo
 ```
 
 On this workstation the sample's private `.env` is already connected to the local
@@ -33,9 +33,9 @@ For a fresh installation, copy this directory's `.env.example` to `.env` and set
 belong to the chosen Langfuse project. Authentication is checked before invoking
 any model. Shell environment variables override `.env`.
 
-Default mode uses simulated LLMs but sends real traces. To use real models, set
-`LG_PROVIDER`, `LG_MODEL`, and the provider key in the same `.env`, then add
-`--live` to the command. Both agents use that provider configuration; calls are
+`--demo` uses simulated LLMs but sends real traces. To use real models, set
+`LG_PROVIDER`, `LG_MODEL`, and the provider key in the same `.env`, then replace
+`--demo` with `--live --client static` in the command. Both agents use that provider configuration; calls are
 billable. Every run also produces the local `run.json`, `spans.jsonl`,
 `prices.json`, and `report.html` bundle in `reports/subagent_chat_langfuse/`
 (or `--out`). Excel remains a separate export. Both recorders observe one

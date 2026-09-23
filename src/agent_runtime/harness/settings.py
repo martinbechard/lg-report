@@ -17,7 +17,7 @@ from reporting.exchange import get_exchange_rate
 from reporting.price_refresh import get_prices
 from reporting.pricing import Prices
 
-from .argument_parser import argument_parser
+from .argument_parser import argument_parser, resolve_live_mode
 
 
 @dataclass(frozen=True)
@@ -64,6 +64,9 @@ def settings_for(app_file: str, description: str, *, args=None) -> Settings:
         args = argument_parser(app_file, description).parse_args()
     # The sample's own .env is its configuration boundary. Shell variables win.
     values = {**dotenv_values(args.env_file or app_dir / ".env"), **os.environ}
+    if args.live is None:
+        args.live = resolve_live_mode(args, values)
+    print("Model mode: live" if args.live else "Model mode: demo (scripted responses)")
     # A CLI file wins over LG_PRICES. Only a nonempty environment value becomes
     # a Path: absent/empty means automatic refresh, not the current directory.
     prices = get_prices(

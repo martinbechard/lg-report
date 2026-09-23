@@ -47,6 +47,7 @@ def test_standalone_application(name, calls, tools, turn_count, tmp_path):
             sys.executable,
             "-m",
             "agent_runtime",
+            "--demo",
             "--sample",
             name,
             "--prices",
@@ -86,6 +87,7 @@ def test_standalone_application(name, calls, tools, turn_count, tmp_path):
             sys.executable,
             "-m",
             "agent_runtime",
+            "--demo",
             "--sample",
             name,
             "--prices",
@@ -139,6 +141,7 @@ def test_working_directory_defaults_and_report_commands(tmp_path):
         stdout = execute(
             "-m",
             "agent_runtime",
+            "--demo",
             "--sample",
             sample,
             "--prices",
@@ -206,7 +209,8 @@ def test_batch_continues_after_failure_and_hides_stale_links(tmp_path, monkeypat
     runner = runpy.run_path(str(root / "scripts/run_samples.py"))
     main = runner["main"]
     state = main.__globals__
-    monkeypatch.setitem(state, "excel_runtime", lambda: ("node", {}))
+    monkeypatch.setenv("LG_PROVIDER", "openai")
+    monkeypatch.setenv("OPENAI_API_KEY", "test-placeholder")
     monkeypatch.setitem(state, "SAMPLES", ("simple_chat", "tool_chat"))
     refreshes = []
 
@@ -260,7 +264,6 @@ def test_batch_clears_generated_files_before_failed_sample(tmp_path, monkeypatch
             tmp_path,
             prices=root / "models.json",
             fx_file=None,
-            node="node",
             env={},
         )
     assert not (tmp_path / "report.xlsx").exists()
@@ -286,9 +289,9 @@ def test_batch_model_mode_and_shared_config(tmp_path, monkeypatch, simulated):
     config.write_text(
         "LG_PROVIDER=openai\nLG_MODEL=file-model\nOPENAI_API_KEY=test-placeholder\n"
     )
-    monkeypatch.setitem(
-        state, "excel_runtime", lambda: ("node", {"LG_MODEL": "shell-model"})
-    )
+    monkeypatch.setenv("LG_MODEL", "shell-model")
+    monkeypatch.delenv("LG_PROVIDER", raising=False)
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
     monkeypatch.setitem(state, "SAMPLES", ("simple_chat",))
     refreshes = []
 
@@ -351,12 +354,13 @@ def test_batch_child_model_and_interaction_mode(
         tmp_path,
         prices=root / "models.json",
         fx_file=None,
-        node="node",
         env={},
         simulated=simulated,
     )
+    assert calls[2][0][:3] == [sys.executable, "-m", "reporting.export_excel"]
     command, options = calls[0]
     assert ("--live" in command) is not simulated
+    assert ("--demo" in command) is simulated
     interactive = sample == "quote_request" and not simulated
     assert command[command.index("--client") + 1] == (
         "console" if interactive else "static"

@@ -242,7 +242,9 @@ def test_quote_model_questions_resolve_multiple_issues():
     # The extracted agent supplies its instructions and remains visible to the
     # caller's recorder on every assessment, including after human interrupts.
     assert capture.system_prompts == [SYSTEM_PROMPT] * 4
-    assert capture.agent_runs == ["quote_interpreter"] * 4
+    # Each assessment records the domain adapter and its native agent graph.
+    # Both carry the role name; the inner graph owns the actual model call.
+    assert capture.agent_runs == ["quote_interpreter"] * 8
     assert not result.get("__interrupt__")
 
 
@@ -335,7 +337,7 @@ def test_standalone_samples(tmp_path, sample, extra, stdin):
     args = [
         sys.executable,
         "-m",
-        "agent_runtime", "--sample", sample,
+        "agent_runtime", "--demo", "--sample", sample,
         "--prices",
         str(root / "models.json"),
         "--fx-file",

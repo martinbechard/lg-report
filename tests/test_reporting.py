@@ -151,6 +151,8 @@ def test_schema_rejects_invalid_counts_and_cycles():
 def test_html_escapes_all_content(tmp_path, prices):
     step = model_step()
     step.name = '<img src=x onerror="alert(1)">'
+    # Model operations display model identity, so exercise that visible field too.
+    step.model = step.name
     run = Run(
         id="r",
         title="<script>alert(1)</script>",

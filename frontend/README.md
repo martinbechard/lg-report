@@ -21,7 +21,7 @@ uv run --extra chat python -m agent_runtime --sample simple_chat --live --client
 ```
 
 Open [the chat](http://127.0.0.1:8000). The sample's `--env-file`, `--prices`, and
-`--out` options still apply; `--port` changes the server port. Omit `--live` for
+`--out` options still apply; `--port` changes the server port. Use `--demo` for
 scripted responses as the initial selection. The dropdown can change this mode
 without restarting the server; real LLM mode needs configured provider credentials.
 

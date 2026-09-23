@@ -2,7 +2,7 @@
 
 Reuse the HTML report's conversation order, request labels, tree, and accounting
 so the spreadsheet does not invent a second interpretation of a trace. The CLI
-writes a JSON projection consumed by reporting/export_excel.mjs; it does not invoke
+writes a JSON projection consumed by reporting.export_excel; it does not invoke
 an agent or fetch prices. Preserve unrounded costs and unknown-data flags here;
 the workbook applies execution-count scaling before rounding final estimates.
 

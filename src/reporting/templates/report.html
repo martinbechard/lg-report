@@ -44,6 +44,9 @@ summary::-webkit-details-marker{display:none}
 .activity-children{padding-left:20px;margin-top:12px}
 .activity-children>.agent-activity{margin-bottom:0}
 .turn>summary{justify-content:flex-start}.turn>summary .turn-cost{margin-left:auto}
+
+/* The initial HTML is simplified even before JavaScript initializes. */
+#execution-tree.summary-view .full-detail, #execution-tree.summary-view .detail-only, #execution-tree .tree-row[hidden] { display:none; }
 </style></head><body><main>
 {# Header: demo alone triggers the offline label; real recordings make no simulation claim. #}<header><h1>{{ run.title }}</h1><span>{{ run.status }}</span>{% if run.demo %}<small>Offline demonstration · no provider billed</small>{% endif %}</header>
 
@@ -89,7 +92,7 @@ summary::-webkit-details-marker{display:none}
 {% if collaboration %}
 <section aria-labelledby="collaboration-heading">
 <h3 id="collaboration-heading">Agent collaboration</h3>
-<p>Read downward in time order. Each lane is one agent invocation; arrows show calls and successful returns. Boxes show model and tool activity with their recorded outcome. Timestamps mark activity starts or returns, not a proportional time scale. Click an agent name for details.</p>
+<p>Read downward in time order. Each lifeline represents a named agent within its caller path; activation bars mark individual invocations. Arrows show calls and successful returns. Boxes show model and tool activity with their recorded outcome. Timestamps mark activity starts or returns, not a proportional time scale. Click an activation bar for invocation details.</p>
 {% for diagram in collaboration %}
 <h4>Turn {{ diagram.turn }}</h4>
 <div style="overflow-x:auto">
@@ -101,8 +104,13 @@ summary::-webkit-details-marker{display:none}
 <a href="#agent-{{ lane.step.id }}" aria-label="Activity details for {{ lane.step.name }}">
 <rect x="{{ lane.x - 125 }}" y="4" width="250" height="{{ diagram.header_height - 8 }}" rx="8" fill="#f6f1fb" stroke="#8462a7"></rect>
 {% for line in lane.name_lines %}<text x="{{ lane.x }}" y="{{ 26 + loop.index0 * 16 }}" text-anchor="middle" font-size="13" font-weight="600" fill="#684296">{{ line }}</text>{% endfor %}
-<text x="{{ lane.x }}" y="{{ diagram.header_height - 34 }}" text-anchor="middle" font-size="11">Status: {{ lane.step.status }}</text>
-<text x="{{ lane.x }}" y="{{ diagram.header_height - 17 }}" text-anchor="middle" font-size="11">{{ lane.model_calls }} model call(s) · {{ '%.2f'|format(lane.step.duration_ms) }} ms</text>
+<text x="{{ lane.x }}" y="{{ diagram.header_height - 34 }}" text-anchor="middle" font-size="11">{{ lane.invocations }} invocation(s)</text>
+<text x="{{ lane.x }}" y="{{ diagram.header_height - 17 }}" text-anchor="middle" font-size="11">{{ lane.model_calls }} model call(s)</text>
+</a>
+{% endfor %}
+{% for activation in diagram.activations %}
+<a href="#agent-{{ activation.step.id }}" aria-label="Invocation details for {{ activation.step.name }}">
+<rect class="agent-activation" x="{{ activation.x - 6 }}" y="{{ activation.y }}" width="12" height="{{ activation.height }}" fill="{{ '#e5d7f2' if activation.step.status == 'ok' else '#fff1d4' }}" stroke="#8462a7"><title>{{ activation.step.name }} · {{ activation.step.status }} · {{ '%.2f'|format(activation.step.duration_ms) }} ms</title></rect>
 </a>
 {% endfor %}
 {% for event in diagram.events %}
@@ -150,12 +158,12 @@ summary::-webkit-details-marker{display:none}
 {# Turn totals: partial flags warn that the displayed subtotal omits unknown charges rather than representing a complete price. #}<div id="conversation-list">{% for turn in turns %}<details open class="turn"><summary class="turn-heading"><strong>Turn {{ turn.number }}</strong><span class="turn-cost">Turn cost {{ money(turn.total, false) }}{% if turn.partial %} · incomplete{% endif %}</span></summary>{% if turn.partial %}<p class="partial">Incomplete cost: some usage or pricing is unknown.</p>{% endif %}
 <div class="conversation-thread">{{ conversation_nodes(turn.conversation_nodes, turn) }}</div></details>{% endfor %}</div>
 
-<h2>Execution tree</h2><p>Drill into graph nodes, model calls, and tools. Each token category has its own column with EUR and USD cost underneath. Categories are disjoint: fresh input excludes cache; output excludes reasoning.</p>
-<div class="toolbar"><button id="expand-all" type="button">Expand all</button><button id="collapse-all" type="button">Collapse all</button><span>{{ run.steps|length }} spans · parent rows show subtree totals; do not add parent and child rows together.</span></div>
+<h2>Execution tree</h2><p>Workflow steps, agents, model calls, and tools are shown by default. Enable all details to include internal adapters, routing callbacks, span IDs, and graph-step counters. Each token category has its own column with EUR and USD cost underneath. Categories are disjoint: fresh input excludes cache; output excludes reasoning.</p>
+<div class="toolbar"><label><input id="show-execution-details" type="checkbox" aria-controls="execution-tree"> Show all execution details</label><button id="expand-all" type="button">Expand all</button><button id="collapse-all" type="button">Collapse all</button><span>{{ run.steps|length }} spans · parent rows show subtree totals; do not add parent and child rows together.</span></div>
 
 
-<div class="table-wrap"><table aria-label="Expandable execution trace and token costs"><thead><tr><th>Operation</th><th>Span ID</th><th>Status</th><th>Description</th><th>Model · effort</th><th>Elapsed</th>{{ token_headers() }}<th>Total cost<br>EUR / USD</th></tr></thead><tbody>
-{# Tree: only error status colors the whole row; non-ok status labels remain marked. Root parent IDs are empty for traversal. Only parents get expansion controls/subtree labels. Error/context metadata appears only when present (graph step zero remains valid). Model names/effort require recorded values; missing effort is explicit. Rows without model descendants show dashes, while partial totals remain marked. #}{% for row in rows %}{% set step=row.step %}<tr class="tree-row {{ 'error-row' if step.status == 'error' else '' }}" data-index="{{ row.index }}" data-parent="{{ row.parent if row.parent is not none else '' }}"><td><div style="padding-left:{{ row.depth * 14 }}px"><div class="kind">{{ 'agent' if step.id in agents.scopes else step.kind }} <span class="status {{ 'error' if step.status != 'ok' else '' }}">· {{ step.status }}</span></div><div class="step-name">{% if row.has_children %}<button type="button" class="toggle" aria-expanded="true" aria-label="Toggle children of {{ step.name }}">−</button>{% endif %}{{ step.name }}</div>{% if row.has_children %}<div class="subtree">Subtree totals</div>{% endif %}</div></td><td class="span-id">{{ step.id }}</td><td>{{ step.status }}{% if step.error %}<br>{{ step.error }}{% endif %}</td><td class="description-cell">{{ row.description }}{% if step.context.get('langgraph_step') is not none %}<div class="context">Graph step {{ step.context.langgraph_step }}</div>{% endif %}{% if step.context.get('requested_tools') %}<div class="context">Requested: {{ step.context.requested_tools|join(', ') }}</div>{% endif %}{% if step.context.get('finish_reason') %}<div class="context">Completion: {{ step.context.finish_reason }}</div>{% endif %}</td><td>{% if step.model %}{{ step.model }}{% if step.effort %}-{{ step.effort }}{% endif %}<div class="context">{{ step.provider }}{% if not step.effort %} · effort not reported{% endif %}</div>{% else %}—{% endif %}</td><td>{{ '%.2f'|format(step.duration_ms) }} ms</td>{{ token_cells(row, false) }}<td>{% if row.has_usage %}{{ money(row.total, false) }}{% if row.partial %}<span class="partial">Incomplete</span>{% endif %}{% else %}—{% endif %}</td></tr>{% endfor %}
+<div class="table-wrap"><table id="execution-tree" class="summary-view" aria-label="Expandable execution trace and token costs"><thead><tr><th>Operation</th><th class="full-detail">Span ID</th><th>Description</th><th>Elapsed</th>{{ token_headers() }}<th>Total cost<br>EUR / USD</th></tr></thead><tbody>
+{# Tree: only error status colors the whole row; non-ok status labels remain marked. Root parent IDs are empty for traversal. Only parents get expansion controls/subtree labels. Error/context metadata appears only when present (graph step zero remains valid). Model calls show the recorded model and optional effort in Operation; absent effort adds no label. Rows without model descendants show dashes, while partial totals remain marked. #}{% for row in rows %}{% set step=row.step %}<tr class="tree-row {{ 'detail-only' if row.detail_only else '' }} {{ 'error-row' if step.status == 'error' else '' }}" data-index="{{ row.index }}" data-detail-only="{{ 'true' if row.detail_only else 'false' }}" data-summary-parent="{{ row.summary_parent if row.summary_parent is not none else '' }}" data-depth="{{ row.depth }}" data-summary-depth="{{ row.summary_depth }}" data-summary-children="{{ 'true' if row.summary_children else 'false' }}" data-parent="{{ row.parent if row.parent is not none else '' }}"><td><div class="tree-indent" style="padding-left:{{ row.summary_depth * 21 }}px"><div class="kind">{{ 'agent' if step.id in agents.scopes else step.kind }} <span class="status {{ 'error' if step.status != 'ok' else '' }}">· {{ step.status }}</span></div><div class="step-name">{% if row.has_children %}<button type="button" class="toggle" aria-expanded="true" aria-label="Toggle children of {{ step.name }}">−</button>{% endif %}{% if step.kind == 'model' and step.model %}{{ step.model }}{% if step.effort %} · {{ step.effort }}{% endif %}{% else %}{{ step.name }}{% endif %}</div>{% if step.kind == 'model' and step.provider %}<div class="context">{{ step.provider }}</div>{% endif %}{% if row.has_children %}<div class="subtree">Includes descendant model costs</div>{% endif %}</div></td><td class="span-id full-detail">{{ step.id }}</td><td class="description-cell">{{ row.description }}{% if step.error %}<div class="error">{{ step.error }}</div>{% endif %}{% if step.context.get('langgraph_step') is not none %}<div class="context full-detail">Graph step {{ step.context.langgraph_step }}</div>{% endif %}{% if step.context.get('requested_tools') %}<div class="context">Requested: {{ step.context.requested_tools|join(', ') }}</div>{% endif %}{% if step.context.get('finish_reason') %}<div class="context">Completion: {{ step.context.finish_reason }}</div>{% endif %}</td><td>{{ '%.2f'|format(step.duration_ms) }} ms</td>{{ token_cells(row, false) }}<td>{% if row.has_usage %}{{ money(row.total, false) }}{% if row.partial %}<span class="partial">Incomplete</span>{% endif %}{% else %}—{% endif %}</td></tr>{% endfor %}
 </tbody></table></div>
 <h2>Token price references</h2>
 {% for model,error in prices.refresh_errors.items() %}<p class="notice">{{ model }}: {{ error }}</p>{% endfor %}
@@ -193,13 +201,20 @@ document.querySelectorAll('[data-cost-tip]').forEach(segment => {
 // indices let visibility follow the execution hierarchy without altering totals.
 const treeRows = Array.from(document.querySelectorAll('.tree-row'));
 const rowByIndex = new Map(treeRows.map(row => [row.dataset.index, row]));
+const executionDetails = document.getElementById('show-execution-details');
+const executionTree = document.getElementById('execution-tree');
 const expandedRowIndices = new Set(treeRows.map(row => row.dataset.index));
 
 /** Apply ancestor visibility while preserving each descendant's own open state. */
 {# Make expansion choices visible after initialization or a tree-control click. Read the shared expandedRowIndices set, then update row visibility and accessibility labels in place; collapsing an ancestor preserves descendants own choices for reopening. #}function refreshTreeVisibility() {
+  const allDetails = executionDetails.checked;
+  executionTree.classList.toggle('summary-view', !allDetails);
+  const parentOf = row => allDetails ? row.dataset.parent : row.dataset.summaryParent;
   for (const row of treeRows) {
-    let parentIndex = row.dataset.parent;
-    let visible = true;
+    let parentIndex = parentOf(row);
+    let visible = allDetails || row.dataset.detailOnly !== 'true';
+    row.querySelector('.tree-indent').style.paddingLeft =
+      `${Number(allDetails ? row.dataset.depth : row.dataset.summaryDepth) * 21}px`;
     // The empty parent is the root sentinel; roots remain visible even when
     // Collapse all removes every entry from the expanded set.
     while (parentIndex !== '') {
@@ -208,19 +223,22 @@ const expandedRowIndices = new Set(treeRows.map(row => row.dataset.index));
         visible = false;
         break;
       }
-      parentIndex = rowByIndex.get(parentIndex).dataset.parent;
+      parentIndex = parentOf(rowByIndex.get(parentIndex));
     }
     row.hidden = !visible;
     const toggleButton = row.querySelector('.toggle');
     // Leaves have no expansion control. Parents expose the same state to
     // assistive technology and the visual plus/minus affordance.
     if (toggleButton) {
+      toggleButton.hidden = !allDetails && row.dataset.summaryChildren !== 'true';
       const isExpanded = expandedRowIndices.has(row.dataset.index);
       toggleButton.setAttribute('aria-expanded', String(isExpanded));
       toggleButton.textContent = isExpanded ? '−' : '+';
     }
   }
 }
+// Switching views preserves expansion choices but bypasses hidden wrappers.
+executionDetails.addEventListener('change', refreshTreeVisibility);
 for (const row of treeRows) {
   const toggleButton = row.querySelector('.toggle');
   // Only parent rows have children to hide; leaf rows need no click handler.

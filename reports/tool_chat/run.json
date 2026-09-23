@@ -1,17 +1,17 @@
 {
   "schema_version": 1,
-  "id": "01a0c40f-0fc0-7651-8efb-a0878955525f",
-  "title": "Reference lookup · two turns",
+  "id": "01a0cc5a-133d-7d70-a7a8-c7574189a3b7",
+  "title": "Tool chat",
   "demo": false,
   "status": "ok",
   "steps": [
     {
-      "id": "01a0c40f-0fc0-7651-8efb-a0878955525f",
+      "id": "01a0cc5a-133d-7d70-a7a8-c7574189a3b7",
       "parent_id": null,
       "name": "reference_chat_agent",
       "kind": "workflow",
-      "start_ns": 1789995716547430000,
-      "end_ns": 1789995719728461000,
+      "start_ns": 1790134850366661000,
+      "end_ns": 1790134853041429000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -23,18 +23,18 @@
       "tool_definitions": null,
       "context": {
         "report_turn": 1,
-        "thread_id": "f5c3f156-a4a5-44b9-959b-3db3002d2f3f",
+        "thread_id": "498991e7-b0ba-4e5f-a8c1-57dfd224b852",
         "cache_ttl": "5m",
         "description": "Execute the reference_chat_agent workflow operation and pass its result to the next graph step."
       }
     },
     {
-      "id": "01a0c40f-0fc4-7de1-a55e-b146017f862f",
-      "parent_id": "01a0c40f-0fc0-7651-8efb-a0878955525f",
+      "id": "01a0cc5a-133f-7620-8444-cb47a6814fbd",
+      "parent_id": "01a0cc5a-133d-7d70-a7a8-c7574189a3b7",
       "name": "PatchToolCallsMiddleware.before_agent",
       "kind": "workflow",
-      "start_ns": 1789995716548714000,
-      "end_ns": 1789995716549311000,
+      "start_ns": 1790134850367850000,
+      "end_ns": 1790134850368259000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -48,7 +48,7 @@
         "langgraph_node": "PatchToolCallsMiddleware.before_agent",
         "langgraph_step": 1,
         "report_turn": 1,
-        "thread_id": "f5c3f156-a4a5-44b9-959b-3db3002d2f3f",
+        "thread_id": "498991e7-b0ba-4e5f-a8c1-57dfd224b852",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:1"
@@ -57,12 +57,12 @@
       }
     },
     {
-      "id": "01a0c40f-0fc5-7491-85ed-90cf5599c320",
-      "parent_id": "01a0c40f-0fc0-7651-8efb-a0878955525f",
+      "id": "01a0cc5a-1340-7e12-b717-479275fbf018",
+      "parent_id": "01a0cc5a-133d-7d70-a7a8-c7574189a3b7",
       "name": "model",
       "kind": "workflow",
-      "start_ns": 1789995716550060000,
-      "end_ns": 1789995718416624000,
+      "start_ns": 1790134850368855000,
+      "end_ns": 1790134851465133000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -76,7 +76,7 @@
         "langgraph_node": "model",
         "langgraph_step": 2,
         "report_turn": 1,
-        "thread_id": "f5c3f156-a4a5-44b9-959b-3db3002d2f3f",
+        "thread_id": "498991e7-b0ba-4e5f-a8c1-57dfd224b852",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:2"
@@ -85,21 +85,21 @@
       }
     },
     {
-      "id": "01a0c40f-0fcb-7d32-94c1-3ee5b23aac72",
-      "parent_id": "01a0c40f-0fc5-7491-85ed-90cf5599c320",
+      "id": "01a0cc5a-1346-7611-99e8-b4878ab9ac1b",
+      "parent_id": "01a0cc5a-1340-7e12-b717-479275fbf018",
       "name": "ChatOpenAI",
       "kind": "model",
-      "start_ns": 1789995716555924000,
-      "end_ns": 1789995718410899000,
+      "start_ns": 1790134850374407000,
+      "end_ns": 1790134851463342000,
       "status": "ok",
       "provider": "openai",
       "model": "gpt-5.6-luna",
       "effort": null,
       "usage": {
-        "input_tokens": 2054,
-        "output_tokens": 23,
+        "input_tokens": 2042,
+        "output_tokens": 19,
         "cache_read": 0,
-        "cache_write": 2051,
+        "cache_write": 2039,
         "cache_write_5m": 0,
         "cache_write_1h": 0,
         "reasoning": 0
@@ -108,13 +108,13 @@
       "request": [
         {
           "role": "system",
-          "content": "Use workflow_reference to obtain evidence for each question about agent workflows, then answer concisely using the observation.",
+          "content": "Call echo_tool with the user's text, then answer concisely using the returned echo. The tool repeats input; it provides no independent factual evidence.",
           "tool_calls": [],
           "tool_call_id": null
         },
         {
           "role": "human",
-          "content": "Explain the main steps in an agent workflow.",
+          "content": "Echo this text: ReAct",
           "tool_calls": [],
           "tool_call_id": null
         }
@@ -125,20 +125,20 @@
           "content": [
             {
               "type": "function_call",
-              "name": "workflow_reference",
-              "arguments": "{\"topic\":\"main steps in an agent workflow\"}",
-              "call_id": "call_sICXVcaHtGSnZ9ROsQ4DWTYu",
-              "id": "fc_0a9efd79565af3c1006ab12ac5c44887d291aa5e0ab2cfc436",
+              "name": "echo_tool",
+              "arguments": "{\"text\":\"ReAct\"}",
+              "call_id": "call_N3tIiLfCsL87adnZuJLU4z1t",
+              "id": "fc_05e0c4a49feda864006ab34a4330b887d285a8810bf7fb41b0",
               "index": 0
             }
           ],
           "tool_calls": [
             {
-              "name": "workflow_reference",
+              "name": "echo_tool",
               "args": {
-                "topic": "main steps in an agent workflow"
+                "text": "ReAct"
               },
-              "id": "call_sICXVcaHtGSnZ9ROsQ4DWTYu",
+              "id": "call_N3tIiLfCsL87adnZuJLU4z1t",
               "type": "tool_call"
             }
           ],
@@ -395,17 +395,17 @@
         {
           "type": "function",
           "function": {
-            "name": "workflow_reference",
-            "description": "Return a fixed explanation from a small local agent-workflow reference.",
+            "name": "echo_tool",
+            "description": "Return the provided text prefixed with \"Your input was: \".",
             "parameters": {
               "properties": {
-                "topic": {
-                  "description": "The workflow concept used to label the explanation, such as tool calling or delegation. This fixture returns the same explanation for every topic.",
+                "text": {
+                  "description": "The string to echo unchanged after the prefix.",
                   "type": "string"
                 }
               },
               "required": [
-                "topic"
+                "text"
               ],
               "type": "object"
             }
@@ -416,29 +416,30 @@
         "langgraph_node": "model",
         "langgraph_step": 2,
         "report_turn": 1,
-        "thread_id": "f5c3f156-a4a5-44b9-959b-3db3002d2f3f",
+        "thread_id": "498991e7-b0ba-4e5f-a8c1-57dfd224b852",
         "cache_ttl": "5m",
         "tags": [
           "seq:step:1"
         ],
         "description": "Generate the next assistant message or tool request from the current conversation.",
+        "input_message_bytes": 307,
         "message_count": 2,
         "message_roles": [
           "system",
           "human"
         ],
         "requested_tools": [
-          "workflow_reference"
+          "echo_tool"
         ]
       }
     },
     {
-      "id": "01a0c40f-1713-74a0-87bd-0ccc2febf1b1",
-      "parent_id": "01a0c40f-0fc0-7651-8efb-a0878955525f",
+      "id": "01a0cc5a-178a-7050-bf38-ac8e9677d71b",
+      "parent_id": "01a0cc5a-133d-7d70-a7a8-c7574189a3b7",
       "name": "tools",
       "kind": "workflow",
-      "start_ns": 1789995718420185000,
-      "end_ns": 1789995718444709000,
+      "start_ns": 1790134851466752000,
+      "end_ns": 1790134851470974000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -452,7 +453,7 @@
         "langgraph_node": "tools",
         "langgraph_step": 3,
         "report_turn": 1,
-        "thread_id": "f5c3f156-a4a5-44b9-959b-3db3002d2f3f",
+        "thread_id": "498991e7-b0ba-4e5f-a8c1-57dfd224b852",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:3"
@@ -461,12 +462,12 @@
       }
     },
     {
-      "id": "01a0c40f-1716-7aa2-b9c3-3283206643c6",
-      "parent_id": "01a0c40f-1713-74a0-87bd-0ccc2febf1b1",
-      "name": "workflow_reference",
+      "id": "01a0cc5a-178b-7961-af54-0594e2d118f3",
+      "parent_id": "01a0cc5a-178a-7050-bf38-ac8e9677d71b",
+      "name": "echo_tool",
       "kind": "tool",
-      "start_ns": 1789995718426728000,
-      "end_ns": 1789995718434082000,
+      "start_ns": 1790134851467613000,
+      "end_ns": 1790134851468267000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -476,15 +477,15 @@
       "request": [
         {
           "role": "tool_call",
-          "content": "{'topic': 'main steps in an agent workflow'}"
+          "content": "{'text': 'ReAct'}"
         }
       ],
       "response": [
         {
           "role": "tool",
-          "content": "main steps in an agent workflow: an agent selects a tool, observes its result, and uses it to answer.",
+          "content": "Your input was: ReAct",
           "tool_calls": [],
-          "tool_call_id": "call_sICXVcaHtGSnZ9ROsQ4DWTYu"
+          "tool_call_id": "call_N3tIiLfCsL87adnZuJLU4z1t"
         }
       ],
       "tool_definitions": null,
@@ -492,21 +493,21 @@
         "langgraph_node": "tools",
         "langgraph_step": 3,
         "report_turn": 1,
-        "thread_id": "f5c3f156-a4a5-44b9-959b-3db3002d2f3f",
+        "thread_id": "498991e7-b0ba-4e5f-a8c1-57dfd224b852",
         "cache_ttl": "5m",
         "tags": [
           "seq:step:1"
         ],
-        "description": "Return a fixed explanation from a small local agent-workflow reference."
+        "description": "Return the provided text prefixed with \"Your input was: \"."
       }
     },
     {
-      "id": "01a0c40f-172e-7c80-a635-1c24c5f45dca",
-      "parent_id": "01a0c40f-0fc0-7651-8efb-a0878955525f",
+      "id": "01a0cc5a-178f-7fb2-a6a0-23a30ba82704",
+      "parent_id": "01a0cc5a-133d-7d70-a7a8-c7574189a3b7",
       "name": "model",
       "kind": "workflow",
-      "start_ns": 1789995718447259000,
-      "end_ns": 1789995719727129000,
+      "start_ns": 1790134851471904000,
+      "end_ns": 1790134853040751000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -520,7 +521,7 @@
         "langgraph_node": "model",
         "langgraph_step": 4,
         "report_turn": 1,
-        "thread_id": "f5c3f156-a4a5-44b9-959b-3db3002d2f3f",
+        "thread_id": "498991e7-b0ba-4e5f-a8c1-57dfd224b852",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:4"
@@ -529,21 +530,21 @@
       }
     },
     {
-      "id": "01a0c40f-173a-7b51-a93a-4ea24391f9c7",
-      "parent_id": "01a0c40f-172e-7c80-a635-1c24c5f45dca",
+      "id": "01a0cc5a-1793-7632-878e-7d9f6b57f0d0",
+      "parent_id": "01a0cc5a-178f-7fb2-a6a0-23a30ba82704",
       "name": "ChatOpenAI",
       "kind": "model",
-      "start_ns": 1789995718461848000,
-      "end_ns": 1789995719723734000,
+      "start_ns": 1790134851475916000,
+      "end_ns": 1790134853039851000,
       "status": "ok",
       "provider": "openai",
       "model": "gpt-5.6-luna",
       "effort": null,
       "usage": {
-        "input_tokens": 2111,
-        "output_tokens": 43,
-        "cache_read": 2051,
-        "cache_write": 57,
+        "input_tokens": 2078,
+        "output_tokens": 10,
+        "cache_read": 2039,
+        "cache_write": 36,
         "cache_write_5m": 0,
         "cache_write_1h": 0,
         "reasoning": 0
@@ -552,13 +553,13 @@
       "request": [
         {
           "role": "system",
-          "content": "Use workflow_reference to obtain evidence for each question about agent workflows, then answer concisely using the observation.",
+          "content": "Call echo_tool with the user's text, then answer concisely using the returned echo. The tool repeats input; it provides no independent factual evidence.",
           "tool_calls": [],
           "tool_call_id": null
         },
         {
           "role": "human",
-          "content": "Explain the main steps in an agent workflow.",
+          "content": "Echo this text: ReAct",
           "tool_calls": [],
           "tool_call_id": null
         },
@@ -567,20 +568,20 @@
           "content": [
             {
               "type": "function_call",
-              "name": "workflow_reference",
-              "arguments": "{\"topic\":\"main steps in an agent workflow\"}",
-              "call_id": "call_sICXVcaHtGSnZ9ROsQ4DWTYu",
-              "id": "fc_0a9efd79565af3c1006ab12ac5c44887d291aa5e0ab2cfc436",
+              "name": "echo_tool",
+              "arguments": "{\"text\":\"ReAct\"}",
+              "call_id": "call_N3tIiLfCsL87adnZuJLU4z1t",
+              "id": "fc_05e0c4a49feda864006ab34a4330b887d285a8810bf7fb41b0",
               "index": 0
             }
           ],
           "tool_calls": [
             {
-              "name": "workflow_reference",
+              "name": "echo_tool",
               "args": {
-                "topic": "main steps in an agent workflow"
+                "text": "ReAct"
               },
-              "id": "call_sICXVcaHtGSnZ9ROsQ4DWTYu",
+              "id": "call_N3tIiLfCsL87adnZuJLU4z1t",
               "type": "tool_call"
             }
           ],
@@ -588,9 +589,9 @@
         },
         {
           "role": "tool",
-          "content": "main steps in an agent workflow: an agent selects a tool, observes its result, and uses it to answer.",
+          "content": "Your input was: ReAct",
           "tool_calls": [],
-          "tool_call_id": "call_sICXVcaHtGSnZ9ROsQ4DWTYu"
+          "tool_call_id": "call_N3tIiLfCsL87adnZuJLU4z1t"
         }
       ],
       "response": [
@@ -599,10 +600,10 @@
           "content": [
             {
               "type": "text",
-              "text": "The main steps are:\n\n1. **Select a tool** based on the task.\n2. **Observe the tool’s result**.\n3. **Use that result to formulate an answer**.",
+              "text": "Your input was: ReAct",
               "phase": "final_answer",
               "index": 0,
-              "id": "msg_0a9efd79565af3c1006ab12ac71bd087d2b971b31223720a84"
+              "id": "msg_05e0c4a49feda864006ab34a44c25487d2986301b1ec0f3385"
             }
           ],
           "tool_calls": [],
@@ -859,17 +860,17 @@
         {
           "type": "function",
           "function": {
-            "name": "workflow_reference",
-            "description": "Return a fixed explanation from a small local agent-workflow reference.",
+            "name": "echo_tool",
+            "description": "Return the provided text prefixed with \"Your input was: \".",
             "parameters": {
               "properties": {
-                "topic": {
-                  "description": "The workflow concept used to label the explanation, such as tool calling or delegation. This fixture returns the same explanation for every topic.",
+                "text": {
+                  "description": "The string to echo unchanged after the prefix.",
                   "type": "string"
                 }
               },
               "required": [
-                "topic"
+                "text"
               ],
               "type": "object"
             }
@@ -880,12 +881,13 @@
         "langgraph_node": "model",
         "langgraph_step": 4,
         "report_turn": 1,
-        "thread_id": "f5c3f156-a4a5-44b9-959b-3db3002d2f3f",
+        "thread_id": "498991e7-b0ba-4e5f-a8c1-57dfd224b852",
         "cache_ttl": "5m",
         "tags": [
           "seq:step:1"
         ],
         "description": "Generate the next assistant message or tool request from the current conversation.",
+        "input_message_bytes": 774,
         "message_count": 4,
         "message_roles": [
           "system",
@@ -896,12 +898,12 @@
       }
     },
     {
-      "id": "01a0c40f-1c45-7ca3-9bb9-bc1deef67dbe",
+      "id": "01a0cc5a-1dc3-7021-abb1-561851a31374",
       "parent_id": null,
       "name": "reference_chat_agent",
       "kind": "workflow",
-      "start_ns": 1789995719749970000,
-      "end_ns": 1789995722176181000,
+      "start_ns": 1790134853059706000,
+      "end_ns": 1790134856212306000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -913,18 +915,18 @@
       "tool_definitions": null,
       "context": {
         "report_turn": 2,
-        "thread_id": "f5c3f156-a4a5-44b9-959b-3db3002d2f3f",
+        "thread_id": "498991e7-b0ba-4e5f-a8c1-57dfd224b852",
         "cache_ttl": "5m",
         "description": "Execute the reference_chat_agent workflow operation and pass its result to the next graph step."
       }
     },
     {
-      "id": "01a0c40f-1c46-7792-ae09-f1491ff0c7a6",
-      "parent_id": "01a0c40f-1c45-7ca3-9bb9-bc1deef67dbe",
+      "id": "01a0cc5a-1dc4-7801-ab29-de1c3584e9f8",
+      "parent_id": "01a0cc5a-1dc3-7021-abb1-561851a31374",
       "name": "PatchToolCallsMiddleware.before_agent",
       "kind": "workflow",
-      "start_ns": 1789995719751129000,
-      "end_ns": 1789995719751488000,
+      "start_ns": 1790134853060656000,
+      "end_ns": 1790134853060934000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -938,7 +940,7 @@
         "langgraph_node": "PatchToolCallsMiddleware.before_agent",
         "langgraph_step": 7,
         "report_turn": 2,
-        "thread_id": "f5c3f156-a4a5-44b9-959b-3db3002d2f3f",
+        "thread_id": "498991e7-b0ba-4e5f-a8c1-57dfd224b852",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:7"
@@ -947,12 +949,12 @@
       }
     },
     {
-      "id": "01a0c40f-1c47-79e1-ab5c-dde4f64367d8",
-      "parent_id": "01a0c40f-1c45-7ca3-9bb9-bc1deef67dbe",
+      "id": "01a0cc5a-1dc5-75a3-9e07-905a3aee5d09",
+      "parent_id": "01a0cc5a-1dc3-7021-abb1-561851a31374",
       "name": "model",
       "kind": "workflow",
-      "start_ns": 1789995719752047000,
-      "end_ns": 1789995721212810000,
+      "start_ns": 1790134853061470000,
+      "end_ns": 1790134855357236000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -966,7 +968,7 @@
         "langgraph_node": "model",
         "langgraph_step": 8,
         "report_turn": 2,
-        "thread_id": "f5c3f156-a4a5-44b9-959b-3db3002d2f3f",
+        "thread_id": "498991e7-b0ba-4e5f-a8c1-57dfd224b852",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:8"
@@ -975,36 +977,36 @@
       }
     },
     {
-      "id": "01a0c40f-1c4b-7812-8de8-764a20748268",
-      "parent_id": "01a0c40f-1c47-79e1-ab5c-dde4f64367d8",
+      "id": "01a0cc5a-1dc7-7672-aca2-7611626ff48f",
+      "parent_id": "01a0cc5a-1dc5-75a3-9e07-905a3aee5d09",
       "name": "ChatOpenAI",
       "kind": "model",
-      "start_ns": 1789995719755442000,
-      "end_ns": 1789995721211936000,
+      "start_ns": 1790134853063465000,
+      "end_ns": 1790134855353679000,
       "status": "ok",
       "provider": "openai",
       "model": "gpt-5.6-luna",
       "effort": null,
       "usage": {
-        "input_tokens": 2170,
-        "output_tokens": 25,
-        "cache_read": 2108,
-        "cache_write": 59,
+        "input_tokens": 2100,
+        "output_tokens": 37,
+        "cache_read": 2075,
+        "cache_write": 22,
         "cache_write_5m": 0,
         "cache_write_1h": 0,
-        "reasoning": 0
+        "reasoning": 16
       },
       "error": null,
       "request": [
         {
           "role": "system",
-          "content": "Use workflow_reference to obtain evidence for each question about agent workflows, then answer concisely using the observation.",
+          "content": "Call echo_tool with the user's text, then answer concisely using the returned echo. The tool repeats input; it provides no independent factual evidence.",
           "tool_calls": [],
           "tool_call_id": null
         },
         {
           "role": "human",
-          "content": "Explain the main steps in an agent workflow.",
+          "content": "Echo this text: ReAct",
           "tool_calls": [],
           "tool_call_id": null
         },
@@ -1013,20 +1015,20 @@
           "content": [
             {
               "type": "function_call",
-              "name": "workflow_reference",
-              "arguments": "{\"topic\":\"main steps in an agent workflow\"}",
-              "call_id": "call_sICXVcaHtGSnZ9ROsQ4DWTYu",
-              "id": "fc_0a9efd79565af3c1006ab12ac5c44887d291aa5e0ab2cfc436",
+              "name": "echo_tool",
+              "arguments": "{\"text\":\"ReAct\"}",
+              "call_id": "call_N3tIiLfCsL87adnZuJLU4z1t",
+              "id": "fc_05e0c4a49feda864006ab34a4330b887d285a8810bf7fb41b0",
               "index": 0
             }
           ],
           "tool_calls": [
             {
-              "name": "workflow_reference",
+              "name": "echo_tool",
               "args": {
-                "topic": "main steps in an agent workflow"
+                "text": "ReAct"
               },
-              "id": "call_sICXVcaHtGSnZ9ROsQ4DWTYu",
+              "id": "call_N3tIiLfCsL87adnZuJLU4z1t",
               "type": "tool_call"
             }
           ],
@@ -1034,19 +1036,19 @@
         },
         {
           "role": "tool",
-          "content": "main steps in an agent workflow: an agent selects a tool, observes its result, and uses it to answer.",
+          "content": "Your input was: ReAct",
           "tool_calls": [],
-          "tool_call_id": "call_sICXVcaHtGSnZ9ROsQ4DWTYu"
+          "tool_call_id": "call_N3tIiLfCsL87adnZuJLU4z1t"
         },
         {
           "role": "ai",
           "content": [
             {
               "type": "text",
-              "text": "The main steps are:\n\n1. **Select a tool** based on the task.\n2. **Observe the tool’s result**.\n3. **Use that result to formulate an answer**.",
+              "text": "Your input was: ReAct",
               "phase": "final_answer",
               "index": 0,
-              "id": "msg_0a9efd79565af3c1006ab12ac71bd087d2b971b31223720a84"
+              "id": "msg_05e0c4a49feda864006ab34a44c25487d2986301b1ec0f3385"
             }
           ],
           "tool_calls": [],
@@ -1054,7 +1056,7 @@
         },
         {
           "role": "human",
-          "content": "How does a tool observation help the agent answer?",
+          "content": "Echo this text: Tool observations",
           "tool_calls": [],
           "tool_call_id": null
         }
@@ -1064,21 +1066,29 @@
           "role": "ai",
           "content": [
             {
+              "id": "rs_05e0c4a49feda864006ab34a46cc4487d28e566ce19612d6d1",
+              "summary": [],
+              "type": "reasoning",
+              "content": [],
+              "index": 0,
+              "encrypted_content": "gAAAAABqs0pGzD0rG6YkanBRpjuU_8pNDlVfJ6tyxsRvdtMzNZD5WuwkY9-qPg8JQ8XlTOpONBOPbN9t2VRAvaYc1Jd4YSg3Dxzfh4EfIZn3dAYjPAtZftNA_wH9RDGqYkGttCDqCWLkwzE4viYRXi12qTEDeAN7QhWOPpwJ1_55vEvaLV9L2-gGzqPAe2YXvXcv0wuQvXDtVRKSiB-FGaClpSGaJCu9SAW9UVBckgm-KFd8bd1qTWiVeSuglomDv8OdAAaOs9jdzbQRUAFe_x7MK5AEj4zqGZl5_sWR2pK5hRP8NCrWeGwB7Saj6cS0pK0_RWAkXQRh8HL7uDbbkVHBItnAu_XwydIB_xmq2zQTpYtabN9vsxzwObq5i-t5lHRcoVAqpFx8Eb-bXsLGk6qquU-J10xMpQGK2Sip8PrcNiAYdRVbhDjZtfrqTcMG7gykF4p-pEqkn8dFcs2ieEeBvTbGTg2UXLL0rkG3L5QnOsi9RoQJ967zBs26tcAdLjPr-WusYaTTTQgsMKpHl1o_j_EDAeVCnKYef2I_6bfzgZGnhbXOsAgfiEjbEljF-BIZBO-Mcr6oulZk7JtJhQDrytgP4DnvsOTz5jYDVpP2o2TG9V5NYVjafdyIhyjjwiW4J1c1IW3-2QJ1hBKw0ReWLpe8XrAYZKR2W8iQBUSW3NSjs09yclB7xiq9DtMN3kWCkfrOfOPUQY3Sq8cd4kPhNth9KhzLApDdJLgTaMjcJdECuvzenp3-2PlkiPrgHxuOAU3m5vYQMaViVPoZAJIeMnRCi_ch7bShfunOhH2wwzhiyplT8Se8U5dFv1DvVOFi0fl38HoAI2F8Kt0MhIoJAov14ZpPLsDh59Gsn14-AJTrupzcD0T1UGtNvg4B8STfqDCGroqqT-rl_O_w44ci1gYIBmaGHGBA52KNsgOlqD4zQfDu_UIIvsi0YGwp1ja4P8ix8OxajhYRqHnnkFiugJCwMRCnQw5Gw4xZPOAdclL08w_LFEc4QLEKBMC057kjA51FVA8CtG1hs7LGigaVhO3hTI90iyzM3eXx42qGFIJajK9mAuLLUsGksW6sWGE136ixZvsZRQNpEWjKvbMFGOH36b173GzKLwaoq8X1l4RxHjsdcOtm0LYv4a1XCjZhExfFV9jnO6PC8Nug25jA0VRioUnJKrh7y_7Pfh7NSGotm5mhAsDemsaJ3c8R2AlN7CIlj4_C8K2eJmDsO0nh6Uh32L2U_OsuMvCGCqqVB8U2pKKZTX4="
+            },
+            {
               "type": "function_call",
-              "name": "workflow_reference",
-              "arguments": "{\"topic\":\"how a tool observation helps the agent answer\"}",
-              "call_id": "call_pNhklgyZjfBv9KXygb6NlDBn",
-              "id": "fc_0a9efd79565af3c1006ab12ac8d4c887d28e997d246bf0ed9f",
-              "index": 0
+              "name": "echo_tool",
+              "arguments": "{\"text\":\"Tool observations\"}",
+              "call_id": "call_BywrswZzTXovyCJataXXnhR7",
+              "id": "fc_05e0c4a49feda864006ab34a46ff4087d284f0b93cee93fdb3",
+              "index": 1
             }
           ],
           "tool_calls": [
             {
-              "name": "workflow_reference",
+              "name": "echo_tool",
               "args": {
-                "topic": "how a tool observation helps the agent answer"
+                "text": "Tool observations"
               },
-              "id": "call_pNhklgyZjfBv9KXygb6NlDBn",
+              "id": "call_BywrswZzTXovyCJataXXnhR7",
               "type": "tool_call"
             }
           ],
@@ -1335,17 +1345,17 @@
         {
           "type": "function",
           "function": {
-            "name": "workflow_reference",
-            "description": "Return a fixed explanation from a small local agent-workflow reference.",
+            "name": "echo_tool",
+            "description": "Return the provided text prefixed with \"Your input was: \".",
             "parameters": {
               "properties": {
-                "topic": {
-                  "description": "The workflow concept used to label the explanation, such as tool calling or delegation. This fixture returns the same explanation for every topic.",
+                "text": {
+                  "description": "The string to echo unchanged after the prefix.",
                   "type": "string"
                 }
               },
               "required": [
-                "topic"
+                "text"
               ],
               "type": "object"
             }
@@ -1356,12 +1366,13 @@
         "langgraph_node": "model",
         "langgraph_step": 8,
         "report_turn": 2,
-        "thread_id": "f5c3f156-a4a5-44b9-959b-3db3002d2f3f",
+        "thread_id": "498991e7-b0ba-4e5f-a8c1-57dfd224b852",
         "cache_ttl": "5m",
         "tags": [
           "seq:step:1"
         ],
         "description": "Generate the next assistant message or tool request from the current conversation.",
+        "input_message_bytes": 1077,
         "message_count": 6,
         "message_roles": [
           "system",
@@ -1372,17 +1383,17 @@
           "human"
         ],
         "requested_tools": [
-          "workflow_reference"
+          "echo_tool"
         ]
       }
     },
     {
-      "id": "01a0c40f-21fd-7121-9d20-2a6083e878dc",
-      "parent_id": "01a0c40f-1c45-7ca3-9bb9-bc1deef67dbe",
+      "id": "01a0cc5a-26bf-7382-aa90-c362d505c483",
+      "parent_id": "01a0cc5a-1dc3-7021-abb1-561851a31374",
       "name": "tools",
       "kind": "workflow",
-      "start_ns": 1789995721213566000,
-      "end_ns": 1789995721215379000,
+      "start_ns": 1790134855360217000,
+      "end_ns": 1790134855363903000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -1396,7 +1407,7 @@
         "langgraph_node": "tools",
         "langgraph_step": 9,
         "report_turn": 2,
-        "thread_id": "f5c3f156-a4a5-44b9-959b-3db3002d2f3f",
+        "thread_id": "498991e7-b0ba-4e5f-a8c1-57dfd224b852",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:9"
@@ -1405,12 +1416,12 @@
       }
     },
     {
-      "id": "01a0c40f-21fe-7322-a27a-f6112a831907",
-      "parent_id": "01a0c40f-21fd-7121-9d20-2a6083e878dc",
-      "name": "workflow_reference",
+      "id": "01a0cc5a-26c1-7043-a54b-b0aa692fcf0a",
+      "parent_id": "01a0cc5a-26bf-7382-aa90-c362d505c483",
+      "name": "echo_tool",
       "kind": "tool",
-      "start_ns": 1789995721214142000,
-      "end_ns": 1789995721214715000,
+      "start_ns": 1790134855361553000,
+      "end_ns": 1790134855362683000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -1420,15 +1431,15 @@
       "request": [
         {
           "role": "tool_call",
-          "content": "{'topic': 'how a tool observation helps the agent answer'}"
+          "content": "{'text': 'Tool observations'}"
         }
       ],
       "response": [
         {
           "role": "tool",
-          "content": "how a tool observation helps the agent answer: an agent selects a tool, observes its result, and uses it to answer.",
+          "content": "Your input was: Tool observations",
           "tool_calls": [],
-          "tool_call_id": "call_pNhklgyZjfBv9KXygb6NlDBn"
+          "tool_call_id": "call_BywrswZzTXovyCJataXXnhR7"
         }
       ],
       "tool_definitions": null,
@@ -1436,21 +1447,21 @@
         "langgraph_node": "tools",
         "langgraph_step": 9,
         "report_turn": 2,
-        "thread_id": "f5c3f156-a4a5-44b9-959b-3db3002d2f3f",
+        "thread_id": "498991e7-b0ba-4e5f-a8c1-57dfd224b852",
         "cache_ttl": "5m",
         "tags": [
           "seq:step:1"
         ],
-        "description": "Return a fixed explanation from a small local agent-workflow reference."
+        "description": "Return the provided text prefixed with \"Your input was: \"."
       }
     },
     {
-      "id": "01a0c40f-21ff-70e0-8a08-53aa09c6ddcf",
-      "parent_id": "01a0c40f-1c45-7ca3-9bb9-bc1deef67dbe",
+      "id": "01a0cc5a-26c4-7843-8214-e6d90a5cf77e",
+      "parent_id": "01a0cc5a-1dc3-7021-abb1-561851a31374",
       "name": "model",
       "kind": "workflow",
-      "start_ns": 1789995721215995000,
-      "end_ns": 1789995722174927000,
+      "start_ns": 1790134855364978000,
+      "end_ns": 1790134856210677000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -1464,7 +1475,7 @@
         "langgraph_node": "model",
         "langgraph_step": 10,
         "report_turn": 2,
-        "thread_id": "f5c3f156-a4a5-44b9-959b-3db3002d2f3f",
+        "thread_id": "498991e7-b0ba-4e5f-a8c1-57dfd224b852",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:10"
@@ -1473,21 +1484,21 @@
       }
     },
     {
-      "id": "01a0c40f-2201-7ec2-96aa-4d5b676e3855",
-      "parent_id": "01a0c40f-21ff-70e0-8a08-53aa09c6ddcf",
+      "id": "01a0cc5a-26c8-7502-af8b-20ad6dcc4b4d",
+      "parent_id": "01a0cc5a-26c4-7843-8214-e6d90a5cf77e",
       "name": "ChatOpenAI",
       "kind": "model",
-      "start_ns": 1789995721217981000,
-      "end_ns": 1789995722173185000,
+      "start_ns": 1790134855369306000,
+      "end_ns": 1790134856208915000,
       "status": "ok",
       "provider": "openai",
       "model": "gpt-5.6-luna",
       "effort": null,
       "usage": {
-        "input_tokens": 2231,
-        "output_tokens": 22,
-        "cache_read": 2167,
-        "cache_write": 61,
+        "input_tokens": 2154,
+        "output_tokens": 10,
+        "cache_read": 2097,
+        "cache_write": 54,
         "cache_write_5m": 0,
         "cache_write_1h": 0,
         "reasoning": 0
@@ -1496,13 +1507,13 @@
       "request": [
         {
           "role": "system",
-          "content": "Use workflow_reference to obtain evidence for each question about agent workflows, then answer concisely using the observation.",
+          "content": "Call echo_tool with the user's text, then answer concisely using the returned echo. The tool repeats input; it provides no independent factual evidence.",
           "tool_calls": [],
           "tool_call_id": null
         },
         {
           "role": "human",
-          "content": "Explain the main steps in an agent workflow.",
+          "content": "Echo this text: ReAct",
           "tool_calls": [],
           "tool_call_id": null
         },
@@ -1511,20 +1522,20 @@
           "content": [
             {
               "type": "function_call",
-              "name": "workflow_reference",
-              "arguments": "{\"topic\":\"main steps in an agent workflow\"}",
-              "call_id": "call_sICXVcaHtGSnZ9ROsQ4DWTYu",
-              "id": "fc_0a9efd79565af3c1006ab12ac5c44887d291aa5e0ab2cfc436",
+              "name": "echo_tool",
+              "arguments": "{\"text\":\"ReAct\"}",
+              "call_id": "call_N3tIiLfCsL87adnZuJLU4z1t",
+              "id": "fc_05e0c4a49feda864006ab34a4330b887d285a8810bf7fb41b0",
               "index": 0
             }
           ],
           "tool_calls": [
             {
-              "name": "workflow_reference",
+              "name": "echo_tool",
               "args": {
-                "topic": "main steps in an agent workflow"
+                "text": "ReAct"
               },
-              "id": "call_sICXVcaHtGSnZ9ROsQ4DWTYu",
+              "id": "call_N3tIiLfCsL87adnZuJLU4z1t",
               "type": "tool_call"
             }
           ],
@@ -1532,19 +1543,19 @@
         },
         {
           "role": "tool",
-          "content": "main steps in an agent workflow: an agent selects a tool, observes its result, and uses it to answer.",
+          "content": "Your input was: ReAct",
           "tool_calls": [],
-          "tool_call_id": "call_sICXVcaHtGSnZ9ROsQ4DWTYu"
+          "tool_call_id": "call_N3tIiLfCsL87adnZuJLU4z1t"
         },
         {
           "role": "ai",
           "content": [
             {
               "type": "text",
-              "text": "The main steps are:\n\n1. **Select a tool** based on the task.\n2. **Observe the tool’s result**.\n3. **Use that result to formulate an answer**.",
+              "text": "Your input was: ReAct",
               "phase": "final_answer",
               "index": 0,
-              "id": "msg_0a9efd79565af3c1006ab12ac71bd087d2b971b31223720a84"
+              "id": "msg_05e0c4a49feda864006ab34a44c25487d2986301b1ec0f3385"
             }
           ],
           "tool_calls": [],
@@ -1552,7 +1563,7 @@
         },
         {
           "role": "human",
-          "content": "How does a tool observation help the agent answer?",
+          "content": "Echo this text: Tool observations",
           "tool_calls": [],
           "tool_call_id": null
         },
@@ -1560,21 +1571,29 @@
           "role": "ai",
           "content": [
             {
+              "id": "rs_05e0c4a49feda864006ab34a46cc4487d28e566ce19612d6d1",
+              "summary": [],
+              "type": "reasoning",
+              "content": [],
+              "index": 0,
+              "encrypted_content": "gAAAAABqs0pGzD0rG6YkanBRpjuU_8pNDlVfJ6tyxsRvdtMzNZD5WuwkY9-qPg8JQ8XlTOpONBOPbN9t2VRAvaYc1Jd4YSg3Dxzfh4EfIZn3dAYjPAtZftNA_wH9RDGqYkGttCDqCWLkwzE4viYRXi12qTEDeAN7QhWOPpwJ1_55vEvaLV9L2-gGzqPAe2YXvXcv0wuQvXDtVRKSiB-FGaClpSGaJCu9SAW9UVBckgm-KFd8bd1qTWiVeSuglomDv8OdAAaOs9jdzbQRUAFe_x7MK5AEj4zqGZl5_sWR2pK5hRP8NCrWeGwB7Saj6cS0pK0_RWAkXQRh8HL7uDbbkVHBItnAu_XwydIB_xmq2zQTpYtabN9vsxzwObq5i-t5lHRcoVAqpFx8Eb-bXsLGk6qquU-J10xMpQGK2Sip8PrcNiAYdRVbhDjZtfrqTcMG7gykF4p-pEqkn8dFcs2ieEeBvTbGTg2UXLL0rkG3L5QnOsi9RoQJ967zBs26tcAdLjPr-WusYaTTTQgsMKpHl1o_j_EDAeVCnKYef2I_6bfzgZGnhbXOsAgfiEjbEljF-BIZBO-Mcr6oulZk7JtJhQDrytgP4DnvsOTz5jYDVpP2o2TG9V5NYVjafdyIhyjjwiW4J1c1IW3-2QJ1hBKw0ReWLpe8XrAYZKR2W8iQBUSW3NSjs09yclB7xiq9DtMN3kWCkfrOfOPUQY3Sq8cd4kPhNth9KhzLApDdJLgTaMjcJdECuvzenp3-2PlkiPrgHxuOAU3m5vYQMaViVPoZAJIeMnRCi_ch7bShfunOhH2wwzhiyplT8Se8U5dFv1DvVOFi0fl38HoAI2F8Kt0MhIoJAov14ZpPLsDh59Gsn14-AJTrupzcD0T1UGtNvg4B8STfqDCGroqqT-rl_O_w44ci1gYIBmaGHGBA52KNsgOlqD4zQfDu_UIIvsi0YGwp1ja4P8ix8OxajhYRqHnnkFiugJCwMRCnQw5Gw4xZPOAdclL08w_LFEc4QLEKBMC057kjA51FVA8CtG1hs7LGigaVhO3hTI90iyzM3eXx42qGFIJajK9mAuLLUsGksW6sWGE136ixZvsZRQNpEWjKvbMFGOH36b173GzKLwaoq8X1l4RxHjsdcOtm0LYv4a1XCjZhExfFV9jnO6PC8Nug25jA0VRioUnJKrh7y_7Pfh7NSGotm5mhAsDemsaJ3c8R2AlN7CIlj4_C8K2eJmDsO0nh6Uh32L2U_OsuMvCGCqqVB8U2pKKZTX4="
+            },
+            {
               "type": "function_call",
-              "name": "workflow_reference",
-              "arguments": "{\"topic\":\"how a tool observation helps the agent answer\"}",
-              "call_id": "call_pNhklgyZjfBv9KXygb6NlDBn",
-              "id": "fc_0a9efd79565af3c1006ab12ac8d4c887d28e997d246bf0ed9f",
-              "index": 0
+              "name": "echo_tool",
+              "arguments": "{\"text\":\"Tool observations\"}",
+              "call_id": "call_BywrswZzTXovyCJataXXnhR7",
+              "id": "fc_05e0c4a49feda864006ab34a46ff4087d284f0b93cee93fdb3",
+              "index": 1
             }
           ],
           "tool_calls": [
             {
-              "name": "workflow_reference",
+              "name": "echo_tool",
               "args": {
-                "topic": "how a tool observation helps the agent answer"
+                "text": "Tool observations"
               },
-              "id": "call_pNhklgyZjfBv9KXygb6NlDBn",
+              "id": "call_BywrswZzTXovyCJataXXnhR7",
               "type": "tool_call"
             }
           ],
@@ -1582,9 +1601,9 @@
         },
         {
           "role": "tool",
-          "content": "how a tool observation helps the agent answer: an agent selects a tool, observes its result, and uses it to answer.",
+          "content": "Your input was: Tool observations",
           "tool_calls": [],
-          "tool_call_id": "call_pNhklgyZjfBv9KXygb6NlDBn"
+          "tool_call_id": "call_BywrswZzTXovyCJataXXnhR7"
         }
       ],
       "response": [
@@ -1593,10 +1612,10 @@
           "content": [
             {
               "type": "text",
-              "text": "A tool observation gives the agent information or results that it can use to formulate its answer.",
+              "text": "Your input was: Tool observations",
               "phase": "final_answer",
               "index": 0,
-              "id": "msg_0a9efd79565af3c1006ab12ac9c7ac87d2ae02973d2ffbb59b"
+              "id": "msg_05e0c4a49feda864006ab34a48031c87d29082d6c79b726828"
             }
           ],
           "tool_calls": [],
@@ -1853,17 +1872,17 @@
         {
           "type": "function",
           "function": {
-            "name": "workflow_reference",
-            "description": "Return a fixed explanation from a small local agent-workflow reference.",
+            "name": "echo_tool",
+            "description": "Return the provided text prefixed with \"Your input was: \".",
             "parameters": {
               "properties": {
-                "topic": {
-                  "description": "The workflow concept used to label the explanation, such as tool calling or delegation. This fixture returns the same explanation for every topic.",
+                "text": {
+                  "description": "The string to echo unchanged after the prefix.",
                   "type": "string"
                 }
               },
               "required": [
-                "topic"
+                "text"
               ],
               "type": "object"
             }
@@ -1874,12 +1893,13 @@
         "langgraph_node": "model",
         "langgraph_step": 10,
         "report_turn": 2,
-        "thread_id": "f5c3f156-a4a5-44b9-959b-3db3002d2f3f",
+        "thread_id": "498991e7-b0ba-4e5f-a8c1-57dfd224b852",
         "cache_ttl": "5m",
         "tags": [
           "seq:step:1"
         ],
         "description": "Generate the next assistant message or tool request from the current conversation.",
+        "input_message_bytes": 2993,
         "message_count": 8,
         "message_roles": [
           "system",
@@ -1894,5 +1914,5 @@
       }
     }
   ],
-  "output": "[{'type': 'text', 'text': 'A tool observation gives the agent information or results that it can use to formulate its answer.', 'phase': 'final_answer', 'index': 0, 'id': 'msg_0a9efd79565af3c1006ab12ac9c7ac87d2ae02973d2ffbb59b'}]"
+  "output": "[{'type': 'text', 'text': 'Your input was: Tool observations', 'phase': 'final_answer', 'index': 0, 'id': 'msg_05e0c4a49feda864006ab34a48031c87d29082d6c79b726828'}]"
 }

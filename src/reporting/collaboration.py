@@ -1,6 +1,7 @@
 """Lay out recorded agent activity as offline SVG sequence diagrams.
 
-Each invocation owns a lane, including repeated agents and concurrent children.
+Each named agent within a caller path owns a lifeline. Repeated invocations
+share that lifeline and retain separate activation periods.
 Arrows require recorded caller relationships; chronological proximity alone is
 not evidence of a handoff. This projection never changes run data or accounting.
 
@@ -16,7 +17,7 @@ def collaboration_diagrams(run, agents, turns):
     """Help readers follow who called whom during each recorded conversation turn.
 
     Return diagram dictionaries consumed by the HTML template: lanes identify
-    agent invocations and events describe observed work or handoffs. ``run`` is
+    named participants and events describe observed work or handoffs. ``run`` is
     normalized trace evidence, ``agents`` supplies resolved activities/callers,
     and ``turns`` supplies the renderer's grouped model/tool events. These are
     display projections, not live agents or executable scheduling instructions.
@@ -30,18 +31,40 @@ def collaboration_diagrams(run, agents, turns):
     for activity in agents["activities"]:
         number = activity["step"].context.get("report_turn", 1)
         groups.setdefault(number, []).append(activity)
+    # Names are the stable identity exposed by these traces; span IDs identify
+    # calls, not agent objects. Include caller ancestry so equally named roles
+    # belonging to different parents do not collapse into one participant.
+    activities_by_id = {a["step"].id: a for a in agents["activities"]}
+
+    def participant_key(activity):
+        """Resolve a role's caller path without using per-invocation span IDs."""
+        caller = activity["caller"]
+        parent = activities_by_id.get(caller.id) if caller else None
+        prefix = participant_key(parent) if parent else ()
+        return (*prefix, activity["step"].name)
+
     diagrams = []
     for number, activities in groups.items():
         lanes = []
-        for index, activity in enumerate(activities):
-            lanes.append(
-                {
-                    **activity,
-                    "x": 220 + index * 280,
+        by_key = {}
+        by_id = {}
+        for activity in activities:
+            key = participant_key(activity)
+            if key not in by_key:
+                lane = {
+                    "step": activity["step"],
+                    "x": 220 + len(lanes) * 280,
                     "name_lines": wrap(activity["step"].name, 28) or ["Unnamed agent"],
+                    "invocations": 0,
+                    "model_calls": 0,
                 }
-            )
-        by_id = {lane["step"].id: lane for lane in lanes}
+                by_key[key] = lane
+                lanes.append(lane)
+            lane = by_key[key]
+            lane["invocations"] += 1
+            lane["model_calls"] += activity["model_calls"]
+            by_id[activity["step"].id] = lane
+        activations = []
         header_height = 65 + max(len(lane["name_lines"]) for lane in lanes) * 16
         events = []
 
@@ -59,8 +82,8 @@ def collaboration_diagrams(run, agents, turns):
             """Represent an observed action or handoff at the correct place in the diagram.
 
             The caller supplies the observed ``timestamp`` in Unix nanoseconds,
-            display ``label``, and recorded ``status``. This returns None after
-            appending the event; rendering happens later in the HTML template.
+            display ``label``, and recorded ``status``. Return the appended event
+            so activation boundaries follow the same layout; rendering happens later in the HTML template.
 
             ``source`` and ``target`` must be IDs present in ``by_id``; the
             self-target form is intentional for local work such as model/tool
@@ -68,19 +91,19 @@ def collaboration_diagrams(run, agents, turns):
             so diagram ordering never invents precision that the trace lacks.
             The helper mutates only this diagram's temporary ``events`` list.
             """
-            events.append(
-                {
-                    "timestamp": timestamp,
-                    "source": source,
-                    "target": target,
-                    "label": label,
-                    "status": status,
-                    "order": order,
-                    "time_ms": (timestamp - start) / 1_000_000,
-                    "x1": by_id[source]["x"],
-                    "x2": by_id[target]["x"],
-                }
-            )
+            event = {
+                "timestamp": timestamp,
+                "source": source,
+                "target": target,
+                "label": label,
+                "status": status,
+                "order": order,
+                "time_ms": (timestamp - start) / 1_000_000,
+                "x1": by_id[source]["x"],
+                "x2": by_id[target]["x"],
+            }
+            events.append(event)
+            return event
 
         for activity in activities:
             step = activity["step"]
@@ -90,7 +113,7 @@ def collaboration_diagrams(run, agents, turns):
             # caller. A missing caller lane becomes a local start marker, never
             # a guessed link to the preceding chronological agent.
             if caller and caller.id in by_id:
-                add(
+                opened = add(
                     step.start_ns,
                     caller.id,
                     step.id,
@@ -99,14 +122,14 @@ def collaboration_diagrams(run, agents, turns):
                     0,
                 )
             else:
-                add(step.start_ns, step.id, step.id, "Started", "ok", 0)
+                opened = add(step.start_ns, step.id, step.id, "Started", "ok", 0)
             if (
                 caller
                 and caller.id in by_id
                 and step.status == "ok"
                 and (task is None or task.status == "ok")
             ):
-                add(
+                closed = add(
                     task.end_ns if task else step.end_ns,
                     step.id,
                     caller.id,
@@ -117,7 +140,7 @@ def collaboration_diagrams(run, agents, turns):
             else:
                 # Closing an incomplete span is recorder cleanup, not completion.
                 label = "Finished" if step.status == "ok" else "Stopped / last recorded"
-                add(
+                closed = add(
                     step.end_ns,
                     step.id,
                     step.id,
@@ -125,6 +148,16 @@ def collaboration_diagrams(run, agents, turns):
                     step.status,
                     2,
                 )
+            # Keep each call independently inspectable even when its lifeline
+            # is shared. Waiting for human input lies between activations.
+            activations.append(
+                {
+                    "step": step,
+                    "x": by_id[step.id]["x"],
+                    "opened": opened,
+                    "closed": closed,
+                }
+            )
         for turn in turns:
             for event in turn["events"]:
                 owner = event.get("agent")
@@ -157,11 +190,15 @@ def collaboration_diagrams(run, agents, turns):
             event["center"] = (event["x1"] + event["x2"]) / 2
             event["box_height"] = 16 * len(event["lines"]) + 12
             y += event["box_height"] + 30
+        for activation in activations:
+            activation["y"] = activation["opened"]["y"]
+            activation["height"] = max(1, activation["closed"]["y"] - activation["y"])
         diagrams.append(
             {
                 "turn": number,
                 "lanes": lanes,
                 "events": events,
+                "activations": activations,
                 "width": 100 + 280 * len(lanes),
                 "height": y + 10,
                 "header_height": header_height,

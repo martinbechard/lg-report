@@ -73,10 +73,10 @@ limit; overlapping passages preserve facts crossing chunk boundaries.
 ## Run the sample
 
 ```sh
-uv run python -m agent_runtime --sample rag_chat
+uv run python -m agent_runtime --sample rag_chat --demo
 ```
 
-The default uses a scripted chat model but **real semantic retrieval from Chroma**.
+The `--demo` command uses a scripted chat model but **real semantic retrieval from Chroma**.
 Its one question is about how the Australian raven adapts to urban environments. The fixture preselects a source
 excerpt, then the graph makes its own recorded search call and returns that excerpt
 with a passage ID. This demonstrates the retrieval/cost plumbing, not live answer

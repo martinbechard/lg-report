@@ -12,7 +12,6 @@ Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 import argparse
 import html
 import os
-import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -29,60 +28,13 @@ SAMPLES = tuple(
 )
 
 
-def excel_runtime():
-    """Ensure the batch can produce Excel workbooks before starting any lessons.
-
-    main calls this preflight so a missing exporter dependency fails before
-    sample execution. Return the Node executable and child-process environment
-    needed by run_sample. LG_EXCEL_RUNTIME overrides the desktop dependency
-    directory; otherwise the bundled location is used. Missing Node or an
-    unresolvable artifact-tool package raises RuntimeError.
-    """
-    bundled = (
-        Path.home() / ".cache/codex-runtimes/codex-primary-runtime/dependencies/node"
-    )
-    runtime = Path(os.environ.get("LG_EXCEL_RUNTIME", bundled)).expanduser().resolve()
-    node = (
-        str(runtime / "bin/node")
-        if (runtime / "bin/node").is_file()
-        else shutil.which("node")
-    )
-    if not node:
-        raise RuntimeError(
-            "Node.js is required for Excel export. Install Node.js or use the Codex desktop runtime."
-        )
-    env = {**os.environ, "LG_EXCEL_RUNTIME": str(runtime)}
-    # Resolve the exporter package from the selected runtime, rather than the
-    # current directory, to check the same dependency location used for export.
-    probe = subprocess.run(
-        [
-            node,
-            "--input-type=module",
-            "-e",
-            (
-                "import {createRequire} from 'node:module'; import path from 'node:path'; "
-                "createRequire(path.join(process.env.LG_EXCEL_RUNTIME,'package.json')).resolve('@oai/artifact-tool');"
-            ),
-        ],
-        env=env,
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    if probe.returncode:
-        raise RuntimeError(
-            "Excel runtime unavailable. Set LG_EXCEL_RUNTIME to the directory containing node_modules/@oai/artifact-tool."
-        )
-    return node, env
-
-
-def run_sample(name, directory, *, prices, fx_file, node, env, simulated=False):
+def run_sample(name, directory, *, prices, fx_file, env, simulated=False):
     """Produce one lesson's current HTML and Excel reports for the batch index.
 
     main calls this for each selected lesson so successful rows refer to this
     run's artifacts. name identifies a sample module; directory isolates its
-    outputs. prices and optional fx_file supply accounting references. node and
-    env come from excel_runtime and are passed to the exporter subprocess.
+    outputs. prices and optional fx_file supply accounting references. The child
+    environment carries provider settings; all stages use this Python runtime.
 
     Remove earlier report artifacts, run the selected model mode, convert run.json
     to workbook input, then export Excel. A failing child stops this sequence
@@ -122,8 +74,7 @@ def run_sample(name, directory, *, prices, fx_file, node, env, simulated=False):
         "--client",
         "console" if name == "quote_request" and not simulated else "static",
     ]
-    if not simulated:
-        command.append("--live")
+    command.append("--demo" if simulated else "--live")
     if fx_file:
         command.extend(["--fx-file", str(fx_file)])
     if name == "file_approval":
@@ -140,7 +91,7 @@ def run_sample(name, directory, *, prices, fx_file, node, env, simulated=False):
             ]
         )
     # These stages depend on one another: the recorder writes run.json, the
-    # converter extracts workbook data, and Node renders that data to Excel.
+    # converter extracts workbook data, and the Python exporter writes Excel.
     commands = [
         command,
         [
@@ -152,8 +103,9 @@ def run_sample(name, directory, *, prices, fx_file, node, env, simulated=False):
             "excel-data.json",
         ],
         [
-            node,
-            str(ROOT / "src/reporting/export_excel.mjs"),
+            sys.executable,
+            "-m",
+            "reporting.export_excel",
             "excel-data.json",
             "report.xlsx",
         ],
@@ -259,7 +211,7 @@ def main():
     )
     args = parser.parse_args()
     try:
-        node, env = excel_runtime()
+        env = dict(os.environ)
         # Children change working directory, so resolve shared configuration here.
         # Preserve shell precedence without printing credentials or mutating .env.
         if args.env_file.exists():
@@ -325,7 +277,6 @@ def main():
                 output / name,
                 prices=prices,
                 fx_file=fx_file,
-                node=node,
                 env=env,
                 simulated=args.simulated,
             )

@@ -69,6 +69,7 @@ def build_agent(parameters: dict):
     # The wrapper below only translates the role's domain input and output.
     agent = create_agent(
         **parameters,
+        name="review_author",
         system_prompt=SYSTEM_PROMPT,
     )
 

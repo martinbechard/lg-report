@@ -14,14 +14,14 @@ From the repository root:
 uv sync --locked
 # Only if the existing RAG index has not been built:
 uv run python -m samples.rag_chat.ingest
-uv run python -m agent_runtime --sample mcp_rag_chat
+uv run python -m agent_runtime --sample mcp_rag_chat --demo
 ```
 
 No separately running server is needed. The workflow launches and closes the MCP
 subprocess for each turn, using the same Python environment. The printed HTML
 path defaults to `reports/mcp_rag_chat/report.html`, replacing the previous default run.
 
-The default uses a scripted model with **real MCP transport and vector retrieval**.
+The `--demo` command uses a scripted model with **real MCP transport and vector retrieval**.
 It makes two simulated model calls and one real `semantic_search_wikipedia` call. The final
 scripted message acknowledges retrieval; inspect the tool observation for actual
 passages and IDs. It does not claim to generate or evaluate a factual answer.

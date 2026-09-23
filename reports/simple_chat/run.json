@@ -1,17 +1,17 @@
 {
   "schema_version": 1,
-  "id": "01a0c40e-de14-7f90-9d6f-6ccd2c6e3bbf",
+  "id": "01a0cc59-9086-7d33-a673-f17e09b3eab0",
   "title": "Simple chat",
   "demo": false,
   "status": "ok",
   "steps": [
     {
-      "id": "01a0c40e-de14-7f90-9d6f-6ccd2c6e3bbf",
+      "id": "01a0cc59-9086-7d33-a673-f17e09b3eab0",
       "parent_id": null,
       "name": "chat_agent",
       "kind": "workflow",
-      "start_ns": 1789995703829689000,
-      "end_ns": 1789995707601264000,
+      "start_ns": 1790134816904392000,
+      "end_ns": 1790134819586327000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -23,18 +23,18 @@
       "tool_definitions": null,
       "context": {
         "report_turn": 1,
-        "thread_id": "1d03c43b-2a5f-4989-97a2-8e6aa9a5cf09",
+        "thread_id": "4c97fa69-a706-4510-bb6e-71f381cfcb3b",
         "cache_ttl": "5m",
         "description": "Coordinate a direct chat response: prepare messages and invoke the model."
       }
     },
     {
-      "id": "01a0c40e-de16-73a0-b982-a57562da843f",
-      "parent_id": "01a0c40e-de14-7f90-9d6f-6ccd2c6e3bbf",
+      "id": "01a0cc59-9089-7313-8055-1f3293f1ab21",
+      "parent_id": "01a0cc59-9086-7d33-a673-f17e09b3eab0",
       "name": "PatchToolCallsMiddleware.before_agent",
       "kind": "workflow",
-      "start_ns": 1789995703830877000,
-      "end_ns": 1789995703831219000,
+      "start_ns": 1790134816905770000,
+      "end_ns": 1790134816906121000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -48,7 +48,7 @@
         "langgraph_node": "PatchToolCallsMiddleware.before_agent",
         "langgraph_step": 1,
         "report_turn": 1,
-        "thread_id": "1d03c43b-2a5f-4989-97a2-8e6aa9a5cf09",
+        "thread_id": "4c97fa69-a706-4510-bb6e-71f381cfcb3b",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:1"
@@ -57,12 +57,12 @@
       }
     },
     {
-      "id": "01a0c40e-de17-7b12-86b0-96367426d30e",
-      "parent_id": "01a0c40e-de14-7f90-9d6f-6ccd2c6e3bbf",
+      "id": "01a0cc59-908a-7d20-9525-d3665db23d70",
+      "parent_id": "01a0cc59-9086-7d33-a673-f17e09b3eab0",
       "name": "model",
       "kind": "workflow",
-      "start_ns": 1789995703832002000,
-      "end_ns": 1789995707600303000,
+      "start_ns": 1790134816906747000,
+      "end_ns": 1790134819584559000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -76,7 +76,7 @@
         "langgraph_node": "model",
         "langgraph_step": 2,
         "report_turn": 1,
-        "thread_id": "1d03c43b-2a5f-4989-97a2-8e6aa9a5cf09",
+        "thread_id": "4c97fa69-a706-4510-bb6e-71f381cfcb3b",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:2"
@@ -85,21 +85,21 @@
       }
     },
     {
-      "id": "01a0c40e-de1c-7723-9710-800dbf8a0e7e",
-      "parent_id": "01a0c40e-de17-7b12-86b0-96367426d30e",
+      "id": "01a0cc59-908f-71e1-add5-920a7163db39",
+      "parent_id": "01a0cc59-908a-7d20-9525-d3665db23d70",
       "name": "ChatOpenAI",
       "kind": "model",
-      "start_ns": 1789995703836896000,
-      "end_ns": 1789995707598995000,
+      "start_ns": 1790134816912031000,
+      "end_ns": 1790134819583202000,
       "status": "ok",
       "provider": "openai",
       "model": "gpt-5.6-luna",
       "effort": null,
       "usage": {
         "input_tokens": 1999,
-        "output_tokens": 172,
-        "cache_read": 0,
-        "cache_write": 1996,
+        "output_tokens": 153,
+        "cache_read": 1983,
+        "cache_write": 13,
         "cache_write_5m": 0,
         "cache_write_1h": 0,
         "reasoning": 0
@@ -125,10 +125,10 @@
           "content": [
             {
               "type": "text",
-              "text": "The main steps in an agent workflow are:\n\n1. **Perceive** – Gather information from the user, environment, tools, or data sources.\n2. **Interpret** – Understand the goal, context, and constraints.\n3. **Plan** – Break the task into steps and decide which actions or tools are needed.\n4. **Act** – Execute those actions, such as calling APIs, searching data, or modifying files.\n5. **Observe results** – Check what happened and collect feedback from each action.\n6. **Reason and adjust** – Evaluate the results, revise the plan if necessary, and handle errors.\n7. **Complete and respond** – Produce the final outcome or answer, often after validating it.\n\nThis process may repeat in a loop until the goal is achieved or the agent determines that it cannot proceed.",
+              "text": "The main steps in an agent workflow are:\n\n1. **Receive the goal** – Understand the user’s request and desired outcome.\n2. **Plan** – Break the goal into smaller tasks and decide what actions or tools are needed.\n3. **Gather information** – Retrieve relevant data from sources, files, APIs, or the conversation.\n4. **Act** – Execute tasks, such as calling tools, editing files, or interacting with systems.\n5. **Observe results** – Inspect the outputs and determine whether they are correct or sufficient.\n6. **Iterate** – Revise the plan or take additional actions if needed.\n7. **Deliver the result** – Provide the final answer or completed work, usually with a concise summary.",
               "phase": "final_answer",
               "index": 0,
-              "id": "msg_0c93db884d4098e4006ab12ab9253087d283bf85f3a63572b5"
+              "id": "msg_03b97f5174cecfbc006ab34a21e11087d29c6ea1b48cc9d0c3"
             }
           ],
           "tool_calls": [],
@@ -387,12 +387,13 @@
         "langgraph_node": "model",
         "langgraph_step": 2,
         "report_turn": 1,
-        "thread_id": "1d03c43b-2a5f-4989-97a2-8e6aa9a5cf09",
+        "thread_id": "4c97fa69-a706-4510-bb6e-71f381cfcb3b",
         "cache_ttl": "5m",
         "tags": [
           "seq:step:1"
         ],
         "description": "Generate the next assistant message or tool request from the current conversation.",
+        "input_message_bytes": 281,
         "message_count": 2,
         "message_roles": [
           "system",
@@ -401,12 +402,12 @@
       }
     },
     {
-      "id": "01a0c40e-ece3-72f0-8833-2a494c9ff0b7",
+      "id": "01a0cc59-9b15-7151-8c7a-7bb6fa988bf5",
       "parent_id": null,
       "name": "chat_agent",
       "kind": "workflow",
-      "start_ns": 1789995707619468000,
-      "end_ns": 1789995710038766000,
+      "start_ns": 1790134819606316000,
+      "end_ns": 1790134821590419000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -418,18 +419,18 @@
       "tool_definitions": null,
       "context": {
         "report_turn": 2,
-        "thread_id": "1d03c43b-2a5f-4989-97a2-8e6aa9a5cf09",
+        "thread_id": "4c97fa69-a706-4510-bb6e-71f381cfcb3b",
         "cache_ttl": "5m",
         "description": "Coordinate a direct chat response: prepare messages and invoke the model."
       }
     },
     {
-      "id": "01a0c40e-ece4-7f03-9c19-91b750a531c4",
-      "parent_id": "01a0c40e-ece3-72f0-8833-2a494c9ff0b7",
+      "id": "01a0cc59-9b17-7ef3-a481-8df4ceaa1f28",
+      "parent_id": "01a0cc59-9b15-7151-8c7a-7bb6fa988bf5",
       "name": "PatchToolCallsMiddleware.before_agent",
       "kind": "workflow",
-      "start_ns": 1789995707620431000,
-      "end_ns": 1789995707620707000,
+      "start_ns": 1790134819607447000,
+      "end_ns": 1790134819607769000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -443,7 +444,7 @@
         "langgraph_node": "PatchToolCallsMiddleware.before_agent",
         "langgraph_step": 5,
         "report_turn": 2,
-        "thread_id": "1d03c43b-2a5f-4989-97a2-8e6aa9a5cf09",
+        "thread_id": "4c97fa69-a706-4510-bb6e-71f381cfcb3b",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:5"
@@ -452,12 +453,12 @@
       }
     },
     {
-      "id": "01a0c40e-ece5-7bb1-ba2d-956388616a7b",
-      "parent_id": "01a0c40e-ece3-72f0-8833-2a494c9ff0b7",
+      "id": "01a0cc59-9b18-7930-b955-50a3f0b16a32",
+      "parent_id": "01a0cc59-9b15-7151-8c7a-7bb6fa988bf5",
       "name": "model",
       "kind": "workflow",
-      "start_ns": 1789995707621286000,
-      "end_ns": 1789995710038061000,
+      "start_ns": 1790134819608351000,
+      "end_ns": 1790134821588974000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -471,7 +472,7 @@
         "langgraph_node": "model",
         "langgraph_step": 6,
         "report_turn": 2,
-        "thread_id": "1d03c43b-2a5f-4989-97a2-8e6aa9a5cf09",
+        "thread_id": "4c97fa69-a706-4510-bb6e-71f381cfcb3b",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:6"
@@ -480,21 +481,21 @@
       }
     },
     {
-      "id": "01a0c40e-ece7-7c53-a9da-c281f861b48f",
-      "parent_id": "01a0c40e-ece5-7bb1-ba2d-956388616a7b",
+      "id": "01a0cc59-9b1a-7cf0-bcc0-ebbf05ff1427",
+      "parent_id": "01a0cc59-9b18-7930-b955-50a3f0b16a32",
       "name": "ChatOpenAI",
       "kind": "model",
-      "start_ns": 1789995707623535000,
-      "end_ns": 1789995710037029000,
+      "start_ns": 1790134819610729000,
+      "end_ns": 1790134821585474000,
       "status": "ok",
       "provider": "openai",
       "model": "gpt-5.6-luna",
       "effort": null,
       "usage": {
-        "input_tokens": 2187,
-        "output_tokens": 109,
+        "input_tokens": 2168,
+        "output_tokens": 99,
         "cache_read": 1996,
-        "cache_write": 188,
+        "cache_write": 169,
         "cache_write_5m": 0,
         "cache_write_1h": 0,
         "reasoning": 0
@@ -518,10 +519,10 @@
           "content": [
             {
               "type": "text",
-              "text": "The main steps in an agent workflow are:\n\n1. **Perceive** – Gather information from the user, environment, tools, or data sources.\n2. **Interpret** – Understand the goal, context, and constraints.\n3. **Plan** – Break the task into steps and decide which actions or tools are needed.\n4. **Act** – Execute those actions, such as calling APIs, searching data, or modifying files.\n5. **Observe results** – Check what happened and collect feedback from each action.\n6. **Reason and adjust** – Evaluate the results, revise the plan if necessary, and handle errors.\n7. **Complete and respond** – Produce the final outcome or answer, often after validating it.\n\nThis process may repeat in a loop until the goal is achieved or the agent determines that it cannot proceed.",
+              "text": "The main steps in an agent workflow are:\n\n1. **Receive the goal** – Understand the user’s request and desired outcome.\n2. **Plan** – Break the goal into smaller tasks and decide what actions or tools are needed.\n3. **Gather information** – Retrieve relevant data from sources, files, APIs, or the conversation.\n4. **Act** – Execute tasks, such as calling tools, editing files, or interacting with systems.\n5. **Observe results** – Inspect the outputs and determine whether they are correct or sufficient.\n6. **Iterate** – Revise the plan or take additional actions if needed.\n7. **Deliver the result** – Provide the final answer or completed work, usually with a concise summary.",
               "phase": "final_answer",
               "index": 0,
-              "id": "msg_0c93db884d4098e4006ab12ab9253087d283bf85f3a63572b5"
+              "id": "msg_03b97f5174cecfbc006ab34a21e11087d29c6ea1b48cc9d0c3"
             }
           ],
           "tool_calls": [],
@@ -540,10 +541,10 @@
           "content": [
             {
               "type": "text",
-              "text": "A tool observation gives the agent new information from an action it performed—for example, search results, an API response, or a file’s contents. The agent uses that information to:\n\n- Verify whether its action succeeded\n- Update its understanding of the situation\n- Detect errors or missing information\n- Decide what action to take next\n- Support a more accurate final answer\n\nIn short, the observation closes the loop between **acting** and **reasoning**, allowing the agent to adapt rather than rely only on its initial assumptions.",
+              "text": "A tool observation shows the agent what happened after it took an action. It provides new information—such as search results, file contents, API responses, or errors—that the agent uses to:\n\n- Check whether the action succeeded\n- Update its understanding of the situation\n- Decide what to do next\n- Correct mistakes or try an alternative approach\n- Produce a more accurate final answer\n\nIn short, observations create the feedback loop between **acting** and **reasoning**.",
               "phase": "final_answer",
               "index": 0,
-              "id": "msg_0c93db884d4098e4006ab12abcb5d487d2afbd8c4dee36a98e"
+              "id": "msg_03b97f5174cecfbc006ab34a24887887d2b1c1104637e4a840"
             }
           ],
           "tool_calls": [],
@@ -802,12 +803,13 @@
         "langgraph_node": "model",
         "langgraph_step": 6,
         "report_turn": 2,
-        "thread_id": "1d03c43b-2a5f-4989-97a2-8e6aa9a5cf09",
+        "thread_id": "4c97fa69-a706-4510-bb6e-71f381cfcb3b",
         "cache_ttl": "5m",
         "tags": [
           "seq:step:1"
         ],
         "description": "Generate the next assistant message or tool request from the current conversation.",
+        "input_message_bytes": 1283,
         "message_count": 4,
         "message_roles": [
           "system",
@@ -818,5 +820,5 @@
       }
     }
   ],
-  "output": "[{'type': 'text', 'text': 'A tool observation gives the agent new information from an action it performed—for example, search results, an API response, or a file’s contents. The agent uses that information to:\\n\\n- Verify whether its action succeeded\\n- Update its understanding of the situation\\n- Detect errors or missing information\\n- Decide what action to take next\\n- Support a more accurate final answer\\n\\nIn short, the observation closes the loop between **acting** and **reasoning**, allowing the agent to adapt rather than rely only on its initial assumptions.', 'phase': 'final_answer', 'index': 0, 'id': 'msg_0c93db884d4098e4006ab12abcb5d487d2afbd8c4dee36a98e'}]"
+  "output": "[{'type': 'text', 'text': 'A tool observation shows the agent what happened after it took an action. It provides new information—such as search results, file contents, API responses, or errors—that the agent uses to:\\n\\n- Check whether the action succeeded\\n- Update its understanding of the situation\\n- Decide what to do next\\n- Correct mistakes or try an alternative approach\\n- Produce a more accurate final answer\\n\\nIn short, observations create the feedback loop between **acting** and **reasoning**.', 'phase': 'final_answer', 'index': 0, 'id': 'msg_03b97f5174cecfbc006ab34a24887887d2b1c1104637e4a840'}]"
 }

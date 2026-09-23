@@ -14,7 +14,7 @@ From the repository root:
 
 ```bash
 uv sync
-uv run python -m agent_runtime --sample tool_chat
+uv run python -m agent_runtime --sample tool_chat --demo
 ```
 
 Each run writes raw spans, normalized data, the pricing snapshot, and HTML under
@@ -28,7 +28,7 @@ For a real model, copy `samples/tool_chat/.env.example` to
 uv run python -m agent_runtime --sample tool_chat --live
 ```
 
-Default runs use the simulator, so they do not call a model provider. FX reads the shared
+`--demo` runs use the simulator, so they do not call a model provider. FX reads the shared
 `exchange-rate.json` without a network lookup. Live mode incurs model
 charges and is not required to follow the scripted call sequence.
 
@@ -75,7 +75,7 @@ assumptions. The reporting library never infers real cache usage from history.
 
 ## Interactive client
 
-Add `--client console --live` to the launch command after configuring this sample's
+Replace `--demo` with `--client console --live` in the launch command after configuring this sample's
 `.env`. The shared console accepts prompts and `/attach PATH` text files, `/send`,
 and `/quit`. Both clients use the same workflow and retained conversation history.
 See [component and sequence diagrams](../../docs/chat-composition.md).

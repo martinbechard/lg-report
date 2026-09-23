@@ -124,6 +124,69 @@ def tree_rows(run: Run, prices: Prices) -> list[dict]:
     return rows
 
 
+def execution_tree_view(rows, scopes):
+    """Add a simplified HTML hierarchy without changing recorded spans or totals.
+
+    Keep graph steps, agents, provider calls, tools, and every abnormal outcome.
+    Adapters and internal model/tool nodes remain available in the full trace.
+    Successful workflow layers containing only one visible agent/model are
+    redundant in this view; this describes the recorded call structure, not
+    Python object lifetime or a singleton design pattern.
+    Hidden wrappers are bypassed when finding a visible parent so collapsing a
+    branch works consistently in either view. Excel continues to use tree_rows.
+    """
+    for row in rows:
+        step = row["step"]
+        node = step.context.get("langgraph_node")
+        row["detail_only"] = (
+            step.status == "ok"
+            and step.kind == "workflow"
+            and row["parent"] is not None
+            and step.id not in scopes
+            and (step.name != node or node in {"model", "tools"})
+        )
+    # Resolve visible children from the leaves upward. A workflow with its own
+    # preparation, tool, or pause step has more than a lone agent/model child
+    # and must remain visible. Never remove an agent's identity or an abnormal
+    # outcome merely because only one call happened beneath it.
+    children = {row["index"]: [] for row in rows}
+    for row in rows:
+        if row["parent"] is not None:
+            children[row["parent"]].append(row["index"])
+    visible_children = {}
+    for row in reversed(rows):
+        contained = []
+        for index in children[row["index"]]:
+            contained.extend(visible_children[index])
+        step = row["step"]
+        if (
+            not row["detail_only"]
+            and step.kind == "workflow"
+            and step.status == "ok"
+            and step.id not in scopes
+            and len(contained) == 1
+        ):
+            child = rows[contained[0]]["step"]
+            if child.id in scopes or child.kind == "model":
+                row["detail_only"] = True
+        visible_children[row["index"]] = (
+            contained if row["detail_only"] else [row["index"]]
+        )
+
+    for row in rows:
+        parent = row["parent"]
+        while parent is not None and rows[parent]["detail_only"]:
+            parent = rows[parent]["parent"]
+        row["summary_parent"] = parent
+        row["summary_depth"] = (
+            0 if parent is None else rows[parent]["summary_depth"] + 1
+        )
+        row["summary_children"] = False
+        if not row["detail_only"] and parent is not None:
+            rows[parent]["summary_children"] = True
+    return rows
+
+
 def agent_activity(run: Run, prices: Prices) -> dict:
     """Show which agents performed recorded work and assign each call one owner.
 
@@ -646,7 +709,7 @@ def render(run: Run, prices: Prices, destination: Path):
             run=run,
             prices=prices,
             summary=summarize(run, prices),
-            rows=tree_rows(run, prices),
+            rows=execution_tree_view(tree_rows(run, prices), agents["scopes"]),
             turns=turns,
             agents=agents,
             collaboration=collaboration_diagrams(run, agents, turns),

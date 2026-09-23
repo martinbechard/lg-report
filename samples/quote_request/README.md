@@ -34,8 +34,8 @@ request can finish without questions. There are no mandatory contact fields.
 An offline demonstration explicitly replays authored model decisions and answers:
 
 ```sh
-uv run python -m agent_runtime --sample quote_request --client static
-uv run python -m agent_runtime --sample quote_request --client static --scenario cancel
+uv run python -m agent_runtime --sample quote_request --demo
+uv run python -m agent_runtime --sample quote_request --demo --scenario cancel
 ```
 
 This simulation demonstrates interrupt/resume wiring, multiple issues, and

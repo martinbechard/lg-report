@@ -40,10 +40,10 @@ No avatar agent is implemented yet.
 
 ```bash
 uv sync
-uv run python -m agent_runtime --sample simple_chat
+uv run python -m agent_runtime --sample simple_chat --demo
 ```
 
-Default client: `static`. Default model: simulated. This executes a real graph
+`--demo` selects fixed prompts and a simulated model. With a provider key configured, omitting `--demo` starts live console chat. This executes a real graph
 with two predefined user turns and two prerecorded responses, without provider
 charges. Model-price refreshes may still access the network; use `--prices models.json`
 to avoid them. FX always reads the saved shared `exchange-rate.json`.
@@ -75,9 +75,8 @@ provider file API, and PDF/image/binary decoding is not supported. Attached text
 is sent to the configured provider in live mode and appears in local trace/report
 content unless `--metadata-only` is selected.
 
-Console requires `--live`: fixed offline answers would be misleading for arbitrary
-human questions. To run the same static test against a real provider, use `--live`
-with the default static client.
+Console requires live mode (selected automatically when a provider key is configured): fixed offline answers would be misleading for arbitrary
+human questions. To run the same static test against a real provider, replace `--demo` with `--live --client static`.
 
 ## Reports and checks
 

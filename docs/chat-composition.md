@@ -46,7 +46,7 @@ Prompt sequencing belongs to a client, with one cursor per conversation:
 - `ConsoleClient` reads human input and, when given a catalog, handles `/samples`,
   `/sample ID`, and `/new` between turns; interruption answers pass through unchanged.
   Structured approval/quote lessons use an authored initial request, then return
-  to the selection menu after completion. Ordinary console chat requires `--live`.
+  to the selection menu after completion. Ordinary console chat requires live mode, selected automatically when the configured provider has an API key. `--demo` selects scripted responses and fixed terminal prompts.
 
 `WebConversation` does not use the Python prompter or own a prompt cursor. It handles
 requests arriving over HTTP and retains the graph, checkpoint, and pending

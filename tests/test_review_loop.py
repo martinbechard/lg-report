@@ -60,6 +60,15 @@ def test_feedback_drives_real_second_round_and_report(tmp_path):
     assert FIRST_DRAFT in result["judge_history"][0].content
     assert REVISED_DRAFT in result["judge_history"][-2].content
     run = Run.model_validate_json((tmp_path / "run/run.json").read_text())
+    # The outer adapter and native agent graph both carry role ownership, so
+    # nested model calls remain attributable when reports group agent spans.
+    agent_span_counts = {
+        name: sum(step.name == name for step in run.steps)
+        for name in ("review_author", "evidence_judge")
+    }
+    # Each role runs twice; two spans per invocation distinguish the native
+    # graph from its outer RunnableLambda adapter.
+    assert agent_span_counts == {"review_author": 4, "evidence_judge": 4}
     calls = sorted(
         [step for step in run.steps if step.kind == "model"],
         key=lambda step: step.start_ns,

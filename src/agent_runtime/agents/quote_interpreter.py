@@ -92,6 +92,9 @@ def build_agent(parameters: dict):
     """
     decider = create_agent(
         **parameters,
+        # The inner graph owns the model calls in traces. Name it as well as
+        # the domain adapter below so reports identify this role, not LangGraph.
+        name="quote_interpreter",
         system_prompt=SYSTEM_PROMPT,
         response_format=ToolStrategy(QuoteDecision, handle_errors=False),
     )
