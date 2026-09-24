@@ -26,6 +26,32 @@ need the RAG download. See [RAG setup](data/rag/README.md).
 To avoid downloading old RAG blobs retained in Git history, use
 `git clone --depth 1 https://github.com/martinbechard/lg-report.git`.
 
+### Azure Foundry with GPT-4.1
+
+Set the following in `.env.local`. Use your Azure resource's key and the exact
+GPT-4.1 **deployment name** (which may differ from the model name):
+
+```dotenv
+LG_PROVIDER=openai
+LG_MODEL=YOUR-GPT-4.1-DEPLOYMENT-NAME
+OPENAI_API_KEY=YOUR-AZURE-RESOURCE-KEY
+OPENAI_BASE_URL=https://YOUR-RESOURCE.openai.azure.com/openai/v1/
+LG_MAX_TOKENS=2048
+LG_EFFORT=
+```
+
+Then launch the UI with that file:
+
+```sh
+uv run --extra chat python -m agent_runtime --sample simple_chat --client angular --live --env-file .env.local
+```
+
+The endpoint is read directly from the file; no shell export is needed. Shell
+variables still override matching file settings. Azure's OpenAI v1 endpoint uses
+no `api-version` parameter. Leave reasoning effort empty for GPT-4.1. This setup
+uses API-key authentication and the Responses API; use Azure-specific rates for
+accurate cost estimates. See [Azure's Responses API documentation](https://learn.microsoft.com/en-us/azure/foundry/openai/how-to/responses).
+
 ### Run all samples as a batch
 
 The batch runs all local samples and produces HTML reports, Excel workbooks,

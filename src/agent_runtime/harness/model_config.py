@@ -32,7 +32,7 @@ def configured_model(model_name: str | None = None, *, settings=None):
     reporting; obtaining this tuple does not generate an answer.
 
     An explicit ``model_name`` overrides LG_MODEL. Read ``LG_PROVIDER`` (``openai``/``anthropic``), ``LG_MODEL``, the matching API key, positive
-    LG_MAX_TOKENS, and optional LG_EFFORT from the sample settings overlaid by the process environment.
+    LG_MAX_TOKENS, optional LG_EFFORT, and optional OPENAI_BASE_URL from the sample settings overlaid by the process environment.
     No sample writes its .env into global process state. Model access and supported effort values remain the
     provider's responsibility. Missing keys or invalid local settings raise
     ValueError; adapter validation errors also propagate. No request is sent here.
@@ -81,6 +81,10 @@ def configured_model(model_name: str | None = None, *, settings=None):
             # instead of silently disabling reasoning to make the call pass.
             use_responses_api=True,
             api_key=values[key_name],
+            # Sample .env values stay out of global process state, so pass the
+            # endpoint explicitly as we do the key. This also supports Azure's
+            # OpenAI v1 endpoint. None retains the SDK's normal default/fallback.
+            base_url=values.get("OPENAI_BASE_URL") or None,
             max_tokens=max_tokens,
             timeout=60,
             max_retries=0,
