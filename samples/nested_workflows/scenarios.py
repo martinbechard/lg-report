@@ -10,6 +10,7 @@ AI attribution: Generated with AI assistance by Northstar.
 Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
 
+import json
 from copy import deepcopy
 
 from agent_runtime.workflows.nested_policy import Limits
@@ -24,14 +25,12 @@ TASK = {
     ],
     "constraints": ["Use only the Python standard library."],
 }
-USER_PROMPTS = [
-    (
-        "Implement normalize_tags(tags). Trim and lowercase tags, deduplicate while "
-        "preserving order, discard blank tags, and do not mutate the input. Use the "
-        "Python standard library only. OUTER_ONLY_DETAIL: an incidental planning "
-        "briefing marker, not part of the implementation assignment."
-    )
-]
+USER_REQUEST = (
+    "Implement normalize_tags(tags). Trim and lowercase tags, deduplicate while "
+    "preserving order, discard blank tags, and do not mutate the input. Use the "
+    "Python standard library only. OUTER_ONLY_DETAIL: an incidental planning "
+    "briefing marker, not part of the implementation assignment."
+)
 SOURCE_V1 = """def normalize_tags(tags):
     return [tag.strip().lower() for tag in tags]
 """
@@ -44,52 +43,55 @@ SOURCE_V3 = """def normalize_tags(tags):
 """
 
 
-def script(options=None):
-    """Return fresh queues for rework, either breaker path, or immediate success."""
+def conversation(options=None):
+    """Author steps in execution order for rework, a breaker, or immediate success."""
     options = options or {}
     scenario = options.get("scenario", "rework")
     limits = Limits(
         options.get("max_review_rounds", 3), options.get("max_coding_cycles", 3)
     )
-    queues = {
-        name: []
-        for name in ("planner", "coding_supervisor", "coder", "reviewer", "tester")
-    }
+    steps = [{"role": "client", "content": USER_REQUEST}]
+
+    def reply(role, decision):
+        """Place each role's structured decision at its actual place in the story."""
+        steps.append({"role": role, "content": json.dumps(decision)})
+
     current = 0
 
     def plan(action, note):
-        queues["planner"].append(
-            {"action": action, "task": deepcopy(TASK), "note": note}
-        )
+        reply("planner", {"action": action, "task": deepcopy(TASK), "note": note})
 
     def supervise(action, directive):
-        queues["coding_supervisor"].append(
+        reply(
+            "coding_supervisor",
             {
                 "action": action,
                 "directive": "CODING_ONLY_DETAIL: " + directive,
-            }
+            },
         )
 
     def develop(source):
         nonlocal current
         current += 1
-        queues["coder"].append(
+        reply(
+            "coder",
             {
                 "candidate_id": f"candidate-{current}",
                 "source": source,
                 "working_notes": "CODING_ONLY_DETAIL: private implementation discussion.",
-            }
+            },
         )
 
     def assess(role, verdict, findings, evidence):
-        queues[role].append(
+        reply(
+            role,
             {
                 "candidate_id": f"candidate-{current}",
                 "verdict": verdict,
                 "findings": findings,
                 "evidence": evidence,
                 "evidence_kind": "scripted",
-            }
+            },
         )
 
     def accepted_review():
@@ -185,4 +187,17 @@ def script(options=None):
         plan("finish", "The initial candidate passed both scripted gates.")
     else:
         raise ValueError(f"Unknown scenario: {scenario}")
-    return queues
+    return steps
+
+
+CONVERSATION = conversation()
+USER_PROMPTS = [entry["content"] for entry in CONVERSATION if entry["role"] == "client"]
+
+
+def script(options=None):
+    """Project chronological decisions into role queues for policy-level tests."""
+    steps = conversation(options)
+    return {
+        role: [json.loads(entry["content"]) for entry in steps if entry["role"] == role]
+        for role in ("planner", "coding_supervisor", "coder", "reviewer", "tester")
+    }

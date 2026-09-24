@@ -134,8 +134,10 @@ they are not provider-request timeouts or a full operational reliability policy.
 
 ## Run from the lg-report repository root
 
-`sample.json` registers the sample and both failure variants through the
-existing dynamic catalog.
+Each variant has its own metadata: [rework](sample.py),
+[review limit](../nested_workflows_review_limit/sample.py), and
+[test-fix limit](../nested_workflows_test_limit/sample.py). All share the
+`nested_workflows` implementation through the dynamic catalog.
 
 ```sh
 uv run python -m agent_runtime --sample nested_workflows --prices models.json --demo

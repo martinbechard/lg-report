@@ -53,7 +53,7 @@ are included, and reruns replace their previous generated output.
 
 ## Code path
 
-`sample.json` → `workflows/mcp_rag_chat.py` → `agents/wikipedia_mcp_agent.py`
+`sample.py` → `workflows/mcp_rag_chat.py` → `agents/wikipedia_mcp_agent.py`
 → `MCPAdapter` → stdio → `mcp_servers/wikipedia.py` → `tools/semantic_search_wikipedia.py`.
 
 The synchronous workflow bridge preserves the recorder's callbacks and passes the

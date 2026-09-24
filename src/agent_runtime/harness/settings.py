@@ -125,7 +125,7 @@ def prepare_sample(catalog, sample_id, args):
     settings_args = copy(args)
     settings_args.out = args.out or Path("reports") / sample_id
     settings = settings_for(
-        str(sample.directory / "sample.json"), sample.description, args=settings_args
+        str(sample.directory / "sample.py"), sample.description, args=settings_args
     )
     prompts = None
     if args.request is not None:

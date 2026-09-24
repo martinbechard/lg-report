@@ -1,9 +1,10 @@
 <!-- Copyright (c) 2026 Martin.Bechard@DevConsult.ca; third-party source excerpts retain their original rights. -->
 # Training applications
 
-Each directory describes a DeepAgents/LangGraph sample discovered by the shared
-`SampleCatalog`. Start with its README. `sample.json` declares the sample identity,
-workflow entry point, script module, and default options. `scripted_run.py` owns scenario prompts and model fixtures; Langfuse
+Each `sample.py` describes one DeepAgents/LangGraph sample discovered by the
+shared `SampleCatalog`. Start with its README. Metadata declares the identity,
+description, and default options. Workflow and script paths follow the sample ID;
+variants can name a shared implementation. `sample.py` owns scenario prompts and model fixtures; Langfuse
 variants reuse the corresponding local scenario. No agent knows the test prompts.
 See [composition diagrams](../docs/chat-composition.md).
 
@@ -77,44 +78,66 @@ The console accepts `/samples`, `/sample tool_chat`, and `/new`. Selection close
 the previous conversation before creating a new graph, model, and checkpoint.
 `/quit` exits. Approval/clarification answers are passed to the workflow unchanged.
 
-To register another lesson, add a folder with `sample.json`:
+To register another lesson, add a folder with `sample.py`:
 
-```json
-{
-  "samples": [{
-    "id": "my_lesson",
-    "name": "My lesson",
-    "description": "A longer explanation of what this lesson demonstrates.",
-    "workflow": "agent_runtime.workflows.my_lesson:build_workflow",
-    "scripted_run": "samples.my_lesson.scripted_run",
-    "options": {}
-  }]
+```python
+SAMPLE = {
+  "id": "my_lesson",
+  "name": "My lesson",
+  "description": "What this lesson demonstrates",
+  "options": {}
 }
 ```
 
-Provide that workflow and script module, then restart the launcher. Discovery
-reads JSON without importing workflows or creating models. IDs must be unique.
-One folder can declare multiple variants, as `claims_context` does. Optional
+Add the conversation and optional model factory to this module, provide the
+workflow, then restart the launcher. Discovery
+imports each trusted local `sample.py` and reads its `SAMPLE` dictionary. Imports
+may load dependencies, but must not construct models, execute tools, or call providers.
+IDs must be unique. Each variant has its own folder and `SAMPLE` declaration. The catalog derives
+`agent_runtime.workflows.<id>:build_workflow` and `samples.<id>.sample`.
+When code is shared, one `implementation` name replaces `<id>` in both paths;
+for example, `claims_context_naive` and `claims_context_managed` each declare
+`"implementation": "claims_context"`. Each variant reads its own `.env` beside
+its metadata. Do not store `workflow` or `definition_module` import strings. Optional
 `tracing: "langfuse"`, `interaction: "approval"` or `"clarification"`, and
 `mcp_tools` describe harness behavior. `default_client` defaults to `static`;
 file approval declares `console` so, without a key or an explicit mode, it still asks a human before editing. Live mode defaults to `console`; explicit `--demo` defaults to fixed prompts and scripted answers. An explicit `--client` overrides these defaults. No shared registration code changes.
 
 Workflows obtain models through `build_model`; agents may request their own with
-a named caller. A script can provide `CONVERSATION` entries (`client`, `ai`, named
-agents, and documented tool observations), as `subagent_chat` does. Existing
-specialized scripts expose `USER_PROMPTS` and `build_models(options)` so real tool
-results and context-accounting simulations retain their behavior. Python
-`ScriptPrompter` and browser `WebScriptPrompter` each own their prompt position;
-the catalog only supplies data. Neither prompter supplies model responses.
+a named caller. Every sample script provides a chronological `CONVERSATION`:
+
+- `client` starts a user turn. Several AI and tool steps may occur before the next client entry.
+- `ai` or a named agent supplies model text, tool calls, and optional response metadata.
+- `tool` documents an expected observation; the running tool supplies the actual result.
+- `human` resumes a clarification or approval pause within the current turn. It is not a new client request.
+- `middleware` documents an output produced by middleware rather than by a model.
+
+`client_prompts()` extracts user requests and `model_responses()` extracts one
+speaker's replies in order. `quote_request` also derives its interruption answers
+from the human entries. Model reasoning metadata is illustrative when scripted.
+
+Scripts can additionally expose `build_scripted_models(options)`. The catalog explicitly
+calls this optional callback in simulated mode to preserve specialized adapters,
+report metadata, or scenario variants. `options` merges sample defaults with run
+overrides. File and shell adapters resolve script templates against actual tool
+observations, while context-budget adapters preserve their compaction accounting.
+The nested-workflow scenario builder emits an ordered list for the selected retry
+story. Conditional steps and on-demand summaries are identified in their scripts;
+the workflow controls execution, not the list itself.
+
+Python `ScriptPrompter` and browser `WebScriptPrompter` each own their prompt
+position; the catalog only supplies data. Neither prompter supplies model responses.
 
 ## Read the code in this order
 
-1. **`sample.json`** declares the ID, short name, explanation, workflow, and script.
+1. **`sample.py`** declares `SAMPLE` metadata, `CONVERSATION`, and optional model factories.
+   A variant can declare a shared implementation; implementation-only modules omit `SAMPLE`.
    The shared `python -m agent_runtime` launcher selects clients and recording.
 2. **`src/agent_runtime/workflows/`** composes participants, including single-agent workflows.
 3. **`src/agent_runtime/agents/`** contains one named role per file, its instructions and graph/specification.
 4. **`src/agent_runtime/tools/`** contains callable evidence tools, independent of clients.
-5. **`scripted_run.py`** holds user prompts and scripted decisions; it never executes tools itself.
+5. Return to **`sample.py`** to follow user prompts and scripted decisions; factories
+   create fresh simulated models when called, while live runs use the configured provider.
 6. **`src/agent_runtime/harness/`** provides the common client loop and tracing lifecycle.
 7. **`src/reporting/`** captures, normalizes, prices, and exports local traces.
 

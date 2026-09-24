@@ -37,13 +37,13 @@ number of calls. Environment variables override the sample's `.env`.
 
 ## Read the code
 
-- `sample.json` declares the sample ID, display name, description, workflow, and
-  script module. The shared launcher selects clients and recording.
+- `sample.py` declares the sample ID, display name, and description. The ID
+  determines the workflow and script module paths. The shared launcher selects clients and recording.
 - `src/agent_runtime/workflows/subagent_chat.py` composes the participating agents.
 - `src/agent_runtime/agents/delegating_parent.py` owns the agent instructions and registration.
 - `src/agent_runtime/tools/echo_tool.py` owns the local echo tool.
 - `src/agent_runtime/agents/isolated_subagent.py` owns the child role and echo tool.
-- `scripted_run.py` describes one conversation in execution order. `client` entries
+- `sample.py` describes one conversation in execution order. `client` entries
   supply static prompts; `ai` entries supply the workflow-created model;
   `isolated-subagent` entries supply the model created by that agent.
   Tool entries document expected observations; actual tools still run.
@@ -104,11 +104,11 @@ history shared by every model call in the report.
 
 Each simulated agent has its own context meter and response cursor. Its first
 request has no cached history; its second reuses its own previous context. Counts
-are illustrative JSON words/punctuation, not provider tokenizer counts. Actual
-provider usage is retained in live mode. All four model calls contribute to the
+use the shared tiktoken `o200k_base` estimator over canonical JSON, not a provider's
+exact request envelope. Actual provider usage is retained in live mode. All four model calls contribute to the
 turn cost; `task` and the local echo have no additional model-token charge.
 
-Try changing `DELEGATED_TASK` and `SPECIALIST_SUMMARY` in `scripted_run.py`. Inspect
+Try changing `DELEGATED_TASK` and `SPECIALIST_SUMMARY` in `sample.py`. Inspect
 which agent's input grows and where the summary enters the parent's context.
 Keep the tool request's `subagent_type` aligned with the registered specialist.
 

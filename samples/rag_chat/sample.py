@@ -1,5 +1,8 @@
 """Supply an offline model fixture while still executing real Chroma retrieval.
 
+SAMPLE declares discovery metadata alongside this scenario. Model factories
+create fresh simulated models only when called; live mode uses the provider.
+
 The fixture preselects a citation and excerpt from the built index so it never
 pretends to generate an unscripted answer. Live mode replaces this model entirely.
 This tests retrieval plumbing and accounting, not live answer quality.
@@ -10,13 +13,47 @@ Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 
 # LangChain's AIMessage holds an assistant response; constructing it runs nothing.
 # Its tool_calls, when present, are proposed names/arguments, not tool results.
-from langchain_core.messages import AIMessage
-
 from agent_runtime.agents.wikipedia_rag_agent import WIKIPEDIA_INDEX_DIRECTORY
+from agent_runtime.harness.model_factory import client_prompts, model_responses
 from agent_runtime.harness.rag_index import open_index
 from agent_runtime.harness.simulated_model import MeteredDemoModel
 
-USER_PROMPTS = ["How has the Australian raven adapted to urban environments?"]
+# Discovery reads this metadata without constructing a model.
+SAMPLE = {
+    "id": "rag_chat",
+    "name": "Wikipedia RAG",
+    "description": "Search your prepared local Wikipedia index.",
+}
+
+# The excerpt placeholder is resolved from the local index when the simulated
+# model is constructed. Importing the script to list prompts performs no I/O.
+CONVERSATION = [
+    {
+        "role": "client",
+        "content": "How has the Australian raven adapted to urban environments?",
+    },
+    {
+        "role": "ai",
+        "content": "",
+        "tool_calls": [
+            {
+                "name": "semantic_search_wikipedia",
+                "args": {
+                    "query": "How has the Australian raven adapted to urban environments?"
+                },
+                "id": "wiki-search-1",
+            }
+        ],
+    },
+    {
+        "role": "tool",
+        "name": "semantic_search_wikipedia",
+        "tool_call_id": "wiki-search-1",
+        "content": "Expected: real retrieved passages and source IDs from the local Chroma index.",
+    },
+    {"role": "ai", "content": "Retrieved reference excerpt [{passage_id}]:\n{excerpt}"},
+]
+USER_PROMPTS = client_prompts(CONVERSATION)
 
 
 def make_simulated_model():
@@ -38,22 +75,12 @@ def make_simulated_model():
     # An empty index cannot provide the required excerpt and fails here.
     passage_id = result["ids"][0][0]
     excerpt = result["documents"][0][0][:600]
+    responses = model_responses(CONVERSATION)
+    responses[-1].content = responses[-1].content.format(
+        passage_id=passage_id, excerpt=excerpt
+    )
     return MeteredDemoModel(
-        responses=[
-            AIMessage(
-                content="",
-                tool_calls=[
-                    {
-                        "name": "semantic_search_wikipedia",
-                        "args": {"query": USER_PROMPTS[0]},
-                        "id": "wiki-search-1",
-                    }
-                ],
-            ),
-            AIMessage(
-                content=f"Retrieved reference excerpt [{passage_id}]:\n{excerpt}"
-            ),
-        ],
+        responses=responses,
         metadata={
             "report_description": "Retrieve bounded evidence and answer with passage citations.",
             "report_effort": "light",
@@ -61,7 +88,7 @@ def make_simulated_model():
     )
 
 
-def build_models(options):
+def build_scripted_models(options):
     """Give the model factory fresh caller-specific scripted adapters for one run.
 
     The catalog supplies workflow options, not model instances. Actual tools

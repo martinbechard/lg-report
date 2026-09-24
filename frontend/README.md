@@ -71,7 +71,7 @@ message semantics using fresh deterministic models. This verifies shared sample
 behavior; independent live model runs can still produce different wording.
 
 To add a compatible sample, declare its workflow and script in the folder's
-`sample.json`. The catalog discovers it on startup without a central registration
+`sample.py`. The catalog discovers it on startup without a central registration
 edit. The parity test covers all discovered samples.
 
 ## Attachments and local state

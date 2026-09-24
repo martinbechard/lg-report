@@ -65,7 +65,7 @@ uv run python -m agent_runtime --sample context_budget --live --client console -
 - [`planner`](../../src/agent_runtime/agents/planner.py) and [`worker`](../../src/agent_runtime/agents/worker.py): role instructions.
 - [`isolated reviewer`](../../src/agent_runtime/agents/isolated_reviewer.py): read-only review role.
 - [`workspace backend`](../../src/agent_runtime/workflows/exercise_backend.py): the three allowed virtual file paths.
-- [`scripted run`](scripted_run.py): reproducible model decisions and the substantial example plan.
+- [`scripted run`](sample.py): reproducible model decisions and the substantial example plan.
 - [`context budget`](../../src/agent_runtime/context_budget.py): reusable compaction policy and final input guard.
 
 Verify the workflow and report with:

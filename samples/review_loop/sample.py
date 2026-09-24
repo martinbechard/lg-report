@@ -1,5 +1,8 @@
 """Demonstrate concrete judge feedback improving a deliberately shallow draft.
 
+SAMPLE declares discovery metadata alongside this scenario. Model factories
+create fresh simulated models only when called; live mode uses the provider.
+
 The incident and measurements below are fictional supplied evidence, not claims
 about a real system. Fixed verdicts verify graph routing; live judge quality must
 be evaluated separately. Neither agent imports these questions or responses.
@@ -10,28 +13,25 @@ Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 
 import json
 
-# LangChain's AIMessage holds an assistant response; constructing it runs nothing.
-# Its tool_calls, when present, are proposed names/arguments, not tool results.
-from langchain_core.messages import AIMessage
-
 from agent_runtime.agents.evidence_judge import SYSTEM_PROMPT as JUDGE_INSTRUCTIONS
 from agent_runtime.agents.review_author import SYSTEM_PROMPT as AUTHOR_INSTRUCTIONS
+
+# LangChain's AIMessage holds an assistant response; constructing it runs nothing.
+# Its tool_calls, when present, are proposed names/arguments, not tool results.
+from agent_runtime.harness.model_factory import client_prompts, model_responses
 from agent_runtime.harness.shared_simulated_model import SharedSimulatedModel
+
+# Discovery reads this metadata without constructing a model.
+SAMPLE = {
+    "id": "review_loop",
+    "name": "Review loop",
+    "description": "An author revises a draft using a judge's feedback.",
+    "options": {"max_rounds": 3, "first_draft_high_level": True},
+}
 
 # Evidence is supplied by the client as part of the request. E1-E4 give the judge
 # a concrete basis for checking claims without needing a retrieval service. The
 # request explicitly asks for operational detail, so a generic overview falls short.
-USER_PROMPTS = [
-    (
-        "Recommend a concrete latency fix, explaining evidence, rollout, verification, "
-        "freshness risk, and rollback. Use these fictional incident notes: [E1] p95 "
-        "latency is 1.8 seconds at 240 requests/second; repeated account lookups are "
-        "observed. [E2] The database pool has 12 connections; no more database nodes "
-        "are allowed. [E3] Account data may be cached for at most 60 seconds; changes "
-        "must invalidate it. [E4] Target p95 is under 500 ms. There are no benchmark "
-        "results yet. Distinguish a proposed improvement from measured success."
-    )
-]
 # Deliberately incomplete, not deliberately false: this demonstrates that a
 # reasonable-sounding answer can still fail the user's requested level of detail.
 FIRST_DRAFT = (
@@ -80,37 +80,27 @@ FINAL_REVIEW = {
 }
 
 
-# The fixture intentionally serializes judge output as JSON because the real
-# workflow must parse and validate model text. This catches schema/routing
-# regressions while keeping semantic quality claims outside the offline test.
+# Both roles read their replies from this one chronological exchange. The judge
+# emits JSON so the real workflow still parses and validates every verdict.
+CONVERSATION = [
+    {
+        "role": "client",
+        "content": "Recommend a concrete latency fix, explaining evidence, rollout, verification, freshness risk, and rollback. Use these fictional incident notes: [E1] p95 latency is 1.8 seconds at 240 requests/second; repeated account lookups are observed. [E2] The database pool has 12 connections; no more database nodes are allowed. [E3] Account data may be cached for at most 60 seconds; changes must invalidate it. [E4] Target p95 is under 500 ms. There are no benchmark results yet. Distinguish a proposed improvement from measured success.",
+    },
+    {"role": "author", "content": FIRST_DRAFT},
+    {"role": "judge", "content": json.dumps(FIRST_REVIEW)},
+    {"role": "author", "content": REVISED_DRAFT},
+    {"role": "judge", "content": json.dumps(FINAL_REVIEW)},
+]
+USER_PROMPTS = client_prompts(CONVERSATION)
+
+
 def make_simulated_model():
-    """Demonstrate a draft improving after feedback in a repeatable review session.
-
-    Return a fresh shared simulator for the complete two-round scenario.
-
-    The simulator recognizes each tool-free role by its actual system instruction.
-    The author consumes its two answers in order, and the judge consumes its two
-    verdicts. Their histories/token counters stay separate despite one LLM object.
-    This exercises real StateGraph transitions but does not evaluate whether a
-    provider would generate this feedback or approve this revision on its own.
-
-    To test continued rejection, add author/review responses and change the last
-    verdict to revise. To test immediate approval, supply one answer and approval.
-    The simulator raises on exhausted scripts rather than recycling old answers.
-    """
-    # AIMessage is the same result shape used by provider adapters. JSON encoding
-    # ensures the judge goes through the real parse/validation boundary rather
-    # than passing a trusted Python Review object directly into workflow state.
+    """Extract each role's replies while retaining separate shared-model ledgers."""
     return SharedSimulatedModel(
         scripts={
-            AUTHOR_INSTRUCTIONS: [
-                AIMessage(content=FIRST_DRAFT),
-                AIMessage(content=REVISED_DRAFT),
-            ],
-            JUDGE_INSTRUCTIONS: [
-                AIMessage(content=json.dumps(FIRST_REVIEW)),
-                AIMessage(content=json.dumps(FINAL_REVIEW)),
-            ],
+            AUTHOR_INSTRUCTIONS: model_responses(CONVERSATION, "author"),
+            JUDGE_INSTRUCTIONS: model_responses(CONVERSATION, "judge"),
         },
         metadata={
             "report_effort": "light",
@@ -119,10 +109,6 @@ def make_simulated_model():
     )
 
 
-def build_models(options):
-    """Give the model factory fresh caller-specific scripted adapters for one run.
-
-    The catalog supplies workflow options, not model instances. Actual tools
-    still execute in the graph; these adapters author decisions and meter usage.
-    """
+def build_scripted_models(options):
+    """Retain role routing in simulated mode; this fixed story ignores options."""
     return {"workflow": make_simulated_model()}

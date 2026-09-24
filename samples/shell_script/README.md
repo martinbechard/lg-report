@@ -35,7 +35,7 @@ folder. [Saved HTML](../../reports/shell_script/report.html) and
 
 ## Ownership and execution
 
-1. `sample.json` registers the lesson. The shared launcher selects a client;
+1. `sample.py` registers the lesson. The shared launcher selects a client;
    the workflow prepares its workspace and obtains its model from `build_model`.
 2. `workflows/shell_script.py` selects the shell agent.
 3. `agents/shell_agent.py` creates a DeepAgent with `ShellBackend`.

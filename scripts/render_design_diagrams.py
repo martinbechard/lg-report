@@ -475,7 +475,7 @@ def architecture(index):
         280,
         65,
         "SampleCatalog",
-        "sample.json · model factory scope",
+        "sample.py · model factory scope",
         "shared_code",
     )
     d.arrow("M340 227 H320", dotted=True)

@@ -11,7 +11,7 @@ specialist uses a local echo tool, and the parent answers from its summary.
 The graph is shared intentionally. Comparing tracing systems should not introduce
 a second version of the workflow or simulated token calculations. This directory
 owns its catalog metadata and configuration; `agent_runtime.workflows.subagent_chat` composes the shared agents, and
-`subagent_chat/scripted_run.py` owns the conversation history from which the factory
+`subagent_chat/sample.py` owns the conversation history from which the factory
 extracts each caller's responses and static client prompts.
 
 ## Run
@@ -43,7 +43,7 @@ execution; the workflow is not run twice.
 
 ## Tracing boundary
 
-`sample.json` declares the shared delegation workflow and Langfuse tracing.
+`sample.py` declares the shared delegation workflow and Langfuse tracing.
 `execute_conversation` owns the same graph, execution, local-report, and cleanup sequence
 for every console sample. `LangfuseCapture` handles configuration, project
 authentication, the official callback, and shutdown; `conversation_trace` adds

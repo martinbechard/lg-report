@@ -18,7 +18,7 @@ that controls **which context is carried into the next turn**. The same agent
 works under either strategy; it receives no `naive` or `managed` setting.
 
 ```text
-sample.json: model configuration, human/static client, reporting
+Variant sample.py: model configuration, human/static client, reporting
    |
    v
 build_workflow(): compose a ClaimsAgent with a conversation harness
@@ -121,10 +121,11 @@ Output directories are reused. Omit `--out` to replace the report bundle and
 ## Compare actual agent decisions
 
 ```bash
-cp samples/claims_context/.env.example samples/claims_context/.env
-# Configure provider credentials and model in that file.
+cp samples/claims_context/.env.example samples/claims_context_naive/.env
+cp samples/claims_context/.env.example samples/claims_context_managed/.env
+# Configure provider credentials and model in each variant file.
 uv run python -m agent_runtime --sample claims_context_naive --live --mode naive --show-context --out reports/claims-live-naive
-uv run python -m agent_runtime --sample claims_context_naive --live --mode managed --show-context --out reports/claims-live-managed
+uv run python -m agent_runtime --sample claims_context_managed --live --mode managed --show-context --out reports/claims-live-managed
 ```
 
 These runs share user questions, tools, and agent instructions. The real model
@@ -182,8 +183,8 @@ Files and responsibilities follow the project's agent/workflow separation:
 - `src/agent_runtime/workflows/claims_context.py`: participant composition and the
   harness controlling turns, naive/managed strategy, and independent audit.
   It never reads records or inspects tool names to decide what the agent does.
-- `scripted_run.py`: scripted user prompts and model responses.
-- `sample.json`: both context-policy variants and their workflow options.
+- `sample.py`: scripted user prompts and model responses.
+- [Naive metadata](../claims_context_naive/sample.py) and [managed metadata](../claims_context_managed/sample.py): one context-policy variant per file, each sharing the `claims_context` implementation.
 
 Tests verify on-demand reads, policy retention, no forced reload, multiple edits,
 failed edits, tool-pair integrity, and unchanged audit evidence.

@@ -34,11 +34,11 @@ charges and is not required to follow the scripted call sequence.
 
 ## Code and execution flow
 
-- `sample.json` declares the workflow and script; the shared launcher selects client and recorder.
+- `sample.py` declares the sample ID, which determines workflow and script paths; the shared launcher selects client and recorder.
 - `src/agent_runtime/workflows/tool_chat.py` composes the participating agents.
 - `src/agent_runtime/agents/reference_chat_agent.py` owns the agent instructions and registration.
 - `src/agent_runtime/tools/echo_tool.py` owns the local echo tool.
-- `scripted_run.py` scripts four model responses. It does **not** fake tool
+- `sample.py` scripts four model responses. It does **not** fake tool
   execution: LangGraph dispatches the registered Python function.
 - Shared reporting wraps the application; no report-generation code is inside
   the tool or graph definition.

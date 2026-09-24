@@ -11,7 +11,7 @@ from langchain_core.messages import HumanMessage, ToolMessage
 
 from agent_runtime.harness import model_factory
 from agent_runtime.harness.console_client import ConsoleClient
-from samples.subagent_chat.scripted_run import CONVERSATION, FINAL_ANSWER, USER_PROMPTS
+from samples.subagent_chat.sample import CONVERSATION, FINAL_ANSWER, USER_PROMPTS
 
 
 def test_conversation_routing_and_fresh_models():
@@ -97,9 +97,15 @@ def test_subagent_live_build_does_not_load_script(monkeypatch):
     original_import = sample_catalog.import_module
 
     def import_workflow_only(name):
-        """Allow workflow discovery, but reject any scripted content in live mode."""
-        assert not name.endswith(".scripted_run")
-        return original_import(name)
+        """Metadata imports are allowed; live execution must bypass fixture factories."""
+        module = original_import(name)
+        if name.endswith(".sample") and hasattr(module, "build_scripted_models"):
+            monkeypatch.setattr(
+                module,
+                "build_scripted_models",
+                lambda options: pytest.fail("Live mode called a simulated factory"),
+            )
+        return module
 
     monkeypatch.setattr(sample_catalog, "import_module", import_workflow_only)
     graph, provider, model_id = SampleCatalog().create_run("subagent_chat", True)
@@ -123,3 +129,57 @@ def test_subagent_static_client_comes_from_conversation():
     configure_sample_script(second, catalog, "subagent_chat_langfuse")
     assert [first.receive().prompt] == USER_PROMPTS
     assert [second.receive().prompt] == USER_PROMPTS
+
+
+def test_chronological_extraction_preserves_metadata_and_isolates_runs():
+    """Keep reasoning evidence and tool IDs while excluding interruption answers."""
+    conversation = [
+        {"role": "client", "content": "Begin"},
+        {
+            "role": "ai",
+            "content": "Check",
+            "tool_calls": [
+                {"name": "inspect", "args": {"section": "first"}, "id": "inspect-1"}
+            ],
+            "response_metadata": {"simulated_reasoning_tokens": 12000},
+        },
+        {"role": "tool", "content": "Expected observation"},
+        {"role": "human", "interaction": "clarification", "content": "Continue"},
+        {"role": "ai", "content": "Done"},
+        {"role": "client", "content": "Next request"},
+    ]
+    first = model_factory.model_responses(conversation)
+    second = model_factory.model_responses(conversation)
+    assert [message.content for message in first] == ["Check", "Done"]
+    assert model_factory.client_prompts(conversation) == ["Begin", "Next request"]
+    assert first[0].response_metadata["simulated_reasoning_tokens"] == 12000
+    first[0].tool_calls[0]["args"]["section"] = "changed"
+    first[0].response_metadata["simulated_reasoning_tokens"] = 0
+    assert second[0].tool_calls[0]["args"]["section"] == "first"
+    assert conversation[1]["response_metadata"]["simulated_reasoning_tokens"] == 12000
+
+
+def test_catalog_keeps_specialized_adapter_with_conversation(monkeypatch):
+    """Chronological data must not replace unmetered quote decisions with estimates."""
+    from agent_runtime.harness.sample_catalog import SampleCatalog
+    from agent_runtime.harness.simulated_model import (
+        MeteredDemoModel,
+        ScriptedChatModel,
+    )
+
+    catalog = SampleCatalog()
+    script = catalog.script("quote_request")
+    original = script.build_scripted_models
+    constructed = []
+
+    def record_models(options):
+        """Observe the actual adapter selected during catalog graph construction."""
+        models = original(options)
+        constructed.append(models["workflow"])
+        return models
+
+    monkeypatch.setattr(script, "build_scripted_models", record_models)
+    catalog.create_run("quote_request", False, tracing=False)
+    assert len(constructed) == 1
+    assert isinstance(constructed[0], ScriptedChatModel)
+    assert not isinstance(constructed[0], MeteredDemoModel)

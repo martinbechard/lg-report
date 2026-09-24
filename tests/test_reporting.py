@@ -30,7 +30,7 @@ from reporting.normalize import normalize
 from reporting.pricing import cost, load_prices, summarize
 from reporting.render import render
 from reporting.schema import Run, Step, Usage
-from samples.simple_chat.scripted_run import make_simulated_model as make_chat_model
+from samples.simple_chat.sample import make_simulated_model as make_chat_model
 
 
 @pytest.fixture

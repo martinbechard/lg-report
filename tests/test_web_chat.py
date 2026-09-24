@@ -134,7 +134,7 @@ def test_console_and_sse_sample_parity(
     if sample == "file_approval":
         answers = ["approve", "approve"]
     elif sample == "quote_request":
-        from samples.quote_request.scripted_run import ANSWERS
+        from samples.quote_request.sample import ANSWERS
 
         answers = list(ANSWERS)
     prompts = sample_info(sample)["prompts"]

@@ -21,7 +21,7 @@ from reporting.pricing import cost, load_prices, summarize
 from reporting.schema import Run
 
 create_run = partial(SampleCatalog().create_run, "expert_dispatch")
-from samples.expert_dispatch.scripted_run import CASES
+from samples.expert_dispatch.sample import CASES
 
 
 # Exercise every scripted routing case and prove selected experts
@@ -81,7 +81,7 @@ def test_expert_selection_isolation_and_costs(tmp_path):
 def test_shared_model_retains_separate_tool_bindings(monkeypatch):
     from agent_runtime.harness.shared_simulated_model import SharedSimulatedModel
     from agent_runtime.workflows.expert_dispatch import build_workflow
-    from samples.expert_dispatch.scripted_run import make_simulated_model
+    from samples.expert_dispatch.sample import make_simulated_model
 
     bound_schemas = []
     original = SharedSimulatedModel.bind_tools
@@ -119,7 +119,7 @@ def test_shared_model_retains_separate_tool_bindings(monkeypatch):
 # identity through unchanged rather than configuring a second hidden instance.
 def test_live_configures_one_model(monkeypatch):
     from agent_runtime.harness import model_factory
-    from samples.expert_dispatch.scripted_run import make_simulated_model
+    from samples.expert_dispatch.sample import make_simulated_model
 
     model_instance = make_simulated_model()
     configured_calls = []

@@ -26,7 +26,7 @@ from langchain_core.messages import HumanMessage
 
 from agent_runtime.workflows.nested_workflows import build_workflow
 from samples.nested_workflows.scenarios import USER_PROMPTS
-from samples.nested_workflows.scripted_run import build_models
+from samples.nested_workflows.sample import build_scripted_models
 
 
 @pytest.mark.parametrize(
@@ -130,7 +130,7 @@ def test_catalog_cli_report_preserves_context_scopes(tmp_path, sample, outcome):
 
 def build(scenario="rework", **options):
     settings = {"scenario": scenario, **options}
-    models = build_models(settings)
+    models = build_scripted_models(settings)
     graph = build_workflow(
         planner_model=models["planner"],
         supervisor_model=models["coding_supervisor"],

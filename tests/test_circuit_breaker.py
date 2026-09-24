@@ -16,16 +16,19 @@ import pytest
 from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 
 from agent_runtime.agents import planner
+from agent_runtime.harness.model_factory import build_model, model_factory_scope
 from agent_runtime.harness.simulated_model import MeteredDemoModel
 from agent_runtime.workflows.circuit_breaker import build_workflow
-from samples.circuit_breaker.scripted_run import USER_PROMPTS, build_models
 from agent_runtime.workflows.exercise_backend import ExerciseBackend
+from samples.circuit_breaker.sample import CONVERSATION, USER_PROMPTS
 
 
 @pytest.mark.parametrize("asynchronous", [False, True])
 def test_breaker_blocks_fourth_write_and_ends(tmp_path, asynchronous):
     """The final message must come from middleware, not a scripted answer."""
-    model = build_models({})["worker"]
+    # Exercise the same conversation extraction used by the sample catalog.
+    with model_factory_scope(live=False, conversation=CONVERSATION):
+        model = build_model(caller="worker")
     graph = build_workflow(model=model, workspace_dir=tmp_path)
     state = {"messages": [HumanMessage(USER_PROMPTS[0])]}
     result = asyncio.run(graph.ainvoke(state)) if asynchronous else graph.invoke(state)

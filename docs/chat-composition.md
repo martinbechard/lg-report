@@ -6,9 +6,13 @@ responsibilities, interaction sequences, and diagrams for all sample application
 
 ## Sample discovery and input sources
 
-`python -m agent_runtime --list` discovers `samples/*/sample.json`. Each entry
-provides an ID, short name, explanation, workflow entry point, script module,
-and optional workflow settings or tracing mode. There is no central sample list
+`python -m agent_runtime --list` discovers `samples/*/sample.py`. Each file
+declares a `SAMPLE` dictionary with an ID, short name, explanation, and optional
+workflow settings or tracing mode. These are trusted Python modules: discovery
+imports them without calling model factories. Shared implementation-only modules
+omit `SAMPLE` and do not appear as separate selections. The catalog derives workflow and script paths from the
+ID; a variant can specify one `implementation` name when it shares code. Each
+variant has its own metadata file and configuration directory. There is no central sample list
 and no per-sample Python launcher. Restart the CLI/server after adding metadata.
 
 Within the harness, `argument_parser.py` defines and validates launch options,
@@ -32,7 +36,7 @@ handlers use it to list samples and construct fresh workflows. The catalog
 establishes a model factory scope; workflows call `build_model(caller="workflow")`
 and an agent that constructs its own model supplies its agent name. Live mode
 reads provider settings; scripted mode resolves only that caller's responses.
-Specialized scripts can implement `build_models(options)` for tool-dependent
+Specialized scripts can implement `build_scripted_models(options)` for tool-dependent
 answers or context-accounting fixtures. Scripts stay outside workflow/agent code.
 
 Prompt sequencing belongs to a client, with one cursor per conversation:

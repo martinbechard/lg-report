@@ -23,7 +23,7 @@ from agent_runtime.workflows.review_loop import build_workflow
 from reporting.execute_runnable import execute_runnable
 from reporting.pricing import cost, load_prices, summarize
 from reporting.schema import Run
-from samples.review_loop.scripted_run import (
+from samples.review_loop.sample import (
     FINAL_REVIEW,
     FIRST_DRAFT,
     FIRST_REVIEW,

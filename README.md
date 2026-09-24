@@ -147,7 +147,7 @@ src/
     web/         # HTTP endpoints; catalog lives in harness/
   reporting/     # Normalized data, prices, HTML, Excel and reporting CLI
 samples/
-  simple_chat/   # sample.json metadata, scripted_run.py fixtures, README and configuration
+  simple_chat/   # sample.py metadata and fixtures, README and configuration
 ```
 
 Runtime imports use `agent_runtime`; report imports use `reporting`. The installed
@@ -267,7 +267,7 @@ traces to Langfuse and print a trace URL; they create the same local bundle.
 | `models.json` | Shared pricing catalog used when starting runs; not a run result |
 | `exchange-rate.json` | Saved USD/EUR reference; refreshed once by the live batch |
 | `samples/<sample>/.env` | Provider configuration for that sample |
-| `samples/<sample>/scripted_run.py` | Authored prompts and scripted model fixtures |
+| `samples/<sample>/sample.py` | Discovery metadata, authored prompts, and scripted model factories |
 | `.cache/lg-report/prices/` and `.cache/lg-report/fx/` | Downloaded, reusable reference data; created dynamically, not execution reports |
 | `data/rag/` and `.cache/lg-report/rag/` | Optional downloaded corpus/index archives and the restored retrieval index |
 

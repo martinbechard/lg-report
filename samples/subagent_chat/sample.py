@@ -1,5 +1,8 @@
 """Describe the example conversation in execution order, including the child exchange.
 
+SAMPLE declares discovery metadata alongside this scenario. Model factories
+create fresh simulated models only when called; live mode uses the provider.
+
 The factory extracts assistant messages by speaker; the static client extracts
 client messages. Tool entries document expected observations only: the graph
 still executes the real tools and supplies their actual results.
@@ -8,6 +11,13 @@ Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
 
 from agent_runtime.harness.model_factory import client_prompts
+
+# Discovery reads this metadata without constructing a model.
+SAMPLE = {
+    "id": "subagent_chat",
+    "name": "Subagent chat",
+    "description": "A parent agent delegates to a specialist.",
+}
 
 # The assignment must stand alone because the specialist starts without the
 # parent's conversation. Only the final summary crosses back to the parent.

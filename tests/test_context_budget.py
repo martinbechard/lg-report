@@ -27,7 +27,7 @@ from agent_runtime.context_budget import (
 from agent_runtime.harness.simulated_model import ScriptedChatModel
 from agent_runtime.tools.echo_tool import echo_tool
 from agent_runtime.workflows.context_budget import build_workflow
-from samples.context_budget.scripted_run import (
+from samples.context_budget.sample import (
     FINAL_ANSWER,
     PEER_BRIEF,
     PLAN,

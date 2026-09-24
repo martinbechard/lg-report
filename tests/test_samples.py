@@ -321,13 +321,12 @@ def test_batch_includes_all_local_samples():
 
     root = Path(__file__).resolve().parents[1]
     runner = runpy.run_path(str(root / "scripts/run_samples.py"))
-    import json
 
     local = {
         entry["id"]
-        for path in (root / "samples").glob("*/sample.json")
-        for entry in json.loads(path.read_text())["samples"]
-        if entry.get("tracing", "local") == "local"
+        for path in (root / "samples").glob("*/sample.py")
+        for entry in [runpy.run_path(str(path)).get("SAMPLE", {})]
+        if entry and entry.get("tracing", "local") == "local"
     }
     assert set(runner["SAMPLES"]) == local
 
@@ -527,7 +526,7 @@ def test_sample_settings_never_fetch_exchange_rate(tmp_path, monkeypatch, availa
     from agent_runtime.harness.settings import settings_for
 
     root = Path(__file__).resolve().parents[1]
-    app = tmp_path / "samples/simple_chat/sample.json"
+    app = tmp_path / "samples/simple_chat/sample.py"
     rate = tmp_path / "exchange-rate.json"
     if available:
         rate.write_text('{"rate":"0.88","date":"2000-01-01"}')

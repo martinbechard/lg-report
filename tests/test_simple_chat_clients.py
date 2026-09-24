@@ -16,7 +16,7 @@ from langchain_core.messages import AIMessage
 from agent_runtime.agents.chat_agent import build_agent
 from agent_runtime.harness.console_client import ConsoleClient
 from agent_runtime.harness.conversation import Attachment, Conversation, Request
-from samples.simple_chat.scripted_run import make_simulated_model
+from samples.simple_chat.sample import make_simulated_model
 
 
 @pytest.mark.parametrize("exit_kind", ["quit", "eof", "sigint"])

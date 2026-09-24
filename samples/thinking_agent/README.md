@@ -36,11 +36,11 @@ tested against a paid provider merely by running the offline fixture tests.
 
 ## Code and execution flow
 
-- `sample.json` declares the workflow and script; the shared launcher selects client and recorder.
+- `sample.py` declares the sample ID, which determines workflow and script paths; the shared launcher selects client and recorder.
 - `src/agent_runtime/workflows/thinking_agent.py` composes the participating agents.
 - `src/agent_runtime/agents/investigation_agent.py` owns the agent instructions and registration.
 - `src/agent_runtime/tools/service_evidence.py` owns the callable evidence tools.
-- `scripted_run.py` owns the seven scripted LLM responses. It specifies the
+- `sample.py` owns the seven scripted LLM responses. It specifies the
   teaching reasoning counts and illustrative thinking text.
 
 The deterministic sequence is:
@@ -72,7 +72,7 @@ is not appended to visible history or marked as cached response text. Real
 providers may return reasoning text, summaries, redactions, or only token usage;
 the sample must not invent text for a live response.
 
-Try changing the reasoning count in `scripted_run.py` while leaving the visible
+Try changing the reasoning count in `sample.py` while leaving the visible
 response unchanged. Its output cost should change, but the subsequent visible
 context should not grow by that hidden reasoning count. Then change a tool
 result and observe fresh-input/context growth instead.

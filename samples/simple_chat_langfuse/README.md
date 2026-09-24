@@ -25,7 +25,7 @@ Live model mode additionally needs the selected provider key and model settings.
 uv run python -m agent_runtime --sample simple_chat_langfuse --demo
 ```
 
-This reuses `samples/simple_chat/scripted_run.py`: two user prompts and scripted
+This reuses `samples/simple_chat/sample.py`: two user prompts and scripted
 assistant responses. It makes no LLM provider call, but sends real traces to the
 configured Langfuse endpoint. Replace `--demo` with `--live --client static` to use the same requests with a real model.
 
@@ -50,7 +50,7 @@ content from the local bundle. Excel remains a separate export.
 
 ## Execution and trace structure
 
-1. `sample.json` declares the shared simple-chat workflow and Langfuse tracing.
+1. `sample.py` declares the shared simple-chat workflow and Langfuse tracing.
    The shared launcher selects the client; the workflow requests its model from the factory.
 2. `execute_conversation` creates `LangfuseCapture`, which validates project access
    before graph construction. The console application supplies the client.

@@ -88,14 +88,7 @@ def build_model(model_name: str | None = None, *, caller: str) -> BaseChatModel:
     if resolver is not None:
         return resolver(caller)
     speaker = "ai" if caller == "workflow" else caller
-    responses = [
-        AIMessage(
-            content=entry["content"],
-            tool_calls=entry.get("tool_calls", []),
-        ).model_copy(deep=True)
-        for entry in conversation
-        if entry["role"] == speaker
-    ]
+    responses = model_responses(conversation, speaker)
     if not responses:
         raise ValueError(
             f"No simulated responses for caller {caller!r} (speaker {speaker!r})"
@@ -110,3 +103,25 @@ def client_prompts(conversation: Sequence[Mapping[str, Any]]) -> list[str]:
     entries become input; named agents and generic ai entries remain responses.
     """
     return [entry["content"] for entry in conversation if entry["role"] == "client"]
+
+
+def model_responses(
+    conversation: Sequence[Mapping[str, Any]], speaker: str = "ai"
+) -> list[AIMessage]:
+    """Extract one speaker's replies in order, preserving authored usage metadata.
+
+    A chronological script may contain many AI/tool steps between user messages.
+    Only this speaker's entries become model replies; tool observations and human
+    interruption answers remain outside the model queue. Copies isolate mutable
+    messages between runs. Metadata includes illustrative reasoning counts and
+    thinking labels used by teaching reports, not evidence of provider billing.
+    """
+    return [
+        AIMessage(
+            content=entry["content"],
+            tool_calls=entry.get("tool_calls", []),
+            response_metadata=entry.get("response_metadata", {}),
+        ).model_copy(deep=True)
+        for entry in conversation
+        if entry["role"] == speaker
+    ]

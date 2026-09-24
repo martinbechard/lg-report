@@ -1,17 +1,17 @@
 """Discover teaching samples and construct their workflows for any client.
 
-Each sample folder owns sample.json: identity, descriptions, workflow entry point,
-script module, and default options. Discovery reads only JSON; it never imports
-workflows, opens databases, or constructs models. CLI and HTTP use this same
-catalog, while each conversation owns its models, prompts, and resources.
+Each sample.py declares SAMPLE metadata beside conversation data and optional
+model factories. Discovery imports these trusted local modules but does not call
+the factories. Workflow paths follow the ID or shared implementation name.
+CLI and HTTP use this same catalog, while each conversation owns its models, prompts, and resources.
 AI attribution: Generated with AI assistance by Northstar.
 Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
 
-import json
 import re
 from dataclasses import dataclass, field
 from importlib import import_module
+from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
 
 from dotenv import dotenv_values
@@ -28,14 +28,23 @@ class Sample:
     id: str
     name: str
     description: str
-    workflow: str
-    scripted_run: str
+    implementation: str
     directory: Path
     options: dict = field(default_factory=dict)
     tracing: str = "local"
     mcp_tools: tuple[str, ...] = ()
     interaction: str | None = None
     default_client: str = "static"
+
+    @property
+    def workflow(self) -> str:
+        """Locate the conventional workflow builder without storing a module path."""
+        return f"agent_runtime.workflows.{self.implementation}:build_workflow"
+
+    @property
+    def definition_module(self) -> str:
+        """Locate scenario data alongside the implementation's teaching sample."""
+        return f"samples.{self.implementation}.sample"
 
 
 class SampleCatalog:
@@ -50,79 +59,81 @@ class SampleCatalog:
     def __init__(self, root: Path | None = None):
         self.root = Path(root) if root is not None else Path(samples.__file__).parent
         self.samples: dict[str, Sample] = {}
-        for path in sorted(self.root.glob("*/sample.json")):
+        for path in sorted(self.root.glob("*/sample.py")):
             try:
-                data = json.loads(path.read_text(encoding="utf-8"))
-                entries = data["samples"]
-                if not isinstance(entries, list) or not entries:
-                    raise ValueError("samples must be a nonempty list")
-                for entry in entries:
-                    for key in (
-                        "id",
-                        "name",
-                        "description",
-                        "workflow",
-                        "scripted_run",
-                    ):
-                        if (
-                            not isinstance(entry.get(key), str)
-                            or not entry[key].strip()
-                        ):
-                            raise ValueError(f"{key} must be a nonempty string")
-                    if not re.fullmatch(r"[a-z][a-z0-9_]*", entry["id"]):
-                        raise ValueError(
-                            "id must use lowercase letters, digits, and underscores"
-                        )
-                    if entry["id"] in self.samples:
-                        raise ValueError(f"Duplicate sample id: {entry['id']}")
-                    if not re.fullmatch(r"[\w.]+:[A-Za-z_]\w*", entry["workflow"]):
-                        raise ValueError("workflow must be module:function")
-                    if not re.fullmatch(r"[\w.]+", entry["scripted_run"]):
-                        raise ValueError("scripted_run must be a module name")
-                    if not isinstance(entry.get("options", {}), dict):
-                        raise TypeError("options must be an object")
-                    if entry.get("tracing", "local") not in {"local", "langfuse"}:
-                        raise ValueError("tracing must be local or langfuse")
-                    if entry.get("interaction") not in {
-                        None,
-                        "approval",
-                        "clarification",
-                    }:
-                        raise ValueError(
-                            "interaction must be approval or clarification"
-                        )
-                    if entry.get("default_client", "static") not in {
-                        "static",
-                        "console",
-                        "angular",
-                    }:
-                        raise ValueError(
-                            "default_client must be static, console, or angular"
-                        )
-                    tools = entry.get("mcp_tools", [])
-                    if not isinstance(tools, list) or not all(
-                        isinstance(t, str) for t in tools
-                    ):
-                        raise ValueError("mcp_tools must be a list of names")
-                    sample = Sample(
-                        **{
-                            key: entry[key]
-                            for key in (
-                                "id",
-                                "name",
-                                "description",
-                                "workflow",
-                                "scripted_run",
-                            )
-                        },
-                        directory=path.parent,
-                        options=entry.get("options", {}),
-                        tracing=entry.get("tracing", "local"),
-                        mcp_tools=tuple(tools),
-                        interaction=entry.get("interaction"),
-                        default_client=entry.get("default_client", "static"),
+                if self.root.resolve() == Path(samples.__file__).parent.resolve():
+                    module = import_module(f"samples.{path.parent.name}.sample")
+                else:
+                    # Alternate collections are trusted local Python too. Load
+                    # their actual file, not an installed module with the same name.
+                    spec = spec_from_file_location(f"sample_{path.parent.name}", path)
+                    module = module_from_spec(spec)
+                    spec.loader.exec_module(module)
+                # Implementation-only folders (such as claims_context) supply
+                # shared scenarios without adding a selectable catalog entry.
+                if not hasattr(module, "SAMPLE"):
+                    continue
+                entry = module.SAMPLE
+                if not isinstance(entry, dict) or "samples" in entry:
+                    raise ValueError("sample.py must contain one sample object")
+                if (
+                    "workflow" in entry
+                    or "scripted_run" in entry
+                    or "definition_module" in entry
+                ):
+                    raise ValueError(
+                        "workflow and definition_module are derived from the sample ID or implementation"
                     )
-                    self.samples[sample.id] = sample
+                for key in ("id", "name", "description"):
+                    if not isinstance(entry.get(key), str) or not entry[key].strip():
+                        raise ValueError(f"{key} must be a nonempty string")
+                if not re.fullmatch(r"[a-z][a-z0-9_]*", entry["id"]):
+                    raise ValueError(
+                        "id must use lowercase letters, digits, and underscores"
+                    )
+                if entry["id"] in self.samples:
+                    raise ValueError(f"Duplicate sample id: {entry['id']}")
+                # Most lessons use their ID as the Python module name. Variants
+                # name shared code once instead of repeating two import strings.
+                implementation = entry.get("implementation", entry["id"])
+                if not isinstance(implementation, str) or not re.fullmatch(
+                    r"[a-z][a-z0-9_]*", implementation
+                ):
+                    raise ValueError(
+                        "implementation must be a lowercase sample module name"
+                    )
+                if not isinstance(entry.get("options", {}), dict):
+                    raise TypeError("options must be an object")
+                if entry.get("tracing", "local") not in {"local", "langfuse"}:
+                    raise ValueError("tracing must be local or langfuse")
+                if entry.get("interaction") not in {None, "approval", "clarification"}:
+                    raise ValueError("interaction must be approval or clarification")
+                if entry.get("default_client", "static") not in {
+                    "static",
+                    "console",
+                    "angular",
+                }:
+                    raise ValueError(
+                        "default_client must be static, console, or angular"
+                    )
+                tools = entry.get("mcp_tools", [])
+                if not isinstance(tools, list) or not all(
+                    isinstance(t, str) for t in tools
+                ):
+                    raise ValueError("mcp_tools must be a list of names")
+                sample = Sample(
+                    id=entry["id"],
+                    name=entry["name"],
+                    description=entry["description"],
+                    implementation=implementation,
+                    directory=path.parent,
+                    options=entry.get("options", {}),
+                    tracing=entry.get("tracing", "local"),
+                    mcp_tools=tuple(tools),
+                    interaction=entry.get("interaction"),
+                    default_client=entry.get("default_client", "static"),
+                )
+                self.samples[sample.id] = sample
             except (ValueError, KeyError, TypeError, AttributeError) as exc:
                 raise ValueError(f"Invalid sample metadata {path}: {exc}") from exc
 
@@ -134,8 +145,8 @@ class SampleCatalog:
             raise ValueError(f"Unknown sample: {sample_id}") from None
 
     def script(self, sample_id: str):
-        """Load authored inputs only when a client or simulated run needs them."""
-        return import_module(self.get(sample_id).scripted_run)
+        """Resolve the selected implementation module for prompts and model factories."""
+        return import_module(self.get(sample_id).definition_module)
 
     def prompts(self, sample_id: str) -> list[str]:
         """Return a fresh list without owning a conversation's sequence position."""
@@ -191,12 +202,14 @@ class SampleCatalog:
         try:
             script = None if live else self.script(sample_id)
 
+            # CONVERSATION supplies chronological data. An optional build_scripted_models
+            # callback preserves specialized adapters and option-dependent scripts.
             # Special fixtures react to real file/shell observations or maintain
             # separate ledgers. They remain behind the same build_model boundary.
             def resolve(caller):
                 # Each request gets a fresh response cursor, even when one
                 # caller constructs multiple adapters in the same workflow.
-                models = script.build_models(arguments)
+                models = script.build_scripted_models(arguments)
                 try:
                     return models[caller]
                 except KeyError:
@@ -207,7 +220,7 @@ class SampleCatalog:
             conversation = getattr(script, "CONVERSATION", [])
             resolver = (
                 resolve
-                if script is not None and not hasattr(script, "CONVERSATION")
+                if script is not None and hasattr(script, "build_scripted_models")
                 else None
             )
             module, function = sample.workflow.split(":")

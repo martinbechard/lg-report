@@ -44,7 +44,7 @@ def files(tmp_path, mode="always-ask"):
 
 def editor(inputs):
     """Wire the same agent and harness as the CLI with two scripted model edits."""
-    from samples.file_approval.scripted_run import make_simulated_model
+    from samples.file_approval.sample import make_simulated_model
 
     # Only the model's decisions are simulated. Reads, approval interrupts,
     # checkpoint resumes, and writes all run through the production graph.
@@ -195,7 +195,7 @@ def test_quote_model_questions_resolve_multiple_issues():
     from langchain_core.callbacks import BaseCallbackHandler
 
     from agent_runtime.agents.quote_interpreter import SYSTEM_PROMPT
-    from samples.quote_request.scripted_run import (
+    from samples.quote_request.sample import (
         ANSWERS,
         DECISIONS,
         INITIAL_VALUES,
@@ -252,7 +252,7 @@ def test_quote_model_questions_resolve_multiple_issues():
 # the model decision rather than enforce a fixed question count.
 def test_quote_model_can_complete_without_questions():
     """Routing follows the model, not mandatory fields or a fixed question count."""
-    from samples.quote_request.scripted_run import make_simulated_model
+    from samples.quote_request.sample import make_simulated_model
 
     decision = {
         "action": "complete",
@@ -270,7 +270,7 @@ def test_quote_model_can_complete_without_questions():
 # gets another turn with the first answer retained in conversation state.
 def test_quote_unclear_answer_can_trigger_another_question():
     """The human's first reply does not automatically resolve the model's concern."""
-    from samples.quote_request.scripted_run import (
+    from samples.quote_request.sample import (
         DECISIONS,
         INITIAL_VALUES,
         make_simulated_model,
@@ -289,7 +289,7 @@ def test_quote_unclear_answer_can_trigger_another_question():
 # Explicit cancellation must clear partial values, conversation, and request
 # from the returned state. This does not test deletion of checkpoint history.
 def test_quote_abandon_discards_partial_request():
-    from samples.quote_request.scripted_run import INITIAL_VALUES, make_simulated_model
+    from samples.quote_request.sample import INITIAL_VALUES, make_simulated_model
 
     graph = quote_workflow(make_simulated_model(), checkpointer=InMemorySaver())
     graph.invoke({"values": INITIAL_VALUES}, CONFIG)
@@ -431,8 +431,8 @@ def test_batched_restricted_calls_are_gated(tmp_path, cancel_batch):
 @pytest.mark.parametrize("supplied", [False, True])
 def test_workflow_persistence_is_caller_owned(tmp_path, kind, supplied):
     """Factories neither allocate savers nor replace caller-provided persistence."""
-    from samples.file_approval.scripted_run import make_simulated_model as file_model
-    from samples.quote_request.scripted_run import make_simulated_model as quote_model
+    from samples.file_approval.sample import make_simulated_model as file_model
+    from samples.quote_request.sample import make_simulated_model as quote_model
 
     saver = InMemorySaver() if supplied else None
     kwargs = {"checkpointer": saver} if supplied else {}

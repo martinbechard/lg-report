@@ -27,11 +27,11 @@ from reporting.execute_runnable import execute_runnable
 from reporting.pricing import breakdown, cost, load_prices
 from reporting.render import tree_rows
 from reporting.schema import Run, Step, Usage
-from samples.simple_chat.scripted_run import make_simulated_model as make_chat_model
-from samples.thinking_agent.scripted_run import (
+from samples.simple_chat.sample import make_simulated_model as make_chat_model
+from samples.thinking_agent.sample import (
     make_simulated_model as make_thinking_model,
 )
-from samples.tool_chat.scripted_run import make_simulated_model as make_tool_model
+from samples.tool_chat.sample import make_simulated_model as make_tool_model
 
 
 @pytest.fixture

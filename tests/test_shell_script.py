@@ -17,7 +17,7 @@ from agent_runtime.backends.shell_backend import ShellBackend
 from agent_runtime.harness.sample_catalog import SampleCatalog
 
 create_run = partial(SampleCatalog().create_run, "shell_script")
-from samples.shell_script.scripted_run import USER_PROMPTS
+from samples.shell_script.sample import USER_PROMPTS
 
 
 @pytest.mark.parametrize("asynchronous", [False, True])
@@ -99,7 +99,7 @@ def test_prepared_script_runs_directly_through_native_execute(monkeypatch, live)
 
     from agent_runtime.harness import model_factory
     from agent_runtime.harness.simulated_model import ScriptedChatModel
-    from samples.shell_script import scripted_run
+    from samples.shell_script import sample
 
     model = ScriptedChatModel(
         responses=[
@@ -118,7 +118,7 @@ def test_prepared_script_runs_directly_through_native_execute(monkeypatch, live)
     )
     # Exercise both construction branches without making a paid provider call.
     # Only the model is substituted; workspace preparation and execution are real.
-    monkeypatch.setattr(scripted_run, "make_simulated_model", lambda: model)
+    monkeypatch.setattr(sample, "make_simulated_model", lambda: model)
     monkeypatch.setattr(
         model_factory, "configured_model", lambda name: (model, "demo", "scripted-chat")
     )

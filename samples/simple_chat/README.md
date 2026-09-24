@@ -26,8 +26,8 @@ The reusable code lives under `src/agent_runtime/`:
   Runtime trace capture lives in `src/agent_runtime/harness/trace_capture.py`.
 - **`tools/`** is the home for application tools. Simple chat defines none.
 
-This sample directory contains **`sample.json`** for discovery metadata and
-**`scripted_run.py`** for the scenario's user prompts and prerecorded model answers,
+This sample directory contains **`sample.py`** with `SAMPLE` discovery metadata,
+the scenario's user prompts, prerecorded model answers, and model factories,
 plus this README and configuration example. A client simulator and a model
 simulator serve different roles even when one test case configures both.
 
@@ -86,9 +86,17 @@ The command prints its HTML report path and saves `spans.jsonl`, `run.json`,
 quitting before any request produces an incomplete report with no model spans.
 
 In the static run, compare R1's fresh input with R2's cached history and new prompt.
-Edit test prompts in `scripted_run.py`, not the agent file. When changing the
-scenario in offline mode, update the corresponding answers in `scripted_run.py`.
+Edit test prompts in `sample.py`, not the agent file. When changing the
+scenario in offline mode, update the corresponding answers in `sample.py`.
 Tests in `tests/test_simple_chat_clients.py` exercise file context, console input,
 history, and the interrupt boundary without contacting a provider.
 
 All samples follow this structure; Langfuse variants share the same workflows.
+
+## Why the factory is a function
+
+Importing `sample.py` makes its metadata and conversation available. It does not
+create a model. In simulated mode, `build_scripted_models(options)` calls
+`make_simulated_model()` to create a fresh response cursor and usage ledger for
+the conversation. Live mode bypasses these factories and selects the configured
+provider. The factory is the same one previously used by this lesson.

@@ -21,7 +21,7 @@ from agent_runtime.workflows.claims_context import (
     ClaimsContext,
     ContextAudit,
 )
-from samples.claims_context.scripted_run import (
+from samples.claims_context.sample import (
     CORRECTED_DESCRIPTION,
     USER_PROMPTS,
     UncachedDemoModel,

@@ -27,7 +27,7 @@ from reporting.pricing import load_prices
 from reporting.schema import Run
 
 create_run = partial(SampleCatalog().create_run, "mcp_rag_chat")
-from samples.mcp_rag_chat.scripted_run import USER_PROMPTS
+from samples.mcp_rag_chat.sample import USER_PROMPTS
 
 
 class Collection:

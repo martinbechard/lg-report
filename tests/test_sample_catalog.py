@@ -6,7 +6,7 @@ AI attribution: Generated with AI assistance by Northstar.
 Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
 
-import json
+import ast
 
 import pytest
 
@@ -21,28 +21,22 @@ def register(root, folder, sample_id):
     """Create metadata independently of the catalog's implementation registry."""
     directory = root / folder
     directory.mkdir()
-    (directory / "sample.json").write_text(
-        json.dumps(
+    (directory / "sample.py").write_text(
+        "SAMPLE = "
+        + repr(
             {
-                "samples": [
-                    {
-                        "id": sample_id,
-                        "name": "Discovered lesson",
-                        "description": "A new lesson",
-                        "workflow": "agent_runtime.workflows.simple_chat:build_workflow",
-                        "scripted_run": "samples.simple_chat.scripted_run",
-                    }
-                ]
+                "id": sample_id,
+                "name": "Discovered lesson",
+                "description": "A new lesson",
+                "implementation": "simple_chat",
             }
         )
     )
     return directory
 
 
-def test_new_folder_is_discovered_without_imports_and_reaches_http(
-    tmp_path, monkeypatch
-):
-    """Listing reads metadata only; HTTP then loads prompts for the discovered ID."""
+def test_new_folder_is_discovered_and_reaches_http(tmp_path, monkeypatch):
+    """Discovery reads SAMPLE from trusted Python; HTTP resolves shared prompts."""
     from fastapi.testclient import TestClient
 
     from agent_runtime.harness import sample_catalog
@@ -73,7 +67,7 @@ def test_duplicate_metadata_names_its_source(tmp_path):
     """Two folders cannot silently compete for one public sample ID."""
     register(tmp_path, "a", "lesson")
     register(tmp_path, "b", "lesson")
-    with pytest.raises(ValueError, match=r"b/sample.json.*Duplicate"):
+    with pytest.raises(ValueError, match=r"b/sample.py.*Duplicate"):
         SampleCatalog(tmp_path)
 
 
@@ -390,3 +384,74 @@ def test_file_approval_demo_is_explicit_and_no_key_keeps_human_approval(
     assert (args.live, args.client) == (False, "static")
     _, args = parse_arguments(catalog, [*argv, "--demo", "--client", "console"])
     assert (args.live, args.client) == (False, "console")
+
+
+def test_conventional_paths_and_explicit_shared_implementation(tmp_path):
+    """Infer both imports from one name while keeping each variant's configuration local."""
+    directory = register(tmp_path, "simple_chat", "simple_chat")
+    path = directory / "sample.py"
+    data = ast.literal_eval(path.read_text().removeprefix("SAMPLE = "))
+    del data["implementation"]
+    path.write_text("SAMPLE = " + repr(data))
+    variant = register(tmp_path, "traced_chat", "traced_chat")
+    catalog = SampleCatalog(tmp_path)
+    sample = catalog.get("simple_chat")
+    assert sample.workflow == "agent_runtime.workflows.simple_chat:build_workflow"
+    assert sample.definition_module == "samples.simple_chat.sample"
+    shared = catalog.get("traced_chat")
+    assert shared.workflow == sample.workflow
+    assert shared.definition_module == sample.definition_module
+    assert shared.directory == variant
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        {"samples": [{"id": "one"}, {"id": "two"}]},
+        [{"id": "one"}, {"id": "two"}],
+    ],
+)
+def test_one_sample_per_file(tmp_path, payload):
+    """A registry file cannot hide multiple selections inside a collection."""
+    directory = tmp_path / "lesson"
+    directory.mkdir()
+    (directory / "sample.py").write_text("SAMPLE = " + repr(payload))
+    with pytest.raises(ValueError, match="one sample object"):
+        SampleCatalog(tmp_path)
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("workflow", "agent_runtime.workflows.simple_chat:build_workflow"),
+        ("scripted_run", "samples.simple_chat.sample"),
+        ("implementation", "nested.module"),
+    ],
+)
+def test_redundant_paths_and_invalid_implementation_fail_at_discovery(
+    tmp_path, field, value
+):
+    """Catch stale module-path configuration before the user tries to run a lesson."""
+    directory = register(tmp_path, "lesson", "lesson")
+    path = directory / "sample.py"
+    data = ast.literal_eval(path.read_text().removeprefix("SAMPLE = "))
+    data[field] = value
+    path.write_text("SAMPLE = " + repr(data))
+    with pytest.raises(ValueError, match="Invalid sample metadata"):
+        SampleCatalog(tmp_path)
+
+
+def test_discovery_does_not_call_model_factories(monkeypatch):
+    """Importing metadata must not consume responses or create model ledgers."""
+    from samples.simple_chat import sample
+
+    def unexpected(*args, **kwargs):
+        """Fail if discovery crosses the model construction boundary."""
+        pytest.fail("Discovery created a simulated model")
+
+    monkeypatch.setattr(sample, "make_simulated_model", unexpected)
+    monkeypatch.setattr(sample, "build_scripted_models", unexpected)
+    catalog = SampleCatalog()
+    assert catalog.get("simple_chat").name == sample.SAMPLE["name"]
+    assert catalog.prompts("simple_chat") == sample.USER_PROMPTS
+    assert "claims_context" not in catalog.samples

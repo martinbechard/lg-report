@@ -42,6 +42,6 @@ breaker execute normally. Live mode is available with `--live --env-file
 .env.local`, but a real model may stop voluntarily before reaching the limit.
 
 The [workflow](../../src/agent_runtime/workflows/circuit_breaker.py) owns limits
-and the intentionally defective instructions. The [script](scripted_run.py)
+and the intentionally defective instructions. The [script](sample.py)
 owns deterministic decisions. The [context-budget sample](../context_budget/README.md)
 uses the correct `/slug.py` and `/test_slug.py` names.

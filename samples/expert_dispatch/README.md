@@ -57,8 +57,8 @@ For the fixed three-question scenario with a provider, use `--live --client stat
 
 ## Read the code
 
-- `sample.json`: discovery metadata and workflow selection.
-- `scripted_run.py`: fixed questions, scripted dispatch decisions, and expert answers.
+- `sample.py`: discovery metadata, fixed questions, scripted dispatch decisions,
+  and expert answers.
 - `src/agent_runtime/workflows/expert_dispatch.py`: connects the four roles.
 - `src/agent_runtime/agents/dispatcher_agent.py`: routing instructions and native task tool.
 - `src/agent_runtime/agents/reference_expert.py`: one shared factory with independent movie, sports, and history definitions.

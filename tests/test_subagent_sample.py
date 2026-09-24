@@ -19,7 +19,7 @@ from reporting.execute_runnable import execute_runnable
 from reporting.pricing import cost, load_prices, summarize
 from reporting.render import agent_activity, conversation_turns
 from reporting.schema import Run
-from samples.subagent_chat.scripted_run import (
+from samples.subagent_chat.sample import (
     DELEGATED_TASK,
     SPECIALIST_SUMMARY,
     USER_PROMPTS,

@@ -84,9 +84,9 @@ verdicts are teaching fixtures. Live evaluation quality is not tested by them.
 
 ## Code and state
 
-- `sample.json` declares the workflow and its default teaching options; the workflow
-  obtains the shared model through `build_model`.
-- `scripted_run.py` owns user evidence and prerecorded author/judge responses.
+- `sample.py` declares the sample ID and default teaching options alongside user
+  evidence and prerecorded author/judge responses. The workflow obtains the
+  shared model through `build_model`.
 - `src/agent_runtime/workflows/review_loop.py` owns the explicit nodes, conditional
   edge, round counter, and finalization. `max_rounds=3` includes the first draft.
 - `src/agent_runtime/agents/review_author.py` owns writing/revision instructions and
