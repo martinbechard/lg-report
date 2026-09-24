@@ -253,8 +253,13 @@ add(
         ],
         [n("w", "Completed agent turn", "Harness detects successful edit", "workflow")],
         [
-            n("nv", "Naive strategy", "Retain previous context", "workflow"),
-            n("mg", "Managed strategy", "Remove claim-dependent context", "workflow"),
+            n("nv", "edit-with-patched-state", "Retain previous context", "workflow"),
+            n(
+                "mg",
+                "edit-with-reloaded-state",
+                "Remove claim-dependent context",
+                "workflow",
+            ),
         ],
         [n("f", "Follow-up → claims agent", "Agent chooses any needed reread")],
     ],
@@ -271,7 +276,7 @@ add(
         ("nv", "f", ""),
         ("mg", "f", ""),
     ],
-    "Managed mode can retain unaffected policy evidence. Display history and audit remain separate from working model context.",
+    "edit-with-reloaded-state mode can retain unaffected policy evidence. Display history and audit remain separate from working model context.",
 )
 add(
     "Simple chat with Langfuse",
@@ -483,13 +488,19 @@ def architecture(index):
     d.arrow("M100 260 V280 H180 V300", dotted=True)
     d.arrow("M240 260 V280 H480 V300", dotted=True)
     d.box(
-        40, 300, 280, 70,
+        40,
+        300,
+        280,
+        70,
         "ConsoleApplication",
         "Prepare console / scripted runs",
         "shared_code",
     )
     d.box(
-        340, 300, 280, 70,
+        340,
+        300,
+        280,
+        70,
         "AngularApplication",
         "Prepare and start HTTP listener",
         "shared_code",
@@ -497,7 +508,15 @@ def architecture(index):
     # Console startup creates its client and configures optional authored prompts.
     d.arrow("M180 370 V410", dotted=True)
     d.arrow("M320 335 H330 V390 H480 V410", "configure script", 480, 382, dotted=True)
-    d.box(40, 410, 280, 70, "ConsoleClient", "Input / output / interrupt answers", "shared_code")
+    d.box(
+        40,
+        410,
+        280,
+        70,
+        "ConsoleClient",
+        "Input / output / interrupt answers",
+        "shared_code",
+    )
     d.box(
         340,
         410,
@@ -908,7 +927,7 @@ def claims_sequence(index):
         ),
         (
             "2 · Edit → end turn",
-            "Successful edit; managed purge",
+            "Successful edit; purge at turn end",
             "Claim v2",
             "Policy evidence + notice\nNo claim snapshot",
             "Snapshot v1\n+ edit args / receipt v2",
@@ -928,14 +947,16 @@ def claims_sequence(index):
             "Earlier evidence\n+ fresh snapshot v3",
         ),
     ]
-    for i, (title, detail, store, managed, naive) in enumerate(steps):
+    for i, (title, detail, store, reloaded_context, patched_context) in enumerate(
+        steps
+    ):
         x = 190 + i * 295
         d.box(x, 30, 275, 85, title, detail, "agent")
         if i < 3:
             d.arrow(f"M{x + 275} 72 H{x + 295}")
         d.box(x, 165, 275, 65, store, role="tool")
-        d.box(x, 275, 275, 105, "Managed context", managed, "workflow")
-        d.box(x, 420, 275, 105, "Naive context", naive, "support")
+        d.box(x, 275, 275, 105, "edit-with-reloaded-state", reloaded_context, "workflow")
+        d.box(x, 420, 275, 105, "edit-with-patched-state", patched_context, "support")
     d.text(20, 195, "Current store", "node-title", "start")
     d.text(20, 305, "Working context\nafter the step", "node-title", "start")
     d.text(20, 450, "Working context\nafter the step", "node-title", "start")
@@ -945,11 +966,11 @@ def claims_sequence(index):
         1160,
         65,
         "Transcript / audit: historical evidence is retained separately",
-        "Content depends on capture policy. It is never automatically replayed into managed working context.",
+        "Content depends on capture policy. It is never automatically replayed into edit-with-reloaded-state working context.",
         "support",
     )
     return d.finish(
-        "Agent instructions are supplied on every invocation. Managed purge occurs at the end of an edited turn, not immediately after each edit tool call. A fresh read supplies current data; it does not merge old snapshots."
+        "Agent instructions are supplied on every invocation. edit-with-reloaded-state purge occurs at the end of an edited turn, not immediately after each edit tool call. A fresh read supplies current data; it does not merge old snapshots."
     )
 
 
@@ -978,7 +999,44 @@ def protocol_sequence(index):
 
 # Complex flows use sequence diagrams: one lifeline per participant makes return
 # messages unambiguous and avoids drawing the same agent as separate components.
+def token_accounting(index):
+    """Show usage producers and shared records without double billing.
+
+    Live SDK receipts and simulated counts converge on AIMessage metadata.
+    Arrows show data flow; pricing functions consume records, not model calls.
+    """
+    d = Drawing(index, "Token calculation: model response to report", 1000, 1200)
+    d.box(35, 20, 430, 90, "Live model / provider SDK",
+          "Returns measured usage through LangChain\nNo local recount of provider input", "dependency")
+    d.box(690, 20, 475, 90, "SimulatedModel",
+          "One scenario · filter by lc_agent_name\nIndependent agent cursors and caches", "shared_code")
+    d.box(690, 155, 475, 90, "ContextSimulation",
+          "record() → units() / message_units()\ntiktoken o200k_base · canonical JSON", "shared_code")
+    d.arrow("M928 110 V155", "count request / response", 1050, 140)
+    d.box(390, 295, 420, 90, "AIMessage",
+          "usage_metadata: input / output + subsets\nresponse_metadata: simulation basis", "dependency")
+    d.arrow("M250 110 V340 H390", "SDK usage", 305, 325)
+    d.arrow("M928 245 V340 H810", "estimated usage", 920, 325)
+    d.box(390, 435, 420, 90, "TraceCapture → JsonlExporter",
+          "on_llm_end() → lg.usage on model span\nspans.jsonl preserves reported counts", "shared_code")
+    d.arrow("M600 385 V435")
+    d.box(390, 575, 420, 90, "Run → Step → Usage",
+          "normalize() builds validated records\nrun.json stores totals and subsets", "shared_code")
+    d.arrow("M600 525 V575", "normalize(spans.jsonl)", 730, 555)
+    d.box(855, 575, 310, 90, "Prices → Rate",
+          "Saved USD tariffs per million\nExact model or explicit alias", "shared_code")
+    d.box(390, 730, 420, 90, "breakdown() · cost() · summarize()",
+          "Separate cache / reasoning subsets\nPrice each category; sum model calls", "shared_code")
+    d.arrow("M600 665 V730", "Usage", 640, 705)
+    d.arrow("M1010 665 V775 H810", "Rate", 915, 760)
+    d.box(390, 875, 420, 90, "HTML and Excel exporters",
+          "Shared usage and pricing calculations\nUnknown usage / cost stays explicit", "support")
+    d.arrow("M600 820 V875")
+    return d.finish("Boxes name implementation classes; names with parentheses are functions or methods. Run contains Steps; a model Step may have Usage. Tool and workflow spans are not additional token charges.")
+
+
 CUSTOM = {
+    19: token_accounting,
     0: architecture,
     1: interrupt_sequence,
     15: approval_sequence,
@@ -1001,10 +1059,10 @@ CUSTOM = {
             (2, 3, "Edit claim, if requested"),
             (3, 2, "Edit receipt with new revision"),
             (2, 1, "Completed agent turn"),
-            (1, 1, "Apply naive or managed strategy"),
+            (1, 1, "Apply edit-with-patched-state or edit-with-reloaded-state strategy"),
             (1, 0, "Answer; await follow-up"),
         ],
-        "The workflow retains all working messages in naive mode. After a successful edited turn, managed mode removes claim-dependent context. A follow-up repeats this exchange with the retained working context.",
+        "The workflow retains all working messages in edit-with-patched-state mode. After a successful edited turn, edit-with-reloaded-state mode removes claim-dependent context. A follow-up repeats this exchange with the retained working context.",
     ),
     9: lambda i: sequence(
         i,
@@ -1112,7 +1170,7 @@ def main():
         return render(index, *DIAGRAMS[index])
 
     updated, count = re.subn(pattern, replace, source, flags=re.DOTALL)
-    assert count == 19, f"Expected 19 diagram slots, found {count}"
+    assert count == 20, f"Expected 20 diagram slots, found {count}"
     updated = updated.replace(
         "Diagrams are embedded text, with no CDN or diagram-rendering dependency.",
         'Diagrams are embedded SVG, generated from the editable definitions in <a href="../scripts/render_design_diagrams.py" target="_blank" rel="noopener noreferrer">render_design_diagrams.py</a>. Viewing the page requires no CDN or diagram-rendering library.',

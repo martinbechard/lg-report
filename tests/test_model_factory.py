@@ -22,14 +22,17 @@ def test_conversation_routing_and_fresh_models():
         second_parent = model_factory.build_model(caller="workflow")
     # Invocation after scope exit proves existing graphs retain their mode.
     request = HumanMessage(content="delegate")
-    delegation = parent.invoke([request])
+    config = {"metadata": {"lc_agent_name": "delegating_parent"}}
+    delegation = parent.invoke([request], config=config)
     assert delegation.tool_calls[0]["name"] == "task"
-    assert child.invoke("echo").tool_calls[0]["name"] == "echo_tool"
+    assert child.invoke("echo", config={"metadata": {"lc_agent_name": "isolated-subagent"}}).tool_calls[0]["name"] == "echo_tool"
     result = ToolMessage(content="Child summary", tool_call_id="delegate-1")
-    assert parent.invoke([request, delegation, result]).content == FINAL_ANSWER
-    assert second_parent.invoke("delegate").tool_calls[0]["name"] == "task"
+    assert parent.invoke([request, delegation, result], config=config).content == FINAL_ANSWER
+    assert second_parent.invoke("delegate", config=config).tool_calls[0]["name"] == "task"
     assert model_factory.client_prompts(CONVERSATION) == USER_PROMPTS
-    assert len(parent.responses) == len(child.responses) == 2
+    assert parent.conversation == child.conversation == CONVERSATION
+    assert parent._positions == {"delegating_parent": 2}
+    assert child._positions == {"isolated-subagent": 1}
 
 
 def test_missing_caller_and_scope_reset(monkeypatch):
@@ -47,7 +50,9 @@ def test_missing_caller_and_scope_reset(monkeypatch):
         pytest.raises(ValueError, match="missing-agent"),
         model_factory.model_factory_scope(live=False, conversation=CONVERSATION),
     ):
-        model_factory.build_model(caller="missing-agent")
+        model_factory.build_model(caller="missing-agent").invoke(
+            "Start", config={"metadata": {"lc_agent_name": "missing-agent"}}
+        )
     assert model_factory.build_model("chosen-model", caller="workflow") is sentinel
     assert calls == ["chosen-model"]
 
@@ -67,7 +72,7 @@ def test_nested_live_failure_never_falls_back(monkeypatch):
             model_factory.model_factory_scope(live=True, conversation=[]),
         ):
             model_factory.build_model(caller="workflow")
-        assert model_factory.build_model(caller="workflow").responses
+        assert model_factory.build_model(caller="workflow").conversation
 
 
 def test_subagent_live_build_does_not_load_script(monkeypatch):
@@ -81,13 +86,13 @@ def test_subagent_live_build_does_not_load_script(monkeypatch):
 
     from agent_runtime.harness import sample_catalog
     from agent_runtime.harness.sample_catalog import SampleCatalog
-    from agent_runtime.harness.simulated_model import MeteredDemoModel
+    from agent_runtime.harness.simulated_model import SimulatedModel
 
     models = []
 
     def provider_model(name):
         """Return a distinct valid adapter for each real-mode factory request."""
-        model = MeteredDemoModel(responses=[AIMessage(content="unused")])
+        model = SimulatedModel(conversation=[{"role": "test-agent", "content": response.content, "tool_calls": response.tool_calls, "response_metadata": response.response_metadata} for response in [AIMessage(content="unused")]], agent_name="test-agent")
         models.append(model)
         return model, "openai", "selected-model"
 
@@ -136,7 +141,7 @@ def test_chronological_extraction_preserves_metadata_and_isolates_runs():
     conversation = [
         {"role": "client", "content": "Begin"},
         {
-            "role": "ai",
+            "role": "test-agent",
             "content": "Check",
             "tool_calls": [
                 {"name": "inspect", "args": {"section": "first"}, "id": "inspect-1"}
@@ -145,11 +150,11 @@ def test_chronological_extraction_preserves_metadata_and_isolates_runs():
         },
         {"role": "tool", "content": "Expected observation"},
         {"role": "human", "interaction": "clarification", "content": "Continue"},
-        {"role": "ai", "content": "Done"},
+        {"role": "test-agent", "content": "Done"},
         {"role": "client", "content": "Next request"},
     ]
-    first = model_factory.model_responses(conversation)
-    second = model_factory.model_responses(conversation)
+    first = model_factory.model_responses(conversation, "test-agent")
+    second = model_factory.model_responses(conversation, "test-agent")
     assert [message.content for message in first] == ["Check", "Done"]
     assert model_factory.client_prompts(conversation) == ["Begin", "Next request"]
     assert first[0].response_metadata["simulated_reasoning_tokens"] == 12000
@@ -163,8 +168,8 @@ def test_catalog_keeps_specialized_adapter_with_conversation(monkeypatch):
     """Chronological data must not replace unmetered quote decisions with estimates."""
     from agent_runtime.harness.sample_catalog import SampleCatalog
     from agent_runtime.harness.simulated_model import (
-        MeteredDemoModel,
         ScriptedChatModel,
+        SimulatedModel,
     )
 
     catalog = SampleCatalog()
@@ -182,4 +187,4 @@ def test_catalog_keeps_specialized_adapter_with_conversation(monkeypatch):
     catalog.create_run("quote_request", False, tracing=False)
     assert len(constructed) == 1
     assert isinstance(constructed[0], ScriptedChatModel)
-    assert not isinstance(constructed[0], MeteredDemoModel)
+    assert not isinstance(constructed[0], SimulatedModel)

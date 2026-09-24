@@ -35,7 +35,11 @@ starts.
 handlers use it to list samples and construct fresh workflows. The catalog
 establishes a model factory scope; workflows call `build_model(caller="workflow")`
 and an agent that constructs its own model supplies its agent name. Live mode
-reads provider settings; scripted mode resolves only that caller's responses.
+reads provider settings; scripted mode supplies the entire chronological scenario
+to `SimulatedModel`. Native agent names (`lc_agent_name` metadata) select each
+agent's replies at invocation. One model supports solo and shared execution,
+with separate response positions and simulated caches per agent. Scenario agent
+roles use registered names rather than `ai`; prompts and tool names are not keys.
 Specialized scripts can implement `build_scripted_models(options)` for tool-dependent
 answers or context-accounting fixtures. Scripts stay outside workflow/agent code.
 
@@ -161,7 +165,7 @@ protocol, such as a quote decision schema or domain-specific state invalidation.
 | `review_loop` | Author/judge framing and judge protocol validation | Separate histories, round budget, revision edges, final outcome |
 | `quote_request` | Interpretation, message formatting, decision binding/validation | Human answers, cancellation, reassessment routing |
 | `file_approval` | Editing prompt, file-tool registration, model/tool loop | Restricted-tool policy, automatic approval interrupts, cancellation |
-| `claims_context` | Instructions, tools, store, context-dependency knowledge | Naive/managed strategy, turn loop, retained working history and audit |
+| `edit_with_reloaded_state` | Instructions, tools, store, context-dependency knowledge | edit-with-patched-state/edit-with-reloaded-state strategy, turn loop, retained working history and audit |
 
 Tests exercise review/quote agents directly, independently of their workflows,
 and retain workflow coverage for revision limits, invalid decisions, cancellation,

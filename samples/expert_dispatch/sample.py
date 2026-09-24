@@ -11,7 +11,7 @@ Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
 
 from agent_runtime.harness.model_factory import client_prompts, model_responses
-from agent_runtime.harness.shared_simulated_model import SharedSimulatedModel
+from agent_runtime.harness.simulated_model import SimulatedModel
 
 # Discovery reads this metadata without constructing a model.
 SAMPLE = {
@@ -23,7 +23,7 @@ SAMPLE = {
 CONVERSATION = [
     {"role": "client", "content": "Who directed Spirited Away?"},
     {
-        "role": "ai",
+        "role": "dispatcher_agent",
         "content": "",
         "tool_calls": [
             {
@@ -65,7 +65,7 @@ CONVERSATION = [
         "content": "Hayao Miyazaki directed Spirited Away, released in 2001. Source: https://www.ghibli.jp/works/",
     },
     {
-        "role": "ai",
+        "role": "dispatcher_agent",
         "content": "Hayao Miyazaki directed Spirited Away, released in 2001. Source: https://www.ghibli.jp/works/",
     },
     {
@@ -73,7 +73,7 @@ CONVERSATION = [
         "content": "How many players does a basketball team have on court?",
     },
     {
-        "role": "ai",
+        "role": "dispatcher_agent",
         "content": "",
         "tool_calls": [
             {
@@ -119,13 +119,13 @@ CONVERSATION = [
         "https://about.fiba.basketball/en/our-sport/basketball",
     },
     {
-        "role": "ai",
+        "role": "dispatcher_agent",
         "content": "A basketball team has five players on court during normal play. Source: "
         "https://about.fiba.basketball/en/our-sport/basketball",
     },
     {"role": "client", "content": "In which year did the Berlin Wall fall?"},
     {
-        "role": "ai",
+        "role": "dispatcher_agent",
         "content": "",
         "tool_calls": [
             {
@@ -169,14 +169,14 @@ CONVERSATION = [
         "Source: https://www.stiftung-berliner-mauer.de/de/ueber-uns/leichte-sprache/geschichte",
     },
     {
-        "role": "ai",
+        "role": "dispatcher_agent",
         "content": "The Berlin Wall opened on 9 November 1989, the opening preceded its physical demolition. "
         "Source: https://www.stiftung-berliner-mauer.de/de/ueber-uns/leichte-sprache/geschichte",
     },
 ]
 USER_PROMPTS = client_prompts(CONVERSATION)
 # Keep the compact case view used by integration tests derived from the script.
-_dispatcher = model_responses(CONVERSATION)
+_dispatcher = model_responses(CONVERSATION, "dispatcher_agent")
 CASES = [
     (
         request.tool_calls[0]["args"]["subagent_type"],
@@ -189,18 +189,13 @@ del _dispatcher
 
 
 def make_simulated_model():
-    """Route the shared model's bound tools to role replies from one transcript.
+    """Select named agents' replies from the complete chronological scenario.
 
     Each role retains an independent response cursor and usage ledger. Actual
     delegation and retrieval still execute in the graph between model calls.
     """
-    return SharedSimulatedModel(
-        scripts={
-            "task": model_responses(CONVERSATION),
-            "search_movie_reference": model_responses(CONVERSATION, "movie_expert"),
-            "search_sports_reference": model_responses(CONVERSATION, "sports_expert"),
-            "search_history_reference": model_responses(CONVERSATION, "history_expert"),
-        },
+    return SimulatedModel(
+        conversation=CONVERSATION,
         metadata={
             "report_description": "Execute this agent's role using the shared LLM and its bound tool.",
             "report_effort": "light",

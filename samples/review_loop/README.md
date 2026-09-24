@@ -93,8 +93,8 @@ verdicts are teaching fixtures. Live evaluation quality is not tested by them.
   converts structured round inputs into model messages.
 - `src/agent_runtime/agents/evidence_judge.py` owns evidence framing, the rubric,
   and parsing/validation of its model response into a review result.
-- `src/agent_runtime/harness/shared_simulated_model.py` separates offline scripts and
-  token accounting by role instruction for agents without tools.
+- `src/agent_runtime/harness/simulated_model.py` filters one chronological scenario
+  by native agent name, with independent response positions and token accounting.
 
 State keeps `messages` (user conversation), `author_history`, `judge_history`,
 `round`, `draft`, `review`, and `outcome`. Role histories grow during revision,

@@ -23,7 +23,7 @@ from langchain.mcp import MCPAdapter
 from langchain_core.messages import AIMessage
 from test_rag import TestEmbedding
 
-from agent_runtime.harness.simulated_model import MeteredDemoModel
+from agent_runtime.harness.simulated_model import SimulatedModel
 from agent_runtime.mcp_servers.wikipedia import build_server
 
 
@@ -61,8 +61,8 @@ def test_mcp_contract_and_deep_agent(collection):
             for query in ["", "x" * 501]:
                 result = await tools[0].ainvoke({"query": query})
                 assert '"passages": []' in str(result)
-            model = MeteredDemoModel(
-                responses=[
+            model = SimulatedModel(
+                conversation=[{"role": "test-agent", "content": response.content, "tool_calls": response.tool_calls, "response_metadata": response.response_metadata} for response in [
                     AIMessage(
                         content="",
                         tool_calls=[
@@ -74,7 +74,7 @@ def test_mcp_contract_and_deep_agent(collection):
                         ],
                     ),
                     AIMessage(content="Ravens adapt to urban environments."),
-                ]
+                ]], agent_name="test-agent"
             )
             agent = create_deep_agent(model=model, tools=tools, backend=StateBackend())
             final = await agent.ainvoke(

@@ -45,7 +45,7 @@ CONVERSATION = [
         ),
     },
     {
-        "role": "ai",
+        "role": "quote_interpreter",
         "content": "",
         "tool_calls": [
             {
@@ -68,7 +68,7 @@ CONVERSATION = [
         "instead.",
     },
     {
-        "role": "ai",
+        "role": "quote_interpreter",
         "content": "",
         "tool_calls": [
             {
@@ -90,7 +90,7 @@ CONVERSATION = [
         "content": "There are 500 households among the 650 guests. Send one invitation per household.",
     },
     {
-        "role": "ai",
+        "role": "quote_interpreter",
         "content": "",
         "tool_calls": [
             {
@@ -111,7 +111,7 @@ CONVERSATION = [
         "content": "Include 500 printed envelopes. We'll supply a spreadsheet of names and addresses.",
     },
     {
-        "role": "ai",
+        "role": "quote_interpreter",
         "content": "",
         "tool_calls": [
             {
@@ -134,7 +134,7 @@ CONVERSATION = [
 USER_PROMPTS = client_prompts(CONVERSATION)
 INITIAL_VALUES = json.loads(USER_PROMPTS[0])
 ANSWERS = [entry["content"] for entry in CONVERSATION if entry["role"] == "human"]
-DECISIONS = [message.tool_calls[0]["args"] for message in model_responses(CONVERSATION)]
+DECISIONS = [message.tool_calls[0]["args"] for message in model_responses(CONVERSATION, "quote_interpreter")]
 
 
 def make_simulated_model(decisions=None):
@@ -145,7 +145,7 @@ def make_simulated_model(decisions=None):
     human answers; this function neither executes tools nor resumes interrupts.
     """
     responses = (
-        model_responses(CONVERSATION)
+        model_responses(CONVERSATION, "quote_interpreter")
         if decisions is None
         else [
             AIMessage(

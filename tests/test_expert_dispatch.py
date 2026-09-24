@@ -79,12 +79,12 @@ def test_expert_selection_isolation_and_costs(tmp_path):
 # Capture binding calls because a shared model instance must still
 # expose each agent's own tool schema at the invocation boundary.
 def test_shared_model_retains_separate_tool_bindings(monkeypatch):
-    from agent_runtime.harness.shared_simulated_model import SharedSimulatedModel
+    from agent_runtime.harness.simulated_model import SimulatedModel
     from agent_runtime.workflows.expert_dispatch import build_workflow
     from samples.expert_dispatch.sample import make_simulated_model
 
     bound_schemas = []
-    original = SharedSimulatedModel.bind_tools
+    original = SimulatedModel.bind_tools
 
     def capture_binding(self, tools, **kwargs):
         # Observe agent-specific tool binding without replacing binding behavior.
@@ -94,7 +94,7 @@ def test_shared_model_retains_separate_tool_bindings(monkeypatch):
         bound_schemas.append(binding.kwargs["tool_definitions"])
         return binding
 
-    monkeypatch.setattr(SharedSimulatedModel, "bind_tools", capture_binding)
+    monkeypatch.setattr(SimulatedModel, "bind_tools", capture_binding)
     model = make_simulated_model()
     Conversation(
         build_workflow(model),

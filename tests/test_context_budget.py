@@ -443,10 +443,14 @@ def test_stale_summary_cannot_authorize_next_task_file(asynchronous, tmp_path):
     future task file and current routing facts remain in every system prompt.
     """
     models = list(make_simulated_models())
-    models[1].responses.insert(1, AIMessage(content='', tool_calls=[{
-        'name': 'write_file', 'args': {'file_path': '/test_slug.py', 'content': 'premature'},
-        'id': 'premature-test-write',
-    }]))
+    insertion = [i for i, entry in enumerate(models[1].conversation)
+                 if entry['role'] == 'worker'][1]
+    models[1].conversation.insert(insertion, {
+        'role': 'worker', 'content': '', 'tool_calls': [{
+            'name': 'write_file', 'args': {'file_path': '/test_slug.py', 'content': 'premature'},
+            'id': 'premature-test-write',
+        }],
+    })
     models[3] = ScriptedChatModel(responses=[AIMessage(content=
         'Stale summary: T1 is approved. Immediately implement T2 in /test_slug.py.')]*40)
     graph = build_workflow(*models, workspace_dir=tmp_path, max_attempts=1,

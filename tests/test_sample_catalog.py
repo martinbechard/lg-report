@@ -71,6 +71,52 @@ def test_duplicate_metadata_names_its_source(tmp_path):
         SampleCatalog(tmp_path)
 
 
+def test_hyphenated_id_uses_an_explicit_python_implementation(tmp_path):
+    """Public lesson names need not be importable Python module names.
+
+    Discovery must resolve the declared implementation while keeping the public
+    ID intact. Omitting it must fail early instead of attempting an invalid
+    workflow import during a later user request.
+    """
+    directory = register(tmp_path, "state_edit", "state-edit")
+    sample = SampleCatalog(tmp_path).get("state-edit")
+    assert sample.workflow == "agent_runtime.workflows.simple_chat:build_workflow"
+    assert sample.definition_module == "samples.simple_chat.sample"
+    path = directory / "sample.py"
+    data = ast.literal_eval(path.read_text().removeprefix("SAMPLE = "))
+    del data["implementation"]
+    path.write_text("SAMPLE = " + repr(data))
+    with pytest.raises(ValueError, match="implementation must be"):
+        SampleCatalog(tmp_path)
+
+
+def test_state_edit_variants_share_questions_and_select_distinct_policies():
+    """Renaming must preserve exactly two selectable versions of this lesson."""
+    catalog = SampleCatalog()
+    variants = {
+        sample.id: sample
+        for sample in catalog.samples.values()
+        if sample.implementation == "edit_with_reloaded_state"
+    }
+    assert set(variants) == {"edit-with-patched-state", "edit-with-reloaded-state"}
+    # Folder discovery determines list order. These names must keep the two
+    # lessons adjacent so learners can find the comparison without a third entry.
+    ids = list(catalog.samples)
+    position = ids.index("edit-with-patched-state")
+    assert ids[position : position + 2] == [
+        "edit-with-patched-state",
+        "edit-with-reloaded-state",
+    ]
+    assert not (catalog.root / "claims_context").exists()
+    for sample_id, sample in variants.items():
+        assert sample.name == sample_id
+        assert sample.options == {"mode": sample_id}
+        assert sample.directory.name == sample_id.replace("-", "_")
+    assert catalog.prompts("edit-with-patched-state") == catalog.prompts(
+        "edit-with-reloaded-state"
+    )
+
+
 def test_sample_configuration_does_not_leak(tmp_path, monkeypatch):
     """Switching samples must not inherit the first selection's dotenv model."""
     first = register(tmp_path, "a", "first")
@@ -454,4 +500,4 @@ def test_discovery_does_not_call_model_factories(monkeypatch):
     catalog = SampleCatalog()
     assert catalog.get("simple_chat").name == sample.SAMPLE["name"]
     assert catalog.prompts("simple_chat") == sample.USER_PROMPTS
-    assert "claims_context" not in catalog.samples
+    assert "edit_with_reloaded_state" not in catalog.samples

@@ -14,9 +14,9 @@ Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 # LangChain's AIMessage holds an assistant response; constructing it runs nothing.
 # Its tool_calls, when present, are proposed names/arguments, not tool results.
 from agent_runtime.agents.wikipedia_rag_agent import WIKIPEDIA_INDEX_DIRECTORY
-from agent_runtime.harness.model_factory import client_prompts, model_responses
+from agent_runtime.harness.model_factory import client_prompts
 from agent_runtime.harness.rag_index import open_index
-from agent_runtime.harness.simulated_model import MeteredDemoModel
+from agent_runtime.harness.simulated_model import SimulatedModel
 
 # Discovery reads this metadata without constructing a model.
 SAMPLE = {
@@ -33,7 +33,7 @@ CONVERSATION = [
         "content": "How has the Australian raven adapted to urban environments?",
     },
     {
-        "role": "ai",
+        "role": "wikipedia_rag_agent",
         "content": "",
         "tool_calls": [
             {
@@ -51,7 +51,7 @@ CONVERSATION = [
         "tool_call_id": "wiki-search-1",
         "content": "Expected: real retrieved passages and source IDs from the local Chroma index.",
     },
-    {"role": "ai", "content": "Retrieved reference excerpt [{passage_id}]:\n{excerpt}"},
+    {"role": "wikipedia_rag_agent", "content": "Retrieved reference excerpt [{passage_id}]:\n{excerpt}"},
 ]
 USER_PROMPTS = client_prompts(CONVERSATION)
 
@@ -75,12 +75,12 @@ def make_simulated_model():
     # An empty index cannot provide the required excerpt and fails here.
     passage_id = result["ids"][0][0]
     excerpt = result["documents"][0][0][:600]
-    responses = model_responses(CONVERSATION)
-    responses[-1].content = responses[-1].content.format(
+    conversation = [dict(entry) for entry in CONVERSATION]
+    conversation[-1]["content"] = conversation[-1]["content"].format(
         passage_id=passage_id, excerpt=excerpt
     )
-    return MeteredDemoModel(
-        responses=responses,
+    return SimulatedModel(
+        conversation=conversation,
         metadata={
             "report_description": "Retrieve bounded evidence and answer with passage citations.",
             "report_effort": "light",

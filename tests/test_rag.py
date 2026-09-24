@@ -19,7 +19,7 @@ from tokenizers import Tokenizer, models, pre_tokenizers
 
 from agent_runtime.harness.conversation import Conversation, Request
 from agent_runtime.harness.rag_index import articles, chunks, open_index
-from agent_runtime.harness.simulated_model import MeteredDemoModel
+from agent_runtime.harness.simulated_model import SimulatedModel
 from agent_runtime.tools.semantic_search_wikipedia import build_search_tool
 from agent_runtime.workflows.rag_chat import build_workflow
 
@@ -101,8 +101,8 @@ def test_chroma_persistence_tool_and_graph(tmp_path, monkeypatch):
     assert len(result["passages"]) == 2
     assert json.loads(tool.invoke({"query": ""}))["passages"] == []
     assert json.loads(tool.invoke({"query": "x" * 501}))["passages"] == []
-    model = MeteredDemoModel(
-        responses=[
+    model = SimulatedModel(
+        conversation=[{"role": "test-agent", "content": response.content, "tool_calls": response.tool_calls, "response_metadata": response.response_metadata} for response in [
             AIMessage(
                 content="",
                 tool_calls=[
@@ -114,7 +114,7 @@ def test_chroma_persistence_tool_and_graph(tmp_path, monkeypatch):
                 ],
             ),
             AIMessage(content="Urban adaptation [raven-1]"),
-        ]
+        ]], agent_name="test-agent"
     )
     from agent_runtime.agents import wikipedia_rag_agent
 

@@ -54,7 +54,9 @@ def retrieval_fixture(monkeypatch):
     async def open_fixture(parameters):
         """Keep the same discovered MCP tool alive for either frontend."""
         async with MCPAdapter(build_server(Collection())) as adapter:
-            yield create_deep_agent(**parameters, tools=await adapter.list_tools())
+            yield create_deep_agent(
+                **parameters, name="wikipedia_mcp_agent", tools=await adapter.list_tools()
+            )
 
     monkeypatch.setattr(mcp_rag_chat, "open_agent", open_fixture)
 
@@ -551,12 +553,12 @@ def test_real_mode_configuration_failure_does_not_fall_back(tmp_path):
 
 
 @pytest.mark.parametrize(
-    "sample", ["simple_chat", "claims_context_managed", "subagent_chat", "review_loop"]
+    "sample", ["simple_chat", "edit-with-reloaded-state", "subagent_chat", "review_loop"]
 )
 def test_retained_preview_matches_next_entry_call_without_new_request(tmp_path, sample):
-    """Compare preview contents with real next-turn capture, including managed purges.
+    """Compare preview contents with real next-turn capture, including edit-with-reloaded-state purges.
 
-    Child agent messages must not inflate the parent's context. Managed claims
+    Child agent messages must not inflate the parent's context. edit-with-reloaded-state claims
     must drop invalidated history even while that history stays in the chat UI.
     """
     from reporting.schema import Run
@@ -591,7 +593,7 @@ def test_retained_preview_matches_next_entry_call_without_new_request(tmp_path, 
                 for event in received
                 if event.get("name") == "retained_context"
             )
-            if sample == "claims_context_managed" and prompt == prompts[2]:
+            if sample == "edit-with-reloaded-state" and prompt == prompts[2]:
                 serialized = json.dumps(previous["messages"])
                 assert (
                     "Claim snapshots and prior discussion have been removed"

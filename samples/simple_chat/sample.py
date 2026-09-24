@@ -10,8 +10,8 @@ AI attribution: Generated with AI assistance by Northstar.
 Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
 
-from agent_runtime.harness.model_factory import client_prompts, model_responses
-from agent_runtime.harness.simulated_model import MeteredDemoModel
+from agent_runtime.harness.model_factory import client_prompts
+from agent_runtime.harness.simulated_model import SimulatedModel
 
 # Discovery reads this metadata without constructing a model.
 SAMPLE = {
@@ -23,14 +23,14 @@ SAMPLE = {
 CONVERSATION = [
     {"role": "client", "content": "Explain the main steps in an agent workflow."},
     {
-        "role": "ai",
+        "role": "chat_agent",
         "content": "An agent observes its input, selects an action, uses the result, and responds. This report was "
         "captured from a real DeepAgents graph using an offline model.",
         "response_metadata": {"model_name": "scripted-chat"},
     },
     {"role": "client", "content": "How does a tool observation help the agent answer?"},
     {
-        "role": "ai",
+        "role": "chat_agent",
         "content": "A tool observation supplies evidence the model did not have in the user's request. The model "
         "incorporates that evidence into its next answer.",
         "response_metadata": {"model_name": "scripted-chat", "finish_reason": "stop"},
@@ -43,8 +43,8 @@ USER_PROMPTS = client_prompts(CONVERSATION)
 
 def make_simulated_model():
     """Extract AI replies into a fresh model with independent cursor and usage."""
-    return MeteredDemoModel(
-        responses=model_responses(CONVERSATION),
+    return SimulatedModel(
+        conversation=CONVERSATION,
         metadata={
             "report_effort": "light",
             "report_description": "Answer the current user question directly without "

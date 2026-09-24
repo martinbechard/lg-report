@@ -30,7 +30,7 @@ CONVERSATION = [
     },
     # The specialist starts with this standalone assignment, not parent history.
     {
-        "role": "ai",
+        "role": "delegating_parent",
         "content": "",
         "tool_calls": [
             {
@@ -71,7 +71,7 @@ CONVERSATION = [
         "content": "The echo tool returned Your input was: ReAct. It repeated the supplied text without adding factual evidence.",
     },
     {
-        "role": "ai",
+        "role": "delegating_parent",
         "content": "The specialist echoed ReAct and received Your input was: ReAct. The parent receives its summary; the specialist's internal tool exchange stays in its own context.",
     },
 ]

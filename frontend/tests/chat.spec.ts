@@ -54,6 +54,25 @@ test('rejects non-UTF-8, removes files, selects samples and fits a phone', async
   await page.screenshot({ path: 'test-results/mobile-chat.png', fullPage: true });
 });
 
+// Public sample IDs also select the audit link. Exercise each renamed lesson
+// through the real catalog and one scripted turn so a stale ID-prefix check
+// cannot silently hide the context evidence from the user.
+for (const sample of ['edit-with-patched-state', 'edit-with-reloaded-state']) {
+  test(`${sample} exposes its context audit after a turn`, async ({ page }) => {
+    await page.goto('/');
+    await expect(page.getByRole('button', { name: 'Send message' })).toBeEnabled();
+    await page.getByLabel('Sample', { exact: true }).selectOption(sample);
+    await expect(page.getByRole('heading', { name: sample, exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Send message' })).toBeEnabled();
+    await page.getByRole('button', { name: 'Send message' }).click();
+    const audit = page.getByRole('link', { name: 'View context audit' });
+    await expect(audit).toBeVisible();
+    const response = await page.request.get((await audit.getAttribute('href'))!);
+    expect(response.ok()).toBeTruthy();
+    expect((await response.json()).mode).toBe(sample);
+  });
+}
+
 test('attachment-only live input streams before EOF and Stop closes HTTP', async ({ page }) => {
   let submitted: any;
   let disconnected = false;

@@ -163,7 +163,7 @@ class WebConversation:
                             else:
                                 yield event
                 # Read the final checkpoint, not AG-UI's display transcript or
-                # the last model call. Managed claims retain a separate working
+                # the last model call. edit-with-reloaded-state claims retain a separate working
                 # field; its explicit empty list must not fall back to history.
                 snapshot = await graph.aget_state(
                     {"configurable": {"thread_id": input_data.thread_id}}

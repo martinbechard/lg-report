@@ -1,5 +1,13 @@
 <!-- Copyright (c) 2026 Martin.Bechard@DevConsult.ca -->
-# Claims and policy: agent-driven retrieval and context management
+# edit-with-reloaded-state
+
+The two selectable variants are **edit-with-patched-state** and
+**edit-with-reloaded-state**. This folder declares the reload variant and holds
+the shared scenario used by its patched sibling. In edit-with-patched-state,
+the model reconstructs current state from
+retained reads and successful edit arguments; the application does not rewrite
+old snapshots. In edit-with-reloaded-state, the application removes stale claim
+context after an edited turn, and the agent chooses a fresh read when needed.
 
 The **agent chooses when to read** fictional claim CLM-001 or policy POL-001
 based on the human's query. Neither record is preloaded. The application never
@@ -15,7 +23,7 @@ payment, or local source file is modified.
 
 The agent encapsulates **how to do claims work**. The workflow is the harness
 that controls **which context is carried into the next turn**. The same agent
-works under either strategy; it receives no `naive` or `managed` setting.
+works under either strategy; it receives no `edit-with-patched-state` or `edit-with-reloaded-state` setting.
 
 ```text
 Variant sample.py: model configuration, human/scripted client, reporting
@@ -60,27 +68,32 @@ build_workflow(): compose a ClaimsAgent with a conversation harness
                     |
                     v
        Workflow detects successful edit?
-              /                \
-            No                  Yes
-            |                    |
-       Keep context         Context mode?
-            |                /          \
-            |             naive        managed
-            |               |             |
-            |          Keep history   Remove claim exchanges
-            |               |         and conversation prose;
-            |               |         retain actual policy reads
-            +---------------+-------------+
-                            |
-                     Next human query
-                            |
-                     Agent decides again
-                     (NO automatic read)
+                    |
+          +---------+----------+
+          |                    |
+          No                   Yes
+          |                    |
+     Keep context         Context mode?
+          |                    |
+          |        +-----------+------------------+
+          |        |                              |
+          |  edit-with-patched-state          edit-with-reloaded-state
+          |        |                              |
+          |   Keep history                 Remove claim exchanges
+          |        |                       and conversation prose;
+          |        |                       retain policy tool pairs
+          |        |                              |
+          +--------+------------------------------+
+                   |
+            Next human query
+                   |
+            Agent decides again
+            (NO automatic read)
 ```
 
 Each model call receives tool schemas, but those schemas do not contain the
 record data. Tool execution happens only after a model-emitted tool call. In
-managed mode, the workflow compares the agent's opaque `context_version` before
+edit-with-reloaded-state mode, the workflow compares the agent's opaque `context_version` before
 and after a completed turn. A change causes the harness to request and apply the
 agent's `retain_unaffected_context` projection. The agent knows that claim edits
 leave policy observations valid; the harness knows neither tool names nor the
@@ -91,8 +104,8 @@ Failed edits alone do not invalidate anything.
 ## Run the comparison
 
 ```bash
-uv run python -m agent_runtime --sample claims_context_naive --show-context --out reports/claims-naive --demo
-uv run python -m agent_runtime --sample claims_context_managed --show-context --out reports/claims-managed --demo
+uv run python -m agent_runtime --sample edit-with-patched-state --show-context --out reports/claims-edit-with-patched-state --demo
+uv run python -m agent_runtime --sample edit-with-reloaded-state --show-context --out reports/claims-edit-with-reloaded-state --demo
 ```
 
 The demonstration asks five questions:
@@ -102,7 +115,7 @@ The demonstration asks five questions:
 3. Correction from theft to accidental damage at home, status approved: the
    agent requests `edit_claim`.
 4. Policy limit: the agent uses retained policy context; no claim read occurs.
-5. Current claim details: in managed mode, the agent requests `read_claim` again.
+5. Current claim details: in edit-with-reloaded-state mode, the agent requests `read_claim` again.
 
 **Offline tool choices and answers are scripted model responses.** The tools
 really run. Both modes give the same correct scripted answer; the difference is
@@ -114,18 +127,18 @@ only the offline model fixture scripts different follow-up choices. Simulated
 usage counts the actual inputs; neither mode models provider cache reuse.
 
 Output directories are reused. Omit `--out` to replace the report bundle and
-`context.json` in `reports/claims_context_naive/` or `reports/claims_context_managed/`. Use `--prices models.json` and
+`context.json` in `reports/edit-with-patched-state/` or `reports/edit-with-reloaded-state/`. Use `--prices models.json` and
 `--fx-file PATH` for supplied pricing and exchange snapshots. FX otherwise reads the shared
 `exchange-rate.json` without a lookup. Use `--demo` to keep model calls scripted even when an API key is configured.
 
 ## Compare actual agent decisions
 
 ```bash
-cp samples/claims_context/.env.example samples/claims_context_naive/.env
-cp samples/claims_context/.env.example samples/claims_context_managed/.env
+cp samples/edit_with_reloaded_state/.env.example samples/edit_with_patched_state/.env
+cp samples/edit_with_reloaded_state/.env.example samples/edit_with_reloaded_state/.env
 # Configure provider credentials and model in each variant file.
-uv run python -m agent_runtime --sample claims_context_naive --live --mode naive --show-context --out reports/claims-live-naive
-uv run python -m agent_runtime --sample claims_context_managed --live --mode managed --show-context --out reports/claims-live-managed
+uv run python -m agent_runtime --sample edit-with-patched-state --live --mode edit-with-patched-state --show-context --out reports/claims-live-edit-with-patched-state
+uv run python -m agent_runtime --sample edit-with-reloaded-state --live --mode edit-with-reloaded-state --show-context --out reports/claims-live-edit-with-reloaded-state
 ```
 
 These runs share user questions, tools, and agent instructions. The real model
@@ -135,11 +148,11 @@ Console `/attach` supplies ordinary text context, not a stored claim or policy.
 
 A live model may answer correctly in both modes, reread proactively, or make a
 mistake after invalidation. Inspect actual tool choices and results; the sample
-has not established a live accuracy improvement. In naive mode, current claim
+has not established a live accuracy improvement. In edit-with-patched-state mode, current claim
 facts must be reconstructed from the last read plus **all successful subsequent
 replacements**, in execution order. An edit acknowledgement is not a full claim.
 
-## What the managed mode removes
+## What the edit-with-reloaded-state mode removes
 
 At edit-turn end, the harness elects to apply the agent's retention rules.
 Those rules remove claim tool exchanges and all prior
@@ -170,8 +183,8 @@ visible in the captured messages.
 - `--metadata-only` omits content from saved audits/reports and suppresses
   `--show-context`. Terminal user prompts and answers remain visible.
 
-Examples: [naive report](../../reports/claims_context_naive/report.html)
-and [managed report](../../reports/claims_context_managed/report.html).
+Examples: [edit-with-patched-state report](../../reports/edit-with-patched-state/report.html)
+and [edit-with-reloaded-state report](../../reports/edit-with-reloaded-state/report.html).
 The batch runner includes both modes.
 
 Files and responsibilities follow the project's agent/workflow separation:
@@ -180,19 +193,19 @@ Files and responsibilities follow the project's agent/workflow separation:
   tool registration, model/tool loop, private domain state, and knowledge of
   which context remains valid. The model chooses its actions here.
 - `src/agent_runtime/tools/claims.py`: dummy records and read/edit tool implementations.
-- `src/agent_runtime/workflows/claims_context.py`: participant composition and the
-  harness controlling turns, naive/managed strategy, and independent audit.
+- `src/agent_runtime/workflows/edit_with_reloaded_state.py`: participant composition and the
+  harness controlling turns, edit-with-patched-state/edit-with-reloaded-state strategy, and independent audit.
   It never reads records or inspects tool names to decide what the agent does.
 - `sample.py`: scripted user prompts and model responses.
-- [Naive metadata](../claims_context_naive/sample.py) and [managed metadata](../claims_context_managed/sample.py): one context-policy variant per file, each sharing the `claims_context` implementation.
+- [edit-with-patched-state metadata](../edit_with_patched_state/sample.py) and [edit-with-reloaded-state metadata](../edit_with_reloaded_state/sample.py): one context-policy variant per file, each sharing the `edit_with_reloaded_state` implementation.
 
 Tests verify on-demand reads, policy retention, no forced reload, multiple edits,
 failed edits, tool-pair integrity, and unchanged audit evidence.
 
 ## Angular client
 
-Select **Claims context — naive** or **Claims context — managed** in the catalog,
-or add `--client angular --mode managed` when launching this sample. Both clients
+Select **edit-with-patched-state** or **edit-with-reloaded-state** in the catalog,
+or add `--client angular --mode edit-with-reloaded-state` when launching this sample. Both clients
 use LangGraphAgent and the same context-policy graph. Display history is separate
 from working model context; retaining a message in the UI does not reintroduce it
 to the model. **View context audit** exposes the separate audit. Content follows

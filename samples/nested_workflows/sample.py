@@ -14,9 +14,7 @@ Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 
 from pydantic import PrivateAttr
 
-from agent_runtime.harness.demo_meter import TOKEN_ESTIMATE_BASIS, ContextSimulation
-from agent_runtime.harness.model_factory import model_responses
-from agent_runtime.harness.simulated_model import MeteredDemoModel
+from agent_runtime.harness.simulated_model import SimulatedModel
 from samples.nested_workflows.scenarios import (
     CONVERSATION as CONVERSATION,  # noqa: PLC0414 - chronological catalog export
 )
@@ -38,10 +36,9 @@ SAMPLE = {
 }
 
 
-class NestedDemoModel(MeteredDemoModel):
+class NestedDemoModel(SimulatedModel):
     """Keep one role's response cursor while recording each actual prompt for tests."""
 
-    _issued: int = PrivateAttr(default=0)
     _seen: list = PrivateAttr(default_factory=list)
 
     @property
@@ -53,16 +50,9 @@ class NestedDemoModel(MeteredDemoModel):
         ]
 
     def _generate(self, messages, *args, **kwargs):
-        if self._issued >= len(self.responses):
-            raise RuntimeError("The scripted role response queue is exhausted")
+        """Record actual input before the common simulator selects and meters a reply."""
         self._seen.append([message.model_copy(deep=True) for message in messages])
-        self._issued += 1
-        self._simulation = ContextSimulation()
-        result = super()._generate(messages, *args, **kwargs)
-        result.generations[0].message.response_metadata["usage_basis"] = (
-            f"{TOKEN_ESTIMATE_BASIS}; per actual request; no cache reuse assumed"
-        )
-        return result
+        return super()._generate(messages, *args, **kwargs)
 
 
 def build_scripted_models(options):
@@ -75,7 +65,7 @@ def build_scripted_models(options):
     steps = conversation(options)
     return {
         name: NestedDemoModel(
-            responses=model_responses(steps, name),
+            conversation=steps, cache_reuse=False,
             metadata={
                 "report_description": f"Scripted nested-workflow {name} decisions."
             },

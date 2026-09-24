@@ -13,9 +13,8 @@ Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 
 import json
 
-from agent_runtime.harness.demo_meter import TOKEN_ESTIMATE_BASIS, ContextSimulation
-from agent_runtime.harness.model_factory import client_prompts, model_responses
-from agent_runtime.harness.simulated_model import MeteredDemoModel
+from agent_runtime.harness.model_factory import client_prompts
+from agent_runtime.harness.simulated_model import SimulatedModel
 
 # Discovery reads this metadata without constructing a model.
 SAMPLE = {
@@ -24,20 +23,6 @@ SAMPLE = {
     "description": "File-backed planner and worker with shared compaction and an isolated "
     "code reviewer.",
 }
-
-
-class CompactingDemoModel(MeteredDemoModel):
-    """Meter each rewritten request without claiming cache reuse."""
-
-    def _generate(self, messages, *args, **kwargs):
-        # The generic demo meter assumes append-only history. Native compaction
-        # replaces old messages, so its local prefix ledger must restart.
-        self._simulation = ContextSimulation()
-        result = super()._generate(messages, *args, **kwargs)
-        result.generations[0].message.response_metadata["usage_basis"] = (
-            f"{TOKEN_ESTIMATE_BASIS}; rewritten context; no cache reuse assumed"
-        )
-        return result
 
 
 # Read down this list to follow dispatch, implementation, independent review,
@@ -889,19 +874,19 @@ def make_simulated_models():
         "isolated-reviewer": "Inspect files in isolated review context.",
         "workflow-summary": "Summarize main context.",
     }
-    models = []
-    for role, description in roles.items():
-        responses = model_responses(CONVERSATION, role)
-        # Summarization frequency depends on budgets, so provide independent
-        # copies of the same authored summary for up to forty compactions.
-        if role == "workflow-summary":
-            responses = [responses[0].model_copy(deep=True) for _ in range(40)]
-        models.append(
-            CompactingDemoModel(
-                responses=responses, metadata={"report_description": description}
-            )
+    # Summarization is a direct model call rather than a named agent. Bind its
+    # identity here in the sample harness; workflow code needs no simulation logic.
+    # Forty authored summary entries bound this scenario's on-demand compactions.
+    summary = next(entry for entry in CONVERSATION if entry["role"] == "workflow-summary")
+    scenario = [*CONVERSATION, *[dict(summary) for _ in range(39)]]
+    return tuple(
+        SimulatedModel(
+            conversation=scenario, cache_reuse=False,
+            agent_name=role if role == "workflow-summary" else None,
+            metadata={"report_description": description},
         )
-    return tuple(models)
+        for role, description in roles.items()
+    )
 
 
 def build_scripted_models(options):

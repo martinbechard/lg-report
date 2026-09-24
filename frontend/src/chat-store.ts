@@ -111,7 +111,9 @@ export class ChatStore {
       if (!record(data) || typeof data['threadId'] !== 'string') throw new Error('Invalid session response.');
       if (generation !== this.generation) { this.discard(data['threadId']); return; }
       this.threadId = data['threadId'];
-      if (sample.startsWith('claims_context_')) this.contextUrl.set(`/api/sessions/${this.threadId}/context`);
+      // Both state-edit lessons expose the working-context audit. Their public
+      // IDs differ from the shared edit_with_reloaded_state Python implementation name.
+      if (sample === 'edit-with-patched-state' || sample === 'edit-with-reloaded-state') this.contextUrl.set(`/api/sessions/${this.threadId}/context`);
       if (sample === 'file_approval') this.outputUrl.set(`/api/sessions/${this.threadId}/output`);
       this.agent = new HttpAgent({ url: `/api/chat/${this.threadId}`, threadId: this.threadId });
       this.agent.subscribe({

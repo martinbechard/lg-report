@@ -49,3 +49,9 @@ Generated logs, ad hoc output folders, and Langfuse state remain ignored.
 PNG workbook previews are not generated; inspect the HTML or Excel report directly. The root [LICENSE](../LICENSE) and
 [NOTICE](../NOTICE) cover the report files; third-party excerpts retain their
 source terms.
+
+The claims comparison now uses `edit-with-patched-state` (formerly
+`claims_context_naive`) and `edit-with-reloaded-state` (formerly
+`claims_context_managed`). Saved report folders and display titles use the new
+names. Raw traces and context audits retain the original execution, including
+historical mode labels; this rename did not rerun or simulate those live calls.

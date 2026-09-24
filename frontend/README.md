@@ -142,7 +142,7 @@ requires a fresh chat; it neither approves a tool nor rolls back earlier effects
 
 The context meter previews retained context for the next request, excluding the
 composer draft and newly queued attachments. It reads the server checkpoint after
-the turn, so the final answer is included and managed claims purges are reflected.
+the turn, so the final answer is included and edit-with-reloaded-state claims purges are reflected.
 Expand **View retained context** to inspect messages, instructions, and tool schemas.
 Token counts and percentages are local estimates, not provider usage receipts;
 bytes count the UTF-8 JSON representation including tool definitions. For normal

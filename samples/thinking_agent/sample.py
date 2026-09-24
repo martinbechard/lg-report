@@ -10,8 +10,8 @@ AI attribution: Generated with AI assistance by Northstar.
 Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
 
-from agent_runtime.harness.model_factory import client_prompts, model_responses
-from agent_runtime.harness.simulated_model import MeteredDemoModel
+from agent_runtime.harness.model_factory import client_prompts
+from agent_runtime.harness.simulated_model import SimulatedModel
 
 # Discovery reads this metadata without constructing a model.
 SAMPLE = {
@@ -28,7 +28,7 @@ CONVERSATION = [
         "content": "Investigate service latency and validate a plan meeting the constraints.",
     },
     {
-        "role": "ai",
+        "role": "investigation_agent",
         "content": "Inspect the traffic evidence.",
         "tool_calls": [
             {
@@ -46,7 +46,7 @@ CONVERSATION = [
         "tool.",
     },
     {
-        "role": "ai",
+        "role": "investigation_agent",
         "content": "Inspect the database evidence.",
         "tool_calls": [
             {
@@ -64,7 +64,7 @@ CONVERSATION = [
         "tool.",
     },
     {
-        "role": "ai",
+        "role": "investigation_agent",
         "content": "Inspect the constraints evidence.",
         "tool_calls": [
             {
@@ -82,7 +82,7 @@ CONVERSATION = [
         "running tool.",
     },
     {
-        "role": "ai",
+        "role": "investigation_agent",
         "content": "Proposed plan: deduplicate account lookups and add a 30-second invalidated cache. Validate "
         "load, freshness, and rollback.",
         "tool_calls": [
@@ -106,7 +106,7 @@ CONVERSATION = [
         "content": "Expected: actual test_plan result for {'check': 'load'}; supplied by the running tool.",
     },
     {
-        "role": "ai",
+        "role": "investigation_agent",
         "content": "Verify freshness before recommending the change.",
         "tool_calls": [
             {
@@ -128,7 +128,7 @@ CONVERSATION = [
         "content": "Expected: actual test_plan result for {'check': 'freshness'}; supplied by the running tool.",
     },
     {
-        "role": "ai",
+        "role": "investigation_agent",
         "content": "Verify rollback before recommending the change.",
         "tool_calls": [
             {
@@ -150,7 +150,7 @@ CONVERSATION = [
         "content": "Expected: actual test_plan result for {'check': 'rollback'}; supplied by the running tool.",
     },
     {
-        "role": "ai",
+        "role": "investigation_agent",
         "content": "Recommend deduplicated lookups and a 30-second invalidated cache. The load test meets the "
         "500ms target at 410ms; freshness and rollback checks pass. Roll out behind the feature flag "
         "and monitor latency and pool occupancy.",
@@ -168,8 +168,8 @@ USER_PROMPTS = client_prompts(CONVERSATION)
 
 def make_simulated_model():
     """Extract AI replies into a fresh model with independent cursor and usage."""
-    return MeteredDemoModel(
-        responses=model_responses(CONVERSATION),
+    return SimulatedModel(
+        conversation=CONVERSATION,
         metadata={
             "report_effort": "high",
             "report_description": "Investigate service evidence, evaluate a constrained "

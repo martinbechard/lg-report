@@ -10,8 +10,8 @@ AI attribution: Generated with AI assistance by Northstar.
 Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
 
-from agent_runtime.harness.model_factory import client_prompts, model_responses
-from agent_runtime.harness.simulated_model import MeteredDemoModel
+from agent_runtime.harness.model_factory import client_prompts
+from agent_runtime.harness.simulated_model import SimulatedModel
 
 # Discovery reads this metadata without constructing a model.
 SAMPLE = {
@@ -27,7 +27,7 @@ CONVERSATION = [
         "content": "How has the Australian raven adapted to urban environments?",
     },
     {
-        "role": "ai",
+        "role": "wikipedia_mcp_agent",
         "content": "",
         "tool_calls": [
             {
@@ -47,7 +47,7 @@ CONVERSATION = [
         "adapted to urban environments?'}; supplied by the running tool.",
     },
     {
-        "role": "ai",
+        "role": "wikipedia_mcp_agent",
         "content": "The MCP search completed. Inspect the semantic_search_wikipedia result for retrieved passages "
         "and source IDs. This scripted response demonstrates retrieval and accounting, not answer "
         "synthesis.",
@@ -60,8 +60,8 @@ USER_PROMPTS = client_prompts(CONVERSATION)
 
 def make_simulated_model():
     """Extract AI replies into a fresh model with independent cursor and usage."""
-    return MeteredDemoModel(
-        responses=model_responses(CONVERSATION),
+    return SimulatedModel(
+        conversation=CONVERSATION,
         metadata={
             "report_description": "Search Wikipedia through MCP and consume the returned "
             "evidence.",

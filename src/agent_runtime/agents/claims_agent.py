@@ -19,6 +19,10 @@ from langchain_core.messages import AIMessage, SystemMessage
 
 from agent_runtime.tools.claims import ClaimStore
 
+# These instructions are sent to the model in both context modes. Keeping mode
+# out of the prompt isolates the experiment to available history. The model is
+# asked to use tools correctly; Python validation in ClaimStore, rather than this
+# prose, enforces revision and editable-field checks.
 SYSTEM_PROMPT = """You assist with fictional claim CLM-001 and policy POL-001.
 Decide which tools, if any, the human's question needs. Use read_claim for claim
 facts and read_policy for policy terms when the needed record is absent from
@@ -46,6 +50,9 @@ def invalidate_claim_context(messages):
     # A tool result refers to the model's earlier request by ID. Keeping that
     # relationship is essential: preserving just a JSON policy response would
     # leave an orphaned tool message, not a valid conversational exchange.
+    # Index completed results by call ID, not by tool name: repeated policy reads
+    # must remain paired with their own requests. This assumes normal agent-loop
+    # messages with unique call IDs; it is not a validator for arbitrary traces.
     observations = {
         message.tool_call_id: message for message in messages if message.type == "tool"
     }
@@ -64,6 +71,9 @@ def invalidate_claim_context(messages):
             # mixed call may mention the old claim, so do not preserve that text.
             retained.append(AIMessage(content="", tool_calls=calls))
             retained.extend(observations[call["id"]] for call in calls)
+        # Requests without an observed result are not retained. There is no new
+        # execution here to complete a missing observation, and no claim-related
+        # prose is trusted merely because it accompanies an otherwise valid read.
     # The notice describes what the harness removed; it supplies no claim data
     # and requests no tool. Put it before conversational messages so providers
     # that require system messages at the start receive a valid ordering.
@@ -83,7 +93,7 @@ def invalidate_claim_context(messages):
 class ClaimsAgent:
     """Encapsulate role instructions, tools, domain state, and retention knowledge.
 
-    The workflow controls naive versus managed context. This component reports
+    The workflow controls edit-with-patched-state versus edit-with-reloaded-state context. This component reports
     changes and can project still-valid context, but never chooses that strategy
     or clears the workflow's history itself. Neither mode changes its prompt.
     """
@@ -93,6 +103,9 @@ class ClaimsAgent:
 
         An optional store is a test seam, not something the workflow inspects.
         No checkpointer can silently reintroduce invalidated message history.
+        parameters supplies create_agent construction options, normally the
+        already-selected model. The workflow owns model configuration; this
+        component adds the fixed domain prompt, tool definitions, and agent name.
         """
         # Storage being present in the Python process does NOT put its contents
         # in the model's context. Only an agent-requested read returns those data.
@@ -116,7 +129,15 @@ class ClaimsAgent:
         return self._store.claim.revision
 
     def invoke(self, inputs, config=None):
-        """Let the agent decide and execute actions against supplied working context."""
+        """Run the model/tool loop against the workflow's selected working context.
+
+        inputs supplies messages, not a claim snapshot or an instruction to read.
+        LangChain executes model-proposed tools and calls the model again with
+        their results until it returns an answer without further tool requests.
+        Return the graph's state dictionary, including the full message sequence,
+        rather than only the final answer text. The workflow needs those exchanges
+        both to display execution and to select what context survives next turn.
+        """
         # Forward tracing configuration through the whole internal graph so the
         # report can observe decisions without taking ownership of those decisions.
         return self._graph.invoke(inputs, config=config)
@@ -128,7 +149,7 @@ class ClaimsAgent:
         The supplied transcript and audit are never modified in place.
         """
         # This method describes an available projection. Calling it is a harness
-        # decision: naive mode never calls it, and the agent has no mode flag.
+        # decision: edit-with-patched-state mode never calls it, and the agent has no mode flag.
         return invalidate_claim_context(messages)
 
     def evidence(self):

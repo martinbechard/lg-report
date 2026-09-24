@@ -16,15 +16,15 @@ from langchain_core.messages import AIMessage, ToolMessage
 
 from agent_runtime.agents.claims_agent import build_agent, invalidate_claim_context
 from agent_runtime.harness.conversation import Conversation, Request
+from agent_runtime.harness.simulated_model import SimulatedModel
 from agent_runtime.tools.claims import ClaimStore
-from agent_runtime.workflows.claims_context import (
+from agent_runtime.workflows.edit_with_reloaded_state import (
     ClaimsContext,
     ContextAudit,
 )
-from samples.claims_context.sample import (
+from samples.edit_with_reloaded_state.sample import (
     CORRECTED_DESCRIPTION,
     USER_PROMPTS,
-    UncachedDemoModel,
     make_simulated_model,
 )
 
@@ -43,7 +43,9 @@ def run_demo(mode, *, prompts=USER_PROMPTS, model=None, capture=True):
     return session, client
 
 
-@pytest.mark.parametrize("mode", ["naive", "managed"])
+@pytest.mark.parametrize(
+    "mode", ["edit-with-patched-state", "edit-with-reloaded-state"]
+)
 def test_same_edits_different_actual_model_context(mode):
     """Compare submitted inputs rather than trusting the authored final answers."""
     session, client = run_demo(mode)
@@ -54,7 +56,7 @@ def test_same_edits_different_actual_model_context(mode):
     assert session.agent.context_version == 2
     final_input = session.audit.calls[-1]["messages"]
     serialized = json.dumps(final_input)
-    if mode == "naive":
+    if mode == "edit-with-patched-state":
         assert "parked car" in serialized
         assert '"edit_claim"' in serialized
         # The only read result is revision 1; edits do not insert a new snapshot.
@@ -85,7 +87,7 @@ def test_same_edits_different_actual_model_context(mode):
 
 def test_quit_after_edit_does_not_reload():
     """Reload is demand-driven; a completed edit followed by exit needs no read."""
-    session, _ = run_demo("managed", prompts=USER_PROMPTS[:3])
+    session, _ = run_demo("edit-with-reloaded-state", prompts=USER_PROMPTS[:3])
     assert "parked car" not in str(session.history)
     assert [
         m.tool_calls[0]["name"] for m in session.history if getattr(m, "tool_calls", [])
@@ -94,7 +96,9 @@ def test_quit_after_edit_does_not_reload():
     assert len(session.audit.calls) == 6
 
 
-@pytest.mark.parametrize("mode", ["naive", "managed"])
+@pytest.mark.parametrize(
+    "mode", ["edit-with-patched-state", "edit-with-reloaded-state"]
+)
 def test_multiple_edits_in_one_turn_reload_the_combined_result(mode):
     """Every successful replacement contributes, including across tool calls.
 
@@ -104,7 +108,8 @@ def test_multiple_edits_in_one_turn_reload_the_combined_result(mode):
     """
     model = make_simulated_model(mode)
     final_description = "The damaged laptop was repaired at the local service centre."
-    model.responses[5:5] = [
+    insertion = [i for i, entry in enumerate(model.conversation) if entry["role"] == "claims_agent"][5]
+    model.conversation[insertion:insertion] = [{"role": "claims_agent", "content": response.content, "tool_calls": response.tool_calls} for response in [
         AIMessage(
             content="",
             tool_calls=[
@@ -119,13 +124,13 @@ def test_multiple_edits_in_one_turn_reload_the_combined_result(mode):
                 }
             ],
         ),
-    ]
+    ]]
     session, _ = run_demo(mode, model=model)
     assert session.agent.context_version == 3
     assert session.agent.evidence()["final_claim"]["description"] == final_description
     assert session.agent.evidence()["final_claim"]["status"] == "approved"
     final_input = session.audit.calls[-1]["messages"]
-    if mode == "managed":
+    if mode == "edit-with-reloaded-state":
         reads = [m for m in final_input if m["role"] == "tool"]
         assert len(reads) == 2
         assert json.loads(reads[1]["content"]) == {
@@ -183,9 +188,9 @@ def test_failed_edit_preserves_claim_and_history():
         AIMessage(content="The original claim still applies."),
     ]
     session, _ = run_demo(
-        "managed",
+        "edit-with-reloaded-state",
         prompts=USER_PROMPTS[1:4],
-        model=UncachedDemoModel(responses=responses),
+        model=SimulatedModel(cache_reuse=False, conversation=[{"role": "claims_agent", "content": response.content, "tool_calls": response.tool_calls} for response in responses]),
     )
     assert session.agent.context_version == 1
     assert session.events == []
@@ -213,7 +218,7 @@ def test_invalid_edit_is_atomic(description, status):
 
 def test_metadata_only_omits_claim_and_prompt_content():
     """The extra audit must honor the same content boundary as standard reports."""
-    session, _ = run_demo("managed", capture=False)
+    session, _ = run_demo("edit-with-reloaded-state", capture=False)
     evidence = session.evidence()
     assert "final_claim" not in evidence
     assert all("messages" not in call for call in evidence["calls"])
@@ -221,18 +226,18 @@ def test_metadata_only_omits_claim_and_prompt_content():
 
 
 def test_no_edit_keeps_history_without_reload():
-    """Managed mode preserves normal continuity until an actual edit succeeds."""
-    model = UncachedDemoModel(
-        responses=[AIMessage(content="Hello"), AIMessage(content="Hi")]
+    """edit-with-reloaded-state mode preserves normal continuity until an actual edit succeeds."""
+    model = SimulatedModel(cache_reuse=False, conversation=[{"role": "claims_agent", "content": response.content, "tool_calls": response.tool_calls} for response in [AIMessage(content="Hello"), AIMessage(content="Hi")]])
+    session, _ = run_demo(
+        "edit-with-reloaded-state", prompts=["Hello", "Again"], model=model
     )
-    session, _ = run_demo("managed", prompts=["Hello", "Again"], model=model)
     assert session.events == []
     assert "Hello" in json.dumps(session.audit.calls[-1])
 
 
 def test_policy_follow_up_does_not_reload_claim_after_edit():
     """Removing a claim does not trigger retrieval on an unrelated next question."""
-    session, _ = run_demo("managed", prompts=USER_PROMPTS[:4])
+    session, _ = run_demo("edit-with-reloaded-state", prompts=USER_PROMPTS[:4])
     call = session.audit.calls[-1]
     assert call["turn"] == 4
     text = json.dumps(call["messages"])
@@ -246,10 +251,10 @@ def test_policy_follow_up_does_not_reload_claim_after_edit():
 
 def test_no_read_happens_unless_model_requests_one():
     """No preload and no hidden retrieval even when a question mentions a claim."""
-    model = UncachedDemoModel(
-        responses=[AIMessage(content="Which detail do you need?")]
+    model = SimulatedModel(cache_reuse=False, conversation=[{"role": "claims_agent", "content": response.content, "tool_calls": response.tool_calls} for response in [AIMessage(content="Which detail do you need?")]])
+    session, _ = run_demo(
+        "edit-with-reloaded-state", prompts=["Help with my claim"], model=model
     )
-    session, _ = run_demo("managed", prompts=["Help with my claim"], model=model)
     assert len(session.audit.calls) == 1
     first = session.audit.calls[0]["messages"]
     assert all(m["role"] != "tool" for m in first)
@@ -283,8 +288,7 @@ def test_agent_can_read_claim_without_workflow_or_policy_loading():
     Supply a fresh human question directly to the agent. Its model requests only
     the claim; no workflow is present to select or execute an application read.
     """
-    model = UncachedDemoModel(
-        responses=[
+    model = SimulatedModel(cache_reuse=False, conversation=[{"role": "claims_agent", "content": response.content, "tool_calls": response.tool_calls} for response in [
             AIMessage(
                 content="",
                 tool_calls=[
@@ -296,8 +300,7 @@ def test_agent_can_read_claim_without_workflow_or_policy_loading():
                 ],
             ),
             AIMessage(content="The claim is pending."),
-        ]
-    )
+        ]])
     result = build_agent({"model": model}, ClaimStore()).invoke(
         {
             "messages": [{"role": "user", "content": "What is the claim's status?"}],
@@ -310,7 +313,9 @@ def test_agent_can_read_claim_without_workflow_or_policy_loading():
     assert "deductible_cad" not in str(result["messages"])
 
 
-@pytest.mark.parametrize("mode", ["naive", "managed"])
+@pytest.mark.parametrize(
+    "mode", ["edit-with-patched-state", "edit-with-reloaded-state"]
+)
 def test_harness_controls_strategy_through_agent_interface(mode):
     """Prove the harness can manage an agent with no claim store or tool names.
 
@@ -354,6 +359,6 @@ def test_harness_controls_strategy_through_agent_interface(mode):
         write=lambda _: None,
     )
     Conversation(session.graph, client).invoke({}, {})
-    assert agent.projections == (1 if mode == "managed" else 0)
-    assert len(agent.inputs[1]) == (1 if mode == "managed" else 3)
+    assert agent.projections == (1 if mode == "edit-with-reloaded-state" else 0)
+    assert len(agent.inputs[1]) == (1 if mode == "edit-with-reloaded-state" else 3)
     assert session.evidence()["domain_version"] == 1

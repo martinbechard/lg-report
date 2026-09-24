@@ -17,7 +17,7 @@ from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 
 from agent_runtime.agents import planner
 from agent_runtime.harness.model_factory import build_model, model_factory_scope
-from agent_runtime.harness.simulated_model import MeteredDemoModel
+from agent_runtime.harness.simulated_model import SimulatedModel
 from agent_runtime.workflows.circuit_breaker import build_workflow
 from agent_runtime.workflows.exercise_backend import ExerciseBackend
 from samples.circuit_breaker.sample import CONVERSATION, USER_PROMPTS
@@ -44,11 +44,11 @@ def test_breaker_blocks_fourth_write_and_ends(tmp_path, asynchronous):
 
 def test_model_limit_stops_reads_that_do_not_consume_write_allowance(tmp_path):
     """The fallback ceiling also bounds a different kind of unproductive loop."""
-    model = MeteredDemoModel(responses=[
+    model = SimulatedModel(conversation=[{"role": "test-agent", "content": response.content, "tool_calls": response.tool_calls, "response_metadata": response.response_metadata} for response in [
         AIMessage(content="", tool_calls=[{
             "name": "read_file", "args": {"file_path": "/slugify.py"}, "id": f"read-{i}",
         }]) for i in range(8)
-    ])
+    ]], agent_name="test-agent")
     result = build_workflow(model=model, workspace_dir=tmp_path).invoke(
         {"messages": [HumanMessage("Inspect the required file.")]}
     )

@@ -9,10 +9,10 @@ AI attribution: Generated with AI assistance by Northstar.
 Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
 
-from langchain_core.messages import AIMessage, ToolMessage
+from langchain_core.messages import ToolMessage
 
 from agent_runtime.harness.model_factory import client_prompts, model_responses
-from agent_runtime.harness.simulated_model import MeteredDemoModel
+from agent_runtime.harness.simulated_model import SimulatedModel
 
 # Discovery reads this metadata without constructing a model.
 SAMPLE = {
@@ -29,7 +29,7 @@ CONVERSATION = [
         "content": "Run sh ./summarize.sh and report the order totals and exit status.",
     },
     {
-        "role": "ai",
+        "role": "shell_agent",
         "content": "",
         "tool_calls": [
             {
@@ -44,18 +44,18 @@ CONVERSATION = [
         "name": "execute",
         "content": "Expected: actual stdout, stderr, and exit status; success is not assumed.",
     },
-    {"role": "ai", "content": "Shell tool returned:\n{tool_result}"},
+    {"role": "shell_agent", "content": "Shell tool returned:\n{tool_result}"},
 ]
 USER_PROMPTS = client_prompts(CONVERSATION)
 
 
-class ShellFixture(MeteredDemoModel):
+class ShellFixture(SimulatedModel):
     """Author one execute call, then report its real observation."""
 
-    def _generate(self, messages, *args, **kwargs):
+    def _next_response(self, agent_name, messages, position):
         """Keep scripted model behavior separate from process execution."""
         last = messages[-1]
-        steps = model_responses(CONVERSATION)
+        steps = model_responses(CONVERSATION, "shell_agent")
         if isinstance(last, ToolMessage):
             response = steps[1]
             response.content = response.content.format(tool_result=last.content)
@@ -66,14 +66,12 @@ class ShellFixture(MeteredDemoModel):
             )
         # Meter both model requests through the same fixture used by other
         # lessons. Usage is simulated; command output and side effects are real.
-        self.responses = [response]
-        self.i = 0
-        return super()._generate(messages, *args, **kwargs)
+        return response
 
 
 def make_simulated_model():
     """Return a fresh fixture so separate sessions share no response state."""
-    return ShellFixture(responses=[AIMessage(content="")])
+    return ShellFixture(conversation=CONVERSATION)
 
 
 def build_scripted_models(options):

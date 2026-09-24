@@ -96,8 +96,9 @@ def settings_for(app_file: str, description: str, *, args=None) -> Settings:
     # One stable folder per lesson makes both individual and batch runs easy to
     # find. Context modes remain separate so the comparison survives a rerun.
     name = app_dir.name
-    if name == "claims_context":
-        name += "_" + (args.mode or "naive")
+    if name in {"edit_with_patched_state", "edit_with_reloaded_state"}:
+        # These public sample IDs use hyphens; their Python folders cannot.
+        name = name.replace("_", "-")
     output = args.out or Path("reports") / name
     print(f"Report directory: {output.resolve()}")
     print("Replaces the previous generated report bundle in this directory.")

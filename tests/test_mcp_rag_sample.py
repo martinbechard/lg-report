@@ -65,6 +65,7 @@ def test_sample_records_mcp_evidence(tmp_path, monkeypatch):
             try:
                 yield create_deep_agent(
                     **parameters,
+                    name="wikipedia_mcp_agent",
                     tools=await adapter.list_tools(),
                 )
             finally:

@@ -176,7 +176,7 @@ Each sample wires a workflow to its client and tracing backend; its test case ow
 | [Expert dispatcher](samples/expert_dispatch/README.md) | Select movies, sports, or history expert for each question | `uv run python -m agent_runtime --sample expert_dispatch` |
 | [File approval](samples/file_approval/README.md) | Agent-invoked tools with automatic human approval for restricted writes | See sample README for source/target arguments |
 | [Quote request](samples/quote_request/README.md) | LLM-directed human clarification and cancellation | `uv run python -m agent_runtime --sample quote_request` |
-| [Claim context](samples/claims_context/README.md) | Compare retained snapshots with purge/reload after edits | `uv run python -m agent_runtime --sample claims_context_managed` |
+| [Claim context](samples/edit_with_reloaded_state/README.md) | Compare retained snapshots with purge/reload after edits | `uv run python -m agent_runtime --sample edit-with-reloaded-state` |
 | [Thinking agent](samples/thinking_agent/README.md) | Reasoning costs before and after several tool calls | `uv run python -m agent_runtime --sample thinking_agent` |
 
 The [Langfuse variant of simple chat](samples/simple_chat_langfuse/README.md)
@@ -251,8 +251,8 @@ open reports/simple_chat/report.html
 
 Rerunning a sample replaces its previous generated report bundle, including stale
 Excel exports. There are no dates or run IDs in folder names. Other samples keep
-their own results. Claims-context modes use `claims_context_naive` and
-`claims_context_managed`. Browser turns replace the latest report for that sample.
+their own results. Claims-context modes use `edit-with-patched-state` and
+`edit-with-reloaded-state`. Browser turns replace the latest report for that sample.
 The command prints the absolute HTML path. `--out PATH` selects another directory
 and replaces its generated reports too; unrelated files are preserved.
 Relative paths are relative to the working directory.

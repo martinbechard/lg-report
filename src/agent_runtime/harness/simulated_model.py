@@ -1,14 +1,10 @@
 """Replace provider calls with scripted answers while executing the real agent graph.
 
-ScriptedChatModel supplies authored assistant messages, including any tool-call
-requests. LangGraph still executes those tools; this module does not fabricate
-their results. MeteredDemoModel adds usage computed from the actual messages and
-bound tool definitions using demo_meter's deterministic counting rules.
-
-MeteredDemoModel is a per-agent sequential fixture. SharedSimulatedModel supports
-the single-LLM dispatcher sample with isolated scripts and accounting per binding. Counts and reasoning fixtures are
-illustrative: they make cost-report examples reproducible without provider fees,
-but do not predict a real model's tokenizer, reasoning, or caching behavior.
+SimulatedModel consumes one chronological scenario and filters replies by the
+native agent name. Shared and solo execution use the same response selection and
+per-agent accounting. Tools still execute in the real graph. ScriptedChatModel
+remains an unmetered low-level test fixture and supplies streaming mechanics.
+Counts and reasoning fixtures are illustrative, not provider charges.
 
 Architecture and ownership: docs/chat-composition.md.
 
@@ -18,11 +14,14 @@ Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
 
 import json
+from copy import deepcopy
+from threading import Lock
 
 from langchain_core.language_models.fake_chat_models import FakeMessagesListChatModel
-from langchain_core.messages import AIMessageChunk
-from langchain_core.outputs import ChatGenerationChunk
-from pydantic import PrivateAttr
+from langchain_core.messages import AIMessage, AIMessageChunk
+from langchain_core.outputs import ChatGeneration, ChatGenerationChunk, ChatResult
+from langchain_core.runnables import ensure_config
+from pydantic import Field, PrivateAttr, model_validator
 
 from agent_runtime.harness.demo_meter import (
     TOKEN_ESTIMATE_BASIS,
@@ -121,49 +120,91 @@ class ScriptedChatModel(FakeMessagesListChatModel):
         }
 
 
-class MeteredDemoModel(ScriptedChatModel):
-    """Attach deterministic usage to scripted messages for cost-analysis training.
+class SimulatedModel(ScriptedChatModel):
+    """Select each named agent's replies from one chronological sample scenario.
 
-    Construct one instance per agent, with its own responses list. Reusing the
-    parent's instance for a subagent would mix response cursors and independent
-    caches. The usage shape matches LangChain so capture/exporters need no separate
-    accounting path for demos; actual provider calls never use this estimator.
+    Construct with conversation=[{"role": "agent_name", "content": "..."}, ...].
+    LangChain supplies lc_agent_name from the native agent name; client, human,
+    and tool entries remain scenario evidence, never executed model responses.
+    Each agent has an independent cursor and cache, even on one shared model.
+    agent_name is reserved for direct model clients such as summarization, which
+    have no agent identity of their own. No prompt/tool-name inference is used.
     """
 
-    _simulation: ContextSimulation = PrivateAttr(default_factory=ContextSimulation)
-    _tools: list[dict] = PrivateAttr(default_factory=list)
+    conversation: list[dict]
+    agent_name: str | None = None
+    # Rewritten or isolated histories cannot promise append-only cache reuse.
+    # This option affects accounting only; it never changes graph-owned history.
+    cache_reuse: bool = True
+    # The unmetered base supplies streaming/tool binding, not response selection.
+    responses: list = Field(default_factory=list, exclude=True, repr=False)
+    # Positions count only successfully metered responses for the matching agent.
+    _positions: dict[str, int] = PrivateAttr(default_factory=dict)
+    # Cache state is local to this scenario run, never shared between model instances.
+    _contexts: dict[str, ContextSimulation] = PrivateAttr(default_factory=dict)
+    # Parallel graph branches must select and advance their own entries atomically.
+    _lock: Lock = PrivateAttr(default_factory=Lock)
 
-    def bind_tools(self, tools, *, tool_choice=None, **kwargs):
-        """Include available tools in offline usage so input accounting is complete.
+    @model_validator(mode="before")
+    @classmethod
+    def copy_scenario(cls, values):
+        """Own scenario data per model and reject the superseded response-list API."""
+        if "responses" in values:
+            raise ValueError("SimulatedModel requires one conversation, not responses")
+        return (
+            {**values, "conversation": deepcopy(values["conversation"])}
+            if "conversation" in values
+            else values
+        )
 
-        This stores definitions for metering and returns a callback-visible binding.
-        A separate scripted adapter per agent is essential: sharing one would
-        overwrite both the available schemas and the sequence of fixed answers.
-        The returned binding carries the same definitions into ``_generate`` while
-        the model instance keeps one simulation and response cursor per agent.
+    def _next_response(self, agent_name, messages, position):
+        """Copy the next matching entry; exhaustion must not replay an old answer.
+
+        Sample fixtures may override this hook to fill an authored template from
+        real tool observations. The common generator still owns locking and usage.
         """
-        from langchain_core.utils.function_calling import convert_to_openai_tool
+        entries = [entry for entry in self.conversation if entry["role"] == agent_name]
+        if position >= len(entries):
+            raise ValueError(f"No simulated response left for agent {agent_name!r}")
+        entry = entries[position]
+        return AIMessage(
+            content=deepcopy(entry["content"]),
+            tool_calls=deepcopy(entry.get("tool_calls", [])),
+            response_metadata=deepcopy(entry.get("response_metadata", {})),
+        )
 
-        self._tools = [convert_to_openai_tool(tool) for tool in tools]
-        return self.bind(tool_definitions=self._tools)
+    def _generate(self, messages, stop=None, run_manager=None, **kwargs):
+        """Resolve identity, select one response, and meter this actual request.
 
-    def _generate(self, messages, *args, **kwargs):
-        """Produce a scripted model turn with usage the reporter can inspect.
-
-        LangChain calls this hook with the request transcript in ``messages``;
-        remaining arguments pass to its fake-model implementation. The returned
-        ChatResult holds a generation containing an AIMessage. Its tool_calls
-        are authored proposals for the graph to execute, not tool output.
-        Metering advances this instance's simulated context and may reject a
-        transcript that dropped earlier messages. No provider is contacted.
+        Binding-specific schemas arrive in kwargs, so sharing a model cannot
+        overwrite another agent's tools. Advance the cursor only after successful
+        metering; failed prefix checks leave the scenario response available.
         """
-        result = super()._generate(messages, *args, **kwargs)
-        # FakeMessagesListChatModel can reuse its response objects. Meter a copy
-        # so usage from this call cannot mutate the authored scenario fixtures.
-        response = result.generations[0].message.model_copy(deep=True)
-        response = meter_response(response, self._simulation, self._tools, messages)
-        result.generations[0].message = response
-        return result
+        # LangChain's event-stream path omits run_manager when calling _stream.
+        # Native graph config still carries the same metadata through its context.
+        metadata = run_manager.metadata if run_manager else ensure_config()["metadata"]
+        agent_name = self.agent_name or (metadata or {}).get("lc_agent_name")
+        if not agent_name or agent_name in {"client", "tool", "human", "middleware"}:
+            raise ValueError("SimulatedModel requires a named agent (lc_agent_name)")
+        if not any(entry["role"] == agent_name for entry in self.conversation):
+            raise ValueError(f"No scenario entries for agent {agent_name!r}")
+        with self._lock:
+            position = self._positions.get(agent_name, 0)
+            response = self._next_response(agent_name, messages, position)
+            simulation = (
+                self._contexts.setdefault(agent_name, ContextSimulation())
+                if self.cache_reuse
+                else ContextSimulation()
+            )
+            response = meter_response(
+                response, simulation, kwargs.get("tool_definitions", []), messages
+            )
+            if not self.cache_reuse:
+                response.response_metadata["usage_basis"] = (
+                    f"{TOKEN_ESTIMATE_BASIS}; per actual request; no cache reuse assumed"
+                )
+            self._positions[agent_name] = position + 1
+        return ChatResult(generations=[ChatGeneration(message=response)])
 
 
 def meter_response(response, simulation, tool_definitions, messages):
@@ -176,7 +217,7 @@ def meter_response(response, simulation, tool_definitions, messages):
     response metadata and usage fields, never the authored scenario fixture.
     ``simulation`` belongs to one conversation; ``tool_definitions`` are this
     request bound schemas. Keeping accounting here ensures a shared model and
-    older per-agent fixtures use identical token and cost semantics.
+    specialized sample fixtures use identical token and cost semantics.
     """
     usage_entry, role_token_counts = simulation.record(
         tool_definitions,

@@ -2,7 +2,7 @@
 
 An application selects a mode for graph construction. The workflow and agents
 call build_model with an optional model name and their caller name. Simulation
-extracts only that caller's assistant messages from the example conversation;
+passes the complete scenario to the simulator, which filters by agent name;
 client prompts and documented tool results never become model responses.
 Each call creates an independent model. Outside a scope, models are real.
 AI attribution: Generated with AI assistance.
@@ -18,7 +18,7 @@ from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import AIMessage
 
 from .model_config import configured_identity, configured_model
-from .simulated_model import MeteredDemoModel
+from .simulated_model import SimulatedModel
 
 # None means live. A context-local value avoids process-wide mode changes when
 # independent browser sessions construct graphs concurrently. Models capture
@@ -74,10 +74,9 @@ def build_model(model_name: str | None = None, *, caller: str) -> BaseChatModel:
     """Create the requested provider model or the caller's simulated counterpart.
 
     Omit model_name to use LG_MODEL and the provider default. A workflow-created
-    model consumes the generic "ai" speaker, including when passed to an agent.
-    An agent creating its own model uses its registered name as the speaker.
-    Missing speakers fail during construction instead of borrowing another
-    caller's answers. Each construction copies messages into a fresh ledger.
+    model receives the whole scenario. Native agent identity selects responses
+    at invocation, including when several agents share that model. Missing agent
+    names fail at invocation. Each construction owns fresh cursors and ledgers.
     """
     conversation = _conversation.get()
     if conversation is None:
@@ -87,26 +86,20 @@ def build_model(model_name: str | None = None, *, caller: str) -> BaseChatModel:
     resolver = _resolver.get()
     if resolver is not None:
         return resolver(caller)
-    speaker = "ai" if caller == "workflow" else caller
-    responses = model_responses(conversation, speaker)
-    if not responses:
-        raise ValueError(
-            f"No simulated responses for caller {caller!r} (speaker {speaker!r})"
-        )
-    return MeteredDemoModel(responses=responses)
+    return SimulatedModel(conversation=list(conversation))
 
 
 def client_prompts(conversation: Sequence[Mapping[str, Any]]) -> list[str]:
     """Extract static client turns in order without executing any conversation.
 
     Tool observations are documentation, not canned graph outputs. Only client
-    entries become input; named agents and generic ai entries remain responses.
+    entries become input; named-agent entries remain responses.
     """
     return [entry["content"] for entry in conversation if entry["role"] == "client"]
 
 
 def model_responses(
-    conversation: Sequence[Mapping[str, Any]], speaker: str = "ai"
+    conversation: Sequence[Mapping[str, Any]], speaker: str
 ) -> list[AIMessage]:
     """Extract one speaker's replies in order, preserving authored usage metadata.
 

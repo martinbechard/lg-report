@@ -93,11 +93,15 @@ Add the conversation and optional model factory to this module, provide the
 workflow, then restart the launcher. Discovery
 imports each trusted local `sample.py` and reads its `SAMPLE` dictionary. Imports
 may load dependencies, but must not construct models, execute tools, or call providers.
-IDs must be unique. Each variant has its own folder and `SAMPLE` declaration. The catalog derives
+IDs must be unique and can contain lowercase letters, digits, underscores, or
+hyphens. Python package folders and implementation names use underscores.
+Each variant has its own folder and `SAMPLE` declaration. The catalog derives
 `agent_runtime.workflows.<id>:build_workflow` and `samples.<id>.sample`.
 When code is shared, one `implementation` name replaces `<id>` in both paths;
-for example, `claims_context_naive` and `claims_context_managed` each declare
-`"implementation": "claims_context"`. Each variant reads its own `.env` beside
+for example, `edit-with-patched-state` and `edit-with-reloaded-state` each declare
+`"implementation": "edit_with_reloaded_state"` from the `edit_with_patched_state` and
+`edit_with_reloaded_state` folders. A hyphenated ID must declare a valid Python
+`implementation` name. Each variant reads its own `.env` beside
 its metadata. Do not store `workflow` or `definition_module` import strings. Optional
 `tracing: "langfuse"`, `interaction: "approval"` or `"clarification"`, and
 `mcp_tools` describe harness behavior. `default_client` defaults to `static`;

@@ -32,8 +32,8 @@ wheels/
 !/reports/mcp_rag_chat/
 !/reports/file_approval/
 !/reports/quote_request/
-!/reports/claims_context_naive/
-!/reports/claims_context_managed/
+!/reports/edit-with-patched-state/
+!/reports/edit-with-reloaded-state/
 /reports/*/*
 !/reports/*/report.html
 !/reports/*/report.xlsx

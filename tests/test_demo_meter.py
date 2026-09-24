@@ -68,9 +68,9 @@ def test_simulated_usage_names_its_encoding():
     """Reports must carry estimator provenance rather than imply provider usage."""
     from langchain_core.messages import AIMessage
 
-    from agent_runtime.harness.simulated_model import MeteredDemoModel
+    from agent_runtime.harness.simulated_model import SimulatedModel
 
-    response = MeteredDemoModel(responses=[AIMessage(content="Hello")]).invoke("Hi")
+    response = SimulatedModel(conversation=[{"role": "test-agent", "content": response.content, "tool_calls": response.tool_calls, "response_metadata": response.response_metadata} for response in [AIMessage(content="Hello")]], agent_name="test-agent").invoke("Hi")
     assert TOKEN_ESTIMATE_BASIS in response.response_metadata["usage_basis"]
     assert "o200k_base" in response.response_metadata["usage_basis"]
     assert response.usage_metadata["input_tokens"] > 0

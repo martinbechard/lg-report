@@ -69,8 +69,8 @@ class SampleCatalog:
                     spec = spec_from_file_location(f"sample_{path.parent.name}", path)
                     module = module_from_spec(spec)
                     spec.loader.exec_module(module)
-                # Implementation-only folders (such as claims_context) supply
-                # shared scenarios without adding a selectable catalog entry.
+                # A helper module without SAMPLE contributes no catalog entry.
+                # Shared implementations may also declare a selectable sample.
                 if not hasattr(module, "SAMPLE"):
                     continue
                 entry = module.SAMPLE
@@ -87,9 +87,12 @@ class SampleCatalog:
                 for key in ("id", "name", "description"):
                     if not isinstance(entry.get(key), str) or not entry[key].strip():
                         raise ValueError(f"{key} must be a nonempty string")
-                if not re.fullmatch(r"[a-z][a-z0-9_]*", entry["id"]):
+                # Public IDs also serve as CLI choices and report directory
+                # names, so allow descriptive hyphenated names. Python imports
+                # still require a valid implementation module, checked below.
+                if not re.fullmatch(r"[a-z][a-z0-9_-]*", entry["id"]):
                     raise ValueError(
-                        "id must use lowercase letters, digits, and underscores"
+                        "id must use lowercase letters, digits, underscores, or hyphens"
                     )
                 if entry["id"] in self.samples:
                     raise ValueError(f"Duplicate sample id: {entry['id']}")

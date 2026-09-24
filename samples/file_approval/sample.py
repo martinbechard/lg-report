@@ -15,7 +15,7 @@ import re
 from langchain_core.messages import AIMessage, ToolMessage
 
 from agent_runtime.harness.model_factory import client_prompts, model_responses
-from agent_runtime.harness.simulated_model import MeteredDemoModel
+from agent_runtime.harness.simulated_model import SimulatedModel
 
 # Discovery reads this metadata without constructing a model.
 SAMPLE = {
@@ -39,7 +39,7 @@ CONVERSATION = [
         "['\\nReviewed by the project team.\\n', 'Next step: request a quote.\\n']",
     },
     {
-        "role": "ai",
+        "role": "file_editor",
         "step": "read_source",
         "content": "",
         "tool_calls": [
@@ -56,7 +56,7 @@ CONVERSATION = [
         "content": "Expected: actual source text, including native pagination header.",
     },
     {
-        "role": "ai",
+        "role": "file_editor",
         "step": "read_target",
         "content": "",
         "tool_calls": [
@@ -73,7 +73,7 @@ CONVERSATION = [
         "content": "Expected: current target text, or not-found on a fresh workspace.",
     },
     {
-        "role": "ai",
+        "role": "file_editor",
         "step": "write_target",
         "addition": "\nReviewed by the project team.\n",
         "content": "",
@@ -92,7 +92,7 @@ CONVERSATION = [
         "content": "Expected: real approval/write outcome; rejection does not create the target.",
     },
     {
-        "role": "ai",
+        "role": "file_editor",
         "step": "reread_target",
         "content": "",
         "tool_calls": [
@@ -109,7 +109,7 @@ CONVERSATION = [
         "content": "Expected: actual target after the first decision; never assume the write succeeded.",
     },
     {
-        "role": "ai",
+        "role": "file_editor",
         "step": "edit_target",
         "addition": "Next step: request a quote.\n",
         "content": "",
@@ -132,7 +132,7 @@ CONVERSATION = [
         "content": "Expected: actual edit outcome, including human rejection.",
     },
     {
-        "role": "ai",
+        "role": "file_editor",
         "step": "finish",
         "content": "Finished the requested proposals; see tool results for applied or rejected changes.",
     },
@@ -147,7 +147,7 @@ APPROVAL_DECISION = next(
 def scripted_step(name):
     """Copy one named AI template for resolution against actual tool observations."""
     return model_responses(
-        [entry for entry in CONVERSATION if entry.get("step") == name]
+        [entry for entry in CONVERSATION if entry.get("step") == name], "file_editor"
     )[0]
 
 
@@ -165,12 +165,12 @@ def read_body(message):
     return match[3]
 
 
-class FileEditingFixture(MeteredDemoModel):
+class FileEditingFixture(SimulatedModel):
     """Author the demo's read/write choices using observations from real tools."""
 
     additions: list[str]
 
-    def _generate(self, messages, *args, **kwargs):
+    def _next_response(self, agent_name, messages, position):
         """Choose the next scripted response; let the shared meter record it."""
         # Count proposals, not successful writes: a rejected change is consumed
         # by this scenario and is not automatically retried in the next turn.
@@ -235,9 +235,7 @@ class FileEditingFixture(MeteredDemoModel):
             )
         # Reuse metering/callback behavior; only model choice is simulated. The
         # fixture never opens a file or executes a tool behind the graph's back.
-        self.responses = [response]
-        self.i = 0
-        return super()._generate(messages, *args, **kwargs)
+        return response
 
 
 def make_simulated_model(additions=None):
@@ -247,7 +245,7 @@ def make_simulated_model(additions=None):
         additions = [entry["addition"] for entry in CONVERSATION if "addition" in entry]
     # A fresh instance prevents response position and usage leaking across runs.
     return FileEditingFixture(
-        responses=[AIMessage(content="")],
+        conversation=CONVERSATION,
         additions=additions,
     )
 

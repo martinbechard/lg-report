@@ -13,13 +13,7 @@ Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 
 import json
 
-from agent_runtime.agents.evidence_judge import SYSTEM_PROMPT as JUDGE_INSTRUCTIONS
-from agent_runtime.agents.review_author import SYSTEM_PROMPT as AUTHOR_INSTRUCTIONS
-
-# LangChain's AIMessage holds an assistant response; constructing it runs nothing.
-# Its tool_calls, when present, are proposed names/arguments, not tool results.
-from agent_runtime.harness.model_factory import client_prompts, model_responses
-from agent_runtime.harness.shared_simulated_model import SharedSimulatedModel
+from agent_runtime.harness.simulated_model import SimulatedModel
 
 # Discovery reads this metadata without constructing a model.
 SAMPLE = {
@@ -39,12 +33,12 @@ CONVERSATION = [
     },
     # This deliberately shallow draft gives the judge concrete gaps to identify.
     {
-        "role": "author",
+        "role": "review_author",
         "content": "Reduce redundant database access and consider caching account data. Roll "
         "out cautiously, monitor latency and freshness, and keep a rollback path.",
     },
     {
-        "role": "judge",
+        "role": "evidence_judge",
         "content": json.dumps(
             {
                 "verdict": "revise",
@@ -59,7 +53,7 @@ CONVERSATION = [
         ),
     },
     {
-        "role": "author",
+        "role": "review_author",
         "content": "Diagnosis: repeated account lookups coincide with p95 1.8s at 240 requests/s "
         "[E1]; the pool is limited to 12 connections and more nodes are disallowed [E2]. "
         "This supports testing reduced lookup demand, but does not prove causation.\n\n"
@@ -77,7 +71,7 @@ CONVERSATION = [
         "staging before canary deployment. No database nodes or schema changes are proposed.",
     },
     {
-        "role": "judge",
+        "role": "evidence_judge",
         "content": json.dumps(
             {
                 "verdict": "approve",
@@ -87,21 +81,12 @@ CONVERSATION = [
         ),
     },
 ]
-USER_PROMPTS = client_prompts(CONVERSATION)
-# Retain test-facing views while keeping all authored text above in story order.
-FIRST_DRAFT = CONVERSATION[1]["content"]
-FIRST_REVIEW = json.loads(CONVERSATION[2]["content"])
-REVISED_DRAFT = CONVERSATION[3]["content"]
-FINAL_REVIEW = json.loads(CONVERSATION[4]["content"])
 
 
 def make_simulated_model():
     """Extract each role's replies while retaining separate shared-model ledgers."""
-    return SharedSimulatedModel(
-        scripts={
-            AUTHOR_INSTRUCTIONS: model_responses(CONVERSATION, "author"),
-            JUDGE_INSTRUCTIONS: model_responses(CONVERSATION, "judge"),
-        },
+    return SimulatedModel(
+        conversation=CONVERSATION,
         metadata={
             "report_effort": "light",
             "report_description": "Perform the current author or evidence-review role.",

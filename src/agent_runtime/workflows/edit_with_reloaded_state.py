@@ -22,7 +22,7 @@ from agent_runtime.agents.claims_agent import build_agent
 from agent_runtime.harness.demo_meter import message_record
 from agent_runtime.harness.model_factory import build_model
 
-Mode = Literal["naive", "managed"]
+Mode = Literal["edit-with-patched-state", "edit-with-reloaded-state"]
 
 
 class ContextAudit(BaseCallbackHandler):
@@ -61,15 +61,25 @@ class ContextAudit(BaseCallbackHandler):
 
 
 class ClaimsState(MessagesState):
-    """Separate display transcript from the context supplied to the model."""
+    """Keep the client's visible conversation separate from future model input.
 
+    Inherited ``messages`` uses LangGraph's message reducer: new messages are
+    added and matching IDs updated. ``working`` has no reducer, so each turn
+    replaces it wholesale. That difference lets the UI keep an old claim read
+    while the next model request omits it. The driver checkpoints these fields;
+    neither field is the authoritative claim, which remains inside the agent.
+    """
+
+    # Missing on the first turn means no prior context. Later values contain the
+    # agent's completed history or its edit-with-reloaded-state projection, including any notice
+    # and retained policy exchanges. Never rebuild this from display messages.
     working: list
 
 
 class ClaimsContext:
     """Run the same agent with either retained or purged working messages.
 
-    Managed mode removes claim exchanges and conversation prose after an edit,
+    edit-with-reloaded-state mode removes claim exchanges and conversation prose after an edit,
     while preserving actual policy tool exchanges. The agent owns all reads.
     This coarse policy is intentional for one claim: it prevents stale facts from
     surviving indirectly. It also loses earlier preferences and cannot answer
@@ -87,13 +97,20 @@ class ClaimsContext:
         # Validate strategy here because it is a harness setting. The agent is
         # deliberately constructed without this flag and behaves identically
         # given identical working messages in either experiment.
-        if mode not in {"naive", "managed"}:
-            raise ValueError("mode must be naive or managed")
+        if mode not in {"edit-with-patched-state", "edit-with-reloaded-state"}:
+            raise ValueError(
+                "mode must be edit-with-patched-state or edit-with-reloaded-state"
+            )
         self.mode = mode
         self.agent = agent
         self.audit = audit or ContextAudit(write=write)
         self.write = write
+        # Events describe context-policy decisions for reporting. They are not
+        # messages and never enter the agent's input or token-accounting stream.
         self.events = []
+        # A convenient view of the most recently selected working context. The
+        # checkpointed state supplies continuity to turn(); this attribute is not
+        # used to reconstruct a missing checkpoint or persist the claim store.
         self.history = []
 
         # Policy is a graph node, independent of how a client supplies turns.
@@ -106,16 +123,40 @@ class ClaimsContext:
         self.graph = builder.compile()
 
     def turn(self, state, config):
-        """Execute one agent turn and project context after a successful edit."""
+        """Answer the newest client request, then choose the next turn's context.
+
+        The conversation driver supplies checkpointed state plus a new message;
+        config carries callbacks and run metadata through the inner agent graph.
+        invoke returns an agent state dictionary whose messages include the
+        supplied working prefix, the new request, tool exchanges, and the answer.
+
+        Return a partial graph-state update: display messages for this turn and
+        a complete replacement for working context. Invalidation occurs after
+        invoke returns, so all tool iterations in this turn still see its history.
+        Invocation errors propagate; this method does not roll back tool edits
+        or apply its normal end-of-turn projection after an exception.
+        """
         self.audit.turn += 1
+        # Merge rather than replace callbacks so report tracing and this teaching
+        # audit observe the same inner model calls, including tool-loop retries.
         turn_config = merge_configs(config, {"callbacks": [self.audit]})
         working = list(state.get("working", []))
+        # A changed version proves the store changed, unlike a model's proposed
+        # edit or its prose acknowledgement. Failed edits alone keep this value.
         before_version = self.agent.context_version
+        # Only the newest display message enters the inner graph. Passing the
+        # whole UI transcript would silently restore previously purged snapshots.
         result = self.agent.invoke(
             {"messages": [*working, state["messages"][-1]]}, config=turn_config
         )
         self.history = list(result["messages"])
-        if self.mode == "managed" and self.agent.context_version != before_version:
+        # One projection covers all successful edits in a completed turn. edit-with-patched-state
+        # mode keeps the full result; edit-with-reloaded-state mode with no change does the same.
+        # This requests a message projection, never a record read or model call.
+        if (
+            self.mode == "edit-with-reloaded-state"
+            and self.agent.context_version != before_version
+        ):
             previous = len(self.history)
             self.history = self.agent.retain_unaffected_context(self.history)
             self.events.append(
@@ -130,15 +171,26 @@ class ClaimsContext:
                 }
             )
             self.write(
-                "Applied managed context strategy using the agent retention rules. No automatic reads."
+                "Applied edit-with-reloaded-state context strategy using the agent retention rules. No automatic reads."
             )
         # Return only this turn's display messages. The working projection is a
         # replacement field, so checkpoint history cannot merge removed snapshots
         # back into the next model input. The agent still chooses every read.
+        # Slicing off the supplied working prefix also excludes retained notices
+        # and old policy pairs from being emitted to the display as new activity.
+        # The new human message may already exist there; its ID lets the reducer
+        # reconcile it rather than append a second copy.
         return {"messages": result["messages"][len(working) :], "working": self.history}
 
     def evidence(self):
-        """Export inspection data without feeding audit history back to the model."""
+        """Return report data describing calls, purges, and optionally final state.
+
+        Calls describe actual model inputs, not merely one entry per user turn;
+        an agent may make several model calls while using tools. Metadata-only
+        capture retains counts/events but excludes messages and the final claim.
+        The calls/events lists are this session's accumulated audit, not a deep
+        copy for a caller to mutate. Reporting must treat them as read-only.
+        """
         # The audit answers "what happened?" independently of the working context
         # answering "what should the agent see next?" Keep both, but never merge
         # the historical audit back into a subsequent model request.
@@ -148,7 +200,9 @@ class ClaimsContext:
         return result
 
 
-def build_workflow(model=None, mode: Mode = "naive", *, audit=None, write=print):
+def build_workflow(
+    model=None, mode: Mode = "edit-with-reloaded-state", *, audit=None, write=print
+):
     """Compose the named claims agent with the workflow's selected context strategy.
 
     Model configuration and user input are application concerns. Agent internals

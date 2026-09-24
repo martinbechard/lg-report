@@ -10,8 +10,8 @@ AI attribution: Generated with AI assistance by Northstar.
 Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
 
-from agent_runtime.harness.model_factory import client_prompts, model_responses
-from agent_runtime.harness.simulated_model import MeteredDemoModel
+from agent_runtime.harness.model_factory import client_prompts
+from agent_runtime.harness.simulated_model import SimulatedModel
 
 # Discovery reads this metadata without constructing a model.
 SAMPLE = {
@@ -23,7 +23,7 @@ SAMPLE = {
 CONVERSATION = [
     {"role": "client", "content": "Echo this text: ReAct"},
     {
-        "role": "ai",
+        "role": "reference_chat_agent",
         "content": "",
         "tool_calls": [
             {
@@ -44,14 +44,14 @@ CONVERSATION = [
         "content": "Your input was: ReAct",
     },
     {
-        "role": "ai",
+        "role": "reference_chat_agent",
         "content": 'The tool returned "Your input was: ReAct". This shows the model requesting a tool and then '
         "reading its result.",
         "response_metadata": {"model_name": "scripted-chat", "finish_reason": "stop"},
     },
     {"role": "client", "content": "Echo this text: Tool observations"},
     {
-        "role": "ai",
+        "role": "reference_chat_agent",
         "content": "I will echo the text through the local tool.",
         "tool_calls": [
             {
@@ -72,7 +72,7 @@ CONVERSATION = [
         "content": "Your input was: Tool observations",
     },
     {
-        "role": "ai",
+        "role": "reference_chat_agent",
         "content": 'The tool returned "Your input was: Tool observations". The next model request includes that '
         "result. This echo repeats supplied text and adds no independent evidence.",
         "response_metadata": {"model_name": "scripted-chat", "finish_reason": "stop"},
@@ -85,8 +85,8 @@ USER_PROMPTS = client_prompts(CONVERSATION)
 
 def make_simulated_model():
     """Extract AI replies into a fresh model with independent cursor and usage."""
-    return MeteredDemoModel(
-        responses=model_responses(CONVERSATION),
+    return SimulatedModel(
+        conversation=CONVERSATION,
         metadata={
             "report_effort": "fast",
             "report_description": "Request an echo, or compose the answer using the tool "

@@ -17,26 +17,20 @@ from pydantic import ValidationError
 
 from agent_runtime.agents import evidence_judge, review_author
 from agent_runtime.harness.conversation import Conversation, Request
-from agent_runtime.harness.shared_simulated_model import SharedSimulatedModel
-from agent_runtime.harness.simulated_model import ScriptedChatModel
+from agent_runtime.harness.simulated_model import ScriptedChatModel, SimulatedModel
 from agent_runtime.workflows.review_loop import build_workflow
 from reporting.execute_runnable import execute_runnable
 from reporting.pricing import cost, load_prices, summarize
 from reporting.schema import Run
-from samples.review_loop.sample import (
-    FINAL_REVIEW,
-    FIRST_DRAFT,
-    FIRST_REVIEW,
-    REVISED_DRAFT,
-    USER_PROMPTS,
-    make_simulated_model,
-)
+from samples.review_loop.sample import CONVERSATION, make_simulated_model
 
 
 # Rejection feedback must cause a real second review round and remain
 # traceable in the generated report.
 def test_feedback_drives_real_second_round_and_report(tmp_path):
-    client = MockClient([Request(USER_PROMPTS[0])])
+    # Expected values come from the authored exchange, not sample-level aliases.
+    prompt, first_draft, first_review, revised_draft, _ = CONVERSATION
+    client = MockClient([Request(prompt["content"])])
     graph = build_workflow(make_simulated_model(), first_draft_high_level=True)
     prices = load_prices(Path(__file__).parents[1] / "models.json")
     execute_runnable(
@@ -51,14 +45,14 @@ def test_feedback_drives_real_second_round_and_report(tmp_path):
     )
     result = client.results[0]
     assert result["round"] == 2 and result["outcome"] == "approved"
-    assert result["messages"][-1].content == REVISED_DRAFT
+    assert result["messages"][-1].content == revised_draft["content"]
     # Internal drafts/reviews are not appended to the user's conversation.
     assert len(result["messages"]) == 2
     assert "high-level overview" in result["author_history"][1].content
-    for concern in FIRST_REVIEW["feedback"]:
+    for concern in json.loads(first_review["content"])["feedback"]:
         assert concern in result["author_history"][-2].content
-    assert FIRST_DRAFT in result["judge_history"][0].content
-    assert REVISED_DRAFT in result["judge_history"][-2].content
+    assert first_draft["content"] in result["judge_history"][0].content
+    assert revised_draft["content"] in result["judge_history"][-2].content
     run = Run.model_validate_json((tmp_path / "run/run.json").read_text())
     # The outer adapter and native agent graph both carry role ownership, so
     # nested model calls remain attributable when reports group agent spans.
@@ -94,23 +88,22 @@ def model_with_reviews(reviews):
     # reviews supplies ordered verdict dictionaries, serialized as assistant
     # message text for the real judge parser. Matching author responses let
     # routing consume one draft per verdict; no live judgment occurs here.
-    return SharedSimulatedModel(
-        scripts={
-            review_author.SYSTEM_PROMPT: [
-                AIMessage(content="Draft proposal") for _ in reviews
-            ],
-            evidence_judge.SYSTEM_PROMPT: [
-                AIMessage(content=json.dumps(review)) for review in reviews
-            ],
-        }
-    )
+    return SimulatedModel(conversation=[
+        entry
+        for review in reviews
+        for entry in (
+            {"role": "review_author", "content": "Draft proposal"},
+            {"role": "evidence_judge", "content": json.dumps(review)},
+        )
+    ])
+
 
 
 # Approval on the first judge response must stop iteration immediately
 # and avoid fabricating a later draft.
 def test_first_round_can_be_approved():
     result = build_workflow(
-        model_with_reviews([FINAL_REVIEW]), first_draft_high_level=True
+        model_with_reviews([{"verdict": "approve", "rationale": "Meets the request.", "feedback": []}]), first_draft_high_level=True
     ).invoke({"messages": [("user", "Give a brief overview")]})
     assert result["round"] == 1 and result["outcome"] == "approved"
 
@@ -118,23 +111,22 @@ def test_first_round_can_be_approved():
 # Persistent rejection must honor the round limit and never be
 # rewritten as approval merely because execution ended.
 def test_rejection_stops_at_limit_without_claiming_approval():
+    review = {"verdict": "revise", "rationale": "Missing detail.", "feedback": ["Give a concrete plan."]}
     result = build_workflow(
-        model_with_reviews([FIRST_REVIEW] * 3), max_rounds=3
+        model_with_reviews([review] * 3), max_rounds=3
     ).invoke({"messages": [("user", "Give a concrete plan")]})
     assert result["round"] == 3 and result["outcome"] == "limit_reached"
     assert "NOT approved" in result["messages"][-1].content
-    assert FIRST_REVIEW["feedback"][0] in result["messages"][-1].content
+    assert review["feedback"][0] in result["messages"][-1].content
 
 
 # Invalid judge output is a contract failure, not an approval signal;
 # the workflow must surface that distinction.
 def test_invalid_judge_output_is_not_approval():
-    model = SharedSimulatedModel(
-        scripts={
-            review_author.SYSTEM_PROMPT: [AIMessage(content=FIRST_DRAFT)],
-            evidence_judge.SYSTEM_PROMPT: [AIMessage(content="looks fine to me")],
-        }
-    )
+    model = SimulatedModel(conversation=[
+        {"role": "review_author", "content": "Draft proposal"},
+        {"role": "evidence_judge", "content": "looks fine to me"},
+    ])
     with pytest.raises(ValidationError):
         build_workflow(model).invoke({"messages": [("user", "A plan please")]})
     with pytest.raises(ValidationError):
@@ -161,9 +153,9 @@ def test_new_user_turn_starts_new_review_cycle():
     model = ScriptedChatModel(
         responses=[
             AIMessage(content="First answer"),
-            AIMessage(content=json.dumps(FINAL_REVIEW)),
+            AIMessage(content=json.dumps({"verdict": "approve", "rationale": "Meets the request.", "feedback": []})),
             AIMessage(content="Second answer"),
-            AIMessage(content=json.dumps(FINAL_REVIEW)),
+            AIMessage(content=json.dumps({"verdict": "approve", "rationale": "Meets the request.", "feedback": []})),
         ]
     )
     client = MockClient([Request("First question"), Request("Second question")])
