@@ -16,12 +16,24 @@ Extract `lg-report-pip.tar.gz`, open a terminal in its `lg-report` directory,
 and keep that directory in place after installation. It must be writable for
 generated reports and caches.
 
+**Optional: create a virtual environment.** The following command creates a
+folder named `.venv` containing an isolated Python environment. Packages installed
+there stay separate from those used by your other Python projects. The application
+does not require a virtual environment.
+
 ```sh
 python -m venv .venv
 ```
 
-Activate with `source .venv/bin/activate` on macOS/Linux, or
-`.\.venv\Scripts\Activate.ps1` in Windows PowerShell. Then run:
+If you created it, activate it with `source .venv/bin/activate` on macOS/Linux, or
+`.\.venv\Scripts\Activate.ps1` in Windows PowerShell. Activation makes this
+terminal's `python` command use that environment. Run `deactivate` to leave it.
+
+If creating or activating a virtual environment does not work on your machine,
+you can skip both steps and use an existing Python environment where package
+installation is allowed. The commands below then install into that environment.
+
+With your chosen Python environment, run:
 
 ```sh
 python -m pip install --upgrade pip
@@ -32,7 +44,8 @@ python -m pip check
 **Use the editable installation (`-e`).** The application locates frontend,
 pricing, and RAG assets relative to the source tree. A plain wheel installation
 does not include this complete layout. Run the commands below from the extracted
-directory with the virtual environment activated.
+directory, using the same Python environment you installed into. If you chose
+the optional virtual environment, activate it again whenever you open a new terminal.
 
 ## Start the browser interface
 
