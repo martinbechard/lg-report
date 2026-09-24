@@ -24,7 +24,11 @@ from langchain_core.messages import AIMessageChunk
 from langchain_core.outputs import ChatGenerationChunk
 from pydantic import PrivateAttr
 
-from agent_runtime.harness.demo_meter import ContextSimulation, message_record
+from agent_runtime.harness.demo_meter import (
+    TOKEN_ESTIMATE_BASIS,
+    ContextSimulation,
+    message_record,
+)
 
 
 class ScriptedChatModel(FakeMessagesListChatModel):
@@ -200,7 +204,7 @@ def meter_response(response, simulation, tool_definitions, messages):
                 },
                 "context_ledger": json.dumps(usage_entry),
             },
-            "usage_basis": "Simulated canonical-JSON words/punctuation; completed conversation is cached",
+            "usage_basis": f"{TOKEN_ESTIMATE_BASIS}; simulated immediate cache reuse",
         }
     )
     return response

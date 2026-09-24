@@ -165,13 +165,26 @@ chosen rate and its actual reference date. The report highlights stale dates.
 ## What the simulation means
 
 Scripted responses still travel through a real graph and real local tools. The
-simulator counts canonical message/tool-definition JSON words and punctuation,
-not provider tokenizer tokens. It retains the visible conversation, including
+simulator centrally uses [tiktoken](https://github.com/openai/tiktoken) with the
+`o200k_base` encoding to estimate canonical message/tool-definition JSON tokens.
+This counts our serialized representation, not any provider's exact chat envelope;
+reports identify the estimator in `usage_basis`. It retains the visible conversation, including
 each response, and assumes those tokens can be read from cache on the next call.
 There is no wall-clock cache expiration in the simulator; the app records a `5m`
 cache policy. A displayed simulated cache write is a context movement, distinct
 from provider-reported billable cache creation. Hidden reasoning counts are
 charged as output but are not appended as visible conversation history.
+
+tiktoken downloads its public vocabulary on first use, then caches it locally.
+To prepare for disconnected runs, initialize the vocabulary once while online:
+
+```sh
+uv run python -c 'from agent_runtime.harness.demo_meter import units; units("")'
+```
+
+Set `TIKTOKEN_CACHE_DIR` to a persistent writable directory if the default temporary
+cache is unsuitable. Tokenization itself is local and sends no conversation data.
+Vocabulary-loading failures remain visible; no regex fallback changes the estimates.
 
 These distinctions are deliberate teaching assumptions, not promises about a
 provider's cache implementation. Live mode does not synthesize cache hits or

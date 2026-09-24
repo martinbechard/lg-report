@@ -30,6 +30,7 @@ dependencies = [
     "pyarrow>=25.0.1",
     "pydantic>=2.13.5",
     "python-dotenv>=1.2.3",
+    "tiktoken>=0.14,<1",
     "tokenizers>=0.23.2",
     "xlsxwriter>=3.2,<4",
 ]

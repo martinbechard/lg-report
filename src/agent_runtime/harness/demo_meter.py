@@ -1,8 +1,10 @@
 """Simulate token counts and cache reuse for offline agent examples.
 
-No provider is called. The simulator counts words and punctuation in a stable
-JSON representation of tool definitions and messages, including message framing.
-These are repeatable teaching estimates, not an OpenAI or Anthropic tokenizer.
+No model provider is called. tiktoken's o200k_base encoding counts a stable JSON
+representation of tool definitions and messages, including message framing.
+These are tokenizer-based estimates of our representation, not exact provider
+request counts. The vocabulary may download on first use and is cached by
+tiktoken; prepare that cache before running samples without network access.
 
 ContextSimulation keeps a separate history for each simulated model. It assumes
 completed visible conversation is cached immediately and never expires, and
@@ -19,7 +21,13 @@ Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
 
 import json
-import re
+
+import tiktoken
+
+# One encoding keeps all offline lessons and report detail counts comparable.
+# Scripted models have no provider tokenizer identity to select dynamically.
+TOKEN_ENCODING = "o200k_base"
+TOKEN_ESTIMATE_BASIS = f"Estimated with tiktoken {TOKEN_ENCODING} over canonical JSON"
 
 
 def message_record(message):
@@ -42,21 +50,25 @@ def message_record(message):
 
 
 def units(value):
-    """Make offline context size repeatable without a provider tokenizer.
+    """Return token IDs for canonical JSON through the shared sample estimator.
 
-    Return a list of word/punctuation units, including JSON message framing.
+    Stable key ordering makes equivalent dictionaries count the same way.
+    Encode each message separately so appending another message cannot change
+    its predecessor's token boundaries; the cache ledger needs that stable prefix.
+    This adds our JSON framing, not a provider-specific chat envelope. Ordinary
+    encoding treats special-token-looking text as literal user data instead of
+    rejecting it or interpreting it as a control token.
 
-    ``value`` may be any JSON-serializable representation used by the fixtures.
-    These are teaching units, not a provider tokenizer. Stable key ordering lets
-    successive calls compare context prefixes despite dictionary insertion order.
+    tiktoken caches the encoding in memory and its vocabulary on disk. First use
+    can download that public vocabulary; encoding sends no conversation data.
+    Loading errors propagate rather than silently switching counting methods.
     """
-    return re.findall(
-        r"\w+|[^\w\s]", json.dumps(value, sort_keys=True, ensure_ascii=False)
-    )
+    text = json.dumps(value, sort_keys=True, ensure_ascii=False)
+    return tiktoken.get_encoding(TOKEN_ENCODING).encode_ordinary(text)
 
 
 def message_units(record):
-    """Keep message accounting consistent by returning units for one record."""
+    """Use the central tokenizer for one serialized message, including its framing."""
     return units(record)
 
 

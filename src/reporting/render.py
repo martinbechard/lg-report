@@ -22,7 +22,6 @@ from agent_runtime.context_budget import estimated_retained_output_tokens
 from agent_runtime.harness.demo_meter import message_units, units
 from reporting.annotations import describe, request_comment
 from reporting.collaboration import collaboration_diagrams
-from reporting.workflow_diagram import workflow_diagrams
 from reporting.context import (
     circuit_breaker_description,
     compaction_description,
@@ -31,6 +30,7 @@ from reporting.context import (
 )
 from reporting.pricing import CATEGORIES, Prices, breakdown, summarize
 from reporting.schema import Run
+from reporting.workflow_diagram import workflow_diagrams
 
 
 def model_metrics(models, prices: Prices) -> dict:
@@ -323,7 +323,7 @@ def tool_request_tokens(content):
 
     Captured arguments may be a Python-literal string; literal_eval normalizes
     that representation without executing code. Unparseable strings are counted
-    as text. This word/punctuation count is never provider token telemetry.
+    as text. This tiktoken estimate of canonical JSON is never provider telemetry.
     """
     # Tool arguments may be serialized Python literals or already structured;
     # parse only strings so structured values keep their original shape.
