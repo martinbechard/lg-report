@@ -1,0 +1,28 @@
+{
+  "samples": [
+    {
+      "id": "nested_workflows",
+      "name": "Nested workflows and context scopes",
+      "description": "Planner/tester share outer context; supervisor/coder share a nested context; each review is isolated. Includes review repair and tester-driven re-entry.",
+      "workflow": "agent_runtime.workflows.nested_workflows:build_workflow",
+      "scripted_run": "samples.nested_workflows.scripted_run",
+      "options": {"scenario": "rework", "max_review_rounds": 3, "max_coding_cycles": 3}
+    },
+    {
+      "id": "nested_workflows_review_limit",
+      "name": "Nested workflows: review circuit breaker",
+      "description": "The coding workflow exhausts its review rounds, returns blocked, and never invokes the tester.",
+      "workflow": "agent_runtime.workflows.nested_workflows:build_workflow",
+      "scripted_run": "samples.nested_workflows.scripted_run",
+      "options": {"scenario": "review_limit", "max_review_rounds": 3, "max_coding_cycles": 3}
+    },
+    {
+      "id": "nested_workflows_test_limit",
+      "name": "Nested workflows: test-fix circuit breaker",
+      "description": "Repeated test defects re-enter the same coding context until the outer cycle limit returns blocked.",
+      "workflow": "agent_runtime.workflows.nested_workflows:build_workflow",
+      "scripted_run": "samples.nested_workflows.scripted_run",
+      "options": {"scenario": "test_limit", "max_review_rounds": 3, "max_coding_cycles": 3}
+    }
+  ]
+}
