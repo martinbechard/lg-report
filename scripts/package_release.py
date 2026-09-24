@@ -1,8 +1,8 @@
-"""Record checksums for complete archives uploaded to GitHub Releases.
+"""Prepare only RAG archive pieces and checksums for GitHub Releases.
 
-Run after package_pip.py and uv build. Release assets live outside Git history;
-this manifest lets recipients verify downloads before extracting or installing.
-Only the named distributions for the project version are hashed.
+Run after packaging or downloading the catalog's RAG pieces. Application source
+and compiled UI come from the repository, not this release asset collection.
+The checksum manifest lets recipients verify the optional RAG download.
 AI attribution: Generated with AI assistance by Northstar.
 Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
@@ -10,20 +10,19 @@ Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 import hashlib
 import json
 import shutil
-import tomllib
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
 def main():
-    """Hash each built artifact; publish the manifest only after all succeed."""
-    version = tomllib.loads((ROOT / "pyproject.toml").read_text())["project"]["version"]
-    names = [
-        "lg-report-pip.tar.gz",
-        f"lg_report-{version}.tar.gz",
-        f"lg_report-{version}-py3-none-any.whl",
-    ]
+    """Copy catalog-listed RAG pieces and record only their release checksums.
+
+    An existing dist directory may contain unrelated builds. Leave those files
+    untouched and exclude them from the manifest; no Python or UI build runs.
+    """
+    names = []
+    (ROOT / "dist").mkdir(exist_ok=True)
     # Publish precisely the pieces referenced by the checkout's pinned catalog.
     # Verify before copying so a stale local cache cannot become a bad release.
     catalog = json.loads((ROOT / "data/rag/archives.json").read_text())

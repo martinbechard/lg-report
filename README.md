@@ -11,7 +11,7 @@ Install Python 3.11+ and [uv](https://docs.astral.sh/uv/), then install the proj
 uv sync --locked
 ```
 
-For a destination that uses **pip only**, use the [prebuilt distribution guide](PIP-INSTALL.md).
+For a destination that uses **pip only**, use the [pip installation guide](PIP-INSTALL.md).
 The repository includes the compiled browser interface. Node.js and npm are
 needed only when changing and rebuilding the UI.
 

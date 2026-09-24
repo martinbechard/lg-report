@@ -1,20 +1,29 @@
 <!-- Copyright (c) 2026 Martin.Bechard@DevConsult.ca -->
-# Install the prebuilt samples with pip
+# Install the samples with pip
 
-This bundle includes the compiled Angular interface, Python source, sample
-inputs, and the RAG download helper. The RAG archives are optional and separate. The destination needs Python 3.11+ and pip.
-It does not need uv, Node.js, npm, Git, or Codex. Python packages must be
-available through your configured pip package index.
+Install the application from the repository using Python 3.11+ and pip. The
+repository includes Python source, sample inputs, and the compiled Angular UI.
+Only the optional RAG corpus and index are packaged as release assets.
 
-Download `lg-report-pip.tar.gz` and `SHA256SUMS` from the
-[GitHub Releases page](https://github.com/martinbechard/lg-report/releases/latest).
-Complete distribution archives are release attachments, not tracked Git files.
+You do not need uv, Node.js, npm, or Codex to run the application. Python packages
+must be available through your configured pip package index. Node.js and npm
+are needed only when changing and rebuilding the UI.
 
-## Install on the destination
+## Get the repository
 
-Extract `lg-report-pip.tar.gz`, open a terminal in its `lg-report` directory,
-and keep that directory in place after installation. It must be writable for
-generated reports and caches.
+Download and extract a source ZIP from the
+[repository page](https://github.com/martinbechard/lg-report), or clone it with Git:
+
+```sh
+git clone --depth 1 https://github.com/martinbechard/lg-report.git
+cd lg-report
+```
+
+Git is optional when using the ZIP download. Open a terminal in the repository
+root and run all commands there. Keep that directory after installation; it must
+be writable for generated reports and caches.
+
+## Install dependencies
 
 **Optional: create a virtual environment.** The following command creates a
 folder named `.venv` containing an isolated Python environment. Packages installed
@@ -43,8 +52,8 @@ python -m pip check
 
 **Use the editable installation (`-e`).** The application locates frontend,
 pricing, and RAG assets relative to the source tree. A plain wheel installation
-does not include this complete layout. Run the commands below from the extracted
-directory, using the same Python environment you installed into. If you chose
+does not include this complete layout. Run the commands below from the repository
+root, using the same Python environment you installed into. If you chose
 the optional virtual environment, activate it again whenever you open a new terminal.
 
 ## Start the browser interface
@@ -106,48 +115,51 @@ pip resolves the version ranges in `pyproject.toml`; it does not read `uv.lock`.
 For repeatable enterprise rollout, retain the approved package versions from
 your validated destination environment and use your organization's package index.
 
-## Rebuild the distribution on the maintainer's machine
+## Package RAG assets on the maintainer's machine
 
-The build machine needs Git, Python, and a Node.js version supported by the
-frontend's Angular CLI (Node 22.12+ or Node 24 is suitable for this checkout).
-From the repository root:
-
-```sh
-python scripts/package_pip.py
-```
-
-The script runs `npm ci` and the production Angular build, then creates
-`dist/lg-report-pip.tar.gz`. Send that archive to the destination. It includes
-current source edits and reference assets, but excludes environment secrets,
-virtual environments, dependency caches, and generated conversation reports.
-Rebuild it whenever frontend code changes. npm is needed only on this machine.
-
-
-## Publish a GitHub Release
-
-After rebuilding the pip bundle, build the standard Python distributions and
-copy the locally packaged RAG pieces to `dist/` and record SHA-256 checksums. Use the version in `pyproject.toml` for the release tag:
+Finish ingestion and stop every ingestion or chat process using Chroma before
+packaging a RAG cache. From the repository root, run:
 
 ```sh
-uv build
+python scripts/package_rag.py
 python scripts/package_release.py
 ```
 
-Commit and push the source changes, then create a release against that exact
-commit. For version 0.1.0, using the authenticated GitHub CLI:
+The first command packages the completed cache as index and dataset archive
+pieces under `data/rag/`, with license sidecars and `archives.json`. The second
+verifies the catalog-listed pieces, copies them into `dist/`, and writes
+`dist/SHA256SUMS`. Neither command builds or bundles application source or UI.
+See [RAG setup](data/rag/README.md) for cache requirements and attribution.
+
+To prepare existing release pieces without rebuilding the cache, run
+`python scripts/download_rag.py` followed by `python scripts/package_release.py`.
+
+## Publish RAG assets to a GitHub Release
+
+Commit and push the source changes, including the RAG catalog and license
+sidecars. Create a draft release against that exact commit. For version 0.1.0,
+using the authenticated GitHub CLI:
 
 ```sh
-gh release create v0.1.0 --target "$(git rev-parse HEAD)" --draft --title "lg-report 0.1.0" --notes "Prebuilt pip bundle and Python distributions. See PIP-INSTALL.md for installation."
-gh release upload v0.1.0 dist/lg-report-pip.tar.gz dist/lg_report-0.1.0.tar.gz dist/lg_report-0.1.0-py3-none-any.whl dist/*.tar.xz.part[0-9][0-9][0-9] dist/SHA256SUMS
+gh release create v0.1.0 --target "$(git rev-parse HEAD)" --draft --title "lg-report 0.1.0" --notes "Optional RAG corpus and index. Install the application from the repository; see PIP-INSTALL.md."
+```
+
+Upload exactly the RAG pieces named in `data/rag/archives.json`, plus
+`dist/SHA256SUMS`. Avoid uploading all of `dist/`: it can contain unrelated builds
+or old archive pieces. The checksum file lists the required piece filenames.
+Use `gh release upload v0.1.0` followed by those explicit file paths, or select
+them in GitHub's draft release page.
+
+Check that every required piece is uploaded before publishing the draft:
+
+```sh
 gh release edit v0.1.0 --draft=false
 ```
 
-Check that every upload succeeded before publishing the draft. For later
-versions, update the tag and versioned filenames in these commands. Upload the
-complete archives without splitting them. Keep build outputs ignored by Git.
-The pip bundle includes the compiled UI; RAG pieces are separate release assets.
-The wheel alone does
-not supply the complete source-relative runtime layout.
+For later versions, use the matching tag. Keep archive pieces out of Git;
+source and the compiled UI remain in the repository. GitHub may display its
+automatically generated source archives alongside the uploaded RAG assets.
 
-After downloading all listed artifacts (including the RAG pieces) and the checksum file into one directory,
-verify them on macOS/Linux with `shasum -a 256 -c SHA256SUMS`.
+After downloading the RAG pieces and checksum file into one directory, verify
+them on macOS/Linux with `shasum -a 256 -c SHA256SUMS`. The download helper also
+verifies each piece against the repository catalog.
