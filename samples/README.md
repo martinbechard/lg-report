@@ -145,7 +145,7 @@ With the selected provider’s API key configured, applications default to live 
 For chat applications, use `--client console --live`
 for interactive prompts and UTF-8 text attachments. `/attach PATH` queues a file,
 `/send` submits attachments alone, and `/quit` ends the session. Console mode
-requires a configured provider; chat static mode can use either simulated or live models.
+requires a configured provider; chat scripted mode can use either simulated or live models.
 Quote clarification uses the shared console for interruption answers and requires a human client in live mode.
 All samples use LangGraphAgent. Console and scripted clients consume AG-UI events directly; Angular uses AG-UI over HTTP/SSE. Approval and clarification are normal resumable interactions.
 

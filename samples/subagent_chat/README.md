@@ -44,7 +44,7 @@ number of calls. Environment variables override the sample's `.env`.
 - `src/agent_runtime/tools/echo_tool.py` owns the local echo tool.
 - `src/agent_runtime/agents/isolated_subagent.py` owns the child role and echo tool.
 - `sample.py` describes one conversation in execution order. `client` entries
-  supply static prompts; `ai` entries supply the workflow-created model;
+  supply scripted prompts; `ai` entries supply the workflow-created model;
   `isolated-subagent` entries supply the model created by that agent.
   Tool entries document expected observations; actual tools still run.
 - `src/agent_runtime/harness/model_factory.py` provides
@@ -57,7 +57,7 @@ number of calls. Environment variables override the sample's `.env`.
 - `agent_runtime.harness.sample_catalog.SampleCatalog` discovers metadata and
   establishes the model factory scope. `settings.prepare_sample` resolves
   shared launch inputs; `main` selects the client or listener. `execute_conversation`
-  executes a prepared console/static conversation with its recorder.
+  executes a prepared console/scripted conversation with its recorder.
 - The launcher creates `ConsoleClient()` directly and calls
   `configure_sample_script` from `harness/configure_sample_script.py` when authored
   requests are needed, attaching a `ScriptPrompter` to that client.

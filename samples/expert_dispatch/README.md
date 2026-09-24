@@ -62,7 +62,7 @@ For the fixed three-question scenario with a provider, use `--live --client stat
 - `src/agent_runtime/workflows/expert_dispatch.py`: connects the four roles.
 - `src/agent_runtime/agents/dispatcher_agent.py`: routing instructions and native task tool.
 - `src/agent_runtime/agents/reference_expert.py`: one shared factory with independent movie, sports, and history definitions.
-- Shared `harness` code: console/static clients, history, configuration, simulation.
+- Shared `harness` code: console/scripted clients, history, configuration, simulation.
 - `src/agent_runtime/tools/search_reference.py`: real local lookups with source-labelled passages and explicit misses.
 - Shared `report` code: capture, prices, HTML and Excel export.
 

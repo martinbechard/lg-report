@@ -12,7 +12,7 @@ The graph is shared intentionally. Comparing tracing systems should not introduc
 a second version of the workflow or simulated token calculations. This directory
 owns its catalog metadata and configuration; `agent_runtime.workflows.subagent_chat` composes the shared agents, and
 `subagent_chat/sample.py` owns the conversation history from which the factory
-extracts each caller's responses and static client prompts.
+extracts each caller's responses and scripted client prompts.
 
 ## Run
 

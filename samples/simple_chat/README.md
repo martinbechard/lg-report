@@ -36,7 +36,7 @@ A future user-avatar agent can implement `receive()` and `respond(result)` from
 `None` to end. Such an avatar would live in its own named file under `agents/`.
 No avatar agent is implemented yet.
 
-## Run the static test case
+## Run the scripted test case
 
 ```bash
 uv sync
@@ -76,7 +76,7 @@ is sent to the configured provider in live mode and appears in local trace/repor
 content unless `--metadata-only` is selected.
 
 Console requires live mode (selected automatically when a provider key is configured): fixed offline answers would be misleading for arbitrary
-human questions. To run the same static test against a real provider, replace `--demo` with `--live --client static`.
+human questions. To run the same scripted test against a real provider, replace `--demo` with `--live --client static`.
 
 ## Reports and checks
 
@@ -85,7 +85,7 @@ The command prints its HTML report path and saves `spans.jsonl`, `run.json`,
 `--out` selects another reusable directory. Reports are finalized when the session ends;
 quitting before any request produces an incomplete report with no model spans.
 
-In the static run, compare R1's fresh input with R2's cached history and new prompt.
+In the scripted run, compare R1's fresh input with R2's cached history and new prompt.
 Edit test prompts in `sample.py`, not the agent file. When changing the
 scenario in offline mode, update the corresponding answers in `sample.py`.
 Tests in `tests/test_simple_chat_clients.py` exercise file context, console input,

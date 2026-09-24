@@ -19,7 +19,7 @@ project. For the existing local installation, the endpoint is
 `http://localhost:3001`; keys belong in the private `.env`, not source control.
 Live model mode additionally needs the selected provider key and model settings.
 
-## Static test case
+## Scripted test case
 
 ```bash
 uv run python -m agent_runtime --sample simple_chat_langfuse --demo
@@ -38,7 +38,7 @@ uv run python -m agent_runtime --sample simple_chat_langfuse --client console --
 Enter prompts at `User:`. `/attach PATH` queues a UTF-8 text file, `/send` sends
 queued files without additional prompt text, and `/quit` ends the session. EOF
 also ends normally. History and attachments persist across requests. The console
-requires a real model because the static answers cannot answer arbitrary prompts.
+requires a real model because the scripted answers cannot answer arbitrary prompts.
 
 Traces are **private by default**. Add `--public-trace` only when you want the
 captured content visible through a public trace link. This includes attached file
@@ -63,7 +63,7 @@ content from the local bundle. Excel remains a separate export.
    and shuts down the SDK before exit and prints the trace URL on success.
 
 Inspect one root, two turn spans, and two model observations in the default test.
-The second model request should include the first prompt and answer. Static and
+The second model request should include the first prompt and answer. Scripted and
 console clients use identical history rules. Client waiting time belongs to the
 root duration, not the turn duration.
 

@@ -21,7 +21,7 @@ Within the harness, `argument_parser.py` defines and validates launch options,
 `ConsoleApplication` for every non-web launch, or `AngularApplication` for web
 startup. `AngularApplication.run()` prepares the selected sample and starts the
 HTTP listener.
-`ConsoleApplication.run_session()` prepares both interactive and static runs; no nested
+`ConsoleApplication.run_session()` prepares both interactive and scripted runs; no nested
 callback owns its launch policy. `execute_conversation()` executes one prepared
 Python-client conversation.
 
@@ -384,7 +384,7 @@ checks, not live-model accuracy or hosted-ingestion claims.
 
 ```mermaid
 flowchart LR
-  Client[Console or static client] --> Conversation
+  Client[Console or scripted client] --> Conversation
   Conversation --> W[expert_dispatch workflow]
   W --> D[dispatcher_agent]
   D -->|task: movie_expert| M[movie_expert]

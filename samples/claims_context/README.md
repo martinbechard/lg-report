@@ -18,7 +18,7 @@ that controls **which context is carried into the next turn**. The same agent
 works under either strategy; it receives no `naive` or `managed` setting.
 
 ```text
-Variant sample.py: model configuration, human/static client, reporting
+Variant sample.py: model configuration, human/scripted client, reporting
    |
    v
 build_workflow(): compose a ClaimsAgent with a conversation harness

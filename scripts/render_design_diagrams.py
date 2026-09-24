@@ -446,26 +446,26 @@ class Drawing:
 
 def architecture(index):
     """Show each source folder once so containment communicates ownership."""
-    d = Drawing(index, "Components and source folders", 1985)
+    d = Drawing(index, "Components and source folders", 2095)
     d.folder(20, 15, 625, 110, "src/agent_runtime/", role="shared_code")
     d.box(
         45,
         56,
         575,
         52,
-        "__main__.py · shared launcher",
-        "Sample selection · configuration · client / reporting mode",
+        "__main__.py · package entry point",
+        "Delegates to harness.app.main()",
         "shared_code",
     )
     # Both conversation entry points and optional tracing share this boundary.
-    d.folder(20, 150, 625, 745, "src/agent_runtime/harness/", role="shared_code")
+    d.folder(20, 150, 625, 855, "src/agent_runtime/harness/", role="shared_code")
     d.box(
         40,
         195,
         280,
         65,
-        "main() · launch selection",
-        "Console · static · web listener",
+        "main() · select application",
+        "Select console or browser startup",
         "shared_code",
     )
     # Startup selection is distinct from the solid request/response paths below.
@@ -475,17 +475,32 @@ def architecture(index):
         280,
         65,
         "SampleCatalog",
-        "sample.py · model factory scope",
+        "Discover samples · scope model creation",
         "shared_code",
     )
     d.arrow("M340 227 H320", dotted=True)
     d.arrow("M180 108 V195")
     d.arrow("M100 260 V280 H180 V300", dotted=True)
     d.arrow("M240 260 V280 H480 V300", dotted=True)
-    d.box(40, 300, 280, 70, "ConsoleClient", "ConsoleApplication · input / output", "shared_code")
+    d.box(
+        40, 300, 280, 70,
+        "ConsoleApplication",
+        "Prepare console / scripted runs",
+        "shared_code",
+    )
+    d.box(
+        340, 300, 280, 70,
+        "AngularApplication",
+        "Prepare and start HTTP listener",
+        "shared_code",
+    )
+    # Console startup creates its client and configures optional authored prompts.
+    d.arrow("M180 370 V410", dotted=True)
+    d.arrow("M320 335 H330 V390 H480 V410", "configure script", 480, 382, dotted=True)
+    d.box(40, 410, 280, 70, "ConsoleClient", "Input / output / interrupt answers", "shared_code")
     d.box(
         340,
-        300,
+        410,
         280,
         70,
         "ScriptPrompter",
@@ -494,25 +509,25 @@ def architecture(index):
     )
     d.box(
         40,
-        410,
+        520,
         280,
         70,
         "Conversation",
-        "execute_conversation()",
+        "Client request / AG-UI event loop",
         "shared_code",
     )
     d.box(
         340,
-        410,
+        520,
         280,
         70,
         "WebConversation",
-        "Run status / pending interrupts",
+        "Runs / interrupts / reports / cleanup",
         "shared_code",
     )
     d.box(
         155,
-        700,
+        810,
         350,
         75,
         "create_langgraph_agent()",
@@ -521,7 +536,7 @@ def architecture(index):
     )
     d.box(
         340,
-        805,
+        915,
         280,
         70,
         "LangfuseCapture",
@@ -530,34 +545,59 @@ def architecture(index):
     )
     d.box(
         40,
-        805,
+        915,
         280,
         70,
         "TraceCapture",
         "Runtime callbacks → spans.jsonl",
         "shared_code",
     )
-    d.arrow("M180 775 V805", "Local capture", 105, 795)
+    d.arrow("M180 885 V915", "Local capture", 105, 905)
     # The web conversation supplies the optional Langfuse callback to the driver.
-    d.arrow("M480 775 V805", "Optional callback", 555, 795, dotted=True)
-    d.arrow("M180 370 V410", both=True)
-    d.arrow("M340 335 H320", both=True)
-    d.arrow("M40 460 H30 V735 H155", "AG-UI", 85, 665, True)
-    d.arrow("M620 460 H630 V735 H505", "AG-UI", 575, 665, True)
-    d.folder(695, 15, 385, 110, "frontend/src/", role="shared_code")
+    d.arrow("M480 885 V915", "Optional callback", 555, 905, dotted=True)
+    d.arrow("M180 480 V520", both=True)
+    d.arrow("M340 445 H320", both=True)
+    d.arrow("M40 570 H30 V845 H155", "AG-UI", 85, 775, True)
+    d.arrow("M620 570 H630 V845 H505", "AG-UI", 575, 775, True)
+    d.folder(695, 15, 385, 210, "frontend/src/", role="shared_code")
     d.box(
         715,
         56,
         345,
         52,
-        "ChatStore + HttpAgent",
-        "WebScriptPrompter · Angular presentation",
+        "WebScriptPrompter",
+        "Selects prompts from ChatStore",
         "shared_code",
     )
-    d.folder(695, 255, 385, 505, "src/agent_runtime/web/", role="shared_code")
+    d.box(
+        715,
+        156,
+        345,
+        52,
+        "ChatStore + HttpAgent",
+        "Angular presentation",
+        "shared_code",
+    )
+    # The upward data path initializes the browser's independent prompt cursor.
+    # ChatStore also reads nextPrompt and advances it after each completed turn.
+    d.arrow("M888 156 V108", "reset(prompts)", 980, 137, dotted=True)
+    d.folder(695, 245, 385, 625, "src/agent_runtime/web/", role="shared_code")
     d.box(
         715,
         300,
+        345,
+        70,
+        "GET /api/samples",
+        "Sample metadata + authored prompts",
+        "shared_code",
+    )
+    # Draw data delivery after the folder background. These arrows show the
+    # response payload's route, not AG-UI execution or a direct Python/TS call.
+    d.arrow("M620 227 H665 V320 H715", "catalog.info()", 665, 290, dotted=True)
+    d.arrow("M800 300 V208", "prompts JSON", 790, 235, dotted=True)
+    d.box(
+        715,
+        410,
         345,
         70,
         "create_app() HTTP handlers",
@@ -566,44 +606,45 @@ def architecture(index):
     )
     # Draw this cross-folder startup edge after the web container so its
     # background cannot obscure the dotted arrowhead at the HTTP handlers.
-    d.arrow("M320 245 H330 V275 H675 V320 H715", dotted=True)
+    d.arrow("M620 335 H675 V430 H715", dotted=True)
     d.box(
         715,
-        485,
+        595,
         345,
         75,
         "FastAPI",
         "Application instance · uvicorn.run(app)",
         "dependency",
     )
-    d.arrow("M888 370 V485", "creates app", 970, 470)
+    d.arrow("M888 480 V595", "creates app", 970, 580)
     d.box(
         715,
-        600,
+        710,
         345,
         95,
         "AG-UI protocol / SSE",
         "RunAgentInput · UserMessage\nEventEncoder + StreamingResponse",
         "dependency",
     )
-    d.arrow("M1060 350 H1070 V645 H1060")
-    d.text(888, 727, "No direct LangGraph / DeepAgents classes")
-    d.arrow("M930 108 V300", "AG-UI / HTTP / SSE", 980, 185, True)
-    d.arrow("M715 350 H655 V445 H620", "AG-UI", 665, 400, True)
-    d.folder(20, 960, 625, 145, "src/agent_runtime/workflows/", role="sample_code")
+    d.arrow("M1060 460 H1070 V755 H1060")
+    d.text(888, 837, "No direct LangGraph / DeepAgents classes")
+    # Run/resume traffic bypasses the catalog endpoint in the drawing as in code.
+    d.arrow("M1060 182 H1070 V445 H1060", "AG-UI / HTTP / SSE", 970, 395, True)
+    d.arrow("M715 460 H655 V555 H620", "AG-UI", 665, 510, True)
+    d.folder(20, 1070, 625, 145, "src/agent_runtime/workflows/", role="sample_code")
     d.box(
         65,
-        1002,
+        1112,
         535,
         80,
-        "Custom workflow for each sample",
+        "Sample workflows · shared by variants",
         "Process / routing / context strategy\nReferences: model · backend · middleware",
         "sample_code",
     )
-    d.folder(695, 1140, 385, 140, "src/agent_runtime/middleware/", role="shared_code")
+    d.folder(695, 1250, 385, 140, "src/agent_runtime/middleware/", role="shared_code")
     d.box(
         715,
-        1185,
+        1295,
         345,
         80,
         "RestrictedToolApproval",
@@ -611,29 +652,29 @@ def architecture(index):
         "shared_code",
     )
     d.arrow(
-        "M600 1080 H665 V1225 H715", "configures middleware", 810, 1125, dotted=True
+        "M600 1190 H665 V1335 H715", "configures middleware", 810, 1235, dotted=True
     )
     # Keep the execution route clear of the optional recorder inside harness.
-    d.arrow("M330 775 V1002", "execute / output", 420, 947, True)
-    d.folder(20, 1290, 625, 140, "src/agent_runtime/agents/", role="sample_code")
+    d.arrow("M330 885 V1112", "execute / output", 420, 1057, True)
+    d.folder(20, 1400, 625, 140, "src/agent_runtime/agents/", role="sample_code")
     d.box(
         65,
-        1330,
+        1440,
         535,
         90,
-        "Custom agents for each sample",
-        "Conceptual role / instructions / tools / model loop\nWorkflow supplies configuration; agents add prompts and tools",
+        "Agent implementations · reusable roles",
+        "Role instructions / domain tools / model loop\nWorkflows compose agents and configure execution policy",
         "sample_code",
     )
     # Construction passes references; the adjacent arrow retains runtime flow.
-    d.arrow("M200 1082 V1330", "parameter dictionaries", 175, 1210, dotted=True)
-    d.arrow("M460 1082 V1330", "invoke / result", 525, 1210, True)
+    d.arrow("M200 1192 V1440", "parameter dictionaries", 175, 1320, dotted=True)
+    d.arrow("M460 1192 V1440", "invoke / result", 525, 1320, True)
     # Shared backend adapters sit beside their workflow configuration owner.
     # Agents receive these references through parameter dictionaries.
-    d.folder(695, 790, 385, 315, "src/agent_runtime/backends/", role="shared_code")
+    d.folder(695, 900, 385, 315, "src/agent_runtime/backends/", role="shared_code")
     d.box(
         715,
-        835,
+        945,
         345,
         100,
         "FileAccessBackend",
@@ -642,17 +683,17 @@ def architecture(index):
     )
     d.box(
         715,
-        975,
+        1085,
         345,
         100,
         "ShellBackend",
         "shell_backend.py\nLocal commands + native file I/O",
         "shared_code",
     )
-    d.arrow("M600 1042 H695", "references", 648, 1030, dotted=True)
+    d.arrow("M600 1152 H695", "references", 648, 1140, dotted=True)
     d.folder(
         20,
-        1445,
+        1555,
         625,
         370,
         "src/agent_runtime/tools/ · 5 modules / 10 tools",
@@ -660,7 +701,7 @@ def architecture(index):
     )
     d.box(
         40,
-        1490,
+        1600,
         280,
         115,
         "search_reference.py · 3 tools",
@@ -669,7 +710,7 @@ def architecture(index):
     )
     d.box(
         340,
-        1490,
+        1600,
         280,
         115,
         "claims.py · 3 tools",
@@ -678,7 +719,7 @@ def architecture(index):
     )
     d.box(
         40,
-        1625,
+        1735,
         280,
         90,
         "service_evidence.py · 2 tools",
@@ -687,7 +728,7 @@ def architecture(index):
     )
     d.box(
         340,
-        1625,
+        1735,
         280,
         90,
         "echo_tool.py · 1 tool",
@@ -696,7 +737,7 @@ def architecture(index):
     )
     d.box(
         340,
-        1735,
+        1845,
         280,
         65,
         "semantic_search_wikipedia.py · 1 tool",
@@ -704,25 +745,25 @@ def architecture(index):
         "sample_code",
     )
     # This edge addresses the tool package; each agent registers its own subset.
-    d.arrow("M330 1420 V1445", "call / result", 405, 1435, True)
+    d.arrow("M330 1530 V1555", "call / result", 405, 1545, True)
     # Library dependency is positioned near its owners, not an application class.
     d.box(
         155,
-        540,
+        650,
         350,
         90,
         "InMemorySaver · Checkpointer",
         "LangGraph dependency\nOne instance retained per conversation",
         "dependency",
     )
-    d.arrow("M180 480 V540", "create / retain", 245, 515)
-    d.arrow("M480 480 V540", "create / retain", 415, 515)
+    d.arrow("M180 590 V650", "create / retain", 245, 625)
+    d.arrow("M480 590 V650", "create / retain", 415, 625)
     # The harness driver binds existing persistence; workflow nodes do not call it.
-    d.arrow("M330 700 V630", "bind to graph", 405, 670)
-    d.folder(695, 1290, 385, 140, "src/agent_runtime/mcp_servers/", role="sample_code")
+    d.arrow("M330 810 V740", "bind to graph", 405, 780)
+    d.folder(695, 1400, 385, 140, "src/agent_runtime/mcp_servers/", role="sample_code")
     d.box(
         715,
-        1330,
+        1440,
         345,
         90,
         "Wikipedia FastMCP server",
@@ -730,33 +771,33 @@ def architecture(index):
         "sample_code",
     )
     # The MCP agent owns the adapter; the server exposes the shared search tool.
-    d.arrow("M600 1375 H715", "MCP / stdio", 657, 1364, True)
+    d.arrow("M600 1485 H715", "MCP / stdio", 657, 1474, True)
     # Route MCP outside the file-editor components so ownership stays clear.
     d.arrow(
-        "M1060 1375 H1088 V1830 H630 V1770 H620",
+        "M1060 1485 H1088 V1940 H630 V1880 H620",
         "MCP tool call / result",
         835,
-        1820,
+        1930,
         True,
     )
     d.box(
         715,
-        1520,
+        1630,
         345,
         90,
-        "DeepAgent native tools",
+        "DeepAgents native tools",
         "read_file · write_file · edit_file · execute\nStorage / execution through the backend",
         "dependency",
     )
-    d.arrow("M600 1410 H675 V1565 H715", "native tools", 760, 1505, True)
+    d.arrow("M600 1520 H675 V1675 H715", "native tools", 760, 1615, True)
     # Native tools use the workflow-selected adapters at execution time.
-    d.arrow("M1060 1565 H1095 V885 H1060")
-    d.arrow("M1095 1025 H1060")
+    d.arrow("M1060 1675 H1095 V995 H1060")
+    d.arrow("M1095 1135 H1060")
     # Keep the ownership key below every component and connection.
-    d.text(20, 1855, "Color key · implementation ownership", "node-title", "start")
+    d.text(20, 1965, "Color key · implementation ownership", "node-title", "start")
     d.box(
         20,
-        1875,
+        1985,
         330,
         80,
         "Sample-specific code",
@@ -765,7 +806,7 @@ def architecture(index):
     )
     d.box(
         385,
-        1875,
+        1985,
         330,
         80,
         "Shared application code",
@@ -774,7 +815,7 @@ def architecture(index):
     )
     d.box(
         750,
-        1875,
+        1985,
         330,
         80,
         "Library dependencies",
@@ -782,7 +823,7 @@ def architecture(index):
         "dependency",
     )
     return d.finish(
-        "Workflows pass model, backend, and middleware references through parameter dictionaries (dotted arrow). Agents own domain tools and role instructions. Movies, sports, and history share one reference-expert implementation with independent role definitions."
+        "Dotted arrows show setup or metadata delivery; solid arrows show runtime interaction. main() selects ConsoleApplication (console or scripted input) or AngularApplication (HTTP listener startup). ConsoleApplication prepares and records runs through execute_conversation(); Conversation pumps client requests and AG-UI events. Workflows configure models, backends, and middleware; some pass parameter dictionaries to reusable agents (dotted arrow). Sample variants can share implementations. Movies, sports, and history share one reference-expert implementation with independent role definitions."
     )
 
 
@@ -1058,7 +1099,7 @@ CUSTOM = {
 
 def main():
     """Replace only diagram blocks, preserving the document's hand-written prose."""
-    page = Path(__file__).resolve().parents[1] / "docs/unified-execution-design.html"
+    page = Path(__file__).resolve().parents[1] / "docs/index.html"
     source = page.read_text()
     pattern = (
         r'<figure class="workflow-diagram" data-design-diagram="(\d+)".*?</figure>'
