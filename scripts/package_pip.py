@@ -1,4 +1,4 @@
-"""Build a source distribution with Angular already compiled for pip-only hosts.
+"""Build source and compiled Angular for pip-only hosts; RAG is downloaded separately.
 
 Run on the maintainer's machine with Git, Node.js, and npm available. The bundle
 preserves repository-relative sample assets, so recipients must use an editable
@@ -46,6 +46,8 @@ def source_files():
     for name in sorted(set(result.stdout.decode().split("\0")) - {""}):
         relative = Path(name)
         if relative.parts[0] not in SOURCE_DIRECTORIES and name not in ROOT_FILES:
+            continue
+        if relative.parent == Path("data/rag") and ".tar.xz.part" in relative.name:
             continue
         if any(
             part

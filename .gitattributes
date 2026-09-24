@@ -1,0 +1,4 @@
+# Copyright (c) 2026 Martin.Bechard@DevConsult.ca
+# Keep generated assets recognizable and preserve upstream license text verbatim.
+frontend/dist/chat/** linguist-generated=true
+frontend/dist/chat/3rdpartylicenses.txt -whitespace

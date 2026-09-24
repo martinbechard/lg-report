@@ -1,4 +1,4 @@
-"""Package a stopped, completed RAG cache as compressed, checksummed Git assets.
+"""Package a stopped, completed RAG cache as compressed, checksummed release assets.
 
 Run from the repository root after stopping all ingestion and chat processes.
 Only the pinned corpus and completed index are included, never cache credentials.
@@ -55,7 +55,7 @@ for name, members in [
         for member in members:
             tar.add(root / member, arcname=member, filter=normalize)
     parts = []
-    # Split archives into bounded parts so Git assets remain manageable. Each
+    # Split archives into bounded parts for independently retryable release downloads. Each
     # part gets its own digest and license sidecar; archives.json records the
     # complete set needed for reconstruction.
     with archive.open("rb") as stream:

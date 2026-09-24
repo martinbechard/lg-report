@@ -80,7 +80,8 @@ def test_failed_restore_does_not_publish(tmp_path, monkeypatch, damage):
     elif damage == "missing":
         (tmp_path / "part0").unlink()
     directory = tmp_path / "index"
-    with pytest.raises((ValueError, FileNotFoundError)):
+    expected_message = "python scripts/download_rag.py" if damage == "missing" else None
+    with pytest.raises((ValueError, FileNotFoundError), match=expected_message):
         rag_archives.restore_archive("dataset", directory)
     assert not (directory / "dataset").exists()
     assert not (tmp_path / "escaped").exists()

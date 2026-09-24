@@ -59,7 +59,7 @@ packages = ["src/agent_runtime", "src/reporting", "samples"]
 
 # A source release must not traverse ignored frontend dependencies or local
 # runtime state. Explicit inputs also keep compiled release archives out of
-# subsequent builds; the pip bundle supplies the prebuilt browser separately.
+# subsequent builds; the small compiled browser ships with the source checkout.
 [tool.hatch.build.targets.sdist]
-include = ["/src", "/samples", "/scripts", "/data", "/docs", "/frontend/src", "/frontend/public", "/frontend/tests", "/frontend/*.json", "/frontend/*.ts", "/tests", "/README.md", "/PIP-INSTALL.md", "/LICENSE", "/NOTICE", "/pyproject.toml", "/uv.lock", "/models.json", "/models.json.license", "/exchange-rate.json", "/exchange-rate.json.license", "/.env.example"]
-exclude = ["**/__pycache__", "**/node_modules", "**/.cache", "**/.angular", "**/reports", "**/dist", "**/.env", "**/.env.local"]
+include = ["/src", "/samples", "/scripts", "/data", "/docs", "/frontend/dist/chat", "/frontend/src", "/frontend/public", "/frontend/tests", "/frontend/*.json", "/frontend/*.ts", "/tests", "/README.md", "/PIP-INSTALL.md", "/LICENSE", "/NOTICE", "/pyproject.toml", "/uv.lock", "/models.json", "/models.json.license", "/exchange-rate.json", "/exchange-rate.json.license", "/.env.example"]
+exclude = ["**/__pycache__", "**/node_modules", "**/.cache", "**/.angular", "**/reports", "/data/rag/*.tar.xz.part*", "**/.env", "**/.env.local"]

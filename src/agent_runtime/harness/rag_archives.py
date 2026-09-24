@@ -1,6 +1,6 @@
 """Restore bundled RAG data into the ignored local cache before its first use.
 
-Archives are split into Git-friendly pieces and verified before extraction.
+Optional release archives are split into independently downloadable pieces and verified before extraction.
 Extract into a temporary directory first; never overwrite an existing index.
 The manifest is published last so interrupted restoration cannot appear complete.
 
@@ -58,7 +58,13 @@ def restore_archive(name: str, directory: Path) -> bool:
                 # Verify each split piece before adding it to the reconstructed
                 # compressed stream; a corrupt bundle must fail visibly rather
                 # than become an apparently valid but different dataset.
-                payload = (ARCHIVE_DIRECTORY / filename).read_bytes()
+                part_path = ARCHIVE_DIRECTORY / filename
+                if not part_path.is_file():
+                    raise FileNotFoundError(
+                        f"Missing RAG asset {filename}. From the repository root, "
+                        "run: python scripts/download_rag.py"
+                    )
+                payload = part_path.read_bytes()
                 if (
                     len(payload) != part["bytes"]
                     or hashlib.sha256(payload).hexdigest() != part["sha256"]

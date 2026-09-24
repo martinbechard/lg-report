@@ -12,8 +12,19 @@ uv sync --locked
 ```
 
 For a destination that uses **pip only**, use the [prebuilt distribution guide](PIP-INSTALL.md).
-It includes the compiled browser interface, so Node.js and npm are needed only
-on the machine that builds the distribution.
+The repository includes the compiled browser interface. Node.js and npm are
+needed only when changing and rebuilding the UI.
+
+The optional RAG corpus and index are downloaded separately (about 342 MiB):
+
+```sh
+python scripts/download_rag.py
+```
+
+Run this before RAG samples or the complete sample batch. Other samples do not
+need the RAG download. See [RAG setup](data/rag/README.md).
+To avoid downloading old RAG blobs retained in Git history, use
+`git clone --depth 1 https://github.com/martinbechard/lg-report.git`.
 
 ### Run all samples as a batch
 
@@ -76,12 +87,10 @@ uv run python -m agent_runtime --list
 ### Start the web server and Uvicorn API
 
 The web launcher starts one Uvicorn server that serves both the Angular chat
-and the FastAPI API. Install Node.js with npm, then build the frontend:
+and the FastAPI API. The prebuilt frontend is included in the checkout:
 
 ```sh
 uv sync --locked --extra chat
-npm --prefix frontend ci
-npm --prefix frontend run build
 ```
 
 Start the server with your provider configuration:
@@ -234,7 +243,7 @@ traces to Langfuse and print a trace URL; they create the same local bundle.
 | `samples/<sample>/.env` | Provider configuration for that sample |
 | `samples/<sample>/scripted_run.py` | Authored prompts and scripted model fixtures |
 | `.cache/lg-report/prices/` and `.cache/lg-report/fx/` | Downloaded, reusable reference data; created dynamically, not execution reports |
-| `data/rag/` and `.cache/lg-report/rag/` | Bundled reference corpus/index archives and the restored retrieval index |
+| `data/rag/` and `.cache/lg-report/rag/` | Optional downloaded corpus/index archives and the restored retrieval index |
 
 The samples keep their catalog, default caches, and `.env` relative to the
 repository/sample even when launched elsewhere. Output files go to your working
@@ -369,7 +378,7 @@ uv run python -m reporting.export_excel .cache/excel/data.json outputs/lg-report
 XlsxWriter writes formulas with cached results from the saved accounting data.
 Excel recalculates them when you edit the execution count, tariffs, or exchange
 rate. Unknown costs stay explicit. Export does not generate PNG workbook previews;
-open the workbook to inspect its layout. Node.js is needed only for the Angular frontend.
+open the workbook to inspect its layout. Node.js is needed only to rebuild the Angular frontend.
 
 ## Development checks
 

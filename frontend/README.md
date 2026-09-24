@@ -9,12 +9,11 @@ Changing mode starts a fresh chat. Model configuration remains on the server.
 
 ## Run
 
+The compiled UI is checked into `frontend/dist/chat/`; running it needs no Node.js.
 From the repository root:
 
 ```sh
 uv sync --extra chat
-npm --prefix frontend ci
-npm --prefix frontend run build
 
 uv run --extra chat python -m agent_runtime --sample simple_chat --live --client console
 uv run --extra chat python -m agent_runtime --sample simple_chat --live --client angular
@@ -103,6 +102,12 @@ The server binds to loopback and checks browser origins. This is a single-user
 local demonstration application.
 
 ## Development and verification
+
+Install a supported Node.js version (22.12+ or 24), then run
+`npm --prefix frontend ci`. After frontend source changes, run
+`npm --prefix frontend run build` and commit the complete `frontend/dist/chat/`
+output with the source, including removed hashed assets and third-party licenses.
+
 
 Run the Python server on port 8000, then `npm --prefix frontend start` for Angular
 live reload at [localhost:4200](http://localhost:4200). The development proxy

@@ -2,7 +2,7 @@
 # Install the prebuilt samples with pip
 
 This bundle includes the compiled Angular interface, Python source, sample
-inputs, and bundled RAG archives. The destination needs Python 3.11+ and pip.
+inputs, and the RAG download helper. The RAG archives are optional and separate. The destination needs Python 3.11+ and pip.
 It does not need uv, Node.js, npm, Git, or Codex. Python packages must be
 available through your configured pip package index.
 
@@ -72,7 +72,14 @@ For a live batch, run `python scripts/run_samples.py --env-file .env.local`.
 The quote sample asks for terminal input. Langfuse samples are excluded from
 the batch and require their own project credentials; see their sample READMEs.
 
-RAG samples restore the bundled Chroma index into `.cache/lg-report/rag/`.
+Before running RAG samples or the complete batch, download the optional archives:
+
+```sh
+python scripts/download_rag.py
+```
+
+The helper verifies the checkout's pinned checksums and reuses verified pieces.
+RAG samples restore the downloaded Chroma index into `.cache/lg-report/rag/`.
 The embedding model is not bundled and may download on first use, including
 in demo mode. Rebuilding an index also needs a tokenizer download. This is not
 an air-gapped installation kit. Live batches refresh the exchange rate online;
@@ -106,7 +113,7 @@ Rebuild it whenever frontend code changes. npm is needed only on this machine.
 ## Publish a GitHub Release
 
 After rebuilding the pip bundle, build the standard Python distributions and
-record SHA-256 checksums. Use the version in `pyproject.toml` for the release tag:
+copy the locally packaged RAG pieces to `dist/` and record SHA-256 checksums. Use the version in `pyproject.toml` for the release tag:
 
 ```sh
 uv build
@@ -118,15 +125,16 @@ commit. For version 0.1.0, using the authenticated GitHub CLI:
 
 ```sh
 gh release create v0.1.0 --target "$(git rev-parse HEAD)" --draft --title "lg-report 0.1.0" --notes "Prebuilt pip bundle and Python distributions. See PIP-INSTALL.md for installation."
-gh release upload v0.1.0 dist/lg-report-pip.tar.gz dist/lg_report-0.1.0.tar.gz dist/lg_report-0.1.0-py3-none-any.whl dist/SHA256SUMS
+gh release upload v0.1.0 dist/lg-report-pip.tar.gz dist/lg_report-0.1.0.tar.gz dist/lg_report-0.1.0-py3-none-any.whl dist/*.tar.xz.part[0-9][0-9][0-9] dist/SHA256SUMS
 gh release edit v0.1.0 --draft=false
 ```
 
 Check that every upload succeeded before publishing the draft. For later
 versions, update the tag and versioned filenames in these commands. Upload the
 complete archives without splitting them. Keep build outputs ignored by Git.
-The pip bundle includes the compiled UI and RAG assets; the wheel alone does
+The pip bundle includes the compiled UI; RAG pieces are separate release assets.
+The wheel alone does
 not supply the complete source-relative runtime layout.
 
-After downloading all three artifacts and the checksum file into one directory,
+After downloading all listed artifacts (including the RAG pieces) and the checksum file into one directory,
 verify them on macOS/Linux with `shasum -a 256 -c SHA256SUMS`.

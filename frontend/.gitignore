@@ -1,7 +1,6 @@
-# Keep dependencies, Angular caches, browser evidence and builds local.
+# Keep dependencies, Angular caches, browser evidence local.
 # Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 node_modules/
 .angular/
-dist/
 test-results/
 playwright-report/
