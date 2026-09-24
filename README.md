@@ -202,6 +202,14 @@ workbooks**, with a clickable index. **Real models are the default**, using
 another configuration. Langfuse samples are excluded. Requests and file approvals
 are scripted; the live quote sample asks clarification questions in the terminal.
 
+To restrict model selection, set `LG_AVAILABLE_MODELS=model-id,other-model-id`
+in `.env.local` (use exact deployment names for Azure). Unset or blank means
+unrestricted. A requested model outside the list logs a warning once per model
+per process, explaining the fallback to `LG_MODEL`. The default must also be in
+the list; if it is missing or unavailable, selection raises an error. Both the
+adapter and report identity use the resolved model. This checks the configured
+list; provider API failures still propagate without automatic fallback.
+
 For an unattended offline batch, explicitly select simulated models:
 
 ```sh
