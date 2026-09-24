@@ -1,115 +1,34 @@
 <!-- Copyright (c) 2026 Martin.Bechard@DevConsult.ca -->
-# Workflow and subagent context budgets
+# Context budgets: a file-backed coding plan
 
-This sample runs a planning peer followed by a responding peer over **one shared
-message history**. The responder delegates through DeepAgents' native `task`
-tool to an **isolated specialist**, which has its own history and context budget.
-The workflow owns these policies; agent modules own instructions and tools.
-
-See [context management](../../docs/chat-composition.md#context-management) for
-the shared, isolated, and forked context rules and the meaning of `trigger` and
-`keep` across the project.
+This sample coordinates one plan step at a time. The **planner** writes `/plan.md` and assigns a task ID with acceptance criteria. The **worker** implements only that step. A fresh **isolated-reviewer** inspects the current files and returns `approve` or `revise`. A rejection returns the same task to the worker. Only approval reaches the planner's completion update; the planner rereads the plan and selects the next task or finishes.
 
 ```mermaid
 flowchart LR
-    U[User turn] --> P[Planning peer]
-    P -->|Shared retained messages| R[Responding peer]
-    R -->|Task assignment only| S[Isolated specialist]
-    S -->|Final answer only| R
-    R --> H[Checkpoint for next user turn]
+    P[Planner assigns one step] --> W[Worker implements step]
+    W --> R[Fresh isolated review]
+    R -->|Revise| W
+    R -->|Approve| U[Planner records completion]
+    U -->|Next step| W
+    U -->|Finish| E[End]
+    R -->|Repair limit reached| B[End with step incomplete]
 ```
 
-## Why these roles exist
+This documentation diagram summarizes the code. The report state diagram is extracted from the compiled graph; actual model responses select its conditional routes. The scripted run deliberately presents a T1 implementation without boundary trimming, receives a rejection, repairs it, and obtains approval before recording completion. It then completes T2 (tests). The second user turn adds and completes T3 (boundary tests). Each completion has its own preceding independent approval.
 
-- Planner and responder demonstrate a handoff over shared history.
-- The specialist demonstrates an isolated task: assignment in, final answer out.
-- Summarizers are supporting model calls that rewrite history, not peer agents.
+The sample bundles two self-contained skills: [coding practices](skills/coding-practices/SKILL.md) for the planner and worker, and [review practices](skills/review-practices/SKILL.md) for the reviewer. They are loaded from this sample at construction time. They need no shared machine skill, MCP server, external package, or network service. The plan plus these skills and repeated reads create meaningful context pressure. The plan remains on disk even when middleware summarizes conversation history.
 
-```text
-Shared history: user -> planner -> responder -> next user turn
-                                  |      ^
-                         assignment      final answer
-                                  v      |
-Isolated task:                specialist
+## Context and compaction
 
-Context estimate >= 1,500 tokens -> summarize older messages
-Full agent input > 4,000 estimated tokens -> error before agent model call
-Isolated task: trigger 1,200; full-input error limit 2,000
-```
+The planner and worker each have a fresh instance of the same budget policy. Their retained messages are published back to the outer workflow after every role, so compaction cannot resurrect older messages. Each reviewer task starts with a new isolated context, so the reviewer does not use compaction middleware. Only its validated final assessment enters shared history. Current task, review verdict, and attempt count also live in graph state outside the compacted history. Native dynamic-prompt middleware supplies these authoritative facts in the system instructions on every model call, including calls after compaction. Worker write permission is narrowed to the files in the current planner assignment. A summary cannot substitute for approval. Shared-history summary calls are named `context_summarizer` in the report.
 
-The plot and compaction trigger use **reported input + output** as the baseline.
-Input includes cache, instructions, and tool definitions; output includes reasoning.
-New user/tool messages are estimated with characters / 4 plus message overhead.
-A fingerprint binds each usage receipt to the history it measured. Compaction or
-edits invalidate that receipt; local estimates apply until fresh usage arrives.
-This remains an estimate of the next context: peers can change instructions and
-tools, and not all billed reasoning is retained. The separate full-input error
-guard adjusts the same baseline for changes in system instructions and tool
-definitions before sending a request. Without valid usage it falls back locally.
+| History | Trigger | Recent-history target | Final input ceiling |
+| --- | ---: | ---: | ---: |
+| Main context, shared by planner and worker | 8,500 tokens | 900 tokens | 18,000 tokens |
 
-## Configuration
+The scripted two-turn run produces two compactions at this threshold. The trigger is checked before a model call. When reached, LangChain's `SummarizationMiddleware` replaces older messages with a summary while preserving recent messages and complete tool exchanges. The target is approximate: one large message may exceed it. A separate input guard rejects a request whose full estimated input still exceeds the ceiling. The guard includes role instructions and tool schemas. Compaction is a successful history replacement, not a billed model category; the summary model's own call is billed normally.
 
-Edit the defaults in
-[`src/agent_runtime/workflows/context_budget.py`](../../src/agent_runtime/workflows/context_budget.py),
-or pass `workflow_budget=` and `subagent_budget=` to `build_workflow`:
-
-```python
-workflow_budget = ContextBudget(
-    max_input_tokens=4000,
-    trigger_tokens=1500,
-    keep_tokens=500,
-)
-subagent_budget = ContextBudget(
-    max_input_tokens=2000,
-    trigger_tokens=1200,
-    keep_tokens=300,
-)
-```
-
-Compaction runs before the hard limit; the hard limit raises an error if the resulting full request is still too large:
-
-| Setting | Responsibility |
-| --- | --- |
-| `trigger_tokens` | Summarize when input + output plus estimated new messages reaches this threshold; fall back locally when no valid usage exists. |
-| `keep_tokens` | Target amount of recent history to leave unsummarized. Whole messages and tool exchanges remain intact. |
-| `max_input_tokens` | Reject an agent request whose final input estimate still exceeds this value after compaction. Includes instructions and tool schemas. |
-
-The retained history contains a summary **plus** recent messages. `keep_tokens`
-is not the total resulting size. One oversized message or tool exchange can
-exceed the retention target. The guard then rejects excessive input visibly;
-it never silently truncates the user's latest request.
-
-These policies estimate context; they are not a provider-exact tokenizer or a change to
-the model's physical capacity. Choose input limits below that capacity and
-reserve space for generated output. Summary-model requests are separate calls
-subject to their provider's limits; the agent input guard does not cap those
-requests. The sample observes LangChain's public `SummarizationMiddleware` hooks
-with plain agents, avoiding a second default DeepAgents compaction policy.
-
-## Register middleware with the subagent tool
-
-The workflow passes the child's middleware into the specialist specification:
-
-```python
-specialist = isolated_subagent.build_agent(
-    {
-        "model": specialist_model,
-        "middleware": subagent_budget.middleware(subagent_summary_model),
-    }
-)
-specialist["mode"] = "isolated"
-delegation = SubAgentMiddleware(backend=StateBackend(), subagents=[specialist])
-```
-
-`isolated_subagent.build_agent` puts that middleware in the specification's
-`middleware` list. The `task` tool invokes the compiled specialist with that
-policy. The model's task arguments contain the assignment and specialist name;
-they do not choose or override the context budget.
-
-Both peers receive fresh middleware instances using the workflow's one budget.
-The workflow replaces its outer message list with each peer's retained history,
-so messages removed during compaction cannot reappear at the next peer or turn.
-The child returns only its final answer to that shared conversation.
+The context estimate uses reported total input plus estimated output retained for the next request. Fresh and cache-read input are constituents of that input total. Reasoning counts only when a reasoning item is retained. A new user or tool message is estimated locally until a provider receipt arrives. A history rewrite invalidates the older receipt, so the next estimate uses the current messages. This is a useful budget signal, not the provider's exact tokenizer or capacity.
 
 ## Run and inspect
 
@@ -119,76 +38,40 @@ From the repository root:
 uv run python -m agent_runtime --sample context_budget --prices models.json --demo
 ```
 
-Open [`reports/context_budget/report.html`](../../reports/context_budget/report.html).
-The offline run has two turns and 15 model calls, including **one shared-history
-summary and two child-history summaries**. Summary calls appear in the normal
-trace and accounting. Open their requests to see the older messages being
-summarized, then inspect the subsequent peer/child model request to see what
-was retained. `PARENT_ONLY_DETAIL` and `CHILD_ONLY_DETAIL` identify raw context
-that must not cross the isolation boundary; summaries preserve useful meaning.
+Open the saved [HTML report](../../reports/context_budget/report.html). The two-turn offline run uses deterministic model decisions but real file tools, isolated reviewer invocations, checkpointing, and compaction. Inspect the Conversation section to see the plan write, each status edit and reread, the reviewer's file reads, and the returned report. Orange compaction events appear in the collaboration diagram, execution and conversation tables, and as thin lines in the LLM cost chart. The chart can show raw Post-call Context tokens or context as a percentage of model capacity.
 
-The report identifies compaction calls as `workflow_history_summarizer` for
-shared peer history and `specialist_history_summarizer` for isolated child
-history. These are the native summarization middleware's model/retry scopes;
-their names describe the work rather than the provider adapter class. The
-planner, responder, and delegated specialist retain their own agent identities.
-
-Successful history replacements also appear as orange **Compaction completed**
-events on the owning agent's collaboration timeline. Hover or keyboard-focus
-an event to see the context estimate and its basis before/after replacement,
-the trigger threshold, and separate maximum agent-input limit. The HTML and Excel execution tables include the same evidence.
-The evidence labels its counting basis. Before replacement, a valid receipt
-includes the previous request envelope. After replacement, its local fallback
-is not directly comparable to that provider total. The next plotted point uses
-fresh input + output usage. Compaction does not guarantee a smaller result. No-op checks and failed summaries do not emit completion events.
-Compactions also appear in the Conversation section after their summaries and
-as thin orange vertical markers between requests in the LLM cost chart.
-The chart draws one colored line per retained context: planner/responder share
-one line, and each isolated task has its own line. Summary requests are gray,
-unconnected points. Lines show reported input + output, including cached input
-and reasoning output. The short compaction popup shows the trigger estimate,
-its basis, the threshold, and the separate input error limit.
-
-The chart defaults to raw input + output tokens with a rounded upper limit and 10%
-headroom before rounding. Select **Show context out of 100%** to use the model
-capacity percentage scale. Missing capacity does not hide known raw token counts.
-
-The first user prompt repeats background deliberately to reach the threshold.
-The child makes two real local echo calls; its first scripted input is
-also deliberately long. The tool echoes that input, producing a large
-actual tool observation. The second call lets middleware compact an older
-complete tool exchange. These are load fixtures, not extra factual evidence.
-
-Summary text and agent decisions are scripted in offline mode. Compaction,
-message replacement, checkpointing, and delegation execute for real. Token
-counts are illustrative; this sample assumes no cache reuse because history
-is rewritten. It does not validate a live model's summary quality.
-
-The shared launcher also supports:
+To keep the exercise files after a run, supply a workspace directory:
 
 ```sh
-uv run python -m agent_runtime --sample context_budget --client angular --demo
+uv run python -m agent_runtime --sample context_budget --prices models.json --demo --out reports/context_budget --option 'workspace_dir="reports/context_budget/workspace"'
+```
+
+Without that option, the launcher uses a temporary workspace and removes it when the run closes. Only `/plan.md`, `/slug.py`, and `/test_slug.py` are exposed to the agents. The reviewer receives only `read_file`; the planner and worker receive `read_file`, `write_file`, and `edit_file`, with backend write permissions restricted to `/plan.md` for the planner and the two Python files for the worker.
+
+The public function is `slugify`, in module `slug`; tests use `from slug import slugify`.
+The planner is explicitly given these filenames and the absence of a command tool.
+The separate [circuit-breaker sample](../circuit_breaker/README.md) deliberately
+uses the forbidden `/slugify.py` name to demonstrate bounded repeated failure.
+
+The scripted agents write tests but have no command tool, so their statements do **not** claim those tests executed. You can run the saved tests yourself with `python -m unittest discover -s reports/context_budget/workspace -p 'test_*.py'` after an explicit-workspace run. The offline token usage is illustrative and assumes no cache reuse after rewritten context. Live mode uses configured models and its actual decisions and compaction count can vary:
+
+```sh
 uv run python -m agent_runtime --sample context_budget --live --client console --env-file .env.local
 ```
 
-Live mode uses the configured provider for agents and summaries. The actual
-number of calls and compactions depends on model decisions and user input.
-A summary can lose information; the language constraint in the offline fixture
-is an assertion about that fixture, not a guarantee for a live model.
+## Code ownership
 
-## Code ownership and verification
+- [`workflow`](../../src/agent_runtime/workflows/context_budget.py): shared history, current-task state, response validation, repair limits, and conditional routing.
+- [`planner`](../../src/agent_runtime/agents/planner.py) and [`worker`](../../src/agent_runtime/agents/worker.py): role instructions.
+- [`isolated reviewer`](../../src/agent_runtime/agents/isolated_reviewer.py): read-only review role.
+- [`workspace backend`](../../src/agent_runtime/workflows/exercise_backend.py): the three allowed virtual file paths.
+- [`scripted run`](scripted_run.py): reproducible model decisions and the substantial example plan.
+- [`context budget`](../../src/agent_runtime/context_budget.py): reusable compaction policy and final input guard.
 
-- `sample.json`: workflow and script metadata for the shared launcher.
-- `scripted_run.py`: deterministic prompts, decisions, summaries and simulated usage.
-- `workflows/context_budget.py`: shared state, peer order, budgets, child registration.
-- `agents/context_planner.py` and `agents/context_responder.py`: peer instructions.
-- `agents/isolated_subagent.py`: the existing specialist role and evidence tool.
-- `context_budget.py`: reusable compaction settings and final input-size guard.
+Verify the workflow and report with:
 
 ```sh
 uv run pytest -q tests/test_context_budget.py tests/test_samples.py -k 'context_budget or budget'
 ```
 
-Tests inspect actual model inputs in synchronous and asynchronous runs. They
-verify compaction across peer/checkpoint boundaries, isolation, independent
-summary calls, and rejection of oversized input before the agent model runs.
+The default repair limit is three worker attempts per step. A final rejection ends with the step incomplete. Invalid JSON or a verdict for a different task fails visibly. Tests inspect actual responses to verify assignment, repair, approval, and completion order in synchronous and asynchronous runs.

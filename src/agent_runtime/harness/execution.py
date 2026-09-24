@@ -12,6 +12,8 @@ from contextlib import asynccontextmanager
 
 from ag_ui_langgraph import LangGraphAgent
 
+from .workflow_diagram import diagram_config
+
 
 @asynccontextmanager
 async def open_graph(workflow):
@@ -42,7 +44,7 @@ def create_langgraph_agent(graph, *, name="sample", checkpointer=None, config=No
     return LangGraphAgent(
         name=name,
         graph=graph,
-        config={"recursion_limit": 30, **(config or {})},
+        config=diagram_config(graph, {"recursion_limit": 30, **(config or {})}),
         emit_raw_events=False,
         subagent_visibility="attributed",
         emit_interrupt_outcome=True,

@@ -4,6 +4,10 @@ __pycache__/
 *.py[oc]
 build/
 dist/
+# Store explicit release parts; complete archives remain local for delivery.
+!/dist/
+/dist/*
+!/dist/release/
 wheels/
 *.egg-info
 
@@ -21,6 +25,10 @@ wheels/
 !/reports/shell_script/
 !/reports/subagent_chat/
 !/reports/context_budget/
+!/reports/circuit_breaker/
+!/reports/nested_workflows/
+!/reports/nested_workflows_review_limit/
+!/reports/nested_workflows_test_limit/
 !/reports/thinking_agent/
 !/reports/review_loop/
 !/reports/expert_dispatch/
@@ -39,6 +47,10 @@ wheels/
 !/reports/*/excel-data.json
 !/reports/*/context.json
 !/reports/*/edited-summary.txt
+!/reports/context_budget/workspace/
+!/reports/context_budget/workspace/plan.md
+!/reports/context_budget/workspace/slug.py
+!/reports/context_budget/workspace/test_slug.py
 **/*langfuse*/reports/
 **/*langfuse*/data/
 **/*langfuse*/*.db

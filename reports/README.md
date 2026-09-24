@@ -4,9 +4,27 @@
 Open [the report index](index.html) to view HTML or download Excel for every sample.
 No model credentials, Python installation, or sample execution are needed to inspect
 these saved outputs. The index identifies completed and failed runs from the latest
-batch. The saved collection contains 14 successful live `gpt-5.6-luna` runs,
-with provider-reported usage for all 79 model calls. `run.json` records the
+batch. The refreshed reports use real provider models with scripted user requests
+and approval/clarification answers. The nested-workflow scenario options select
+fixtures only in demo mode; live models determine their own repair paths and
+verdicts. In the circuit-breaker lesson, normal workflow termination means the
+breaker stopped the repeated failure, not that the file was written.
+The saved quote example records cancellation after the live model asked an
+assembly question beyond the authored answers; no customer answer was invented.
+`run.json` records the
 provider, model, execution status, and whether a run is simulated.
+
+The state diagram before the cost chart is generated automatically from the
+compiled LangGraph nodes, edges, branch maps, and discoverable child graphs.
+The execution harness saves that topology with the trace; rendering needs no
+LLM call or current workflow source. Opaque wrappers can expose actual child
+graph references without maintaining a second list of states or transitions.
+Unmapped dynamic destinations are identified as unavailable. The generator
+reads DeepAgents' compiled task registry to capture available delegates.
+Two-headed task links show model-selected delegation and return; they are not
+unconditional workflow transitions. Identical child definitions share one box
+within their parent, with a link from each call step. The collaboration view
+shows which delegates actually ran.
 
 Each stable sample folder contains its HTML and Excel reports, normalized
 `run.json`, raw `spans.jsonl`, and the exact model-price and exchange-rate snapshot

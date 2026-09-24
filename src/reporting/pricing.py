@@ -21,7 +21,7 @@ from reporting.schema import Record, Run, Step
 class Rate(Record):
     """A model tariff in USD per million tokens, with verification provenance.
 
-    For example, Rate(input="2", output="10") prices ordinary input/output;
+    For example, Rate(input="2", output="10") prices standard-rate input/output;
     omitted cache rates remain unknown, rather than implying free caching.
     as_of is the verification day, not necessarily a price's effective date.
     """
@@ -84,10 +84,11 @@ def load_prices(path: Path) -> Prices:
     return Prices.model_validate(json.loads(path.read_text(encoding="utf-8")))
 
 
-# Ordering is shared by accounting projections and both exporters. These buckets
-# are disjoint even when provider totals include cache input or reasoning output.
+# Ordering is shared by accounting projections and both exporters. These billed
+# buckets are disjoint. The chart can regroup cache-written input as a standard
+# fresh-input charge plus its rate premium without changing the total.
 CATEGORIES = [
-    ("input", "Fresh input"),
+    ("input", "Input at standard rate"),
     ("cache_read", "Cache read"),
     ("cache_write_5m", "Cache write (5 min)"),
     ("cache_write_1h", "Cache write (1 hour)"),

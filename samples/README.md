@@ -12,9 +12,11 @@ See [composition diagrams](../docs/chat-composition.md).
 | [Simple chat](simple_chat/README.md) | Conversation history across two user turns | 2 model calls, no tool calls |
 | [Shell script](shell_script/README.md) | Native execute tool and SandboxBackendProtocol | 2 model calls, 1 real shell script |
 | [Tool chat](tool_chat/README.md) | Model/tool/model routing and observations | 4 model calls, 2 tool calls |
+| [Circuit breaker](circuit_breaker/README.md) | Repeated forbidden writes stopped by a native call limit | 4 model calls, 3 rejected writes; fourth write blocked |
 | [Simple chat with Langfuse](simple_chat_langfuse/README.md) | Official callback, trace hierarchy, and conversation grouping | 2 model calls; requires Langfuse |
 | [Parent and subagent](subagent_chat/README.md) | Isolated delegation and combined model costs | 4 model calls, 2 tool executions |
-| [Context budgets](context_budget/README.md) | Shared peer history, summarization, and an independently budgeted isolated subagent | 17 model calls including 5 summaries, 6 tool executions, 2 turns |
+| [Context budgets](context_budget/README.md) | File-backed planner and worker, shared compaction, and an isolated code reviewer | 47 model calls including 2 summaries, 32 tool executions, 2 turns |
+| [Nested workflows](nested_workflows/README.md) | Outer and nested shared histories, fresh isolated reviews, and bounded repair loops | 18 model calls, 3 coding attempts, 2 coding visits; no compaction |
 | [Parent and subagent with Langfuse](subagent_chat_langfuse/README.md) | Nested tracing of the same delegation | 4 model calls; requires Langfuse |
 | [RAG with Chroma](rag_chat/README.md) | Retrieve from millions of indexed tokens | 2 model calls, 1 real vector search; ingest first |
 | [MCP RAG](mcp_rag_chat/README.md) | Deep Agents tool discovery and Wikipedia retrieval over stdio MCP | 2 model calls, 1 MCP search; ingest first |

@@ -16,9 +16,22 @@ Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 
 from collections import Counter
 
+from agent_runtime.context_budget import estimated_retained_output_tokens
+
+
+def circuit_breaker_description(step):
+    """Expose a recorded middleware stop without inferring trips from errors."""
+    if step.context.get("circuit_breaker_event") != "tripped":
+        return None
+    details = ["Circuit breaker tripped"]
+    if step.context.get("circuit_breaker_reason"):
+        details.append(step.context["circuit_breaker_reason"])
+    details.append(step.context.get("circuit_breaker_action", "Agent stopped"))
+    return " | ".join(details)
+
 
 def compaction_description(step):
-    """Explain explicit replacement evidence without inferring missing counts.
+    """List recorded replacement counts without inferring missing values.
 
     This text is shared by diagram tooltips and HTML/Excel execution tables.
     Local history estimates are never added to provider usage or billed tokens.
@@ -33,53 +46,36 @@ def compaction_description(step):
         value = context.get(f"compaction_{field}")
         return f"{value:,}" if isinstance(value, int) else "unreported"
 
-    # New recordings disclose each counter's basis instead of suggesting that
-    # a provider receipt and a post-replacement local estimate are identical.
-    # Keep legacy recordings truthful: their numbers remain history-only counts.
+    # New recordings use a request-context baseline before replacement and a
+    # local history estimate after it. Distinct labels prevent a direct delta
+    # from being implied. The hard error limit controls a different guard.
     if "compaction_before_basis" in context:
         return (
-            f"Compaction completed | Trigger context: {count('before_tokens')} tokens "
-            f"({context['compaction_before_basis']}) | "
-            f"After replacement: {count('after_tokens')} tokens "
-            f"({context['compaction_after_basis']}) | "
-            f"Compact at: {count('trigger_tokens')} context tokens | "
-            f"Input error limit: {count('max_input_tokens')} estimated tokens"
+            f"Compaction completed | Context before: {count('before_tokens')} tokens | "
+            f"History after: {count('after_tokens')} tokens | "
+            f"Trigger: {count('trigger_tokens')} context tokens | "
+            f"Retention target: {count('keep_tokens')} tokens"
         )
 
-    # Completion means history was replaced, not that the replacement shrank.
-    # Small histories can grow when summary prose and its wrapper exceed the
-    # removed content, while recent tool exchanges must still be retained.
-    before = context.get("compaction_before_tokens")
-    after = context.get("compaction_after_tokens")
-    effect = ""
-    if isinstance(before, int) and isinstance(after, int):
-        delta = after - before
-        effect = (
-            f"Estimated history grew by {delta:,} tokens; no size reduction"
-            if delta > 0 else
-            f"Estimated history reduced by {-delta:,} tokens"
-            if delta < 0 else "Estimated history size unchanged"
-        ) + " | "
+    # Older recordings measured local history on both sides. Present the raw
+    # counts only; there is no need to editorialize whether the count changed.
     return (
-        "Compaction completed | Estimated history tokens: "
-        f"{count('before_tokens')} → {count('after_tokens')} | "
-        f"{effect}"
+        f"Compaction completed | History before: {count('before_tokens')} tokens | "
+        f"History after: {count('after_tokens')} tokens | "
         f"Messages: {count('before_messages')} → {count('after_messages')} | "
-        f"Trigger threshold: {count('trigger_tokens')} tokens | "
-        f"Recent-history retention target: {count('keep_tokens')} tokens | "
-        f"Maximum agent input: {count('max_input_tokens')} estimated tokens "
-        "(separate guard, includes system instructions and tool definitions) | "
-        "History estimates exclude system/tool envelopes; retained history includes the summary. "
-        "Trigger may also use matching-provider reported usage."
+        f"Trigger: {count('trigger_tokens')} tokens | "
+        f"Retention target: {count('keep_tokens')} tokens"
     )
 
 
-def context_utilization(step, prices, *, include_output=False):
+def context_utilization(step, prices, *, include_output=False, retained_output=False):
     """Measure request occupancy against a verified model context capacity.
 
-    Input usage already includes cached tokens. Output is excluded because this
-    measures the context at request time, not its size after generation. Exact
-    identities and explicit aliases avoid guessing a capacity for unknown models.
+    Input usage already includes cached tokens. By default output is excluded
+    to measure the request at call time. The history chart opts into estimated
+    retained output to show context after generation, using the same reasoning
+    replay rule as the compaction trigger. Exact identities and explicit aliases
+    avoid guessing a capacity for unknown models.
     Demo tariffs may name a real model basis; that yields an illustrative ratio,
     never a claim that the simulator has a provider-enforced context limit.
     """
@@ -87,9 +83,15 @@ def context_utilization(step, prices, *, include_output=False):
     if capacity is None or step.usage is None:
         return None
     # The request view measures input alone; the history plot shows occupancy
-    # after this response. Output is already inclusive of reasoning. Neither
-    # mode adds cached tokens again: they are part of usage.input_tokens.
-    tokens = step.usage.input_tokens + (step.usage.output_tokens if include_output else 0)
+    # after this response. The chart's retained-output view excludes reasoning
+    # unless the response carries a reasoning item into future requests.
+    # Neither mode adds cached tokens again: they are part of input_tokens.
+    output = step.usage.output_tokens
+    if retained_output:
+        blocks = [block for message in step.response
+                  for block in (message.get("content") if isinstance(message.get("content"), list) else [])]
+        output = estimated_retained_output_tokens(output, step.usage.reasoning, blocks)
+    tokens = step.usage.input_tokens + (output if include_output else 0)
     return {
         **capacity,
         "percent": tokens / capacity["capacity"] * 100,

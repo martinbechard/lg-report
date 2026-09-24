@@ -15,6 +15,7 @@ from langsmith import tracing_context
 
 from agent_runtime.harness.cache_policy import CACHE_TTL
 from agent_runtime.harness.trace_capture import TraceCapture
+from agent_runtime.harness.workflow_diagram import diagram_config
 from reporting.pricing import Prices
 from reporting.recording import clear_report, save_report
 
@@ -69,7 +70,7 @@ def execute_runnable(
     try:
         # Callers may omit config/callbacks entirely; empty containers let us add
         # capture without discarding any supplied execution settings or handlers.
-        run_config = {"recursion_limit": 30, **(config or {})}
+        run_config = diagram_config(runnable, {"recursion_limit": 30, **(config or {})})
         run_config["metadata"] = {
             **run_config.get("metadata", {}),
             "cache_ttl": CACHE_TTL,

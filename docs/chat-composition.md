@@ -216,17 +216,19 @@ sample selects fork mode. Conversation isolation does not itself isolate shared
 files, backends, or other permitted workflow state.
 
 The [context-budget sample](../samples/context_budget/README.md) explicitly shares
-history between its planning and responding peers. Its specialist is isolated.
+history between its planner and worker. Its file-reading reviewer is isolated.
 The [review loop](../samples/review_loop/README.md) instead retains separate
 author and judge histories. Both arrangements can use the same provider model.
 
 ```mermaid
 flowchart LR
-    H[Retained workflow history] --> P[Planning peer]
-    P -->|Updated shared history| R[Responding peer]
-    R -->|Self-contained assignment| S[Isolated specialist]
-    S -->|Final answer only| R
-    R -->|Retained messages for next turn| H
+    H[Retained workflow history] --> P[Planner]
+    P -->|Updated shared history and plan file| W[Worker]
+    W -->|Self-contained assignment| R[Isolated reviewer]
+    R -->|Revise current step| W
+    R -->|Approve current step| U[Planner records completion]
+    U -->|Next task| W
+    U -->|Turn complete| H
 ```
 
 ### Summarization: trigger and keep

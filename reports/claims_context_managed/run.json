@@ -1,17 +1,17 @@
 {
   "schema_version": 1,
-  "id": "01a0ccdf-b7b4-7282-a01f-e7dd9f070b7d",
+  "id": "01a0d12d-5d05-7c53-873c-3dc935c4adaa",
   "title": "Claims context — managed",
   "demo": false,
   "status": "ok",
   "steps": [
     {
-      "id": "01a0ccdf-b7b4-7282-a01f-e7dd9f070b7d",
+      "id": "01a0d12d-5d05-7c53-873c-3dc935c4adaa",
       "parent_id": null,
       "name": "LangGraph",
       "kind": "workflow",
-      "start_ns": 1790143608758201000,
-      "end_ns": 1790143610822657000,
+      "start_ns": 1790215806214706000,
+      "end_ns": 1790215808581612000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -22,19 +22,20 @@
       "response": [],
       "tool_definitions": null,
       "context": {
+        "report_workflow_definition": "{\"title\": \"LangGraph\", \"context\": \"Compiled graph; arrows show declared transitions\", \"nodes\": [\"__start__\", \"claim_turn\", \"__end__\"], \"edges\": [{\"source\": \"__start__\", \"target\": \"claim_turn\", \"label\": \"\"}, {\"source\": \"claim_turn\", \"target\": \"__end__\", \"label\": \"\"}], \"children\": {}}",
         "report_turn": 1,
-        "thread_id": "6fafb92c-6e21-4bce-9abc-e09b862d656b",
+        "thread_id": "f59c89a9-d015-4bdb-9938-dd6664b2e811",
         "cache_ttl": "5m",
         "description": "Execute the LangGraph workflow operation and pass its result to the next graph step."
       }
     },
     {
-      "id": "01a0ccdf-b7b7-77a2-a96e-7839f65fff4c",
-      "parent_id": "01a0ccdf-b7b4-7282-a01f-e7dd9f070b7d",
+      "id": "01a0d12d-5d07-7351-8c95-128ac141e708",
+      "parent_id": "01a0d12d-5d05-7c53-873c-3dc935c4adaa",
       "name": "claim_turn",
       "kind": "workflow",
-      "start_ns": 1790143608759491000,
-      "end_ns": 1790143610821812000,
+      "start_ns": 1790215806215831000,
+      "end_ns": 1790215808580407000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -48,7 +49,7 @@
         "langgraph_node": "claim_turn",
         "langgraph_step": 1,
         "report_turn": 1,
-        "thread_id": "6fafb92c-6e21-4bce-9abc-e09b862d656b",
+        "thread_id": "f59c89a9-d015-4bdb-9938-dd6664b2e811",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:1"
@@ -57,12 +58,12 @@
       }
     },
     {
-      "id": "01a0ccdf-b7b7-77a2-a96e-784c0d8754fd",
-      "parent_id": "01a0ccdf-b7b7-77a2-a96e-7839f65fff4c",
+      "id": "01a0d12d-5d08-73f0-a7c6-2b25acf9e440",
+      "parent_id": "01a0d12d-5d07-7351-8c95-128ac141e708",
       "name": "claims_agent",
       "kind": "workflow",
-      "start_ns": 1790143608760033000,
-      "end_ns": 1790143610821110000,
+      "start_ns": 1790215806216468000,
+      "end_ns": 1790215808579333000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -76,7 +77,7 @@
         "langgraph_node": "claim_turn",
         "langgraph_step": 1,
         "report_turn": 1,
-        "thread_id": "6fafb92c-6e21-4bce-9abc-e09b862d656b",
+        "thread_id": "f59c89a9-d015-4bdb-9938-dd6664b2e811",
         "cache_ttl": "5m",
         "tags": [
           "seq:step:1"
@@ -85,12 +86,12 @@
       }
     },
     {
-      "id": "01a0ccdf-b7b9-7062-a7c6-d364f127b6ab",
-      "parent_id": "01a0ccdf-b7b7-77a2-a96e-784c0d8754fd",
+      "id": "01a0d12d-5d09-7283-9408-6fe25111fb2f",
+      "parent_id": "01a0d12d-5d08-73f0-a7c6-2b25acf9e440",
       "name": "model",
       "kind": "workflow",
-      "start_ns": 1790143608761071000,
-      "end_ns": 1790143609893472000,
+      "start_ns": 1790215806217648000,
+      "end_ns": 1790215807446585000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -104,7 +105,7 @@
         "langgraph_node": "model",
         "langgraph_step": 1,
         "report_turn": 1,
-        "thread_id": "6fafb92c-6e21-4bce-9abc-e09b862d656b",
+        "thread_id": "f59c89a9-d015-4bdb-9938-dd6664b2e811",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:1"
@@ -113,24 +114,24 @@
       }
     },
     {
-      "id": "01a0ccdf-b7bb-7643-9f73-5583342bd8b2",
-      "parent_id": "01a0ccdf-b7b9-7062-a7c6-d364f127b6ab",
+      "id": "01a0d12d-5d0b-7902-932d-67b7882261bb",
+      "parent_id": "01a0d12d-5d09-7283-9408-6fe25111fb2f",
       "name": "ChatOpenAI",
       "kind": "model",
-      "start_ns": 1790143608763143000,
-      "end_ns": 1790143609892410000,
+      "start_ns": 1790215806219979000,
+      "end_ns": 1790215807445482000,
       "status": "ok",
       "provider": "openai",
       "model": "gpt-5.6-luna",
       "effort": null,
       "usage": {
         "input_tokens": 332,
-        "output_tokens": 28,
+        "output_tokens": 26,
         "cache_read": 0,
         "cache_write": 0,
         "cache_write_5m": 0,
         "cache_write_1h": 0,
-        "reasoning": 12
+        "reasoning": 10
       },
       "error": null,
       "request": [
@@ -152,19 +153,19 @@
           "role": "ai",
           "content": [
             {
-              "id": "rs_08acf24a3e239f6a006ab36c795cb087d28ebbb1d47994f32f",
+              "id": "rs_0872d4ff337ce520006ab4867f168887d28ff77936cf2ef367",
               "summary": [],
               "type": "reasoning",
               "content": [],
               "index": 0,
-              "encrypted_content": "gAAAAABqs2x5_Wgphp9Sf8NFOLXYsJNwFrOGSvHpwsXSNNJrZbRlaAdLrEIv2LZc7i3SZshIgBijJJPSCWpWKgvmqyjAB3-y4Bg0ZPyuHNtAcM_8iEjFKxvq0ZoUyq0fyPRacA8au8U4Na_TujB9F93P5gz0vbBPiRTtbsKx8OToiBd2id6X5vKBSOYYj4HAQqdy_GieOrYoFZcUAOghheMqZCQv8LYiGxh1KHnZKAFfg0oyopHuWw7W79VDqhoIcXF3JdEU1l3Bh3vLFVTAFAvNeeGXsA_nTWbeYOJ-opbm6Pl2BrNjBQRorbv8MJv-3pzGu0IG8CnCVEM-ja7BCwm-0lh5n5xpYLSHb-Zb11OccCrrts9I3aFpTVcbS8P8GKKjpVr5ySUKijGaY_VZIb7_dDtAiBbiuY4PI3SFl4KsaFtwKfeLj5do8Wx49KM7OlFHQrWMpbWcYsq5smhis-Loc3u05QeLqAJbxv-K37r3O_rrNHA_Xh77QSq75XdwpGsBWObENsaC4w7M4SCZVnZAiPhS4eixcQiRmcC1aqEpSjADyUZPVXnV8HYBQnKPpr_A71TXqfbOxjvNsrHHx3xYfy_ihIXIKGhRqHTFKd9EqZjA4GTS7CtFbJelrlur9jMOyb30CV2VAsZQL9gMA1d3lEhnTl_QsvH8b_l8OCaZOLGBY7wYVQlOEMG465esivFJndemdcVqe0LzW2_NKmS7lOHzqmiORe0rMZmlr1ZOQBTpAQClpghkdO6XpL4tOlSlB157f6G_eUyQy1MB8GACtlNYKfvCCNjzPQZHgRbd3iGHf6GABuMDnmPOx-S3Y1595G5mq4nrMXq2HQJGShD7hn1JfERyQDLK6F-g3FR8muhl57akKzZcqW0I4_lhw3swc6-p0A4oU9TAlTTOriJFXRmk2V2gNvNwXtCW2WtjmqhnPpdTgQZYN3lMqQZKKAMezRuuOJ-af_uAn1a4o4JTumnZSqj_HJvXjX2ln9fIrG8Uz1LVREi8qaaJKG6srgCda-WQnUcn_aWgU5zcPYwDQIA_dJobLTEp_u8TWcMeZrd8PTm77BJJHMW4i2WnAF_xFWb3xwBA5KpoylSeq7IT-b63ZKpFV-gtbSwxR_us3NS26IgnzJDy9TtfLfYK1h9Acpb1b8-3lD24Mb9-Xf2FUR2IIMrscjyVSUSCBhOR9xZxQVyCCDdprRg7x5E_PAkJB0vdmRET"
+              "encrypted_content": "gAAAAABqtIZ_yo0G6yBGuzkFqSjEu6yyUpW4f7pzqEeQilqfCRPD2ZHmFzANXtZTBRmAC8B8ZbGBzBLrI84K_vyjBTVlsxnCDnU78iadJMG3wsBNOxpAuCjncan58UPvZK9YuAbOc_qQ2DzSOk2Fs-Fn9zb4pRVqJu6-49H2j6fkhP5LPIBeNA4aTMkVD1SyZh-juu51u52r6dLTgwlQLnnOufJRlZOR8F9OrLsi-uWT8JKuD_EnEPsmvyFmXQ4soV7NvK5ckJzpFeXl3VaQmdqmA8lEZfA_wzf0OVsV22DcTv1wLB4gSVEcGU1y-jhhBCKAzUxsms_sxOcZPaE1EuOcE28FuIhcQsBkMsLl4yk4l377DV5dq_if0POZCM0_DeTtL5TbxGgEXyI_FaiPGo4hpJ0_IUgKimiXoveD4xMIc47e0Bn0KZRkJedjvyi8Pl2kLKL7hEe1TDqJWIE677fYhPLRyyUFLvG6FiG55dnVA9jVLaGH97jh8gSiZWqXJ2rg7nbi_ek7lGyS9bcQyqYPdKjsAVjsd0x82heiiKm9v1A3vcNhtjNnoWn3fWwKq_ZvCP9OiFdp7pspNnGAXbVvcuLEqFhGIUCglcwMrUO8O1RLJr9em4SgMIY-TGyccpbS45FroAPW6unmxZZbWrkHGkGa_znD9FBmqIvrHeYTuwHw_eL29Y8BEvi8Az9WtvFQFz-NGdjYzG7xkmRgKW9ci9QksSqJGC0z_BADp8eBD6jlEaUPqBpILL_TirnXNWJTAhJjD7EFmlv675FJQUQl9V3OasaDoANNkx2JZqgGyGAUUPsc_Nfmw2Gfa-ZPk255sTv4M26m1sR6wUjBbrNysxo9dIkOQZBiiJSG--BlkHiLHzO6hOJLIhz-LQjf2QwKnLbIgP71LhmO91j8xCZ-z2AsbgTkVi4mysI21LosqBVrTJyhkMcdJQwzAbmqzrnE39CJ7XBXLgf7l-1k5yGkLZ0kWDAJo4Qr5x8g0bVV5L-PrrnPTt_H86fv7jsOZ45mwfQWaAIRV49hlWfCxmzpC5dOoCeUbKj-FIY7Gf4iiG4e-C-yv4-hHh7e8JaCXk9xCVn-eZk9nwPiD0oxKtAvUVMaoMglrymXArw-Nh3KGZJCSI9GAFUut8sEmoZws2OHns_p_YQwHexgL75DYFM9phTFGWo9r5sYdSEir8L51BVI-BPuxQmvTXd2WXvyxsRVuX52tHan"
             },
             {
               "type": "function_call",
               "name": "read_policy",
               "arguments": "{}",
-              "call_id": "call_KpG3hBdlMxiECjhYb4CXiCnZ",
-              "id": "fc_08acf24a3e239f6a006ab36c79963087d28b6769ea89a88da9",
+              "call_id": "call_ghLY0nrmhuwMrIp5bp3MzZhe",
+              "id": "fc_0872d4ff337ce520006ab4867f3f6c87d28b0668249fde2426",
               "index": 1
             }
           ],
@@ -172,7 +173,7 @@
             {
               "name": "read_policy",
               "args": {},
-              "id": "call_KpG3hBdlMxiECjhYb4CXiCnZ",
+              "id": "call_ghLY0nrmhuwMrIp5bp3MzZhe",
               "type": "tool_call"
             }
           ],
@@ -233,7 +234,7 @@
         "langgraph_node": "model",
         "langgraph_step": 1,
         "report_turn": 1,
-        "thread_id": "6fafb92c-6e21-4bce-9abc-e09b862d656b",
+        "thread_id": "f59c89a9-d015-4bdb-9938-dd6664b2e811",
         "cache_ttl": "5m",
         "tags": [
           "seq:step:1"
@@ -251,12 +252,12 @@
       }
     },
     {
-      "id": "01a0ccdf-bc26-7252-9a98-6502ab914746",
-      "parent_id": "01a0ccdf-b7b7-77a2-a96e-784c0d8754fd",
+      "id": "01a0d12d-61d7-7d30-b559-57a237890fa4",
+      "parent_id": "01a0d12d-5d08-73f0-a7c6-2b25acf9e440",
       "name": "tools",
       "kind": "workflow",
-      "start_ns": 1790143609894639000,
-      "end_ns": 1790143609897869000,
+      "start_ns": 1790215807447818000,
+      "end_ns": 1790215807449981000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -270,7 +271,7 @@
         "langgraph_node": "tools",
         "langgraph_step": 2,
         "report_turn": 1,
-        "thread_id": "6fafb92c-6e21-4bce-9abc-e09b862d656b",
+        "thread_id": "f59c89a9-d015-4bdb-9938-dd6664b2e811",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:2"
@@ -279,12 +280,12 @@
       }
     },
     {
-      "id": "01a0ccdf-bc28-74a1-9d0f-67b8c1faddaa",
-      "parent_id": "01a0ccdf-bc26-7252-9a98-6502ab914746",
+      "id": "01a0d12d-61d8-7ef0-80c1-f5c6deb83ff6",
+      "parent_id": "01a0d12d-61d7-7d30-b559-57a237890fa4",
       "name": "read_policy",
       "kind": "tool",
-      "start_ns": 1790143609896816000,
-      "end_ns": 1790143609897307000,
+      "start_ns": 1790215807448913000,
+      "end_ns": 1790215807449419000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -302,7 +303,7 @@
           "role": "tool",
           "content": "{\"policy_id\": \"POL-001\", \"covered_event\": \"Accidental damage to a laptop at home\", \"deductible_cad\": 150, \"limit_cad\": 2000}",
           "tool_calls": [],
-          "tool_call_id": "call_KpG3hBdlMxiECjhYb4CXiCnZ"
+          "tool_call_id": "call_ghLY0nrmhuwMrIp5bp3MzZhe"
         }
       ],
       "tool_definitions": null,
@@ -310,7 +311,7 @@
         "langgraph_node": "tools",
         "langgraph_step": 2,
         "report_turn": 1,
-        "thread_id": "6fafb92c-6e21-4bce-9abc-e09b862d656b",
+        "thread_id": "f59c89a9-d015-4bdb-9938-dd6664b2e811",
         "cache_ttl": "5m",
         "tags": [
           "seq:step:1"
@@ -319,12 +320,12 @@
       }
     },
     {
-      "id": "01a0ccdf-bc2a-7980-8aa7-0ef6b62afdc4",
-      "parent_id": "01a0ccdf-b7b7-77a2-a96e-784c0d8754fd",
+      "id": "01a0d12d-61da-7fb0-8ff4-7af6165dff70",
+      "parent_id": "01a0d12d-5d08-73f0-a7c6-2b25acf9e440",
       "name": "model",
       "kind": "workflow",
-      "start_ns": 1790143609898509000,
-      "end_ns": 1790143610820002000,
+      "start_ns": 1790215807450691000,
+      "end_ns": 1790215808577984000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -338,7 +339,7 @@
         "langgraph_node": "model",
         "langgraph_step": 3,
         "report_turn": 1,
-        "thread_id": "6fafb92c-6e21-4bce-9abc-e09b862d656b",
+        "thread_id": "f59c89a9-d015-4bdb-9938-dd6664b2e811",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:3"
@@ -347,18 +348,18 @@
       }
     },
     {
-      "id": "01a0ccdf-bc2b-72c0-88f0-5490bade1f97",
-      "parent_id": "01a0ccdf-bc2a-7980-8aa7-0ef6b62afdc4",
+      "id": "01a0d12d-61db-7cc2-b075-b20f700aafe7",
+      "parent_id": "01a0d12d-61da-7fb0-8ff4-7af6165dff70",
       "name": "ChatOpenAI",
       "kind": "model",
-      "start_ns": 1790143609899250000,
-      "end_ns": 1790143610819118000,
+      "start_ns": 1790215807451499000,
+      "end_ns": 1790215808576765000,
       "status": "ok",
       "provider": "openai",
       "model": "gpt-5.6-luna",
       "effort": null,
       "usage": {
-        "input_tokens": 413,
+        "input_tokens": 411,
         "output_tokens": 21,
         "cache_read": 0,
         "cache_write": 0,
@@ -384,19 +385,19 @@
           "role": "ai",
           "content": [
             {
-              "id": "rs_08acf24a3e239f6a006ab36c795cb087d28ebbb1d47994f32f",
+              "id": "rs_0872d4ff337ce520006ab4867f168887d28ff77936cf2ef367",
               "summary": [],
               "type": "reasoning",
               "content": [],
               "index": 0,
-              "encrypted_content": "gAAAAABqs2x5_Wgphp9Sf8NFOLXYsJNwFrOGSvHpwsXSNNJrZbRlaAdLrEIv2LZc7i3SZshIgBijJJPSCWpWKgvmqyjAB3-y4Bg0ZPyuHNtAcM_8iEjFKxvq0ZoUyq0fyPRacA8au8U4Na_TujB9F93P5gz0vbBPiRTtbsKx8OToiBd2id6X5vKBSOYYj4HAQqdy_GieOrYoFZcUAOghheMqZCQv8LYiGxh1KHnZKAFfg0oyopHuWw7W79VDqhoIcXF3JdEU1l3Bh3vLFVTAFAvNeeGXsA_nTWbeYOJ-opbm6Pl2BrNjBQRorbv8MJv-3pzGu0IG8CnCVEM-ja7BCwm-0lh5n5xpYLSHb-Zb11OccCrrts9I3aFpTVcbS8P8GKKjpVr5ySUKijGaY_VZIb7_dDtAiBbiuY4PI3SFl4KsaFtwKfeLj5do8Wx49KM7OlFHQrWMpbWcYsq5smhis-Loc3u05QeLqAJbxv-K37r3O_rrNHA_Xh77QSq75XdwpGsBWObENsaC4w7M4SCZVnZAiPhS4eixcQiRmcC1aqEpSjADyUZPVXnV8HYBQnKPpr_A71TXqfbOxjvNsrHHx3xYfy_ihIXIKGhRqHTFKd9EqZjA4GTS7CtFbJelrlur9jMOyb30CV2VAsZQL9gMA1d3lEhnTl_QsvH8b_l8OCaZOLGBY7wYVQlOEMG465esivFJndemdcVqe0LzW2_NKmS7lOHzqmiORe0rMZmlr1ZOQBTpAQClpghkdO6XpL4tOlSlB157f6G_eUyQy1MB8GACtlNYKfvCCNjzPQZHgRbd3iGHf6GABuMDnmPOx-S3Y1595G5mq4nrMXq2HQJGShD7hn1JfERyQDLK6F-g3FR8muhl57akKzZcqW0I4_lhw3swc6-p0A4oU9TAlTTOriJFXRmk2V2gNvNwXtCW2WtjmqhnPpdTgQZYN3lMqQZKKAMezRuuOJ-af_uAn1a4o4JTumnZSqj_HJvXjX2ln9fIrG8Uz1LVREi8qaaJKG6srgCda-WQnUcn_aWgU5zcPYwDQIA_dJobLTEp_u8TWcMeZrd8PTm77BJJHMW4i2WnAF_xFWb3xwBA5KpoylSeq7IT-b63ZKpFV-gtbSwxR_us3NS26IgnzJDy9TtfLfYK1h9Acpb1b8-3lD24Mb9-Xf2FUR2IIMrscjyVSUSCBhOR9xZxQVyCCDdprRg7x5E_PAkJB0vdmRET"
+              "encrypted_content": "gAAAAABqtIZ_yo0G6yBGuzkFqSjEu6yyUpW4f7pzqEeQilqfCRPD2ZHmFzANXtZTBRmAC8B8ZbGBzBLrI84K_vyjBTVlsxnCDnU78iadJMG3wsBNOxpAuCjncan58UPvZK9YuAbOc_qQ2DzSOk2Fs-Fn9zb4pRVqJu6-49H2j6fkhP5LPIBeNA4aTMkVD1SyZh-juu51u52r6dLTgwlQLnnOufJRlZOR8F9OrLsi-uWT8JKuD_EnEPsmvyFmXQ4soV7NvK5ckJzpFeXl3VaQmdqmA8lEZfA_wzf0OVsV22DcTv1wLB4gSVEcGU1y-jhhBCKAzUxsms_sxOcZPaE1EuOcE28FuIhcQsBkMsLl4yk4l377DV5dq_if0POZCM0_DeTtL5TbxGgEXyI_FaiPGo4hpJ0_IUgKimiXoveD4xMIc47e0Bn0KZRkJedjvyi8Pl2kLKL7hEe1TDqJWIE677fYhPLRyyUFLvG6FiG55dnVA9jVLaGH97jh8gSiZWqXJ2rg7nbi_ek7lGyS9bcQyqYPdKjsAVjsd0x82heiiKm9v1A3vcNhtjNnoWn3fWwKq_ZvCP9OiFdp7pspNnGAXbVvcuLEqFhGIUCglcwMrUO8O1RLJr9em4SgMIY-TGyccpbS45FroAPW6unmxZZbWrkHGkGa_znD9FBmqIvrHeYTuwHw_eL29Y8BEvi8Az9WtvFQFz-NGdjYzG7xkmRgKW9ci9QksSqJGC0z_BADp8eBD6jlEaUPqBpILL_TirnXNWJTAhJjD7EFmlv675FJQUQl9V3OasaDoANNkx2JZqgGyGAUUPsc_Nfmw2Gfa-ZPk255sTv4M26m1sR6wUjBbrNysxo9dIkOQZBiiJSG--BlkHiLHzO6hOJLIhz-LQjf2QwKnLbIgP71LhmO91j8xCZ-z2AsbgTkVi4mysI21LosqBVrTJyhkMcdJQwzAbmqzrnE39CJ7XBXLgf7l-1k5yGkLZ0kWDAJo4Qr5x8g0bVV5L-PrrnPTt_H86fv7jsOZ45mwfQWaAIRV49hlWfCxmzpC5dOoCeUbKj-FIY7Gf4iiG4e-C-yv4-hHh7e8JaCXk9xCVn-eZk9nwPiD0oxKtAvUVMaoMglrymXArw-Nh3KGZJCSI9GAFUut8sEmoZws2OHns_p_YQwHexgL75DYFM9phTFGWo9r5sYdSEir8L51BVI-BPuxQmvTXd2WXvyxsRVuX52tHan"
             },
             {
               "type": "function_call",
               "name": "read_policy",
               "arguments": "{}",
-              "call_id": "call_KpG3hBdlMxiECjhYb4CXiCnZ",
-              "id": "fc_08acf24a3e239f6a006ab36c79963087d28b6769ea89a88da9",
+              "call_id": "call_ghLY0nrmhuwMrIp5bp3MzZhe",
+              "id": "fc_0872d4ff337ce520006ab4867f3f6c87d28b0668249fde2426",
               "index": 1
             }
           ],
@@ -404,7 +405,7 @@
             {
               "name": "read_policy",
               "args": {},
-              "id": "call_KpG3hBdlMxiECjhYb4CXiCnZ",
+              "id": "call_ghLY0nrmhuwMrIp5bp3MzZhe",
               "type": "tool_call"
             }
           ],
@@ -414,7 +415,7 @@
           "role": "tool",
           "content": "{\"policy_id\": \"POL-001\", \"covered_event\": \"Accidental damage to a laptop at home\", \"deductible_cad\": 150, \"limit_cad\": 2000}",
           "tool_calls": [],
-          "tool_call_id": "call_KpG3hBdlMxiECjhYb4CXiCnZ"
+          "tool_call_id": "call_ghLY0nrmhuwMrIp5bp3MzZhe"
         }
       ],
       "response": [
@@ -426,7 +427,7 @@
               "text": "Policy POL-001 applies a **CAD 150 deductible** to accidental laptop damage.",
               "phase": "final_answer",
               "index": 0,
-              "id": "msg_08acf24a3e239f6a006ab36c7a8ae487d2a2bed20de84b96d9"
+              "id": "msg_0872d4ff337ce520006ab4868052f887d2b48768f1d412be0a"
             }
           ],
           "tool_calls": [],
@@ -487,7 +488,7 @@
         "langgraph_node": "model",
         "langgraph_step": 3,
         "report_turn": 1,
-        "thread_id": "6fafb92c-6e21-4bce-9abc-e09b862d656b",
+        "thread_id": "f59c89a9-d015-4bdb-9938-dd6664b2e811",
         "cache_ttl": "5m",
         "tags": [
           "seq:step:1"
@@ -504,12 +505,12 @@
       }
     },
     {
-      "id": "01a0ccdf-bfd9-7152-a32a-74292c4115ce",
+      "id": "01a0d12d-6660-7f01-9dec-517925faae0b",
       "parent_id": null,
       "name": "LangGraph",
       "kind": "workflow",
-      "start_ns": 1790143610842198000,
-      "end_ns": 1790143613876325000,
+      "start_ns": 1790215808609138000,
+      "end_ns": 1790215810914899000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -520,19 +521,20 @@
       "response": [],
       "tool_definitions": null,
       "context": {
+        "report_workflow_definition": "{\"title\": \"LangGraph\", \"context\": \"Compiled graph; arrows show declared transitions\", \"nodes\": [\"__start__\", \"claim_turn\", \"__end__\"], \"edges\": [{\"source\": \"__start__\", \"target\": \"claim_turn\", \"label\": \"\"}, {\"source\": \"claim_turn\", \"target\": \"__end__\", \"label\": \"\"}], \"children\": {}}",
         "report_turn": 2,
-        "thread_id": "6fafb92c-6e21-4bce-9abc-e09b862d656b",
+        "thread_id": "f59c89a9-d015-4bdb-9938-dd6664b2e811",
         "cache_ttl": "5m",
         "description": "Execute the LangGraph workflow operation and pass its result to the next graph step."
       }
     },
     {
-      "id": "01a0ccdf-bfdb-7810-b785-3d8e5ba6a36c",
-      "parent_id": "01a0ccdf-bfd9-7152-a32a-74292c4115ce",
+      "id": "01a0d12d-6662-7dc3-81d9-52f8e5d34c99",
+      "parent_id": "01a0d12d-6660-7f01-9dec-517925faae0b",
       "name": "claim_turn",
       "kind": "workflow",
-      "start_ns": 1790143610843813000,
-      "end_ns": 1790143613875561000,
+      "start_ns": 1790215808610416000,
+      "end_ns": 1790215810913409000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -546,7 +548,7 @@
         "langgraph_node": "claim_turn",
         "langgraph_step": 4,
         "report_turn": 2,
-        "thread_id": "6fafb92c-6e21-4bce-9abc-e09b862d656b",
+        "thread_id": "f59c89a9-d015-4bdb-9938-dd6664b2e811",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:4"
@@ -555,12 +557,12 @@
       }
     },
     {
-      "id": "01a0ccdf-bfdc-7e23-b958-1055eeda5a65",
-      "parent_id": "01a0ccdf-bfdb-7810-b785-3d8e5ba6a36c",
+      "id": "01a0d12d-6662-7dc3-81d9-530b98cba757",
+      "parent_id": "01a0d12d-6662-7dc3-81d9-52f8e5d34c99",
       "name": "claims_agent",
       "kind": "workflow",
-      "start_ns": 1790143610844364000,
-      "end_ns": 1790143613874998000,
+      "start_ns": 1790215808610802000,
+      "end_ns": 1790215810911744000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -574,7 +576,7 @@
         "langgraph_node": "claim_turn",
         "langgraph_step": 4,
         "report_turn": 2,
-        "thread_id": "6fafb92c-6e21-4bce-9abc-e09b862d656b",
+        "thread_id": "f59c89a9-d015-4bdb-9938-dd6664b2e811",
         "cache_ttl": "5m",
         "tags": [
           "seq:step:1"
@@ -583,12 +585,12 @@
       }
     },
     {
-      "id": "01a0ccdf-bfdd-7b21-8f48-d304d91a70bf",
-      "parent_id": "01a0ccdf-bfdc-7e23-b958-1055eeda5a65",
+      "id": "01a0d12d-6663-7f50-bb2f-cc994b68967b",
+      "parent_id": "01a0d12d-6662-7dc3-81d9-530b98cba757",
       "name": "model",
       "kind": "workflow",
-      "start_ns": 1790143610845853000,
-      "end_ns": 1790143612834939000,
+      "start_ns": 1790215808611902000,
+      "end_ns": 1790215809727695000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -602,7 +604,7 @@
         "langgraph_node": "model",
         "langgraph_step": 1,
         "report_turn": 2,
-        "thread_id": "6fafb92c-6e21-4bce-9abc-e09b862d656b",
+        "thread_id": "f59c89a9-d015-4bdb-9938-dd6664b2e811",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:1"
@@ -611,18 +613,18 @@
       }
     },
     {
-      "id": "01a0ccdf-bfdf-7370-a947-75db376a8377",
-      "parent_id": "01a0ccdf-bfdd-7b21-8f48-d304d91a70bf",
+      "id": "01a0d12d-6664-78b0-b59f-969bd2228f7a",
+      "parent_id": "01a0d12d-6663-7f50-bb2f-cc994b68967b",
       "name": "ChatOpenAI",
       "kind": "model",
-      "start_ns": 1790143610847690000,
-      "end_ns": 1790143612833928000,
+      "start_ns": 1790215808613014000,
+      "end_ns": 1790215809726762000,
       "status": "ok",
       "provider": "openai",
       "model": "gpt-5.6-luna",
       "effort": null,
       "usage": {
-        "input_tokens": 455,
+        "input_tokens": 453,
         "output_tokens": 24,
         "cache_read": 0,
         "cache_write": 0,
@@ -648,19 +650,19 @@
           "role": "ai",
           "content": [
             {
-              "id": "rs_08acf24a3e239f6a006ab36c795cb087d28ebbb1d47994f32f",
+              "id": "rs_0872d4ff337ce520006ab4867f168887d28ff77936cf2ef367",
               "summary": [],
               "type": "reasoning",
               "content": [],
               "index": 0,
-              "encrypted_content": "gAAAAABqs2x5_Wgphp9Sf8NFOLXYsJNwFrOGSvHpwsXSNNJrZbRlaAdLrEIv2LZc7i3SZshIgBijJJPSCWpWKgvmqyjAB3-y4Bg0ZPyuHNtAcM_8iEjFKxvq0ZoUyq0fyPRacA8au8U4Na_TujB9F93P5gz0vbBPiRTtbsKx8OToiBd2id6X5vKBSOYYj4HAQqdy_GieOrYoFZcUAOghheMqZCQv8LYiGxh1KHnZKAFfg0oyopHuWw7W79VDqhoIcXF3JdEU1l3Bh3vLFVTAFAvNeeGXsA_nTWbeYOJ-opbm6Pl2BrNjBQRorbv8MJv-3pzGu0IG8CnCVEM-ja7BCwm-0lh5n5xpYLSHb-Zb11OccCrrts9I3aFpTVcbS8P8GKKjpVr5ySUKijGaY_VZIb7_dDtAiBbiuY4PI3SFl4KsaFtwKfeLj5do8Wx49KM7OlFHQrWMpbWcYsq5smhis-Loc3u05QeLqAJbxv-K37r3O_rrNHA_Xh77QSq75XdwpGsBWObENsaC4w7M4SCZVnZAiPhS4eixcQiRmcC1aqEpSjADyUZPVXnV8HYBQnKPpr_A71TXqfbOxjvNsrHHx3xYfy_ihIXIKGhRqHTFKd9EqZjA4GTS7CtFbJelrlur9jMOyb30CV2VAsZQL9gMA1d3lEhnTl_QsvH8b_l8OCaZOLGBY7wYVQlOEMG465esivFJndemdcVqe0LzW2_NKmS7lOHzqmiORe0rMZmlr1ZOQBTpAQClpghkdO6XpL4tOlSlB157f6G_eUyQy1MB8GACtlNYKfvCCNjzPQZHgRbd3iGHf6GABuMDnmPOx-S3Y1595G5mq4nrMXq2HQJGShD7hn1JfERyQDLK6F-g3FR8muhl57akKzZcqW0I4_lhw3swc6-p0A4oU9TAlTTOriJFXRmk2V2gNvNwXtCW2WtjmqhnPpdTgQZYN3lMqQZKKAMezRuuOJ-af_uAn1a4o4JTumnZSqj_HJvXjX2ln9fIrG8Uz1LVREi8qaaJKG6srgCda-WQnUcn_aWgU5zcPYwDQIA_dJobLTEp_u8TWcMeZrd8PTm77BJJHMW4i2WnAF_xFWb3xwBA5KpoylSeq7IT-b63ZKpFV-gtbSwxR_us3NS26IgnzJDy9TtfLfYK1h9Acpb1b8-3lD24Mb9-Xf2FUR2IIMrscjyVSUSCBhOR9xZxQVyCCDdprRg7x5E_PAkJB0vdmRET"
+              "encrypted_content": "gAAAAABqtIZ_yo0G6yBGuzkFqSjEu6yyUpW4f7pzqEeQilqfCRPD2ZHmFzANXtZTBRmAC8B8ZbGBzBLrI84K_vyjBTVlsxnCDnU78iadJMG3wsBNOxpAuCjncan58UPvZK9YuAbOc_qQ2DzSOk2Fs-Fn9zb4pRVqJu6-49H2j6fkhP5LPIBeNA4aTMkVD1SyZh-juu51u52r6dLTgwlQLnnOufJRlZOR8F9OrLsi-uWT8JKuD_EnEPsmvyFmXQ4soV7NvK5ckJzpFeXl3VaQmdqmA8lEZfA_wzf0OVsV22DcTv1wLB4gSVEcGU1y-jhhBCKAzUxsms_sxOcZPaE1EuOcE28FuIhcQsBkMsLl4yk4l377DV5dq_if0POZCM0_DeTtL5TbxGgEXyI_FaiPGo4hpJ0_IUgKimiXoveD4xMIc47e0Bn0KZRkJedjvyi8Pl2kLKL7hEe1TDqJWIE677fYhPLRyyUFLvG6FiG55dnVA9jVLaGH97jh8gSiZWqXJ2rg7nbi_ek7lGyS9bcQyqYPdKjsAVjsd0x82heiiKm9v1A3vcNhtjNnoWn3fWwKq_ZvCP9OiFdp7pspNnGAXbVvcuLEqFhGIUCglcwMrUO8O1RLJr9em4SgMIY-TGyccpbS45FroAPW6unmxZZbWrkHGkGa_znD9FBmqIvrHeYTuwHw_eL29Y8BEvi8Az9WtvFQFz-NGdjYzG7xkmRgKW9ci9QksSqJGC0z_BADp8eBD6jlEaUPqBpILL_TirnXNWJTAhJjD7EFmlv675FJQUQl9V3OasaDoANNkx2JZqgGyGAUUPsc_Nfmw2Gfa-ZPk255sTv4M26m1sR6wUjBbrNysxo9dIkOQZBiiJSG--BlkHiLHzO6hOJLIhz-LQjf2QwKnLbIgP71LhmO91j8xCZ-z2AsbgTkVi4mysI21LosqBVrTJyhkMcdJQwzAbmqzrnE39CJ7XBXLgf7l-1k5yGkLZ0kWDAJo4Qr5x8g0bVV5L-PrrnPTt_H86fv7jsOZ45mwfQWaAIRV49hlWfCxmzpC5dOoCeUbKj-FIY7Gf4iiG4e-C-yv4-hHh7e8JaCXk9xCVn-eZk9nwPiD0oxKtAvUVMaoMglrymXArw-Nh3KGZJCSI9GAFUut8sEmoZws2OHns_p_YQwHexgL75DYFM9phTFGWo9r5sYdSEir8L51BVI-BPuxQmvTXd2WXvyxsRVuX52tHan"
             },
             {
               "type": "function_call",
               "name": "read_policy",
               "arguments": "{}",
-              "call_id": "call_KpG3hBdlMxiECjhYb4CXiCnZ",
-              "id": "fc_08acf24a3e239f6a006ab36c79963087d28b6769ea89a88da9",
+              "call_id": "call_ghLY0nrmhuwMrIp5bp3MzZhe",
+              "id": "fc_0872d4ff337ce520006ab4867f3f6c87d28b0668249fde2426",
               "index": 1
             }
           ],
@@ -668,7 +670,7 @@
             {
               "name": "read_policy",
               "args": {},
-              "id": "call_KpG3hBdlMxiECjhYb4CXiCnZ",
+              "id": "call_ghLY0nrmhuwMrIp5bp3MzZhe",
               "type": "tool_call"
             }
           ],
@@ -678,7 +680,7 @@
           "role": "tool",
           "content": "{\"policy_id\": \"POL-001\", \"covered_event\": \"Accidental damage to a laptop at home\", \"deductible_cad\": 150, \"limit_cad\": 2000}",
           "tool_calls": [],
-          "tool_call_id": "call_KpG3hBdlMxiECjhYb4CXiCnZ"
+          "tool_call_id": "call_ghLY0nrmhuwMrIp5bp3MzZhe"
         },
         {
           "role": "ai",
@@ -688,7 +690,7 @@
               "text": "Policy POL-001 applies a **CAD 150 deductible** to accidental laptop damage.",
               "phase": "final_answer",
               "index": 0,
-              "id": "msg_08acf24a3e239f6a006ab36c7a8ae487d2a2bed20de84b96d9"
+              "id": "msg_0872d4ff337ce520006ab4868052f887d2b48768f1d412be0a"
             }
           ],
           "tool_calls": [],
@@ -706,19 +708,19 @@
           "role": "ai",
           "content": [
             {
-              "id": "rs_08acf24a3e239f6a006ab36c7b6b1c87d298298a6c599f981d",
+              "id": "rs_0872d4ff337ce520006ab486815bc087d2b02a6414ea2148cf",
               "summary": [],
               "type": "reasoning",
               "content": [],
               "index": 0,
-              "encrypted_content": "gAAAAABqs2x7y1_D29XwcxpNBCWtwTjbHl126ixQ1Vy0A_gmMEggm99GUqg7KwDS7Xpkev-Uup9_LRQ_-WQP9avAuzN89L2vMWtLdvDrZvZiowgpwN5eAfizhKpLgjc3vVU1ThawGCO0eX6DIKDM9nOh4is8Dyt2AkM7Ux1UcTLvm1UgW2iJdXG1PyurLpied_NYuaSEzh3gtlhx5w1YBzdwMGBRVgyA0aS8T8IYIQsOo-oP1dODeGCyMoH88acRxYkUCIqgfyqTpczzaPmqdvOKsyiMjo3uTq_vdCaDJgrpxFijwxXixXO5tGzP5BPCr92Pg0Ap2VUJ7dKNWVwli-0VSkQbZyFXC0XCuG-sydsYvcTo_dJcB3z7HzRE9P1Ade4GPfMtBoq3earqeK1aafwu2798jo1ILDwx-uDh0ADwqSQzcwb5fdcrkRaEqoEI2ElxW2n4nfKoskbkFTejjCW46yIsNdC3YC3cqgaqmoAq7kOoTMYt1XuOtVMz8rXzKG0JVNGoW9HDe_cmBFg5dX7o-XVdvvS0FmkE56YQQJNRwcWiObNegnoH_uuSopRG9Wl3q4rnZOrZDFGTyFOKTs0MwBFpLAsu3Dfrak3BUfCL12aG0Uou2RXajjQT3O4UmIorpS6tBYq94m7NpAlK_t4hYEmvvpZaotxBV1AMT00RlS4pOf4D1ioFbnW8PF1XNEL5EG1Z3AkoFBzeBjkuJHZgynw2cLtlZyCMh74-ZlYE4LI7bdwLLfiuhrfwhPUIWwe3xtd0QV9_zpxBDCCfulN4GPz7oE6CdTNbfk88UOBo1_hI46zZM-MGTuDckg0GjKO4y8zJ4lIgsUAfN8ishSxhie4zc0mlnAiy2WzA2ktluANdt4uNk84hXyGghThjuOS8HentlSMnCBnUxakBXYKZ0exgIDUZewT0_1DDGIxUcOijy3XyqtcFC9yBuq2nypj2qT9zFld8J7vHnjTDiNs7Y_tGVGZhGiqxw16Pw4Rv_pjT5NIOSQBQx4HDJLMcwjaxlumHHPyZNu6rDsFIPs8LFioOulPF6_kVcNf46GVHL68ZGj8lrbktNs0-_0jjTvfQ8RSmJlVrx90vvKSYKb3UkqBNj1h_d0_2VAzH7_qEDGGBoqfhTbg1QL-NuNe3a45gOs1HYuv_WFgbsJwlhax7oQl91IWudRhdGwsIp7pPZKNCgY39IuD4jI-IR3Ju9Mu372ceADvM"
+              "encrypted_content": "gAAAAABqtIaBmBKfkQE1Qeg5yLqLuzTVmLzCzv8Ox2_D1i0iKyGiqhseMGAhMIhivGMMMrCcTdr61manV47dSALn0SFvCKEqaqqr_nqNYJ-XAQkjSBL5Dd1Zg0wP-0EBrR5owMYWCFvuE7Xvv6iU5n1Z6FwNyCheXyleWVyp6l-FAG7qY4694nh0oEUjcBsB4hSFQIIrawFsoKZq19-Q15wmdkouyEVv9lCjQ4EalGXln1PIwu6o4QstSagobPFvFVcS_Y1RV6qLutdHph6iBTrjbJi7JYbV5zI-NSXhUv1oprk62wT6jChtuPhHyRFBzd1TzibB4yfm8TngBPj_ooOmZHkeXpIX0eLsxhmDHLuMeHVaEicWSAmR28ZMlT28402FnCpEBY6mgJNXe30ZhHPYlYBWspU8j3aunE02HzIQZWc4hA8OjKNGp0gzy_I_LhEx3Qmx_0Cn4h30C1iKGl78ilwGFrcwBoTvgQJvjVdS2ow9ODOdyr7npcrBW-qvrnBt7y6ZXvjft9UV5aIplMXc5ZqisWfjVcjWpp15_e8EJWrYttcn0QCTa2Qcq8DyezJ631qJr2esMsFqgOin8hMZuxjIPOXIGTnoVFbZqiytlvJiFmllA0KnHKQT-CdM64bo3zCp8bn3AcgToEGjQ7MUOtx9vrLI-2K5o6FdFg9qaeeH4NoIfTQrofARG0sKpW6US1rRTvCllyUg1q9424b4hGdk_2AEDF8J7zG56aFKNRo7HvZHT4gORzlzAj-ynkLGPBPfXRaVyP2inHuUu0cblVtR3v4zyB7R2QBixSrM-xwL15WzmANsMjc3AXdM_UxRgfdgeGszWPvF40i6ycm3fKaxwE2QGA-xATHgMVO6vNGgOiqaE780Tay-hrC3MAHK9HsOMhnovKk3VE_wqgE_RAa5aYxsFh8Q9l5DhGXebmiJdGD6r1wi3BrO_UuL76NeWowmZAQVp3v6Bi8hvSej9WmlG4nlNN9Ct-LkelGZ0q7vK5T7V1zlWMtc8f6a1AxVRsHVgxybMJv2HwdaU-NywFgBqL2w0zk0SRALvf-W4s8BVCGKin73sO7yOFXbeWA4qKuzUoQ_EPEcOajoUgDtH2V6B_a7lHTYgc69mfWmYMzwB5J3el4MIVw7tBfsF-TEkRLs5W3dtiEGUPc6qyF5eBJ5bCfn3lrpvnNKzGyWZ38AwV3rL-Gd6v92MJ4XQm1aQdcn-CFE"
             },
             {
               "type": "function_call",
               "name": "read_claim",
               "arguments": "{}",
-              "call_id": "call_78AYLUwYWh6NWaqvO8hpsVMS",
-              "id": "fc_08acf24a3e239f6a006ab36c7bced487d2b2a1a89aa0a6b9ac",
+              "call_id": "call_b3KToV0FVuAnZl86LmL1Kdgg",
+              "id": "fc_0872d4ff337ce520006ab486817cc087d2971a3acf1f70fc28",
               "index": 1
             }
           ],
@@ -726,7 +728,7 @@
             {
               "name": "read_claim",
               "args": {},
-              "id": "call_78AYLUwYWh6NWaqvO8hpsVMS",
+              "id": "call_b3KToV0FVuAnZl86LmL1Kdgg",
               "type": "tool_call"
             }
           ],
@@ -787,7 +789,7 @@
         "langgraph_node": "model",
         "langgraph_step": 1,
         "report_turn": 2,
-        "thread_id": "6fafb92c-6e21-4bce-9abc-e09b862d656b",
+        "thread_id": "f59c89a9-d015-4bdb-9938-dd6664b2e811",
         "cache_ttl": "5m",
         "tags": [
           "seq:step:1"
@@ -809,12 +811,12 @@
       }
     },
     {
-      "id": "01a0ccdf-c7a4-7810-8512-e9429a148fc1",
-      "parent_id": "01a0ccdf-bfdc-7e23-b958-1055eeda5a65",
+      "id": "01a0d12d-6ac0-75c1-92e1-bee2fd12c11a",
+      "parent_id": "01a0d12d-6662-7dc3-81d9-530b98cba757",
       "name": "tools",
       "kind": "workflow",
-      "start_ns": 1790143612837395000,
-      "end_ns": 1790143612840841000,
+      "start_ns": 1790215809728677000,
+      "end_ns": 1790215809731231000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -828,7 +830,7 @@
         "langgraph_node": "tools",
         "langgraph_step": 2,
         "report_turn": 2,
-        "thread_id": "6fafb92c-6e21-4bce-9abc-e09b862d656b",
+        "thread_id": "f59c89a9-d015-4bdb-9938-dd6664b2e811",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:2"
@@ -837,12 +839,12 @@
       }
     },
     {
-      "id": "01a0ccdf-c7a7-7571-982f-202ee708c675",
-      "parent_id": "01a0ccdf-c7a4-7810-8512-e9429a148fc1",
+      "id": "01a0d12d-6ac1-7993-9dd9-5da7c71357d1",
+      "parent_id": "01a0d12d-6ac0-75c1-92e1-bee2fd12c11a",
       "name": "read_claim",
       "kind": "tool",
-      "start_ns": 1790143612839133000,
-      "end_ns": 1790143612839958000,
+      "start_ns": 1790215809729896000,
+      "end_ns": 1790215809730530000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -860,7 +862,7 @@
           "role": "tool",
           "content": "{\"claim_id\": \"CLM-001\", \"revision\": 1, \"description\": \"A laptop was stolen from a parked car.\", \"status\": \"pending\"}",
           "tool_calls": [],
-          "tool_call_id": "call_78AYLUwYWh6NWaqvO8hpsVMS"
+          "tool_call_id": "call_b3KToV0FVuAnZl86LmL1Kdgg"
         }
       ],
       "tool_definitions": null,
@@ -868,7 +870,7 @@
         "langgraph_node": "tools",
         "langgraph_step": 2,
         "report_turn": 2,
-        "thread_id": "6fafb92c-6e21-4bce-9abc-e09b862d656b",
+        "thread_id": "f59c89a9-d015-4bdb-9938-dd6664b2e811",
         "cache_ttl": "5m",
         "tags": [
           "seq:step:1"
@@ -877,12 +879,12 @@
       }
     },
     {
-      "id": "01a0ccdf-c7a9-7a03-bd18-acfaca02907d",
-      "parent_id": "01a0ccdf-bfdc-7e23-b958-1055eeda5a65",
+      "id": "01a0d12d-6ac3-7010-9dfe-8b3f046ab8ef",
+      "parent_id": "01a0d12d-6662-7dc3-81d9-530b98cba757",
       "name": "model",
       "kind": "workflow",
-      "start_ns": 1790143612841533000,
-      "end_ns": 1790143613874149000,
+      "start_ns": 1790215809732002000,
+      "end_ns": 1790215810909625000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -896,7 +898,7 @@
         "langgraph_node": "model",
         "langgraph_step": 3,
         "report_turn": 2,
-        "thread_id": "6fafb92c-6e21-4bce-9abc-e09b862d656b",
+        "thread_id": "f59c89a9-d015-4bdb-9938-dd6664b2e811",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:3"
@@ -905,18 +907,18 @@
       }
     },
     {
-      "id": "01a0ccdf-c7aa-7073-9062-c33e52e5abcc",
-      "parent_id": "01a0ccdf-c7a9-7a03-bd18-acfaca02907d",
+      "id": "01a0d12d-6ac4-75b3-97d5-b28c317fd852",
+      "parent_id": "01a0d12d-6ac3-7010-9dfe-8b3f046ab8ef",
       "name": "ChatOpenAI",
       "kind": "model",
-      "start_ns": 1790143612842460000,
-      "end_ns": 1790143613873610000,
+      "start_ns": 1790215809732989000,
+      "end_ns": 1790215810908348000,
       "status": "ok",
       "provider": "openai",
       "model": "gpt-5.6-luna",
       "effort": null,
       "usage": {
-        "input_tokens": 525,
+        "input_tokens": 523,
         "output_tokens": 27,
         "cache_read": 0,
         "cache_write": 0,
@@ -942,19 +944,19 @@
           "role": "ai",
           "content": [
             {
-              "id": "rs_08acf24a3e239f6a006ab36c795cb087d28ebbb1d47994f32f",
+              "id": "rs_0872d4ff337ce520006ab4867f168887d28ff77936cf2ef367",
               "summary": [],
               "type": "reasoning",
               "content": [],
               "index": 0,
-              "encrypted_content": "gAAAAABqs2x5_Wgphp9Sf8NFOLXYsJNwFrOGSvHpwsXSNNJrZbRlaAdLrEIv2LZc7i3SZshIgBijJJPSCWpWKgvmqyjAB3-y4Bg0ZPyuHNtAcM_8iEjFKxvq0ZoUyq0fyPRacA8au8U4Na_TujB9F93P5gz0vbBPiRTtbsKx8OToiBd2id6X5vKBSOYYj4HAQqdy_GieOrYoFZcUAOghheMqZCQv8LYiGxh1KHnZKAFfg0oyopHuWw7W79VDqhoIcXF3JdEU1l3Bh3vLFVTAFAvNeeGXsA_nTWbeYOJ-opbm6Pl2BrNjBQRorbv8MJv-3pzGu0IG8CnCVEM-ja7BCwm-0lh5n5xpYLSHb-Zb11OccCrrts9I3aFpTVcbS8P8GKKjpVr5ySUKijGaY_VZIb7_dDtAiBbiuY4PI3SFl4KsaFtwKfeLj5do8Wx49KM7OlFHQrWMpbWcYsq5smhis-Loc3u05QeLqAJbxv-K37r3O_rrNHA_Xh77QSq75XdwpGsBWObENsaC4w7M4SCZVnZAiPhS4eixcQiRmcC1aqEpSjADyUZPVXnV8HYBQnKPpr_A71TXqfbOxjvNsrHHx3xYfy_ihIXIKGhRqHTFKd9EqZjA4GTS7CtFbJelrlur9jMOyb30CV2VAsZQL9gMA1d3lEhnTl_QsvH8b_l8OCaZOLGBY7wYVQlOEMG465esivFJndemdcVqe0LzW2_NKmS7lOHzqmiORe0rMZmlr1ZOQBTpAQClpghkdO6XpL4tOlSlB157f6G_eUyQy1MB8GACtlNYKfvCCNjzPQZHgRbd3iGHf6GABuMDnmPOx-S3Y1595G5mq4nrMXq2HQJGShD7hn1JfERyQDLK6F-g3FR8muhl57akKzZcqW0I4_lhw3swc6-p0A4oU9TAlTTOriJFXRmk2V2gNvNwXtCW2WtjmqhnPpdTgQZYN3lMqQZKKAMezRuuOJ-af_uAn1a4o4JTumnZSqj_HJvXjX2ln9fIrG8Uz1LVREi8qaaJKG6srgCda-WQnUcn_aWgU5zcPYwDQIA_dJobLTEp_u8TWcMeZrd8PTm77BJJHMW4i2WnAF_xFWb3xwBA5KpoylSeq7IT-b63ZKpFV-gtbSwxR_us3NS26IgnzJDy9TtfLfYK1h9Acpb1b8-3lD24Mb9-Xf2FUR2IIMrscjyVSUSCBhOR9xZxQVyCCDdprRg7x5E_PAkJB0vdmRET"
+              "encrypted_content": "gAAAAABqtIZ_yo0G6yBGuzkFqSjEu6yyUpW4f7pzqEeQilqfCRPD2ZHmFzANXtZTBRmAC8B8ZbGBzBLrI84K_vyjBTVlsxnCDnU78iadJMG3wsBNOxpAuCjncan58UPvZK9YuAbOc_qQ2DzSOk2Fs-Fn9zb4pRVqJu6-49H2j6fkhP5LPIBeNA4aTMkVD1SyZh-juu51u52r6dLTgwlQLnnOufJRlZOR8F9OrLsi-uWT8JKuD_EnEPsmvyFmXQ4soV7NvK5ckJzpFeXl3VaQmdqmA8lEZfA_wzf0OVsV22DcTv1wLB4gSVEcGU1y-jhhBCKAzUxsms_sxOcZPaE1EuOcE28FuIhcQsBkMsLl4yk4l377DV5dq_if0POZCM0_DeTtL5TbxGgEXyI_FaiPGo4hpJ0_IUgKimiXoveD4xMIc47e0Bn0KZRkJedjvyi8Pl2kLKL7hEe1TDqJWIE677fYhPLRyyUFLvG6FiG55dnVA9jVLaGH97jh8gSiZWqXJ2rg7nbi_ek7lGyS9bcQyqYPdKjsAVjsd0x82heiiKm9v1A3vcNhtjNnoWn3fWwKq_ZvCP9OiFdp7pspNnGAXbVvcuLEqFhGIUCglcwMrUO8O1RLJr9em4SgMIY-TGyccpbS45FroAPW6unmxZZbWrkHGkGa_znD9FBmqIvrHeYTuwHw_eL29Y8BEvi8Az9WtvFQFz-NGdjYzG7xkmRgKW9ci9QksSqJGC0z_BADp8eBD6jlEaUPqBpILL_TirnXNWJTAhJjD7EFmlv675FJQUQl9V3OasaDoANNkx2JZqgGyGAUUPsc_Nfmw2Gfa-ZPk255sTv4M26m1sR6wUjBbrNysxo9dIkOQZBiiJSG--BlkHiLHzO6hOJLIhz-LQjf2QwKnLbIgP71LhmO91j8xCZ-z2AsbgTkVi4mysI21LosqBVrTJyhkMcdJQwzAbmqzrnE39CJ7XBXLgf7l-1k5yGkLZ0kWDAJo4Qr5x8g0bVV5L-PrrnPTt_H86fv7jsOZ45mwfQWaAIRV49hlWfCxmzpC5dOoCeUbKj-FIY7Gf4iiG4e-C-yv4-hHh7e8JaCXk9xCVn-eZk9nwPiD0oxKtAvUVMaoMglrymXArw-Nh3KGZJCSI9GAFUut8sEmoZws2OHns_p_YQwHexgL75DYFM9phTFGWo9r5sYdSEir8L51BVI-BPuxQmvTXd2WXvyxsRVuX52tHan"
             },
             {
               "type": "function_call",
               "name": "read_policy",
               "arguments": "{}",
-              "call_id": "call_KpG3hBdlMxiECjhYb4CXiCnZ",
-              "id": "fc_08acf24a3e239f6a006ab36c79963087d28b6769ea89a88da9",
+              "call_id": "call_ghLY0nrmhuwMrIp5bp3MzZhe",
+              "id": "fc_0872d4ff337ce520006ab4867f3f6c87d28b0668249fde2426",
               "index": 1
             }
           ],
@@ -962,7 +964,7 @@
             {
               "name": "read_policy",
               "args": {},
-              "id": "call_KpG3hBdlMxiECjhYb4CXiCnZ",
+              "id": "call_ghLY0nrmhuwMrIp5bp3MzZhe",
               "type": "tool_call"
             }
           ],
@@ -972,7 +974,7 @@
           "role": "tool",
           "content": "{\"policy_id\": \"POL-001\", \"covered_event\": \"Accidental damage to a laptop at home\", \"deductible_cad\": 150, \"limit_cad\": 2000}",
           "tool_calls": [],
-          "tool_call_id": "call_KpG3hBdlMxiECjhYb4CXiCnZ"
+          "tool_call_id": "call_ghLY0nrmhuwMrIp5bp3MzZhe"
         },
         {
           "role": "ai",
@@ -982,7 +984,7 @@
               "text": "Policy POL-001 applies a **CAD 150 deductible** to accidental laptop damage.",
               "phase": "final_answer",
               "index": 0,
-              "id": "msg_08acf24a3e239f6a006ab36c7a8ae487d2a2bed20de84b96d9"
+              "id": "msg_0872d4ff337ce520006ab4868052f887d2b48768f1d412be0a"
             }
           ],
           "tool_calls": [],
@@ -998,19 +1000,19 @@
           "role": "ai",
           "content": [
             {
-              "id": "rs_08acf24a3e239f6a006ab36c7b6b1c87d298298a6c599f981d",
+              "id": "rs_0872d4ff337ce520006ab486815bc087d2b02a6414ea2148cf",
               "summary": [],
               "type": "reasoning",
               "content": [],
               "index": 0,
-              "encrypted_content": "gAAAAABqs2x7y1_D29XwcxpNBCWtwTjbHl126ixQ1Vy0A_gmMEggm99GUqg7KwDS7Xpkev-Uup9_LRQ_-WQP9avAuzN89L2vMWtLdvDrZvZiowgpwN5eAfizhKpLgjc3vVU1ThawGCO0eX6DIKDM9nOh4is8Dyt2AkM7Ux1UcTLvm1UgW2iJdXG1PyurLpied_NYuaSEzh3gtlhx5w1YBzdwMGBRVgyA0aS8T8IYIQsOo-oP1dODeGCyMoH88acRxYkUCIqgfyqTpczzaPmqdvOKsyiMjo3uTq_vdCaDJgrpxFijwxXixXO5tGzP5BPCr92Pg0Ap2VUJ7dKNWVwli-0VSkQbZyFXC0XCuG-sydsYvcTo_dJcB3z7HzRE9P1Ade4GPfMtBoq3earqeK1aafwu2798jo1ILDwx-uDh0ADwqSQzcwb5fdcrkRaEqoEI2ElxW2n4nfKoskbkFTejjCW46yIsNdC3YC3cqgaqmoAq7kOoTMYt1XuOtVMz8rXzKG0JVNGoW9HDe_cmBFg5dX7o-XVdvvS0FmkE56YQQJNRwcWiObNegnoH_uuSopRG9Wl3q4rnZOrZDFGTyFOKTs0MwBFpLAsu3Dfrak3BUfCL12aG0Uou2RXajjQT3O4UmIorpS6tBYq94m7NpAlK_t4hYEmvvpZaotxBV1AMT00RlS4pOf4D1ioFbnW8PF1XNEL5EG1Z3AkoFBzeBjkuJHZgynw2cLtlZyCMh74-ZlYE4LI7bdwLLfiuhrfwhPUIWwe3xtd0QV9_zpxBDCCfulN4GPz7oE6CdTNbfk88UOBo1_hI46zZM-MGTuDckg0GjKO4y8zJ4lIgsUAfN8ishSxhie4zc0mlnAiy2WzA2ktluANdt4uNk84hXyGghThjuOS8HentlSMnCBnUxakBXYKZ0exgIDUZewT0_1DDGIxUcOijy3XyqtcFC9yBuq2nypj2qT9zFld8J7vHnjTDiNs7Y_tGVGZhGiqxw16Pw4Rv_pjT5NIOSQBQx4HDJLMcwjaxlumHHPyZNu6rDsFIPs8LFioOulPF6_kVcNf46GVHL68ZGj8lrbktNs0-_0jjTvfQ8RSmJlVrx90vvKSYKb3UkqBNj1h_d0_2VAzH7_qEDGGBoqfhTbg1QL-NuNe3a45gOs1HYuv_WFgbsJwlhax7oQl91IWudRhdGwsIp7pPZKNCgY39IuD4jI-IR3Ju9Mu372ceADvM"
+              "encrypted_content": "gAAAAABqtIaBmBKfkQE1Qeg5yLqLuzTVmLzCzv8Ox2_D1i0iKyGiqhseMGAhMIhivGMMMrCcTdr61manV47dSALn0SFvCKEqaqqr_nqNYJ-XAQkjSBL5Dd1Zg0wP-0EBrR5owMYWCFvuE7Xvv6iU5n1Z6FwNyCheXyleWVyp6l-FAG7qY4694nh0oEUjcBsB4hSFQIIrawFsoKZq19-Q15wmdkouyEVv9lCjQ4EalGXln1PIwu6o4QstSagobPFvFVcS_Y1RV6qLutdHph6iBTrjbJi7JYbV5zI-NSXhUv1oprk62wT6jChtuPhHyRFBzd1TzibB4yfm8TngBPj_ooOmZHkeXpIX0eLsxhmDHLuMeHVaEicWSAmR28ZMlT28402FnCpEBY6mgJNXe30ZhHPYlYBWspU8j3aunE02HzIQZWc4hA8OjKNGp0gzy_I_LhEx3Qmx_0Cn4h30C1iKGl78ilwGFrcwBoTvgQJvjVdS2ow9ODOdyr7npcrBW-qvrnBt7y6ZXvjft9UV5aIplMXc5ZqisWfjVcjWpp15_e8EJWrYttcn0QCTa2Qcq8DyezJ631qJr2esMsFqgOin8hMZuxjIPOXIGTnoVFbZqiytlvJiFmllA0KnHKQT-CdM64bo3zCp8bn3AcgToEGjQ7MUOtx9vrLI-2K5o6FdFg9qaeeH4NoIfTQrofARG0sKpW6US1rRTvCllyUg1q9424b4hGdk_2AEDF8J7zG56aFKNRo7HvZHT4gORzlzAj-ynkLGPBPfXRaVyP2inHuUu0cblVtR3v4zyB7R2QBixSrM-xwL15WzmANsMjc3AXdM_UxRgfdgeGszWPvF40i6ycm3fKaxwE2QGA-xATHgMVO6vNGgOiqaE780Tay-hrC3MAHK9HsOMhnovKk3VE_wqgE_RAa5aYxsFh8Q9l5DhGXebmiJdGD6r1wi3BrO_UuL76NeWowmZAQVp3v6Bi8hvSej9WmlG4nlNN9Ct-LkelGZ0q7vK5T7V1zlWMtc8f6a1AxVRsHVgxybMJv2HwdaU-NywFgBqL2w0zk0SRALvf-W4s8BVCGKin73sO7yOFXbeWA4qKuzUoQ_EPEcOajoUgDtH2V6B_a7lHTYgc69mfWmYMzwB5J3el4MIVw7tBfsF-TEkRLs5W3dtiEGUPc6qyF5eBJ5bCfn3lrpvnNKzGyWZ38AwV3rL-Gd6v92MJ4XQm1aQdcn-CFE"
             },
             {
               "type": "function_call",
               "name": "read_claim",
               "arguments": "{}",
-              "call_id": "call_78AYLUwYWh6NWaqvO8hpsVMS",
-              "id": "fc_08acf24a3e239f6a006ab36c7bced487d2b2a1a89aa0a6b9ac",
+              "call_id": "call_b3KToV0FVuAnZl86LmL1Kdgg",
+              "id": "fc_0872d4ff337ce520006ab486817cc087d2971a3acf1f70fc28",
               "index": 1
             }
           ],
@@ -1018,7 +1020,7 @@
             {
               "name": "read_claim",
               "args": {},
-              "id": "call_78AYLUwYWh6NWaqvO8hpsVMS",
+              "id": "call_b3KToV0FVuAnZl86LmL1Kdgg",
               "type": "tool_call"
             }
           ],
@@ -1028,7 +1030,7 @@
           "role": "tool",
           "content": "{\"claim_id\": \"CLM-001\", \"revision\": 1, \"description\": \"A laptop was stolen from a parked car.\", \"status\": \"pending\"}",
           "tool_calls": [],
-          "tool_call_id": "call_78AYLUwYWh6NWaqvO8hpsVMS"
+          "tool_call_id": "call_b3KToV0FVuAnZl86LmL1Kdgg"
         }
       ],
       "response": [
@@ -1040,7 +1042,7 @@
               "text": "Claim CLM-001 concerns **a laptop stolen from a parked car**. Its status is **pending**.",
               "phase": "final_answer",
               "index": 0,
-              "id": "msg_08acf24a3e239f6a006ab36c7d6c7c87d2a3a592be1fba4fe9"
+              "id": "msg_0872d4ff337ce520006ab48682a41c87d29c91f7e237958e4f"
             }
           ],
           "tool_calls": [],
@@ -1101,7 +1103,7 @@
         "langgraph_node": "model",
         "langgraph_step": 3,
         "report_turn": 2,
-        "thread_id": "6fafb92c-6e21-4bce-9abc-e09b862d656b",
+        "thread_id": "f59c89a9-d015-4bdb-9938-dd6664b2e811",
         "cache_ttl": "5m",
         "tags": [
           "seq:step:1"
@@ -1122,12 +1124,12 @@
       }
     },
     {
-      "id": "01a0ccdf-cbc5-7813-bdba-4cf361a6843f",
+      "id": "01a0d12d-6f81-7623-84d1-8afaaedb0d26",
       "parent_id": null,
       "name": "LangGraph",
       "kind": "workflow",
-      "start_ns": 1790143613893428000,
-      "end_ns": 1790143617629898000,
+      "start_ns": 1790215810946058000,
+      "end_ns": 1790215813653793000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -1138,19 +1140,20 @@
       "response": [],
       "tool_definitions": null,
       "context": {
+        "report_workflow_definition": "{\"title\": \"LangGraph\", \"context\": \"Compiled graph; arrows show declared transitions\", \"nodes\": [\"__start__\", \"claim_turn\", \"__end__\"], \"edges\": [{\"source\": \"__start__\", \"target\": \"claim_turn\", \"label\": \"\"}, {\"source\": \"claim_turn\", \"target\": \"__end__\", \"label\": \"\"}], \"children\": {}}",
         "report_turn": 3,
-        "thread_id": "6fafb92c-6e21-4bce-9abc-e09b862d656b",
+        "thread_id": "f59c89a9-d015-4bdb-9938-dd6664b2e811",
         "cache_ttl": "5m",
         "description": "Execute the LangGraph workflow operation and pass its result to the next graph step."
       }
     },
     {
-      "id": "01a0ccdf-cbc6-75f0-beca-a188817832f3",
-      "parent_id": "01a0ccdf-cbc5-7813-bdba-4cf361a6843f",
+      "id": "01a0d12d-6f83-7070-a001-17ec19c96f7f",
+      "parent_id": "01a0d12d-6f81-7623-84d1-8afaaedb0d26",
       "name": "claim_turn",
       "kind": "workflow",
-      "start_ns": 1790143613894516000,
-      "end_ns": 1790143617629054000,
+      "start_ns": 1790215810947410000,
+      "end_ns": 1790215813653046000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -1164,7 +1167,7 @@
         "langgraph_node": "claim_turn",
         "langgraph_step": 7,
         "report_turn": 3,
-        "thread_id": "6fafb92c-6e21-4bce-9abc-e09b862d656b",
+        "thread_id": "f59c89a9-d015-4bdb-9938-dd6664b2e811",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:7"
@@ -1173,12 +1176,12 @@
       }
     },
     {
-      "id": "01a0ccdf-cbc6-75f0-beca-a19bb9970575",
-      "parent_id": "01a0ccdf-cbc6-75f0-beca-a188817832f3",
+      "id": "01a0d12d-6f83-7070-a001-17f95f467c81",
+      "parent_id": "01a0d12d-6f83-7070-a001-17ec19c96f7f",
       "name": "claims_agent",
       "kind": "workflow",
-      "start_ns": 1790143613894852000,
-      "end_ns": 1790143617627780000,
+      "start_ns": 1790215810947776000,
+      "end_ns": 1790215813652267000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -1192,7 +1195,7 @@
         "langgraph_node": "claim_turn",
         "langgraph_step": 7,
         "report_turn": 3,
-        "thread_id": "6fafb92c-6e21-4bce-9abc-e09b862d656b",
+        "thread_id": "f59c89a9-d015-4bdb-9938-dd6664b2e811",
         "cache_ttl": "5m",
         "tags": [
           "seq:step:1"
@@ -1201,12 +1204,12 @@
       }
     },
     {
-      "id": "01a0ccdf-cbc8-7cf2-b0ef-aa10f2c7df29",
-      "parent_id": "01a0ccdf-cbc6-75f0-beca-a19bb9970575",
+      "id": "01a0d12d-6f85-7572-b91a-5b160ebf33bf",
+      "parent_id": "01a0d12d-6f83-7070-a001-17f95f467c81",
       "name": "model",
       "kind": "workflow",
-      "start_ns": 1790143613896256000,
-      "end_ns": 1790143615761519000,
+      "start_ns": 1790215810949122000,
+      "end_ns": 1790215812458265000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -1220,7 +1223,7 @@
         "langgraph_node": "model",
         "langgraph_step": 1,
         "report_turn": 3,
-        "thread_id": "6fafb92c-6e21-4bce-9abc-e09b862d656b",
+        "thread_id": "f59c89a9-d015-4bdb-9938-dd6664b2e811",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:1"
@@ -1229,24 +1232,24 @@
       }
     },
     {
-      "id": "01a0ccdf-cbc9-71c2-bf15-0ce6b5568029",
-      "parent_id": "01a0ccdf-cbc8-7cf2-b0ef-aa10f2c7df29",
+      "id": "01a0d12d-6f86-7f40-8b7e-fdb723a119b2",
+      "parent_id": "01a0d12d-6f85-7572-b91a-5b160ebf33bf",
       "name": "ChatOpenAI",
       "kind": "model",
-      "start_ns": 1790143613897149000,
-      "end_ns": 1790143615760888000,
+      "start_ns": 1790215810950194000,
+      "end_ns": 1790215812456824000,
       "status": "ok",
       "provider": "openai",
       "model": "gpt-5.6-luna",
       "effort": null,
       "usage": {
-        "input_tokens": 605,
-        "output_tokens": 60,
+        "input_tokens": 603,
+        "output_tokens": 59,
         "cache_read": 0,
         "cache_write": 0,
         "cache_write_5m": 0,
         "cache_write_1h": 0,
-        "reasoning": 20
+        "reasoning": 19
       },
       "error": null,
       "request": [
@@ -1266,19 +1269,19 @@
           "role": "ai",
           "content": [
             {
-              "id": "rs_08acf24a3e239f6a006ab36c795cb087d28ebbb1d47994f32f",
+              "id": "rs_0872d4ff337ce520006ab4867f168887d28ff77936cf2ef367",
               "summary": [],
               "type": "reasoning",
               "content": [],
               "index": 0,
-              "encrypted_content": "gAAAAABqs2x5_Wgphp9Sf8NFOLXYsJNwFrOGSvHpwsXSNNJrZbRlaAdLrEIv2LZc7i3SZshIgBijJJPSCWpWKgvmqyjAB3-y4Bg0ZPyuHNtAcM_8iEjFKxvq0ZoUyq0fyPRacA8au8U4Na_TujB9F93P5gz0vbBPiRTtbsKx8OToiBd2id6X5vKBSOYYj4HAQqdy_GieOrYoFZcUAOghheMqZCQv8LYiGxh1KHnZKAFfg0oyopHuWw7W79VDqhoIcXF3JdEU1l3Bh3vLFVTAFAvNeeGXsA_nTWbeYOJ-opbm6Pl2BrNjBQRorbv8MJv-3pzGu0IG8CnCVEM-ja7BCwm-0lh5n5xpYLSHb-Zb11OccCrrts9I3aFpTVcbS8P8GKKjpVr5ySUKijGaY_VZIb7_dDtAiBbiuY4PI3SFl4KsaFtwKfeLj5do8Wx49KM7OlFHQrWMpbWcYsq5smhis-Loc3u05QeLqAJbxv-K37r3O_rrNHA_Xh77QSq75XdwpGsBWObENsaC4w7M4SCZVnZAiPhS4eixcQiRmcC1aqEpSjADyUZPVXnV8HYBQnKPpr_A71TXqfbOxjvNsrHHx3xYfy_ihIXIKGhRqHTFKd9EqZjA4GTS7CtFbJelrlur9jMOyb30CV2VAsZQL9gMA1d3lEhnTl_QsvH8b_l8OCaZOLGBY7wYVQlOEMG465esivFJndemdcVqe0LzW2_NKmS7lOHzqmiORe0rMZmlr1ZOQBTpAQClpghkdO6XpL4tOlSlB157f6G_eUyQy1MB8GACtlNYKfvCCNjzPQZHgRbd3iGHf6GABuMDnmPOx-S3Y1595G5mq4nrMXq2HQJGShD7hn1JfERyQDLK6F-g3FR8muhl57akKzZcqW0I4_lhw3swc6-p0A4oU9TAlTTOriJFXRmk2V2gNvNwXtCW2WtjmqhnPpdTgQZYN3lMqQZKKAMezRuuOJ-af_uAn1a4o4JTumnZSqj_HJvXjX2ln9fIrG8Uz1LVREi8qaaJKG6srgCda-WQnUcn_aWgU5zcPYwDQIA_dJobLTEp_u8TWcMeZrd8PTm77BJJHMW4i2WnAF_xFWb3xwBA5KpoylSeq7IT-b63ZKpFV-gtbSwxR_us3NS26IgnzJDy9TtfLfYK1h9Acpb1b8-3lD24Mb9-Xf2FUR2IIMrscjyVSUSCBhOR9xZxQVyCCDdprRg7x5E_PAkJB0vdmRET"
+              "encrypted_content": "gAAAAABqtIZ_yo0G6yBGuzkFqSjEu6yyUpW4f7pzqEeQilqfCRPD2ZHmFzANXtZTBRmAC8B8ZbGBzBLrI84K_vyjBTVlsxnCDnU78iadJMG3wsBNOxpAuCjncan58UPvZK9YuAbOc_qQ2DzSOk2Fs-Fn9zb4pRVqJu6-49H2j6fkhP5LPIBeNA4aTMkVD1SyZh-juu51u52r6dLTgwlQLnnOufJRlZOR8F9OrLsi-uWT8JKuD_EnEPsmvyFmXQ4soV7NvK5ckJzpFeXl3VaQmdqmA8lEZfA_wzf0OVsV22DcTv1wLB4gSVEcGU1y-jhhBCKAzUxsms_sxOcZPaE1EuOcE28FuIhcQsBkMsLl4yk4l377DV5dq_if0POZCM0_DeTtL5TbxGgEXyI_FaiPGo4hpJ0_IUgKimiXoveD4xMIc47e0Bn0KZRkJedjvyi8Pl2kLKL7hEe1TDqJWIE677fYhPLRyyUFLvG6FiG55dnVA9jVLaGH97jh8gSiZWqXJ2rg7nbi_ek7lGyS9bcQyqYPdKjsAVjsd0x82heiiKm9v1A3vcNhtjNnoWn3fWwKq_ZvCP9OiFdp7pspNnGAXbVvcuLEqFhGIUCglcwMrUO8O1RLJr9em4SgMIY-TGyccpbS45FroAPW6unmxZZbWrkHGkGa_znD9FBmqIvrHeYTuwHw_eL29Y8BEvi8Az9WtvFQFz-NGdjYzG7xkmRgKW9ci9QksSqJGC0z_BADp8eBD6jlEaUPqBpILL_TirnXNWJTAhJjD7EFmlv675FJQUQl9V3OasaDoANNkx2JZqgGyGAUUPsc_Nfmw2Gfa-ZPk255sTv4M26m1sR6wUjBbrNysxo9dIkOQZBiiJSG--BlkHiLHzO6hOJLIhz-LQjf2QwKnLbIgP71LhmO91j8xCZ-z2AsbgTkVi4mysI21LosqBVrTJyhkMcdJQwzAbmqzrnE39CJ7XBXLgf7l-1k5yGkLZ0kWDAJo4Qr5x8g0bVV5L-PrrnPTt_H86fv7jsOZ45mwfQWaAIRV49hlWfCxmzpC5dOoCeUbKj-FIY7Gf4iiG4e-C-yv4-hHh7e8JaCXk9xCVn-eZk9nwPiD0oxKtAvUVMaoMglrymXArw-Nh3KGZJCSI9GAFUut8sEmoZws2OHns_p_YQwHexgL75DYFM9phTFGWo9r5sYdSEir8L51BVI-BPuxQmvTXd2WXvyxsRVuX52tHan"
             },
             {
               "type": "function_call",
               "name": "read_policy",
               "arguments": "{}",
-              "call_id": "call_KpG3hBdlMxiECjhYb4CXiCnZ",
-              "id": "fc_08acf24a3e239f6a006ab36c79963087d28b6769ea89a88da9",
+              "call_id": "call_ghLY0nrmhuwMrIp5bp3MzZhe",
+              "id": "fc_0872d4ff337ce520006ab4867f3f6c87d28b0668249fde2426",
               "index": 1
             }
           ],
@@ -1286,7 +1289,7 @@
             {
               "name": "read_policy",
               "args": {},
-              "id": "call_KpG3hBdlMxiECjhYb4CXiCnZ",
+              "id": "call_ghLY0nrmhuwMrIp5bp3MzZhe",
               "type": "tool_call"
             }
           ],
@@ -1296,7 +1299,7 @@
           "role": "tool",
           "content": "{\"policy_id\": \"POL-001\", \"covered_event\": \"Accidental damage to a laptop at home\", \"deductible_cad\": 150, \"limit_cad\": 2000}",
           "tool_calls": [],
-          "tool_call_id": "call_KpG3hBdlMxiECjhYb4CXiCnZ"
+          "tool_call_id": "call_ghLY0nrmhuwMrIp5bp3MzZhe"
         },
         {
           "role": "ai",
@@ -1306,7 +1309,7 @@
               "text": "Policy POL-001 applies a **CAD 150 deductible** to accidental laptop damage.",
               "phase": "final_answer",
               "index": 0,
-              "id": "msg_08acf24a3e239f6a006ab36c7a8ae487d2a2bed20de84b96d9"
+              "id": "msg_0872d4ff337ce520006ab4868052f887d2b48768f1d412be0a"
             }
           ],
           "tool_calls": [],
@@ -1322,19 +1325,19 @@
           "role": "ai",
           "content": [
             {
-              "id": "rs_08acf24a3e239f6a006ab36c7b6b1c87d298298a6c599f981d",
+              "id": "rs_0872d4ff337ce520006ab486815bc087d2b02a6414ea2148cf",
               "summary": [],
               "type": "reasoning",
               "content": [],
               "index": 0,
-              "encrypted_content": "gAAAAABqs2x7y1_D29XwcxpNBCWtwTjbHl126ixQ1Vy0A_gmMEggm99GUqg7KwDS7Xpkev-Uup9_LRQ_-WQP9avAuzN89L2vMWtLdvDrZvZiowgpwN5eAfizhKpLgjc3vVU1ThawGCO0eX6DIKDM9nOh4is8Dyt2AkM7Ux1UcTLvm1UgW2iJdXG1PyurLpied_NYuaSEzh3gtlhx5w1YBzdwMGBRVgyA0aS8T8IYIQsOo-oP1dODeGCyMoH88acRxYkUCIqgfyqTpczzaPmqdvOKsyiMjo3uTq_vdCaDJgrpxFijwxXixXO5tGzP5BPCr92Pg0Ap2VUJ7dKNWVwli-0VSkQbZyFXC0XCuG-sydsYvcTo_dJcB3z7HzRE9P1Ade4GPfMtBoq3earqeK1aafwu2798jo1ILDwx-uDh0ADwqSQzcwb5fdcrkRaEqoEI2ElxW2n4nfKoskbkFTejjCW46yIsNdC3YC3cqgaqmoAq7kOoTMYt1XuOtVMz8rXzKG0JVNGoW9HDe_cmBFg5dX7o-XVdvvS0FmkE56YQQJNRwcWiObNegnoH_uuSopRG9Wl3q4rnZOrZDFGTyFOKTs0MwBFpLAsu3Dfrak3BUfCL12aG0Uou2RXajjQT3O4UmIorpS6tBYq94m7NpAlK_t4hYEmvvpZaotxBV1AMT00RlS4pOf4D1ioFbnW8PF1XNEL5EG1Z3AkoFBzeBjkuJHZgynw2cLtlZyCMh74-ZlYE4LI7bdwLLfiuhrfwhPUIWwe3xtd0QV9_zpxBDCCfulN4GPz7oE6CdTNbfk88UOBo1_hI46zZM-MGTuDckg0GjKO4y8zJ4lIgsUAfN8ishSxhie4zc0mlnAiy2WzA2ktluANdt4uNk84hXyGghThjuOS8HentlSMnCBnUxakBXYKZ0exgIDUZewT0_1DDGIxUcOijy3XyqtcFC9yBuq2nypj2qT9zFld8J7vHnjTDiNs7Y_tGVGZhGiqxw16Pw4Rv_pjT5NIOSQBQx4HDJLMcwjaxlumHHPyZNu6rDsFIPs8LFioOulPF6_kVcNf46GVHL68ZGj8lrbktNs0-_0jjTvfQ8RSmJlVrx90vvKSYKb3UkqBNj1h_d0_2VAzH7_qEDGGBoqfhTbg1QL-NuNe3a45gOs1HYuv_WFgbsJwlhax7oQl91IWudRhdGwsIp7pPZKNCgY39IuD4jI-IR3Ju9Mu372ceADvM"
+              "encrypted_content": "gAAAAABqtIaBmBKfkQE1Qeg5yLqLuzTVmLzCzv8Ox2_D1i0iKyGiqhseMGAhMIhivGMMMrCcTdr61manV47dSALn0SFvCKEqaqqr_nqNYJ-XAQkjSBL5Dd1Zg0wP-0EBrR5owMYWCFvuE7Xvv6iU5n1Z6FwNyCheXyleWVyp6l-FAG7qY4694nh0oEUjcBsB4hSFQIIrawFsoKZq19-Q15wmdkouyEVv9lCjQ4EalGXln1PIwu6o4QstSagobPFvFVcS_Y1RV6qLutdHph6iBTrjbJi7JYbV5zI-NSXhUv1oprk62wT6jChtuPhHyRFBzd1TzibB4yfm8TngBPj_ooOmZHkeXpIX0eLsxhmDHLuMeHVaEicWSAmR28ZMlT28402FnCpEBY6mgJNXe30ZhHPYlYBWspU8j3aunE02HzIQZWc4hA8OjKNGp0gzy_I_LhEx3Qmx_0Cn4h30C1iKGl78ilwGFrcwBoTvgQJvjVdS2ow9ODOdyr7npcrBW-qvrnBt7y6ZXvjft9UV5aIplMXc5ZqisWfjVcjWpp15_e8EJWrYttcn0QCTa2Qcq8DyezJ631qJr2esMsFqgOin8hMZuxjIPOXIGTnoVFbZqiytlvJiFmllA0KnHKQT-CdM64bo3zCp8bn3AcgToEGjQ7MUOtx9vrLI-2K5o6FdFg9qaeeH4NoIfTQrofARG0sKpW6US1rRTvCllyUg1q9424b4hGdk_2AEDF8J7zG56aFKNRo7HvZHT4gORzlzAj-ynkLGPBPfXRaVyP2inHuUu0cblVtR3v4zyB7R2QBixSrM-xwL15WzmANsMjc3AXdM_UxRgfdgeGszWPvF40i6ycm3fKaxwE2QGA-xATHgMVO6vNGgOiqaE780Tay-hrC3MAHK9HsOMhnovKk3VE_wqgE_RAa5aYxsFh8Q9l5DhGXebmiJdGD6r1wi3BrO_UuL76NeWowmZAQVp3v6Bi8hvSej9WmlG4nlNN9Ct-LkelGZ0q7vK5T7V1zlWMtc8f6a1AxVRsHVgxybMJv2HwdaU-NywFgBqL2w0zk0SRALvf-W4s8BVCGKin73sO7yOFXbeWA4qKuzUoQ_EPEcOajoUgDtH2V6B_a7lHTYgc69mfWmYMzwB5J3el4MIVw7tBfsF-TEkRLs5W3dtiEGUPc6qyF5eBJ5bCfn3lrpvnNKzGyWZ38AwV3rL-Gd6v92MJ4XQm1aQdcn-CFE"
             },
             {
               "type": "function_call",
               "name": "read_claim",
               "arguments": "{}",
-              "call_id": "call_78AYLUwYWh6NWaqvO8hpsVMS",
-              "id": "fc_08acf24a3e239f6a006ab36c7bced487d2b2a1a89aa0a6b9ac",
+              "call_id": "call_b3KToV0FVuAnZl86LmL1Kdgg",
+              "id": "fc_0872d4ff337ce520006ab486817cc087d2971a3acf1f70fc28",
               "index": 1
             }
           ],
@@ -1342,7 +1345,7 @@
             {
               "name": "read_claim",
               "args": {},
-              "id": "call_78AYLUwYWh6NWaqvO8hpsVMS",
+              "id": "call_b3KToV0FVuAnZl86LmL1Kdgg",
               "type": "tool_call"
             }
           ],
@@ -1352,7 +1355,7 @@
           "role": "tool",
           "content": "{\"claim_id\": \"CLM-001\", \"revision\": 1, \"description\": \"A laptop was stolen from a parked car.\", \"status\": \"pending\"}",
           "tool_calls": [],
-          "tool_call_id": "call_78AYLUwYWh6NWaqvO8hpsVMS"
+          "tool_call_id": "call_b3KToV0FVuAnZl86LmL1Kdgg"
         },
         {
           "role": "ai",
@@ -1362,7 +1365,7 @@
               "text": "Claim CLM-001 concerns **a laptop stolen from a parked car**. Its status is **pending**.",
               "phase": "final_answer",
               "index": 0,
-              "id": "msg_08acf24a3e239f6a006ab36c7d6c7c87d2a3a592be1fba4fe9"
+              "id": "msg_0872d4ff337ce520006ab48682a41c87d29c91f7e237958e4f"
             }
           ],
           "tool_calls": [],
@@ -1380,19 +1383,19 @@
           "role": "ai",
           "content": [
             {
-              "id": "rs_08acf24a3e239f6a006ab36c7eca4887d2b43c97c61c8f7a94",
+              "id": "rs_0872d4ff337ce520006ab48683e04487d28651c044068e19bf",
               "summary": [],
               "type": "reasoning",
               "content": [],
               "index": 0,
-              "encrypted_content": "gAAAAABqs2x_jYNbPJ18Vz45kZQLd0QPFXPKxTnH0RqCGG4eb9Ir4lwm3Z1gwvhHt-L_bONsAHnc0-nwLsaD8MGIONU8kuaVa9_cVHlG77yoo0XjeU8xwhJz6-019Y4TUMBheHwGT4PL-JeHvVDeMrKxmAC4PxYSqjvCnjdSGcDfEsrx7_bZxG6j8L4tjvIUEg5alFHbg5i5Cwssirjt_Kx-Zs59D6Sv09C7WEjEYoEt7pwQZtRQUWzjMYo6Ha-PShe3Bm18-2sUnHKC4_ilSKhF1euFW4ngCEAdK7e-NzgK5z1Cc6ZsgR08VZdDpsg2x8lpX0_sgxs-4lx7jcq_q_bmSpdNzMf4hykh0UUVo0rneMqNNkk8cRLFGauha69TC333MA7YcGOcvHHqvSWwDw5jTPNBQs38Ce-GDSbZePt4le9qwU60_L53xH6baWrc6c4o2ACOIWZl6U7hB7nYOti3pwWCQEXvJJ26s-QrqYApgaKPqIoKDe48GcHwyYxh364To-3yM7Omp-LFbxVy0pFvkGxbOsbqdFWkQpDe9_XCDUizpT4MT_wH9hd_CwV972cSB5Z2rXrpxlyiO_d3Um0iAcjOw4t0Q_AxN-Yfg9hY9BiDl-RVkZFSMDCdtczcf61ozbC-hUz78P4hFxts9ShXrg0Cii2MVaigtI9NJaHyG9HKNO0oJfx47KvgNIgNRwntMoWF4gvdyKbekpXY-bx_kN6vq0fDayWJtEmeaGO1YeyYl_bGFWlzMKdBX4rLstK0UlUX8N-40lGkxAB7Ql2ITfrHmQJHwj6v5G1skKuIgLvpkmlDX-n26trlATBqr1py6OcoHxx9fhMFjFOA4bOKNCAjFEzhn5GDyGOnyH3VShOgubn3BBAGnGgz7Z_bvrJmRRaer1s9vyy9RLgHpG6RblCZYDk-GpHeq2JTJF1vUAaYPYXkLioIxwMocNbcNZ8nTC2KHbHwhQq4A_AWwaZAl5inh9SwaT5xB1EMuNCdRdhge2h6PhvN7MzUbt1K_2UkyScN2PvsDe5Ak84rCxsPEKzV9f83m768HugqTwSkygp6X7xUAv51f7JVAFUmVXpWlm4pc4eHqA5dhMmKjvVtE0KlLd2cIPsfFxCrnby4ysuN6fSxroK9jYqQt608-N7dw9GmQLpxb6dGaO4avTqCxzGZC3jsL9XM0mIC3FFFWhrB8k4T1DSe94FGHxXK0pPd97E9_Ce3fFVjoFl43XOqQmvvnSzK8zEV5jyFTit3JCB_g_Sl02TqBbfbY9u8FYyD9zMmb3tR"
+              "encrypted_content": "gAAAAABqtIaEpvOXl1RTXbTqhKnzLQ8Xy7oOkSIyIVwxUag4mnP05hnJfm22sjVmDGPJQQn2ywdFCJ-BcZnlQHG6J3FH1vfi0mZmgwm8b_8Wjj_M5xrXck-2yEt4bjhDuhatPpWLdOdM_rF2yDnKlszeSSLxyO9DUT5TuEN3nBP6sbffeciN2WgI7ZLrKiZuletyLk6infMfCZfcLwD6QeRDnzGy9kSZNRzJ7QjUkDJKPP3aAKw0bJtRk_tE2vWp5wGcl6GnPDOpvCPuEVxnKNZuWot8OwAkOdroFkjn3E62b4CmPAqPao31mBr1B4j1qNAY4yWXBtEts3SO80rM2in7KcS9XsbhrzDba6tr4Yc6XpE7ALlj0ZQPr-H98FKJiLPCqWrhUyWiCbzsmq6k_-nObY7gT0dCzw43yCy8IEY9Dygb8DIe_f3_DwgHVxRynb95vMu_UuIWVRcy9UoQhVp7PPM598YB46RN1dnDIIJY9Pz_muXZB8q6imWOOKNfGsXEpK7obiDEeB89JaymhRxEaVo1VdvW3vqRy877pIPU7Z5zO00OLyzCaD_ulhEPQNkwYvVXkjpDEuGFs85suxeVxOBsdDaAYNJbbEA7SfJ-THsIuZX0_PjIUSUxpukwmyWdlR9DtXzVEKVAX7OzWYVq3DfaK8f0rkoEGivveSPpIM_-cnn-TvIGnSv6T990hA9PA15lBTYXJWOb5vnlyb5izuMon56XTUm80RJjgj3UbN_JRA7KsDGhjEtM3nqqLoZxTSzfXW1AeCrfmSETxxi4bJIcziKOwVD3VO-Icv21ygGQTdK_2XR5cWd-UhIWDdiiQ4U_mL35VHvYxsfQeYRkREO-kzZJJ2F-5IdghN8NhrBs7vLyj8OTgXzb3TEqDXgKHw8AyylH1vavW23N9FKWlvoKm4-rcRpkSIi23AmRC7JHlTjhbYUsZzbIbGZX_taQ6mqjKGriQ_V0PiJXv2eEmAXkQgIU0sq6kM4S_Gxvp_lp428Zvl4s3rQDM_ig8qDO9JUOhxuAv5sFogdX2iWFhrj5bfArtrAL6p-crr8hwQ7KY1sUlz5cj6QGhuWk0fJCLQBbyl7v5WcTVoCKMU6CvFsp6V9_pRaOeXDqS5zRvB26GcOAWgMQwY4iTw_ps2IlI7M62NZbGOeALfobm5CL0YJrBihgDONNjSaGQYrhMD7lnTcM2UtF8YubTOvoGb-0n1H6IbGgRVO8tikS4FZa5wU5U7eBeBIHkwXw0fV4GtyZqz_fIlpdolT7Z3aF3PD0tgSmdxoZJBD5MFVscPPfZcl4_k_U3Q=="
             },
             {
               "type": "function_call",
               "name": "edit_claim",
               "arguments": "{\"expected_revision\":1,\"description\":\"The laptop screen cracked when it fell from a desk at home.\",\"status\":\"approved\"}",
-              "call_id": "call_dYUixnYLB2nLVku0kx5CQMiT",
-              "id": "fc_08acf24a3e239f6a006ab36c7f120087d2b40371b1dfbf91da",
+              "call_id": "call_Y065W3XP2bTMJj0lpOlzvm06",
+              "id": "fc_0872d4ff337ce520006ab486842d0087d2bd8a1b6f566f8b94",
               "index": 1
             }
           ],
@@ -1404,7 +1407,7 @@
                 "description": "The laptop screen cracked when it fell from a desk at home.",
                 "status": "approved"
               },
-              "id": "call_dYUixnYLB2nLVku0kx5CQMiT",
+              "id": "call_Y065W3XP2bTMJj0lpOlzvm06",
               "type": "tool_call"
             }
           ],
@@ -1465,7 +1468,7 @@
         "langgraph_node": "model",
         "langgraph_step": 1,
         "report_turn": 3,
-        "thread_id": "6fafb92c-6e21-4bce-9abc-e09b862d656b",
+        "thread_id": "f59c89a9-d015-4bdb-9938-dd6664b2e811",
         "cache_ttl": "5m",
         "tags": [
           "seq:step:1"
@@ -1491,12 +1494,12 @@
       }
     },
     {
-      "id": "01a0ccdf-d312-79a2-aa4d-ed1d69c37f03",
-      "parent_id": "01a0ccdf-cbc6-75f0-beca-a19bb9970575",
+      "id": "01a0d12d-756b-78e2-8168-4a40f65f2b64",
+      "parent_id": "01a0d12d-6f83-7070-a001-17f95f467c81",
       "name": "tools",
       "kind": "workflow",
-      "start_ns": 1790143615762145000,
-      "end_ns": 1790143615764068000,
+      "start_ns": 1790215812459732000,
+      "end_ns": 1790215812463718000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -1510,7 +1513,7 @@
         "langgraph_node": "tools",
         "langgraph_step": 2,
         "report_turn": 3,
-        "thread_id": "6fafb92c-6e21-4bce-9abc-e09b862d656b",
+        "thread_id": "f59c89a9-d015-4bdb-9938-dd6664b2e811",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:2"
@@ -1519,12 +1522,12 @@
       }
     },
     {
-      "id": "01a0ccdf-d312-79a2-aa4d-ed292e67dfc9",
-      "parent_id": "01a0ccdf-d312-79a2-aa4d-ed1d69c37f03",
+      "id": "01a0d12d-756d-78e0-9ca5-c2851b5df09d",
+      "parent_id": "01a0d12d-756b-78e2-8168-4a40f65f2b64",
       "name": "edit_claim",
       "kind": "tool",
-      "start_ns": 1790143615763023000,
-      "end_ns": 1790143615763514000,
+      "start_ns": 1790215812461669000,
+      "end_ns": 1790215812462669000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -1542,7 +1545,7 @@
           "role": "tool",
           "content": "{\"ok\": true, \"revision\": 2}",
           "tool_calls": [],
-          "tool_call_id": "call_dYUixnYLB2nLVku0kx5CQMiT"
+          "tool_call_id": "call_Y065W3XP2bTMJj0lpOlzvm06"
         }
       ],
       "tool_definitions": null,
@@ -1550,7 +1553,7 @@
         "langgraph_node": "tools",
         "langgraph_step": 2,
         "report_turn": 3,
-        "thread_id": "6fafb92c-6e21-4bce-9abc-e09b862d656b",
+        "thread_id": "f59c89a9-d015-4bdb-9938-dd6664b2e811",
         "cache_ttl": "5m",
         "tags": [
           "seq:step:1"
@@ -1559,12 +1562,12 @@
       }
     },
     {
-      "id": "01a0ccdf-d314-7191-9d92-37de4cab918a",
-      "parent_id": "01a0ccdf-cbc6-75f0-beca-a19bb9970575",
+      "id": "01a0d12d-7570-72f2-8169-f571e349510c",
+      "parent_id": "01a0d12d-6f83-7070-a001-17f95f467c81",
       "name": "model",
       "kind": "workflow",
-      "start_ns": 1790143615764675000,
-      "end_ns": 1790143617619001000,
+      "start_ns": 1790215812464966000,
+      "end_ns": 1790215813650968000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -1578,7 +1581,7 @@
         "langgraph_node": "model",
         "langgraph_step": 3,
         "report_turn": 3,
-        "thread_id": "6fafb92c-6e21-4bce-9abc-e09b862d656b",
+        "thread_id": "f59c89a9-d015-4bdb-9938-dd6664b2e811",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:3"
@@ -1587,19 +1590,19 @@
       }
     },
     {
-      "id": "01a0ccdf-d315-75f0-9854-d36f955026cf",
-      "parent_id": "01a0ccdf-d314-7191-9d92-37de4cab918a",
+      "id": "01a0d12d-7572-7e63-a0b1-b81418bce2a4",
+      "parent_id": "01a0d12d-7570-72f2-8169-f571e349510c",
       "name": "ChatOpenAI",
       "kind": "model",
-      "start_ns": 1790143615765522000,
-      "end_ns": 1790143617606031000,
+      "start_ns": 1790215812466516000,
+      "end_ns": 1790215813649574000,
       "status": "ok",
       "provider": "openai",
       "model": "gpt-5.6-luna",
       "effort": null,
       "usage": {
-        "input_tokens": 687,
-        "output_tokens": 35,
+        "input_tokens": 684,
+        "output_tokens": 34,
         "cache_read": 0,
         "cache_write": 0,
         "cache_write_5m": 0,
@@ -1624,19 +1627,19 @@
           "role": "ai",
           "content": [
             {
-              "id": "rs_08acf24a3e239f6a006ab36c795cb087d28ebbb1d47994f32f",
+              "id": "rs_0872d4ff337ce520006ab4867f168887d28ff77936cf2ef367",
               "summary": [],
               "type": "reasoning",
               "content": [],
               "index": 0,
-              "encrypted_content": "gAAAAABqs2x5_Wgphp9Sf8NFOLXYsJNwFrOGSvHpwsXSNNJrZbRlaAdLrEIv2LZc7i3SZshIgBijJJPSCWpWKgvmqyjAB3-y4Bg0ZPyuHNtAcM_8iEjFKxvq0ZoUyq0fyPRacA8au8U4Na_TujB9F93P5gz0vbBPiRTtbsKx8OToiBd2id6X5vKBSOYYj4HAQqdy_GieOrYoFZcUAOghheMqZCQv8LYiGxh1KHnZKAFfg0oyopHuWw7W79VDqhoIcXF3JdEU1l3Bh3vLFVTAFAvNeeGXsA_nTWbeYOJ-opbm6Pl2BrNjBQRorbv8MJv-3pzGu0IG8CnCVEM-ja7BCwm-0lh5n5xpYLSHb-Zb11OccCrrts9I3aFpTVcbS8P8GKKjpVr5ySUKijGaY_VZIb7_dDtAiBbiuY4PI3SFl4KsaFtwKfeLj5do8Wx49KM7OlFHQrWMpbWcYsq5smhis-Loc3u05QeLqAJbxv-K37r3O_rrNHA_Xh77QSq75XdwpGsBWObENsaC4w7M4SCZVnZAiPhS4eixcQiRmcC1aqEpSjADyUZPVXnV8HYBQnKPpr_A71TXqfbOxjvNsrHHx3xYfy_ihIXIKGhRqHTFKd9EqZjA4GTS7CtFbJelrlur9jMOyb30CV2VAsZQL9gMA1d3lEhnTl_QsvH8b_l8OCaZOLGBY7wYVQlOEMG465esivFJndemdcVqe0LzW2_NKmS7lOHzqmiORe0rMZmlr1ZOQBTpAQClpghkdO6XpL4tOlSlB157f6G_eUyQy1MB8GACtlNYKfvCCNjzPQZHgRbd3iGHf6GABuMDnmPOx-S3Y1595G5mq4nrMXq2HQJGShD7hn1JfERyQDLK6F-g3FR8muhl57akKzZcqW0I4_lhw3swc6-p0A4oU9TAlTTOriJFXRmk2V2gNvNwXtCW2WtjmqhnPpdTgQZYN3lMqQZKKAMezRuuOJ-af_uAn1a4o4JTumnZSqj_HJvXjX2ln9fIrG8Uz1LVREi8qaaJKG6srgCda-WQnUcn_aWgU5zcPYwDQIA_dJobLTEp_u8TWcMeZrd8PTm77BJJHMW4i2WnAF_xFWb3xwBA5KpoylSeq7IT-b63ZKpFV-gtbSwxR_us3NS26IgnzJDy9TtfLfYK1h9Acpb1b8-3lD24Mb9-Xf2FUR2IIMrscjyVSUSCBhOR9xZxQVyCCDdprRg7x5E_PAkJB0vdmRET"
+              "encrypted_content": "gAAAAABqtIZ_yo0G6yBGuzkFqSjEu6yyUpW4f7pzqEeQilqfCRPD2ZHmFzANXtZTBRmAC8B8ZbGBzBLrI84K_vyjBTVlsxnCDnU78iadJMG3wsBNOxpAuCjncan58UPvZK9YuAbOc_qQ2DzSOk2Fs-Fn9zb4pRVqJu6-49H2j6fkhP5LPIBeNA4aTMkVD1SyZh-juu51u52r6dLTgwlQLnnOufJRlZOR8F9OrLsi-uWT8JKuD_EnEPsmvyFmXQ4soV7NvK5ckJzpFeXl3VaQmdqmA8lEZfA_wzf0OVsV22DcTv1wLB4gSVEcGU1y-jhhBCKAzUxsms_sxOcZPaE1EuOcE28FuIhcQsBkMsLl4yk4l377DV5dq_if0POZCM0_DeTtL5TbxGgEXyI_FaiPGo4hpJ0_IUgKimiXoveD4xMIc47e0Bn0KZRkJedjvyi8Pl2kLKL7hEe1TDqJWIE677fYhPLRyyUFLvG6FiG55dnVA9jVLaGH97jh8gSiZWqXJ2rg7nbi_ek7lGyS9bcQyqYPdKjsAVjsd0x82heiiKm9v1A3vcNhtjNnoWn3fWwKq_ZvCP9OiFdp7pspNnGAXbVvcuLEqFhGIUCglcwMrUO8O1RLJr9em4SgMIY-TGyccpbS45FroAPW6unmxZZbWrkHGkGa_znD9FBmqIvrHeYTuwHw_eL29Y8BEvi8Az9WtvFQFz-NGdjYzG7xkmRgKW9ci9QksSqJGC0z_BADp8eBD6jlEaUPqBpILL_TirnXNWJTAhJjD7EFmlv675FJQUQl9V3OasaDoANNkx2JZqgGyGAUUPsc_Nfmw2Gfa-ZPk255sTv4M26m1sR6wUjBbrNysxo9dIkOQZBiiJSG--BlkHiLHzO6hOJLIhz-LQjf2QwKnLbIgP71LhmO91j8xCZ-z2AsbgTkVi4mysI21LosqBVrTJyhkMcdJQwzAbmqzrnE39CJ7XBXLgf7l-1k5yGkLZ0kWDAJo4Qr5x8g0bVV5L-PrrnPTt_H86fv7jsOZ45mwfQWaAIRV49hlWfCxmzpC5dOoCeUbKj-FIY7Gf4iiG4e-C-yv4-hHh7e8JaCXk9xCVn-eZk9nwPiD0oxKtAvUVMaoMglrymXArw-Nh3KGZJCSI9GAFUut8sEmoZws2OHns_p_YQwHexgL75DYFM9phTFGWo9r5sYdSEir8L51BVI-BPuxQmvTXd2WXvyxsRVuX52tHan"
             },
             {
               "type": "function_call",
               "name": "read_policy",
               "arguments": "{}",
-              "call_id": "call_KpG3hBdlMxiECjhYb4CXiCnZ",
-              "id": "fc_08acf24a3e239f6a006ab36c79963087d28b6769ea89a88da9",
+              "call_id": "call_ghLY0nrmhuwMrIp5bp3MzZhe",
+              "id": "fc_0872d4ff337ce520006ab4867f3f6c87d28b0668249fde2426",
               "index": 1
             }
           ],
@@ -1644,7 +1647,7 @@
             {
               "name": "read_policy",
               "args": {},
-              "id": "call_KpG3hBdlMxiECjhYb4CXiCnZ",
+              "id": "call_ghLY0nrmhuwMrIp5bp3MzZhe",
               "type": "tool_call"
             }
           ],
@@ -1654,7 +1657,7 @@
           "role": "tool",
           "content": "{\"policy_id\": \"POL-001\", \"covered_event\": \"Accidental damage to a laptop at home\", \"deductible_cad\": 150, \"limit_cad\": 2000}",
           "tool_calls": [],
-          "tool_call_id": "call_KpG3hBdlMxiECjhYb4CXiCnZ"
+          "tool_call_id": "call_ghLY0nrmhuwMrIp5bp3MzZhe"
         },
         {
           "role": "ai",
@@ -1664,7 +1667,7 @@
               "text": "Policy POL-001 applies a **CAD 150 deductible** to accidental laptop damage.",
               "phase": "final_answer",
               "index": 0,
-              "id": "msg_08acf24a3e239f6a006ab36c7a8ae487d2a2bed20de84b96d9"
+              "id": "msg_0872d4ff337ce520006ab4868052f887d2b48768f1d412be0a"
             }
           ],
           "tool_calls": [],
@@ -1680,19 +1683,19 @@
           "role": "ai",
           "content": [
             {
-              "id": "rs_08acf24a3e239f6a006ab36c7b6b1c87d298298a6c599f981d",
+              "id": "rs_0872d4ff337ce520006ab486815bc087d2b02a6414ea2148cf",
               "summary": [],
               "type": "reasoning",
               "content": [],
               "index": 0,
-              "encrypted_content": "gAAAAABqs2x7y1_D29XwcxpNBCWtwTjbHl126ixQ1Vy0A_gmMEggm99GUqg7KwDS7Xpkev-Uup9_LRQ_-WQP9avAuzN89L2vMWtLdvDrZvZiowgpwN5eAfizhKpLgjc3vVU1ThawGCO0eX6DIKDM9nOh4is8Dyt2AkM7Ux1UcTLvm1UgW2iJdXG1PyurLpied_NYuaSEzh3gtlhx5w1YBzdwMGBRVgyA0aS8T8IYIQsOo-oP1dODeGCyMoH88acRxYkUCIqgfyqTpczzaPmqdvOKsyiMjo3uTq_vdCaDJgrpxFijwxXixXO5tGzP5BPCr92Pg0Ap2VUJ7dKNWVwli-0VSkQbZyFXC0XCuG-sydsYvcTo_dJcB3z7HzRE9P1Ade4GPfMtBoq3earqeK1aafwu2798jo1ILDwx-uDh0ADwqSQzcwb5fdcrkRaEqoEI2ElxW2n4nfKoskbkFTejjCW46yIsNdC3YC3cqgaqmoAq7kOoTMYt1XuOtVMz8rXzKG0JVNGoW9HDe_cmBFg5dX7o-XVdvvS0FmkE56YQQJNRwcWiObNegnoH_uuSopRG9Wl3q4rnZOrZDFGTyFOKTs0MwBFpLAsu3Dfrak3BUfCL12aG0Uou2RXajjQT3O4UmIorpS6tBYq94m7NpAlK_t4hYEmvvpZaotxBV1AMT00RlS4pOf4D1ioFbnW8PF1XNEL5EG1Z3AkoFBzeBjkuJHZgynw2cLtlZyCMh74-ZlYE4LI7bdwLLfiuhrfwhPUIWwe3xtd0QV9_zpxBDCCfulN4GPz7oE6CdTNbfk88UOBo1_hI46zZM-MGTuDckg0GjKO4y8zJ4lIgsUAfN8ishSxhie4zc0mlnAiy2WzA2ktluANdt4uNk84hXyGghThjuOS8HentlSMnCBnUxakBXYKZ0exgIDUZewT0_1DDGIxUcOijy3XyqtcFC9yBuq2nypj2qT9zFld8J7vHnjTDiNs7Y_tGVGZhGiqxw16Pw4Rv_pjT5NIOSQBQx4HDJLMcwjaxlumHHPyZNu6rDsFIPs8LFioOulPF6_kVcNf46GVHL68ZGj8lrbktNs0-_0jjTvfQ8RSmJlVrx90vvKSYKb3UkqBNj1h_d0_2VAzH7_qEDGGBoqfhTbg1QL-NuNe3a45gOs1HYuv_WFgbsJwlhax7oQl91IWudRhdGwsIp7pPZKNCgY39IuD4jI-IR3Ju9Mu372ceADvM"
+              "encrypted_content": "gAAAAABqtIaBmBKfkQE1Qeg5yLqLuzTVmLzCzv8Ox2_D1i0iKyGiqhseMGAhMIhivGMMMrCcTdr61manV47dSALn0SFvCKEqaqqr_nqNYJ-XAQkjSBL5Dd1Zg0wP-0EBrR5owMYWCFvuE7Xvv6iU5n1Z6FwNyCheXyleWVyp6l-FAG7qY4694nh0oEUjcBsB4hSFQIIrawFsoKZq19-Q15wmdkouyEVv9lCjQ4EalGXln1PIwu6o4QstSagobPFvFVcS_Y1RV6qLutdHph6iBTrjbJi7JYbV5zI-NSXhUv1oprk62wT6jChtuPhHyRFBzd1TzibB4yfm8TngBPj_ooOmZHkeXpIX0eLsxhmDHLuMeHVaEicWSAmR28ZMlT28402FnCpEBY6mgJNXe30ZhHPYlYBWspU8j3aunE02HzIQZWc4hA8OjKNGp0gzy_I_LhEx3Qmx_0Cn4h30C1iKGl78ilwGFrcwBoTvgQJvjVdS2ow9ODOdyr7npcrBW-qvrnBt7y6ZXvjft9UV5aIplMXc5ZqisWfjVcjWpp15_e8EJWrYttcn0QCTa2Qcq8DyezJ631qJr2esMsFqgOin8hMZuxjIPOXIGTnoVFbZqiytlvJiFmllA0KnHKQT-CdM64bo3zCp8bn3AcgToEGjQ7MUOtx9vrLI-2K5o6FdFg9qaeeH4NoIfTQrofARG0sKpW6US1rRTvCllyUg1q9424b4hGdk_2AEDF8J7zG56aFKNRo7HvZHT4gORzlzAj-ynkLGPBPfXRaVyP2inHuUu0cblVtR3v4zyB7R2QBixSrM-xwL15WzmANsMjc3AXdM_UxRgfdgeGszWPvF40i6ycm3fKaxwE2QGA-xATHgMVO6vNGgOiqaE780Tay-hrC3MAHK9HsOMhnovKk3VE_wqgE_RAa5aYxsFh8Q9l5DhGXebmiJdGD6r1wi3BrO_UuL76NeWowmZAQVp3v6Bi8hvSej9WmlG4nlNN9Ct-LkelGZ0q7vK5T7V1zlWMtc8f6a1AxVRsHVgxybMJv2HwdaU-NywFgBqL2w0zk0SRALvf-W4s8BVCGKin73sO7yOFXbeWA4qKuzUoQ_EPEcOajoUgDtH2V6B_a7lHTYgc69mfWmYMzwB5J3el4MIVw7tBfsF-TEkRLs5W3dtiEGUPc6qyF5eBJ5bCfn3lrpvnNKzGyWZ38AwV3rL-Gd6v92MJ4XQm1aQdcn-CFE"
             },
             {
               "type": "function_call",
               "name": "read_claim",
               "arguments": "{}",
-              "call_id": "call_78AYLUwYWh6NWaqvO8hpsVMS",
-              "id": "fc_08acf24a3e239f6a006ab36c7bced487d2b2a1a89aa0a6b9ac",
+              "call_id": "call_b3KToV0FVuAnZl86LmL1Kdgg",
+              "id": "fc_0872d4ff337ce520006ab486817cc087d2971a3acf1f70fc28",
               "index": 1
             }
           ],
@@ -1700,7 +1703,7 @@
             {
               "name": "read_claim",
               "args": {},
-              "id": "call_78AYLUwYWh6NWaqvO8hpsVMS",
+              "id": "call_b3KToV0FVuAnZl86LmL1Kdgg",
               "type": "tool_call"
             }
           ],
@@ -1710,7 +1713,7 @@
           "role": "tool",
           "content": "{\"claim_id\": \"CLM-001\", \"revision\": 1, \"description\": \"A laptop was stolen from a parked car.\", \"status\": \"pending\"}",
           "tool_calls": [],
-          "tool_call_id": "call_78AYLUwYWh6NWaqvO8hpsVMS"
+          "tool_call_id": "call_b3KToV0FVuAnZl86LmL1Kdgg"
         },
         {
           "role": "ai",
@@ -1720,7 +1723,7 @@
               "text": "Claim CLM-001 concerns **a laptop stolen from a parked car**. Its status is **pending**.",
               "phase": "final_answer",
               "index": 0,
-              "id": "msg_08acf24a3e239f6a006ab36c7d6c7c87d2a3a592be1fba4fe9"
+              "id": "msg_0872d4ff337ce520006ab48682a41c87d29c91f7e237958e4f"
             }
           ],
           "tool_calls": [],
@@ -1736,19 +1739,19 @@
           "role": "ai",
           "content": [
             {
-              "id": "rs_08acf24a3e239f6a006ab36c7eca4887d2b43c97c61c8f7a94",
+              "id": "rs_0872d4ff337ce520006ab48683e04487d28651c044068e19bf",
               "summary": [],
               "type": "reasoning",
               "content": [],
               "index": 0,
-              "encrypted_content": "gAAAAABqs2x_jYNbPJ18Vz45kZQLd0QPFXPKxTnH0RqCGG4eb9Ir4lwm3Z1gwvhHt-L_bONsAHnc0-nwLsaD8MGIONU8kuaVa9_cVHlG77yoo0XjeU8xwhJz6-019Y4TUMBheHwGT4PL-JeHvVDeMrKxmAC4PxYSqjvCnjdSGcDfEsrx7_bZxG6j8L4tjvIUEg5alFHbg5i5Cwssirjt_Kx-Zs59D6Sv09C7WEjEYoEt7pwQZtRQUWzjMYo6Ha-PShe3Bm18-2sUnHKC4_ilSKhF1euFW4ngCEAdK7e-NzgK5z1Cc6ZsgR08VZdDpsg2x8lpX0_sgxs-4lx7jcq_q_bmSpdNzMf4hykh0UUVo0rneMqNNkk8cRLFGauha69TC333MA7YcGOcvHHqvSWwDw5jTPNBQs38Ce-GDSbZePt4le9qwU60_L53xH6baWrc6c4o2ACOIWZl6U7hB7nYOti3pwWCQEXvJJ26s-QrqYApgaKPqIoKDe48GcHwyYxh364To-3yM7Omp-LFbxVy0pFvkGxbOsbqdFWkQpDe9_XCDUizpT4MT_wH9hd_CwV972cSB5Z2rXrpxlyiO_d3Um0iAcjOw4t0Q_AxN-Yfg9hY9BiDl-RVkZFSMDCdtczcf61ozbC-hUz78P4hFxts9ShXrg0Cii2MVaigtI9NJaHyG9HKNO0oJfx47KvgNIgNRwntMoWF4gvdyKbekpXY-bx_kN6vq0fDayWJtEmeaGO1YeyYl_bGFWlzMKdBX4rLstK0UlUX8N-40lGkxAB7Ql2ITfrHmQJHwj6v5G1skKuIgLvpkmlDX-n26trlATBqr1py6OcoHxx9fhMFjFOA4bOKNCAjFEzhn5GDyGOnyH3VShOgubn3BBAGnGgz7Z_bvrJmRRaer1s9vyy9RLgHpG6RblCZYDk-GpHeq2JTJF1vUAaYPYXkLioIxwMocNbcNZ8nTC2KHbHwhQq4A_AWwaZAl5inh9SwaT5xB1EMuNCdRdhge2h6PhvN7MzUbt1K_2UkyScN2PvsDe5Ak84rCxsPEKzV9f83m768HugqTwSkygp6X7xUAv51f7JVAFUmVXpWlm4pc4eHqA5dhMmKjvVtE0KlLd2cIPsfFxCrnby4ysuN6fSxroK9jYqQt608-N7dw9GmQLpxb6dGaO4avTqCxzGZC3jsL9XM0mIC3FFFWhrB8k4T1DSe94FGHxXK0pPd97E9_Ce3fFVjoFl43XOqQmvvnSzK8zEV5jyFTit3JCB_g_Sl02TqBbfbY9u8FYyD9zMmb3tR"
+              "encrypted_content": "gAAAAABqtIaEpvOXl1RTXbTqhKnzLQ8Xy7oOkSIyIVwxUag4mnP05hnJfm22sjVmDGPJQQn2ywdFCJ-BcZnlQHG6J3FH1vfi0mZmgwm8b_8Wjj_M5xrXck-2yEt4bjhDuhatPpWLdOdM_rF2yDnKlszeSSLxyO9DUT5TuEN3nBP6sbffeciN2WgI7ZLrKiZuletyLk6infMfCZfcLwD6QeRDnzGy9kSZNRzJ7QjUkDJKPP3aAKw0bJtRk_tE2vWp5wGcl6GnPDOpvCPuEVxnKNZuWot8OwAkOdroFkjn3E62b4CmPAqPao31mBr1B4j1qNAY4yWXBtEts3SO80rM2in7KcS9XsbhrzDba6tr4Yc6XpE7ALlj0ZQPr-H98FKJiLPCqWrhUyWiCbzsmq6k_-nObY7gT0dCzw43yCy8IEY9Dygb8DIe_f3_DwgHVxRynb95vMu_UuIWVRcy9UoQhVp7PPM598YB46RN1dnDIIJY9Pz_muXZB8q6imWOOKNfGsXEpK7obiDEeB89JaymhRxEaVo1VdvW3vqRy877pIPU7Z5zO00OLyzCaD_ulhEPQNkwYvVXkjpDEuGFs85suxeVxOBsdDaAYNJbbEA7SfJ-THsIuZX0_PjIUSUxpukwmyWdlR9DtXzVEKVAX7OzWYVq3DfaK8f0rkoEGivveSPpIM_-cnn-TvIGnSv6T990hA9PA15lBTYXJWOb5vnlyb5izuMon56XTUm80RJjgj3UbN_JRA7KsDGhjEtM3nqqLoZxTSzfXW1AeCrfmSETxxi4bJIcziKOwVD3VO-Icv21ygGQTdK_2XR5cWd-UhIWDdiiQ4U_mL35VHvYxsfQeYRkREO-kzZJJ2F-5IdghN8NhrBs7vLyj8OTgXzb3TEqDXgKHw8AyylH1vavW23N9FKWlvoKm4-rcRpkSIi23AmRC7JHlTjhbYUsZzbIbGZX_taQ6mqjKGriQ_V0PiJXv2eEmAXkQgIU0sq6kM4S_Gxvp_lp428Zvl4s3rQDM_ig8qDO9JUOhxuAv5sFogdX2iWFhrj5bfArtrAL6p-crr8hwQ7KY1sUlz5cj6QGhuWk0fJCLQBbyl7v5WcTVoCKMU6CvFsp6V9_pRaOeXDqS5zRvB26GcOAWgMQwY4iTw_ps2IlI7M62NZbGOeALfobm5CL0YJrBihgDONNjSaGQYrhMD7lnTcM2UtF8YubTOvoGb-0n1H6IbGgRVO8tikS4FZa5wU5U7eBeBIHkwXw0fV4GtyZqz_fIlpdolT7Z3aF3PD0tgSmdxoZJBD5MFVscPPfZcl4_k_U3Q=="
             },
             {
               "type": "function_call",
               "name": "edit_claim",
               "arguments": "{\"expected_revision\":1,\"description\":\"The laptop screen cracked when it fell from a desk at home.\",\"status\":\"approved\"}",
-              "call_id": "call_dYUixnYLB2nLVku0kx5CQMiT",
-              "id": "fc_08acf24a3e239f6a006ab36c7f120087d2b40371b1dfbf91da",
+              "call_id": "call_Y065W3XP2bTMJj0lpOlzvm06",
+              "id": "fc_0872d4ff337ce520006ab486842d0087d2bd8a1b6f566f8b94",
               "index": 1
             }
           ],
@@ -1760,7 +1763,7 @@
                 "description": "The laptop screen cracked when it fell from a desk at home.",
                 "status": "approved"
               },
-              "id": "call_dYUixnYLB2nLVku0kx5CQMiT",
+              "id": "call_Y065W3XP2bTMJj0lpOlzvm06",
               "type": "tool_call"
             }
           ],
@@ -1770,7 +1773,7 @@
           "role": "tool",
           "content": "{\"ok\": true, \"revision\": 2}",
           "tool_calls": [],
-          "tool_call_id": "call_dYUixnYLB2nLVku0kx5CQMiT"
+          "tool_call_id": "call_Y065W3XP2bTMJj0lpOlzvm06"
         }
       ],
       "response": [
@@ -1779,10 +1782,10 @@
           "content": [
             {
               "type": "text",
-              "text": "Claim CLM-001 has been updated:\n\n- **Description:** The laptop screen cracked when it fell from a desk at home.\n- **Status:** Approved",
+              "text": "Claim CLM-001 was updated:\n\n- **Description:** The laptop screen cracked when it fell from a desk at home.\n- **Status:** Approved",
               "phase": "final_answer",
               "index": 0,
-              "id": "msg_08acf24a3e239f6a006ab36c81184087d28244d716be6b3c6c"
+              "id": "msg_0872d4ff337ce520006ab4868544c087d2b31f5fd40a21eac6"
             }
           ],
           "tool_calls": [],
@@ -1843,13 +1846,13 @@
         "langgraph_node": "model",
         "langgraph_step": 3,
         "report_turn": 3,
-        "thread_id": "6fafb92c-6e21-4bce-9abc-e09b862d656b",
+        "thread_id": "f59c89a9-d015-4bdb-9938-dd6664b2e811",
         "cache_ttl": "5m",
         "tags": [
           "seq:step:1"
         ],
         "description": "Generate the next assistant message or tool request from the current conversation.",
-        "input_message_bytes": 8011,
+        "input_message_bytes": 8035,
         "message_count": 12,
         "message_roles": [
           "system",
@@ -1868,12 +1871,12 @@
       }
     },
     {
-      "id": "01a0ccdf-da71-7361-8cc6-97222da230c4",
+      "id": "01a0d12d-7a2c-7d51-89e7-3418dba9d42d",
       "parent_id": null,
       "name": "LangGraph",
       "kind": "workflow",
-      "start_ns": 1790143617649561000,
-      "end_ns": 1790143618640366000,
+      "start_ns": 1790215813677277000,
+      "end_ns": 1790215814585841000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -1884,19 +1887,20 @@
       "response": [],
       "tool_definitions": null,
       "context": {
+        "report_workflow_definition": "{\"title\": \"LangGraph\", \"context\": \"Compiled graph; arrows show declared transitions\", \"nodes\": [\"__start__\", \"claim_turn\", \"__end__\"], \"edges\": [{\"source\": \"__start__\", \"target\": \"claim_turn\", \"label\": \"\"}, {\"source\": \"claim_turn\", \"target\": \"__end__\", \"label\": \"\"}], \"children\": {}}",
         "report_turn": 4,
-        "thread_id": "6fafb92c-6e21-4bce-9abc-e09b862d656b",
+        "thread_id": "f59c89a9-d015-4bdb-9938-dd6664b2e811",
         "cache_ttl": "5m",
         "description": "Execute the LangGraph workflow operation and pass its result to the next graph step."
       }
     },
     {
-      "id": "01a0ccdf-da72-7b10-b712-2fa8dfc703c5",
-      "parent_id": "01a0ccdf-da71-7361-8cc6-97222da230c4",
+      "id": "01a0d12d-7a2e-79a0-b081-a282652b53fe",
+      "parent_id": "01a0d12d-7a2c-7d51-89e7-3418dba9d42d",
       "name": "claim_turn",
       "kind": "workflow",
-      "start_ns": 1790143617651123000,
-      "end_ns": 1790143618639607000,
+      "start_ns": 1790215813678709000,
+      "end_ns": 1790215814585224000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -1910,7 +1914,7 @@
         "langgraph_node": "claim_turn",
         "langgraph_step": 10,
         "report_turn": 4,
-        "thread_id": "6fafb92c-6e21-4bce-9abc-e09b862d656b",
+        "thread_id": "f59c89a9-d015-4bdb-9938-dd6664b2e811",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:10"
@@ -1919,12 +1923,12 @@
       }
     },
     {
-      "id": "01a0ccdf-da73-7f33-9d8b-dfe284f7d757",
-      "parent_id": "01a0ccdf-da72-7b10-b712-2fa8dfc703c5",
+      "id": "01a0d12d-7a2f-7522-a6f6-8d4cfa9db317",
+      "parent_id": "01a0d12d-7a2e-79a0-b081-a282652b53fe",
       "name": "claims_agent",
       "kind": "workflow",
-      "start_ns": 1790143617651497000,
-      "end_ns": 1790143618638884000,
+      "start_ns": 1790215813679107000,
+      "end_ns": 1790215814584717000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -1938,7 +1942,7 @@
         "langgraph_node": "claim_turn",
         "langgraph_step": 10,
         "report_turn": 4,
-        "thread_id": "6fafb92c-6e21-4bce-9abc-e09b862d656b",
+        "thread_id": "f59c89a9-d015-4bdb-9938-dd6664b2e811",
         "cache_ttl": "5m",
         "tags": [
           "seq:step:1"
@@ -1947,12 +1951,12 @@
       }
     },
     {
-      "id": "01a0ccdf-da74-72f3-89f8-1b68f70e4db9",
-      "parent_id": "01a0ccdf-da73-7f33-9d8b-dfe284f7d757",
+      "id": "01a0d12d-7a30-74d1-9992-9b3c743de823",
+      "parent_id": "01a0d12d-7a2f-7522-a6f6-8d4cfa9db317",
       "name": "model",
       "kind": "workflow",
-      "start_ns": 1790143617652772000,
-      "end_ns": 1790143618638239000,
+      "start_ns": 1790215813680454000,
+      "end_ns": 1790215814584084000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -1966,7 +1970,7 @@
         "langgraph_node": "model",
         "langgraph_step": 1,
         "report_turn": 4,
-        "thread_id": "6fafb92c-6e21-4bce-9abc-e09b862d656b",
+        "thread_id": "f59c89a9-d015-4bdb-9938-dd6664b2e811",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:1"
@@ -1975,12 +1979,12 @@
       }
     },
     {
-      "id": "01a0ccdf-da76-70c3-baf0-d4bbf09f4104",
-      "parent_id": "01a0ccdf-da74-72f3-89f8-1b68f70e4db9",
+      "id": "01a0d12d-7a31-73f3-852a-13137394ae77",
+      "parent_id": "01a0d12d-7a30-74d1-9992-9b3c743de823",
       "name": "ChatOpenAI",
       "kind": "model",
-      "start_ns": 1790143617654115000,
-      "end_ns": 1790143618637632000,
+      "start_ns": 1790215813681720000,
+      "end_ns": 1790215814583525000,
       "status": "ok",
       "provider": "openai",
       "model": "gpt-5.6-luna",
@@ -2015,7 +2019,7 @@
             {
               "name": "read_policy",
               "args": {},
-              "id": "call_KpG3hBdlMxiECjhYb4CXiCnZ",
+              "id": "call_ghLY0nrmhuwMrIp5bp3MzZhe",
               "type": "tool_call"
             }
           ],
@@ -2025,7 +2029,7 @@
           "role": "tool",
           "content": "{\"policy_id\": \"POL-001\", \"covered_event\": \"Accidental damage to a laptop at home\", \"deductible_cad\": 150, \"limit_cad\": 2000}",
           "tool_calls": [],
-          "tool_call_id": "call_KpG3hBdlMxiECjhYb4CXiCnZ"
+          "tool_call_id": "call_ghLY0nrmhuwMrIp5bp3MzZhe"
         },
         {
           "role": "human",
@@ -2043,7 +2047,7 @@
               "text": "The policy’s coverage limit is **CAD 2,000**.",
               "phase": "final_answer",
               "index": 0,
-              "id": "msg_0a7a88b94261cb0d006ab36c82409087d284ba98eae380acdb"
+              "id": "msg_03177ce0584c1570006ab486864e8887d2b1cf00208736f1e1"
             }
           ],
           "tool_calls": [],
@@ -2104,7 +2108,7 @@
         "langgraph_node": "model",
         "langgraph_step": 1,
         "report_turn": 4,
-        "thread_id": "6fafb92c-6e21-4bce-9abc-e09b862d656b",
+        "thread_id": "f59c89a9-d015-4bdb-9938-dd6664b2e811",
         "cache_ttl": "5m",
         "tags": [
           "seq:step:1"
@@ -2122,12 +2126,12 @@
       }
     },
     {
-      "id": "01a0ccdf-de62-7ca0-be24-4f844499f0f7",
+      "id": "01a0d12d-7dca-7193-bdc5-b5c2e95b08a6",
       "parent_id": null,
       "name": "LangGraph",
       "kind": "workflow",
-      "start_ns": 1790143618658725000,
-      "end_ns": 1790143621420582000,
+      "start_ns": 1790215814602357000,
+      "end_ns": 1790215816692341000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -2138,19 +2142,20 @@
       "response": [],
       "tool_definitions": null,
       "context": {
+        "report_workflow_definition": "{\"title\": \"LangGraph\", \"context\": \"Compiled graph; arrows show declared transitions\", \"nodes\": [\"__start__\", \"claim_turn\", \"__end__\"], \"edges\": [{\"source\": \"__start__\", \"target\": \"claim_turn\", \"label\": \"\"}, {\"source\": \"claim_turn\", \"target\": \"__end__\", \"label\": \"\"}], \"children\": {}}",
         "report_turn": 5,
-        "thread_id": "6fafb92c-6e21-4bce-9abc-e09b862d656b",
+        "thread_id": "f59c89a9-d015-4bdb-9938-dd6664b2e811",
         "cache_ttl": "5m",
         "description": "Execute the LangGraph workflow operation and pass its result to the next graph step."
       }
     },
     {
-      "id": "01a0ccdf-de64-78c2-bdc5-2da0940d0b00",
-      "parent_id": "01a0ccdf-de62-7ca0-be24-4f844499f0f7",
+      "id": "01a0d12d-7dcb-7062-923f-1904ff2a0c66",
+      "parent_id": "01a0d12d-7dca-7193-bdc5-b5c2e95b08a6",
       "name": "claim_turn",
       "kind": "workflow",
-      "start_ns": 1790143618660605000,
-      "end_ns": 1790143621419476000,
+      "start_ns": 1790215814603398000,
+      "end_ns": 1790215816691678000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -2164,7 +2169,7 @@
         "langgraph_node": "claim_turn",
         "langgraph_step": 13,
         "report_turn": 5,
-        "thread_id": "6fafb92c-6e21-4bce-9abc-e09b862d656b",
+        "thread_id": "f59c89a9-d015-4bdb-9938-dd6664b2e811",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:13"
@@ -2173,12 +2178,12 @@
       }
     },
     {
-      "id": "01a0ccdf-de65-78d3-aecd-aff853e37e7f",
-      "parent_id": "01a0ccdf-de64-78c2-bdc5-2da0940d0b00",
+      "id": "01a0d12d-7dcb-7062-923f-1911a4c6e809",
+      "parent_id": "01a0d12d-7dcb-7062-923f-1904ff2a0c66",
       "name": "claims_agent",
       "kind": "workflow",
-      "start_ns": 1790143618661130000,
-      "end_ns": 1790143621418784000,
+      "start_ns": 1790215814603695000,
+      "end_ns": 1790215816691210000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -2192,7 +2197,7 @@
         "langgraph_node": "claim_turn",
         "langgraph_step": 13,
         "report_turn": 5,
-        "thread_id": "6fafb92c-6e21-4bce-9abc-e09b862d656b",
+        "thread_id": "f59c89a9-d015-4bdb-9938-dd6664b2e811",
         "cache_ttl": "5m",
         "tags": [
           "seq:step:1"
@@ -2201,12 +2206,12 @@
       }
     },
     {
-      "id": "01a0ccdf-de66-7101-92d9-726494fcf04f",
-      "parent_id": "01a0ccdf-de65-78d3-aecd-aff853e37e7f",
+      "id": "01a0d12d-7dcc-7dd2-84eb-d660eaffe821",
+      "parent_id": "01a0d12d-7dcb-7062-923f-1911a4c6e809",
       "name": "model",
       "kind": "workflow",
-      "start_ns": 1790143618662284000,
-      "end_ns": 1790143620168599000,
+      "start_ns": 1790215814604629000,
+      "end_ns": 1790215815614304000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -2220,7 +2225,7 @@
         "langgraph_node": "model",
         "langgraph_step": 1,
         "report_turn": 5,
-        "thread_id": "6fafb92c-6e21-4bce-9abc-e09b862d656b",
+        "thread_id": "f59c89a9-d015-4bdb-9938-dd6664b2e811",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:1"
@@ -2229,24 +2234,24 @@
       }
     },
     {
-      "id": "01a0ccdf-de67-7a20-be6e-34860eeda2e5",
-      "parent_id": "01a0ccdf-de66-7101-92d9-726494fcf04f",
+      "id": "01a0d12d-7dcd-7051-99e4-7da47ce15c86",
+      "parent_id": "01a0d12d-7dcc-7dd2-84eb-d660eaffe821",
       "name": "ChatOpenAI",
       "kind": "model",
-      "start_ns": 1790143618663379000,
-      "end_ns": 1790143620167772000,
+      "start_ns": 1790215814606010000,
+      "end_ns": 1790215815613757000,
       "status": "ok",
       "provider": "openai",
       "model": "gpt-5.6-luna",
       "effort": null,
       "usage": {
         "input_tokens": 473,
-        "output_tokens": 30,
+        "output_tokens": 26,
         "cache_read": 0,
         "cache_write": 0,
         "cache_write_5m": 0,
         "cache_write_1h": 0,
-        "reasoning": 14
+        "reasoning": 10
       },
       "error": null,
       "request": [
@@ -2269,7 +2274,7 @@
             {
               "name": "read_policy",
               "args": {},
-              "id": "call_KpG3hBdlMxiECjhYb4CXiCnZ",
+              "id": "call_ghLY0nrmhuwMrIp5bp3MzZhe",
               "type": "tool_call"
             }
           ],
@@ -2279,7 +2284,7 @@
           "role": "tool",
           "content": "{\"policy_id\": \"POL-001\", \"covered_event\": \"Accidental damage to a laptop at home\", \"deductible_cad\": 150, \"limit_cad\": 2000}",
           "tool_calls": [],
-          "tool_call_id": "call_KpG3hBdlMxiECjhYb4CXiCnZ"
+          "tool_call_id": "call_ghLY0nrmhuwMrIp5bp3MzZhe"
         },
         {
           "role": "human",
@@ -2295,7 +2300,7 @@
               "text": "The policy’s coverage limit is **CAD 2,000**.",
               "phase": "final_answer",
               "index": 0,
-              "id": "msg_0a7a88b94261cb0d006ab36c82409087d284ba98eae380acdb"
+              "id": "msg_03177ce0584c1570006ab486864e8887d2b1cf00208736f1e1"
             }
           ],
           "tool_calls": [],
@@ -2313,19 +2318,19 @@
           "role": "ai",
           "content": [
             {
-              "id": "rs_0a7a88b94261cb0d006ab36c8384ac87d2b7524d5f9aac208c",
+              "id": "rs_03177ce0584c1570006ab48687479487d291ee592ce17113a9",
               "summary": [],
               "type": "reasoning",
               "content": [],
               "index": 0,
-              "encrypted_content": "gAAAAABqs2yD6ofmZyNuFeQTyE7ubOTNJI5qhtc5nxT8ndpiI_kGGq0bVD6lkx_D7_HsrwSmikfdjfVu7b8aA9dFSHGD2ZgxD9YmgsJHrQtj9vn5QfWnkywtSzz-hr20ct2JvtCiNQbLbDuiAy5a7z37RYlWaMT4rJTUUwbUyiYYYD-uJyafLF9ROWcnpmTEnyf7i6v7lLqtRMvPd76VmHz4471Wbk2CjPB85fiHGEZ8ou3lgY5QyxMpZ48qwlLx-nu9q6eU_vo9DMNjJHfebw2oCRq_0HTDnBNUfLBoRby2YeWqPII81ZkFMuJ1vbuW5dSURrio-GIUho6zRatQO50Yevy7id4t0n1cGVdTlbawUIMek9PsVB9y59H3US6Iin06_YzdX4yQE-zr2Xg4wbKH2TnGPgQcu51H0FhFsEY_WR643hm2imtiyuHO8jjsDOl-UjNEnFs2kfV1CHhT5iGTnX95D7vwGEhTasq-cqQvDW2FnhC-FeEm9-14REJjmjk6Dn5ipJTYKZhOv9eqYdn1-V5BYdQblBUEdcAoZVUn6EfCn6N7BwOBccZ60F5k6-OLIbOX_If_Yxf6AQ9pgzKL2mHVx_peiExCMIOTUs-nSfxIlWhxzZpIu274LlMpesMzT3FvCp1YiECQRNBLLNLcZb7gA41borQcSWgnRjEZktoeeM1JPcboA2chUhNFtE9SOsEaoysImWMSOHQZImnBW5zmQPINXJGuPDOWhj-gYHRQJZlzKy_uW5U1QZIcIOLzMFVByfL8MXDuMgCUmXzFMSEZHF_irZXrLMwoNGF-IFw9D7Akk8F73zciM1BVFyNYK-j5pWssYIz6Sf9_bZYCqCQxY1bFuzqjDg-THC1g7ULJTfItp3V4tqWB1tRd24jRGrM1Yoax30HFgyHDCQIYVCrvLN-pCzjlhKrn7ANlwlTlGsrwQlmPlBPdIM5FP52U9WwBw3Fi44CVp_RtqdEUelj-_J3vrJKVzQ6wro58FqoEnZlBp1T0uk0Tyt6yRoACUzqpAnGnik2dMaarNMFpIQm9KxFmpxOuKb_a0EA1oUPb5GX19J823LBV0NnNHn9XdeyQzIf5kcNen59uy0nBXoXrcfvJAPHPXm-IHm4C0ZihLbJecqGDVGg_ceDQrUMJ9w70MtVHDcB3NFnEiPrv7Q10QBXHKcWULk7ow-T_2qXMH5KE-CfOyEUO_VE8WoCgf7V54AYfenTo58O_gKFPv3-ATI8CuQ=="
+              "encrypted_content": "gAAAAABqtIaHi28aWOEopGb6eAuwoXPgkiteW4PgkbzEh8Mm_F5F6xzxnz_P6QQXmvj9CRkVeJS3j0mv0PsEL6TI90v_DRH0fEKWUqKrYq6vpse-9gdqLsKcbVsinokR6MlX_j_lCdoRkZR46Cyhes-yVx5Cn6uR31Nkt5a_OzhpVUIumh3r9zFYPRtlGJBH4msILiT7fGcb7KBKNiC3FiY0Lvq2XRld2BR4WkTWd2E2gci6kpCrNjdsB95WvGGTL8nJlkje1GWx2cCCvymVg3k31J7jX5ziSVgiOhVwoRmsu0RYwvG4hxScX2YJ-_w2_JlWvHiASarkbOto0-WcXit6k6pLiytYeG93Uyp6KKro9ClXlMXnz2l-g8YWpsczyZi6W6ahfNKo_CVF6rdLh8ZnAY9t_omkSrsWsAdPn9gVaJdhrNhd0tV9PzM1qqZukO_U4UAOQz3vOU0NN4k7rXNVagGOF4GvC7ZHmsrzFrJhCOrjs7Somvdjku25DUc9hWhDy-hpz3Oitd1NTIwSWDlv7rLV5OuyPObskZDDUhMhXx4ZbZrwriXcWqnaxvUEGksujvzOKRMIGJMPsLja2xZGkhr6NrnAn-9yUtmQz2DqQnNWRGC1POWorwPcB3KJggYF05cvxzrJVXvBDPEEEcYn3navnMy6dOI5PrwZUgquTXxRLDBzMz0VnaKaXvyOJ7QGLIpTHA-Bmrvd-6N4D1GnccI7Q9fu1CbZ8LjpLQFCgrEauqVaE9ErT_ga75F37w60B1skQiTPIDZfGkbciIBQNFiQfNs2iMcUS-s2wzgSLD7xjuab4M-X3IyQ_P_iI4RlPO2MDT3mJhSv4_ARZEh3XuGR_L_rzCKKKcWxKVKF8H9RJN2axM61LC_we3Bjl5IqiemOdJXlkl4SP3HEr8pz4XYe_X4c1yUgPT8D8JD6KcDQGe7yi6dSc6WhU2KxQJ7GXDkuHh29RJz4XlgN4WPpsgBHg8lINeNM1To4FLnGLt7QWig5m33JdodMGp1qxXoHvFdZ_khNteaiA9nUFTsQCs_Yv2CMw6l90YDR0mV3DcNJOH35tKOZO5EDHN6UIlIBUu3ygf_8BzlLgPupxyeIXvrvzr0Rwo69NO9DRey9j289dtEVI6zzPbRQP4ScO0Xii77W2dlkWtLLVUfacFRpVeF0CeGkEHOnviVSr81KfJ795MyFEmIR8DUvc_is24vDIH-kQRBN"
             },
             {
               "type": "function_call",
               "name": "read_claim",
               "arguments": "{}",
-              "call_id": "call_6v6G40JtLb7Fq5mINTNLOHLt",
-              "id": "fc_0a7a88b94261cb0d006ab36c83cf0087d2bd4191ab7bca5748",
+              "call_id": "call_YHs90LEc6jHJvWADo6Dkag47",
+              "id": "fc_03177ce0584c1570006ab48687795487d285b630c41eee4d51",
               "index": 1
             }
           ],
@@ -2333,7 +2338,7 @@
             {
               "name": "read_claim",
               "args": {},
-              "id": "call_6v6G40JtLb7Fq5mINTNLOHLt",
+              "id": "call_YHs90LEc6jHJvWADo6Dkag47",
               "type": "tool_call"
             }
           ],
@@ -2394,7 +2399,7 @@
         "langgraph_node": "model",
         "langgraph_step": 1,
         "report_turn": 5,
-        "thread_id": "6fafb92c-6e21-4bce-9abc-e09b862d656b",
+        "thread_id": "f59c89a9-d015-4bdb-9938-dd6664b2e811",
         "cache_ttl": "5m",
         "tags": [
           "seq:step:1"
@@ -2417,12 +2422,12 @@
       }
     },
     {
-      "id": "01a0ccdf-e449-7531-952a-5a46174e70f1",
-      "parent_id": "01a0ccdf-de65-78d3-aecd-aff853e37e7f",
+      "id": "01a0d12d-81be-7ea3-b433-b777c1c55bc1",
+      "parent_id": "01a0d12d-7dcb-7062-923f-1911a4c6e809",
       "name": "tools",
       "kind": "workflow",
-      "start_ns": 1790143620169938000,
-      "end_ns": 1790143620172827000,
+      "start_ns": 1790215815614898000,
+      "end_ns": 1790215815616355000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -2436,7 +2441,7 @@
         "langgraph_node": "tools",
         "langgraph_step": 2,
         "report_turn": 5,
-        "thread_id": "6fafb92c-6e21-4bce-9abc-e09b862d656b",
+        "thread_id": "f59c89a9-d015-4bdb-9938-dd6664b2e811",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:2"
@@ -2445,12 +2450,12 @@
       }
     },
     {
-      "id": "01a0ccdf-e44b-7c72-8be8-fcd41c8e6f83",
-      "parent_id": "01a0ccdf-e449-7531-952a-5a46174e70f1",
+      "id": "01a0d12d-81bf-7fb3-9587-1a210861c658",
+      "parent_id": "01a0d12d-81be-7ea3-b433-b777c1c55bc1",
       "name": "read_claim",
       "kind": "tool",
-      "start_ns": 1790143620171231000,
-      "end_ns": 1790143620171793000,
+      "start_ns": 1790215815615535000,
+      "end_ns": 1790215815615938000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -2468,7 +2473,7 @@
           "role": "tool",
           "content": "{\"claim_id\": \"CLM-001\", \"revision\": 2, \"description\": \"The laptop screen cracked when it fell from a desk at home.\", \"status\": \"approved\"}",
           "tool_calls": [],
-          "tool_call_id": "call_6v6G40JtLb7Fq5mINTNLOHLt"
+          "tool_call_id": "call_YHs90LEc6jHJvWADo6Dkag47"
         }
       ],
       "tool_definitions": null,
@@ -2476,7 +2481,7 @@
         "langgraph_node": "tools",
         "langgraph_step": 2,
         "report_turn": 5,
-        "thread_id": "6fafb92c-6e21-4bce-9abc-e09b862d656b",
+        "thread_id": "f59c89a9-d015-4bdb-9938-dd6664b2e811",
         "cache_ttl": "5m",
         "tags": [
           "seq:step:1"
@@ -2485,12 +2490,12 @@
       }
     },
     {
-      "id": "01a0ccdf-e44d-7cc3-924f-35f1043e3acb",
-      "parent_id": "01a0ccdf-de65-78d3-aecd-aff853e37e7f",
+      "id": "01a0d12d-81c0-7ff3-8b99-1d34399f7e17",
+      "parent_id": "01a0d12d-7dcb-7062-923f-1911a4c6e809",
       "name": "model",
       "kind": "workflow",
-      "start_ns": 1790143620173675000,
-      "end_ns": 1790143621417746000,
+      "start_ns": 1790215815616840000,
+      "end_ns": 1790215816690575000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -2504,7 +2509,7 @@
         "langgraph_node": "model",
         "langgraph_step": 3,
         "report_turn": 5,
-        "thread_id": "6fafb92c-6e21-4bce-9abc-e09b862d656b",
+        "thread_id": "f59c89a9-d015-4bdb-9938-dd6664b2e811",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:3"
@@ -2513,19 +2518,19 @@
       }
     },
     {
-      "id": "01a0ccdf-e44e-77e0-82ae-e05dc49996a7",
-      "parent_id": "01a0ccdf-e44d-7cc3-924f-35f1043e3acb",
+      "id": "01a0d12d-81c1-7ae3-927a-9e2c44788fef",
+      "parent_id": "01a0d12d-81c0-7ff3-8b99-1d34399f7e17",
       "name": "ChatOpenAI",
       "kind": "model",
-      "start_ns": 1790143620174737000,
-      "end_ns": 1790143621416793000,
+      "start_ns": 1790215815617450000,
+      "end_ns": 1790215816690037000,
       "status": "ok",
       "provider": "openai",
       "model": "gpt-5.6-luna",
       "effort": null,
       "usage": {
-        "input_tokens": 553,
-        "output_tokens": 29,
+        "input_tokens": 549,
+        "output_tokens": 31,
         "cache_read": 0,
         "cache_write": 0,
         "cache_write_5m": 0,
@@ -2553,7 +2558,7 @@
             {
               "name": "read_policy",
               "args": {},
-              "id": "call_KpG3hBdlMxiECjhYb4CXiCnZ",
+              "id": "call_ghLY0nrmhuwMrIp5bp3MzZhe",
               "type": "tool_call"
             }
           ],
@@ -2563,7 +2568,7 @@
           "role": "tool",
           "content": "{\"policy_id\": \"POL-001\", \"covered_event\": \"Accidental damage to a laptop at home\", \"deductible_cad\": 150, \"limit_cad\": 2000}",
           "tool_calls": [],
-          "tool_call_id": "call_KpG3hBdlMxiECjhYb4CXiCnZ"
+          "tool_call_id": "call_ghLY0nrmhuwMrIp5bp3MzZhe"
         },
         {
           "role": "human",
@@ -2579,7 +2584,7 @@
               "text": "The policy’s coverage limit is **CAD 2,000**.",
               "phase": "final_answer",
               "index": 0,
-              "id": "msg_0a7a88b94261cb0d006ab36c82409087d284ba98eae380acdb"
+              "id": "msg_03177ce0584c1570006ab486864e8887d2b1cf00208736f1e1"
             }
           ],
           "tool_calls": [],
@@ -2595,19 +2600,19 @@
           "role": "ai",
           "content": [
             {
-              "id": "rs_0a7a88b94261cb0d006ab36c8384ac87d2b7524d5f9aac208c",
+              "id": "rs_03177ce0584c1570006ab48687479487d291ee592ce17113a9",
               "summary": [],
               "type": "reasoning",
               "content": [],
               "index": 0,
-              "encrypted_content": "gAAAAABqs2yD6ofmZyNuFeQTyE7ubOTNJI5qhtc5nxT8ndpiI_kGGq0bVD6lkx_D7_HsrwSmikfdjfVu7b8aA9dFSHGD2ZgxD9YmgsJHrQtj9vn5QfWnkywtSzz-hr20ct2JvtCiNQbLbDuiAy5a7z37RYlWaMT4rJTUUwbUyiYYYD-uJyafLF9ROWcnpmTEnyf7i6v7lLqtRMvPd76VmHz4471Wbk2CjPB85fiHGEZ8ou3lgY5QyxMpZ48qwlLx-nu9q6eU_vo9DMNjJHfebw2oCRq_0HTDnBNUfLBoRby2YeWqPII81ZkFMuJ1vbuW5dSURrio-GIUho6zRatQO50Yevy7id4t0n1cGVdTlbawUIMek9PsVB9y59H3US6Iin06_YzdX4yQE-zr2Xg4wbKH2TnGPgQcu51H0FhFsEY_WR643hm2imtiyuHO8jjsDOl-UjNEnFs2kfV1CHhT5iGTnX95D7vwGEhTasq-cqQvDW2FnhC-FeEm9-14REJjmjk6Dn5ipJTYKZhOv9eqYdn1-V5BYdQblBUEdcAoZVUn6EfCn6N7BwOBccZ60F5k6-OLIbOX_If_Yxf6AQ9pgzKL2mHVx_peiExCMIOTUs-nSfxIlWhxzZpIu274LlMpesMzT3FvCp1YiECQRNBLLNLcZb7gA41borQcSWgnRjEZktoeeM1JPcboA2chUhNFtE9SOsEaoysImWMSOHQZImnBW5zmQPINXJGuPDOWhj-gYHRQJZlzKy_uW5U1QZIcIOLzMFVByfL8MXDuMgCUmXzFMSEZHF_irZXrLMwoNGF-IFw9D7Akk8F73zciM1BVFyNYK-j5pWssYIz6Sf9_bZYCqCQxY1bFuzqjDg-THC1g7ULJTfItp3V4tqWB1tRd24jRGrM1Yoax30HFgyHDCQIYVCrvLN-pCzjlhKrn7ANlwlTlGsrwQlmPlBPdIM5FP52U9WwBw3Fi44CVp_RtqdEUelj-_J3vrJKVzQ6wro58FqoEnZlBp1T0uk0Tyt6yRoACUzqpAnGnik2dMaarNMFpIQm9KxFmpxOuKb_a0EA1oUPb5GX19J823LBV0NnNHn9XdeyQzIf5kcNen59uy0nBXoXrcfvJAPHPXm-IHm4C0ZihLbJecqGDVGg_ceDQrUMJ9w70MtVHDcB3NFnEiPrv7Q10QBXHKcWULk7ow-T_2qXMH5KE-CfOyEUO_VE8WoCgf7V54AYfenTo58O_gKFPv3-ATI8CuQ=="
+              "encrypted_content": "gAAAAABqtIaHi28aWOEopGb6eAuwoXPgkiteW4PgkbzEh8Mm_F5F6xzxnz_P6QQXmvj9CRkVeJS3j0mv0PsEL6TI90v_DRH0fEKWUqKrYq6vpse-9gdqLsKcbVsinokR6MlX_j_lCdoRkZR46Cyhes-yVx5Cn6uR31Nkt5a_OzhpVUIumh3r9zFYPRtlGJBH4msILiT7fGcb7KBKNiC3FiY0Lvq2XRld2BR4WkTWd2E2gci6kpCrNjdsB95WvGGTL8nJlkje1GWx2cCCvymVg3k31J7jX5ziSVgiOhVwoRmsu0RYwvG4hxScX2YJ-_w2_JlWvHiASarkbOto0-WcXit6k6pLiytYeG93Uyp6KKro9ClXlMXnz2l-g8YWpsczyZi6W6ahfNKo_CVF6rdLh8ZnAY9t_omkSrsWsAdPn9gVaJdhrNhd0tV9PzM1qqZukO_U4UAOQz3vOU0NN4k7rXNVagGOF4GvC7ZHmsrzFrJhCOrjs7Somvdjku25DUc9hWhDy-hpz3Oitd1NTIwSWDlv7rLV5OuyPObskZDDUhMhXx4ZbZrwriXcWqnaxvUEGksujvzOKRMIGJMPsLja2xZGkhr6NrnAn-9yUtmQz2DqQnNWRGC1POWorwPcB3KJggYF05cvxzrJVXvBDPEEEcYn3navnMy6dOI5PrwZUgquTXxRLDBzMz0VnaKaXvyOJ7QGLIpTHA-Bmrvd-6N4D1GnccI7Q9fu1CbZ8LjpLQFCgrEauqVaE9ErT_ga75F37w60B1skQiTPIDZfGkbciIBQNFiQfNs2iMcUS-s2wzgSLD7xjuab4M-X3IyQ_P_iI4RlPO2MDT3mJhSv4_ARZEh3XuGR_L_rzCKKKcWxKVKF8H9RJN2axM61LC_we3Bjl5IqiemOdJXlkl4SP3HEr8pz4XYe_X4c1yUgPT8D8JD6KcDQGe7yi6dSc6WhU2KxQJ7GXDkuHh29RJz4XlgN4WPpsgBHg8lINeNM1To4FLnGLt7QWig5m33JdodMGp1qxXoHvFdZ_khNteaiA9nUFTsQCs_Yv2CMw6l90YDR0mV3DcNJOH35tKOZO5EDHN6UIlIBUu3ygf_8BzlLgPupxyeIXvrvzr0Rwo69NO9DRey9j289dtEVI6zzPbRQP4ScO0Xii77W2dlkWtLLVUfacFRpVeF0CeGkEHOnviVSr81KfJ795MyFEmIR8DUvc_is24vDIH-kQRBN"
             },
             {
               "type": "function_call",
               "name": "read_claim",
               "arguments": "{}",
-              "call_id": "call_6v6G40JtLb7Fq5mINTNLOHLt",
-              "id": "fc_0a7a88b94261cb0d006ab36c83cf0087d2bd4191ab7bca5748",
+              "call_id": "call_YHs90LEc6jHJvWADo6Dkag47",
+              "id": "fc_03177ce0584c1570006ab48687795487d285b630c41eee4d51",
               "index": 1
             }
           ],
@@ -2615,7 +2620,7 @@
             {
               "name": "read_claim",
               "args": {},
-              "id": "call_6v6G40JtLb7Fq5mINTNLOHLt",
+              "id": "call_YHs90LEc6jHJvWADo6Dkag47",
               "type": "tool_call"
             }
           ],
@@ -2625,7 +2630,7 @@
           "role": "tool",
           "content": "{\"claim_id\": \"CLM-001\", \"revision\": 2, \"description\": \"The laptop screen cracked when it fell from a desk at home.\", \"status\": \"approved\"}",
           "tool_calls": [],
-          "tool_call_id": "call_6v6G40JtLb7Fq5mINTNLOHLt"
+          "tool_call_id": "call_YHs90LEc6jHJvWADo6Dkag47"
         }
       ],
       "response": [
@@ -2634,10 +2639,10 @@
           "content": [
             {
               "type": "text",
-              "text": "The laptop fell from a desk, cracking the screen. It happened at home, and the claim status is **approved**.",
+              "text": "The laptop fell from a desk, causing the screen to crack. It happened at home, and the claim is currently **approved**.",
               "phase": "final_answer",
               "index": 0,
-              "id": "msg_0a7a88b94261cb0d006ab36c84d70887d2aeabbb838a44a091"
+              "id": "msg_03177ce0584c1570006ab48688573487d2aac9c513c24a71cb"
             }
           ],
           "tool_calls": [],
@@ -2698,13 +2703,13 @@
         "langgraph_node": "model",
         "langgraph_step": 3,
         "report_turn": 5,
-        "thread_id": "6fafb92c-6e21-4bce-9abc-e09b862d656b",
+        "thread_id": "f59c89a9-d015-4bdb-9938-dd6664b2e811",
         "cache_ttl": "5m",
         "tags": [
           "seq:step:1"
         ],
         "description": "Generate the next assistant message or tool request from the current conversation.",
-        "input_message_bytes": 4055,
+        "input_message_bytes": 4031,
         "message_count": 9,
         "message_roles": [
           "system",
@@ -2720,5 +2725,5 @@
       }
     }
   ],
-  "output": "[{'type': 'text', 'text': 'The laptop fell from a desk, cracking the screen. It happened at home, and the claim status is **approved**.', 'phase': 'final_answer', 'index': 0, 'id': 'msg_0a7a88b94261cb0d006ab36c84d70887d2aeabbb838a44a091'}]"
+  "output": "[{'type': 'text', 'text': 'The laptop fell from a desk, causing the screen to crack. It happened at home, and the claim is currently **approved**.', 'phase': 'final_answer', 'index': 0, 'id': 'msg_03177ce0584c1570006ab48688573487d2aac9c513c24a71cb'}]"
 }

@@ -3,7 +3,7 @@
     {
       "id": "context_budget",
       "name": "Context budgets",
-      "description": "Shared peer history and independently compacted subagent context.",
+      "description": "File-backed planner and worker with shared compaction and an isolated code reviewer.",
       "workflow": "agent_runtime.workflows.context_budget:build_workflow",
       "scripted_run": "samples.context_budget.scripted_run"
     }

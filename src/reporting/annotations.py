@@ -53,3 +53,62 @@ def describe(kind: str, name: str, metadata: dict, serialized: dict) -> str:
     if kind == "retriever":
         return f"Retrieve documents using {name} for the current query."
     return f"Execute the {name} workflow operation and pass its result to the next graph step."
+
+
+def request_comment(step, *, summary: bool = False) -> str:
+    """Describe a recorded model exchange without guessing its private reasoning.
+
+    Prefer requested tool actions and their file/task targets. Otherwise show a
+    bounded excerpt of the visible answer or user input. These are retrospective
+    trace descriptions: a tool request does not establish successful execution.
+    Missing capture stays explicit, and reasoning blocks are never used.
+    """
+    def excerpt(value):
+        """Keep captured text compact and outside the tooltip's line delimiter."""
+        text = " ".join(str(value).split()).replace(" | ", " / ")
+        return text if len(text) <= 150 else text[:147] + "…"
+
+    def visible_text(message):
+        """Read only plain content and declared text blocks, never reasoning."""
+        content = message.get("content", "")
+        if isinstance(content, str):
+            return content
+        if isinstance(content, list):
+            return " ".join(
+                block["text"] for block in content
+                if isinstance(block, dict) and block.get("type") in {"text", "output_text"}
+                and isinstance(block.get("text"), str)
+            )
+        return ""
+
+    if summary:
+        return "Summarize conversation history for context compaction before the next model call."
+    actions = []
+    verbs = {"read_file": "reading", "write_file": "writing", "edit_file": "editing"}
+    for message in step.response:
+        for call in message.get("tool_calls", []):
+            name = call.get("name", "unnamed tool")
+            args = call.get("args", {})
+            args = args if isinstance(args, dict) else {}
+            if name in verbs and args.get("file_path"):
+                action = f"{verbs[name]} {excerpt(args['file_path'])}"
+            elif name == "task":
+                action = f"delegation to {excerpt(args.get('subagent_type', 'subagent'))}"
+                if args.get("description"):
+                    action += f": {excerpt(args['description'])}"
+            else:
+                action = str(name)
+            if action not in actions:
+                actions.append(action)
+    if actions:
+        return "Request " + "; ".join(actions[:3]) + ("; additional tool calls" if len(actions) > 3 else "") + "."
+    for message in reversed(step.response):
+        text = visible_text(message)
+        if text:
+            return "Recorded answer: " + excerpt(text)
+    for message in reversed(step.request):
+        if message.get("role") in {"human", "user"}:
+            text = visible_text(message)
+            if text:
+                return "Respond to: " + excerpt(text)
+    return "Request purpose unavailable in the captured messages."

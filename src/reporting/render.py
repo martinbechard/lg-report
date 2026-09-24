@@ -15,11 +15,16 @@ from math import ceil, floor, log10
 from pathlib import Path
 
 from jinja2 import Environment, select_autoescape
+from langchain_core.messages import ToolMessage
+from langchain_core.messages.utils import count_tokens_approximately
 
+from agent_runtime.context_budget import estimated_retained_output_tokens
 from agent_runtime.harness.demo_meter import message_units, units
-from reporting.annotations import describe
+from reporting.annotations import describe, request_comment
 from reporting.collaboration import collaboration_diagrams
+from reporting.workflow_diagram import workflow_diagrams
 from reporting.context import (
+    circuit_breaker_description,
     compaction_description,
     context_change,
     context_utilization,
@@ -108,7 +113,7 @@ def tree_rows(run: Run, prices: Prices) -> list[dict]:
         index = len(rows)
         row = {
             "step": step,
-            "description": compaction_description(step) or step.context.get("description")
+            "description": circuit_breaker_description(step) or compaction_description(step) or step.context.get("description")
             or describe(step.kind, step.name, step.context, {}),
             "index": index,
             "parent": parent,
@@ -149,6 +154,7 @@ def execution_tree_view(rows, scopes):
             and row["parent"] is not None
             and step.id not in scopes
             and not compaction_description(step)
+            and not circuit_breaker_description(step)
             and (step.name != node or node in {"model", "tools"})
         )
     # Resolve visible children from the leaves upward. A workflow with its own
@@ -171,6 +177,7 @@ def execution_tree_view(rows, scopes):
             and step.status == "ok"
             and step.id not in scopes
             and not compaction_description(step)
+            and not circuit_breaker_description(step)
             and len(contained) == 1
         ):
             child = rows[contained[0]]["step"]
@@ -239,6 +246,10 @@ def agent_activity(run: Run, prices: Prices) -> dict:
             step.kind == "workflow"
             and (
                 step.parent_id is None
+                # A named agent can intentionally share its graph node's
+                # plain role name. Explicit identity avoids mistaking it for
+                # a wrapper and attributing every role to a generic "run".
+                or step.name == step.context.get("report_agent")
                 or step.name != step.context.get("langgraph_node")
             )
             and not any(
@@ -343,6 +354,18 @@ def conversation_turns(run: Run, prices: Prices) -> list[dict]:
     previous_call_by_agent_path = {}
     request_number = 0
     agents = agent_activity(run, prices)
+    main_owner_name = None
+    # Task invocations own separate child histories. Give each one a stable
+    # display number across the run; the tooltip already prints the turn, so
+    # embedding a turn in the history name would repeat it.
+    task_numbers = {
+        step.id: index
+        for index, step in enumerate(
+            sorted((item for item in run.steps
+                    if item.kind == "tool" and item.name == "task"),
+                   key=lambda item: (item.start_ns, item.id)), 1
+        )
+    }
     for step in sorted(run.steps, key=lambda s: s.start_ns):
         # Framework workflow spans belong in the tree, not as additional
         # conversation messages that would obscure actual model/tool exchanges.
@@ -406,17 +429,29 @@ def conversation_turns(run: Run, prices: Prices) -> list[dict]:
         # peers. Older saved traces predate report_history_id; support that
         # documented workflow contract without merging arbitrary agent paths.
         shared_lesson = any(item.name == "context_budget_workflow" for item in lineage)
+        if step.kind == "model" and not summary and not task and main_owner_name is None:
+            # The first outer model call identifies the sample's primary
+            # conversation. Later invocations of that role keep the same
+            # reader-facing name even when their execution scopes differ.
+            main_owner_name = owner.name if owner else "Unassigned"
         if summary:
-            history_id, history_label = step.id, "Summary request (separate input)"
+            history_id, history_label = step.id, "Summary request context"
         elif task:
-            history_id, history_label = (owner.id if owner else task.id), f"Isolated task / turn {number}"
+            history_id = owner.id if owner else task.id
+            history_label = f"Isolated task context #{task_numbers[task.id]}"
         elif declared or shared_lesson:
             history_id = str(declared or "shared-workflow") + ":" + str(step.context.get("thread_id", "run"))
-            history_label = "Shared workflow history"
+            # A declared history may belong to nested peers, not just the
+            # outer conversation. Use its explicit label when supplied; older
+            # shared-history traces retain their existing main-context label.
+            history_label = next((item.context["report_history_label"] for item in lineage
+                                  if item.context.get("report_history_label")), "Main context")
         else:
             # No evidence of cross-invocation sharing: keep scopes separate.
             history_id = owner.id if owner else step.id
-            history_label = f"{owner.name if owner else 'Unassigned'} history"
+            owner_name = owner.name if owner else "Unassigned"
+            history_label = ("Main context" if owner_name == main_owner_name
+                             else f"{owner_name} context")
         event["history_id"] = history_id
         event["history_label"] = history_label
         event["summary_request"] = summary
@@ -472,6 +507,7 @@ def conversation_turns(run: Run, prices: Prices) -> list[dict]:
         if step.kind == "model":
             request_number += 1
             event["request_label"] = f"R{request_number}"
+            event["request_comment"] = request_comment(step, summary=summary)
             # Compare sequential calls on the same named graph path, across user turns.
             by_id = {s.id: s for s in run.steps}
             ancestry = []
@@ -561,6 +597,13 @@ def conversation_turns(run: Run, prices: Prices) -> list[dict]:
             if step.context.get("report_turn", 1) == turn["number"]
             and compaction_description(step)
         ]
+        turn["circuit_breakers"] = [
+            {"step": step, "description": circuit_breaker_description(step),
+             "agent": agents["scopes"].get(agents["owners"].get(step.id))}
+            for step in run.steps
+            if step.context.get("report_turn", 1) == turn["number"]
+            and circuit_breaker_description(step)
+        ]
         # Keep the flat event list for accounting and charts. HTML additionally
         # nests tools and agent invocations by ancestry, skipping framework nodes.
         nodes = {}
@@ -579,8 +622,12 @@ def conversation_turns(run: Run, prices: Prices) -> list[dict]:
             nodes[compaction["step"].id + "-completion"] = {
                 "step": compaction["step"], "compaction": compaction, "children": []
             }
+        for breaker in turn["circuit_breakers"]:
+            nodes[breaker["step"].id + "-stop"] = {
+                "step": breaker["step"], "circuit_breaker": breaker, "children": []
+            }
         for node in sorted(nodes.values(), key=lambda n: (
-            n["step"].end_ns if "compaction" in n else n["step"].start_ns
+            n["step"].end_ns if "compaction" in n or "circuit_breaker" in n else n["step"].start_ns
         )):
             parent = node["step"].parent_id
             while parent and parent not in nodes:
@@ -592,14 +639,93 @@ def conversation_turns(run: Run, prices: Prices) -> list[dict]:
     return list(turns.values())
 
 
+def tool_context_points(turns, model_events, bars):
+    """Project returned tool messages onto their caller's retained context.
+
+    Use the same local message estimator as the compaction trigger. A recorded
+    pre-compaction count supersedes reconstruction at that boundary. Delegated
+    tasks contribute their returned message only, never their child's history.
+    Missing receipts or ambiguous tool-call matches produce no invented count.
+    """
+    points = []
+    accumulated = {}
+    by_id = {bar["id"]: bar for bar in bars}
+    events = sorted((e for turn in turns for e in turn["events"]
+                     if e["step"].kind == "tool"), key=lambda e: e["step"].end_ns)
+    for event in events:
+        tool, owner = event["step"], event["agent"]
+        caller = next((e for e in reversed(model_events)
+                       if e["agent"] == owner and not e["summary_request"]
+                       and e["step"].end_ns <= tool.start_ns), None)
+        if caller is None:
+            continue
+        bar = by_id[caller["step"].id]
+        if bar["context_tokens"] is None:
+            continue
+        calls = [call for message in caller["step"].response
+                 for call in message.get("tool_calls", []) if call.get("name") == tool.name]
+        result_ids = {m.get("tool_call_id") for m in tool.response if m.get("tool_call_id")}
+        if result_ids:
+            calls = [call for call in calls if call.get("id") in result_ids]
+        if len(calls) != 1:
+            continue
+        call_id = calls[0].get("id")
+        if not call_id:
+            continue
+        # Callback output for task may be a Command repr. Recover the actual
+        # ToolMessage consumed by its caller instead of counting that wrapper.
+        message = next((m for e in model_events if e["agent"] == owner
+                        and e["step"].start_ns >= tool.end_ns
+                        for m in e["step"].request if m.get("tool_call_id") == call_id), None)
+        if message is None:
+            message = next((m for m in tool.response if m.get("tool_call_id") == call_id), None)
+        if message is None:
+            continue
+        messages = accumulated.setdefault(bar["id"], [])
+        messages.append(ToolMessage(content=message.get("content", ""),
+                                    tool_call_id=call_id, name=tool.name))
+        tokens = bar["context_tokens"] + count_tokens_approximately(messages)
+        # This evidence was measured by the running middleware with its full
+        # message envelope. Apply it only to the last result before that check.
+        for turn in turns:
+            for compact in turn.get("compactions", []):
+                boundary = compact["step"].start_ns
+                if (compact["agent"] == owner and tool.end_ns <= boundary
+                        and not any(e["agent"] == owner and tool.end_ns < e["step"].end_ns <= boundary
+                                    for e in events)
+                        and not any(e["agent"] == owner and not e["summary_request"]
+                                    and tool.end_ns < e["step"].start_ns < boundary for e in model_events)):
+                    recorded = compact["step"].context.get("compaction_before_tokens")
+                    if isinstance(recorded, int):
+                        tokens = recorded
+        points.append({"id": tool.id, "history_id": bar["history_id"],
+                       "history_label": bar["history_label"], "start_ns": tool.end_ns,
+                       "context_tokens": tokens, "capacity": bar["context"]["capacity"] if bar["context"] else None,
+                       "description": f"Tool result · {tool.name} · {bar['history_label']} | Context: {tokens:,} tokens"})
+    # The horizontal axis orders requests, not elapsed time. Spread tool
+    # completions inside each request gap without adding any billed request.
+    gaps = {}
+    for point in points:
+        index = sum(b["start_ns"] <= point["start_ns"] for b in bars)
+        gaps.setdefault(index, []).append(point)
+    for index, group in gaps.items():
+        left = bars[index - 1]["center"] if index else 75
+        right = bars[index]["center"] if index < len(bars) else left + 24
+        for offset, point in enumerate(group):
+            point["center"] = left + (right - left) * (offset + 1) / (len(group) + 1)
+    return points
+
+
 def cost_chart(turns, prices):
     """Help readers see which requests drive cost and how costs accumulate.
 
     ``turns`` is the conversation projection; ``prices`` provides recorded FX.
     Return SVG geometry and labels for the template, or None without conversion.
 
-    Each bar includes one model request and its response, split by billed token
-    category; tools have no independent bar. Bars and the cumulative line share
+    Each bar includes one model request and its response. Fresh input includes
+    cache-written tokens; the chart moves only their rate premium out of the
+    billed cache-write buckets so it does not charge those tokens twice. Tools
+    have no independent bar. Bars and the cumulative line share
     the EUR scale; context uses a separate raw-token or percentage axis. Return None
     when FX is unavailable rather than labeling USD as EUR.
     Partial accounting remains flagged in the projection; no amounts are rounded.
@@ -617,46 +743,172 @@ def cost_chart(turns, prices):
         "#658d35",
         "#c25989",
     ]
-    bars = []
+    # A context line belongs to one retained conversation. The previous plotted
+    # point is available even when this request is from another peer on that
+    # shared history. A completed compaction replaces that baseline before the
+    # next call owned by the same agent; summary-model calls stay separate.
+    model_events = sorted(
+        (event for turn in turns for event in turn["events"]
+         if event["step"].kind == "model"),
+        key=lambda event: event["step"].start_ns,
+    )
+    resets = []
     for turn in turns:
-        for event in turn["events"]:
-            # Tools have no independent token bill; their request/result tokens
-            # are already in the model bars that emit and consume them.
-            if event["step"].kind != "model":
-                continue
-            bars.append(
-                {
-                    "label": f"Request {len(bars) + 1}",
-                    "turn": turn["number"],
-                    "agent": event.get("agent"),
-                    "id": event["step"].id,
-                    "history_id": event["history_id"],
-                    "history_label": event["history_label"],
-                    "summary_request": event["summary_request"],
-                    "start_ns": event["step"].start_ns,
-                    # Each point is the measured baseline after the response,
-                    # matching the trigger's input + output basis. New user/tool
-                    # messages may subsequently increase the trigger estimate.
-                    "context_tokens": (event["step"].usage.input_tokens + event["step"].usage.output_tokens
-                                       if event["step"].usage is not None else None),
-                    "partial": event["partial"],
-                    "context": context_utilization(event["step"], prices, include_output=True),
-                    "segments": [
-                        {
-                            "label": CATEGORIES[i][1],
-                            "tokens": cell["tokens"],
-                            "eur": cell["usd"] * prices.exchange.rate,
-                            "color": colors[i],
-                        }
-                        for i, cell in enumerate(event["cells"])
-                    ],
-                    "total": event["total"] * prices.exchange.rate,
-                }
+        for compaction in turn.get("compactions", []):
+            owner = compaction["agent"]
+            following = next(
+                (event for event in model_events
+                 if owner and event["agent"] and event["agent"].id == owner.id
+                 and not event["summary_request"]
+                 and event["step"].start_ns >= compaction["step"].end_ns),
+                None,
             )
+            if following:
+                resets.append((compaction["step"].end_ns, following["history_id"],
+                               compaction["step"].context.get("compaction_after_tokens")))
+    resets.sort(key=lambda item: item[0])
+    next_reset = 0
+    previous_context_by_history = {}
+    bars = []
+    for event in model_events:
+        # Tools have no independent token bill; their request/result tokens
+        # are already in the model bars that emit and consume them.
+        while next_reset < len(resets) and resets[next_reset][0] <= event["step"].start_ns:
+            _, history_id, after_tokens = resets[next_reset]
+            previous_context_by_history[history_id] = (
+                after_tokens if isinstance(after_tokens, int) else None,
+                "after compaction",
+            )
+            next_reset += 1
+        previous_context, previous_basis = previous_context_by_history.get(
+            event["history_id"], (0, "first call")
+        )
+        # Every request tooltip shares one receipt breakdown. Previous
+        # context is the latest post-call estimate for this same history,
+        # or the explicit after-compaction estimate. It is a prior baseline,
+        # not an additive billing bucket or proof of this request's input size:
+        # peer instructions, tools and retained items can change between calls.
+        usage = event["step"].usage
+        response_blocks = [block for message in event["step"].response
+                           for block in (message.get("content") if isinstance(message.get("content"), list) else [])]
+        retained_output = (
+            estimated_retained_output_tokens(usage.output_tokens, usage.reasoning, response_blocks)
+            if usage is not None else None
+        )
+        token_rows = []
+        if usage is not None:
+            # Composition and billing describe different partitions of the
+            # same input. Only the simulation records component token counts;
+            # do not present character estimates as provider-reported usage.
+            system_tokens = event["step"].context.get("simulated_system_tokens")
+            tool_tokens = event["step"].context.get("simulated_definitions_tokens")
+            conversation_tokens = (
+                usage.input_tokens - system_tokens - tool_tokens
+                if isinstance(system_tokens, int) and isinstance(tool_tokens, int)
+                and 0 <= system_tokens + tool_tokens <= usage.input_tokens else None
+            )
+            token_rows = [
+                ("Previous context", (
+                    f"{previous_context:,} tokens"
+                    if previous_context is not None else "unreported"
+                ) + (
+                    " (after compaction)"
+                    if previous_basis == "after compaction" else
+                    " (prior post-call)"
+                    if previous_basis == "prior post-call" else "")),
+                ("Net input change", (
+                    f"{usage.input_tokens - previous_context:+,} tokens"
+                    if previous_context is not None else "unreported"
+                )),
+                ("Total input", f"{usage.input_tokens:,} tokens"),
+                ("• System prompt", f"{system_tokens:,} tokens" if system_tokens is not None else "unreported"),
+                ("• Tool documentation", f"{tool_tokens:,} tokens" if tool_tokens is not None else "unreported"),
+                ("• Conversation", f"{conversation_tokens:,} tokens" if conversation_tokens is not None else "unreported"),
+                ("Input billing", ""),
+                ("• Fresh input", f"{usage.input_tokens - usage.cache_read:,} tokens"),
+                ("• Cache read", f"{usage.cache_read:,} tokens"),
+                ("Cache write", f"{usage.cache_write:,} tokens"),
+                # Output is billed at one rate whether it is reasoning or
+                # visible content. Show that total above its disjoint parts.
+                # Post-call context belongs after output because it adds the
+                # retained response to this request's measured total input.
+                ("Output", f"{usage.output_tokens:,} tokens"),
+                ("• Non-reasoning output", f"{usage.output_tokens - usage.reasoning:,} tokens"),
+                ("• Reasoning", f"{usage.reasoning:,} tokens" + (
+                    " (added to context)"
+                    if usage.reasoning and retained_output == usage.output_tokens else ""
+                )),
+                ("• Post-call Context", f"{usage.input_tokens + retained_output:,} tokens"),
+            ]
+        token_breakdown = " | ".join(
+            f"{label}: {value}" if value else label for label, value in token_rows
+        ) or "Token usage: unreported"
+        # The accounting cells remain disjoint for the tables and workbook.
+        # Reallocate only the chart: every non-cached input token starts at
+        # the standard rate, and cache writes contribute the rate difference.
+        # If a base tariff or write amount is unavailable, keep the original
+        # billed allocation and its explicit partial-cost state.
+        segments = [
+            {"label": CATEGORIES[i][1], "tokens": cell["tokens"],
+             "eur": cell["usd"] * prices.exchange.rate, "color": colors[i]}
+            for i, cell in enumerate(event["cells"])
+        ]
+        price_key = f"{event['step'].provider}:{event['step'].model}"
+        rate = prices.models.get(prices.aliases.get(price_key, price_key))
+        if (usage is not None and rate is not None and rate.input is not None
+                and all(event["cells"][i]["usd"] is not None for i in (0, 2, 3, 4))):
+            write_cells = event["cells"][2:5]
+            premiums = [
+                cell["usd"] - Decimal(cell["tokens"]) * rate.input / Decimal(1_000_000)
+                for cell in write_cells
+            ]
+            if all(premium >= 0 for premium in premiums):
+                segments[0]["tokens"] = usage.input_tokens - usage.cache_read
+                segments[0]["label"] = "Fresh input"
+                segments[0]["eur"] += sum(
+                    (Decimal(cell["tokens"]) * rate.input / Decimal(1_000_000)
+                     for cell in write_cells), Decimal(0)
+                ) * prices.exchange.rate
+                for segment, premium in zip(segments[2:5], premiums):
+                    segment["label"] = segment["label"].replace("Cache write", "Cache-write premium")
+                    segment["eur"] = premium * prices.exchange.rate
+        bars.append(
+            {
+                "token_breakdown": token_breakdown,
+                "request_comment": event["request_comment"],
+                "label": f"Request {len(bars) + 1}",
+                "turn": event["step"].context.get("report_turn", 1),
+                "agent": event.get("agent"),
+                "id": event["step"].id,
+                "history_id": event["history_id"],
+                "history_label": event["history_label"],
+                "summary_request": event["summary_request"],
+                "start_ns": event["step"].start_ns,
+                # Each point is the estimated baseline after the response,
+                # matching the trigger's retained-output basis. New user/tool
+                # messages may subsequently increase the trigger estimate.
+                "context_tokens": (usage.input_tokens + retained_output
+                                   if usage is not None else None),
+                "partial": event["partial"],
+                "context": context_utilization(
+                    event["step"], prices, include_output=True, retained_output=True
+                ),
+                "segments": segments,
+                "total": event["total"] * prices.exchange.rate,
+            }
+        )
+        # Missing usage invalidates the next carry-over value. Do not reuse
+        # a still older call as though the unmeasured response never existed.
+        previous_context_by_history[event["history_id"]] = (
+            bars[-1]["context_tokens"], "prior post-call"
+        )
     cumulative = Decimal(0)
+    cumulative_partial = False
     for bar in bars:
         cumulative += bar["total"]
+        cumulative_partial = cumulative_partial or bar["partial"]
         bar["cumulative"] = cumulative
+        bar["cumulative_partial"] = cumulative_partial
     maximum = cumulative
     # Nonzero totals reserve headroom above the cumulative line; an all-zero
     # chart uses a unit denominator to avoid division by zero in SVG geometry.
@@ -686,10 +938,36 @@ def cost_chart(turns, prices):
     turn_line_y = 334 + max((len(b["agent_name"]) for b in bars), default=0) * 6
     chart_height = turn_line_y + 40
     width = max(680, cursor + 85)
+    # Use recorded policy values, never today's application defaults. A
+    # completed compaction also supplies the policy for older recordings.
+    # Match its owner to a history so isolated reviewers do not inherit it.
+    trigger_policies = set()
+    for event in model_events:
+        trigger = event["step"].context.get("compaction_trigger_tokens")
+        if isinstance(trigger, int) and trigger > 0:
+            trigger_policies.add((event["history_id"], trigger))
+    for turn in turns:
+        for event in turn.get("compactions", []):
+            trigger = event["step"].context.get("compaction_trigger_tokens")
+            owner = event["agent"]
+            if isinstance(trigger, int) and trigger > 0 and owner:
+                for bar in bars:
+                    if bar["agent"] and bar["agent"].id == owner.id and not bar["summary_request"]:
+                        trigger_policies.add((bar["history_id"], trigger))
+    token_triggers = sorted({trigger for _, trigger in trigger_policies})
+    percent_triggers = sorted({
+        trigger / bar["context"]["capacity"] * 100
+        for history_id, trigger in trigger_policies for bar in bars
+        if bar["history_id"] == history_id and bar["context"]
+        and not bar["summary_request"]
+    })
     # Keep the percent axis at least 0–100%; unusually large recorded inputs
     # expand it rather than clipping or silently capping the measured ratio.
+    tool_points = tool_context_points(turns, model_events, bars)
     context_max = max(
-        100, max((b["context"]["percent"] for b in bars if b["context"]), default=0)
+        max((p["context_tokens"] / p["capacity"] * 100 for p in tool_points if p["capacity"]), default=0),
+        100, max((b["context"]["percent"] for b in bars if b["context"]), default=0),
+        max(percent_triggers, default=0),
     )
     context_lines = []
     context_points = []
@@ -716,6 +994,8 @@ def cost_chart(turns, prices):
     # break the line in both modes; an explicit zero remains a valid point.
     maximum_tokens = max((b["context_tokens"] for b in bars
                           if b["context_tokens"] is not None), default=0)
+    maximum_tokens = max(maximum_tokens, max(token_triggers, default=0),
+                         max((p["context_tokens"] for p in tool_points), default=0))
     unit = 10 ** max(0, floor(log10(maximum_tokens or 1)) - 1)
     token_max = max(4, ceil(maximum_tokens * 1.1 / unit) * unit)
     token_lines, points = [], []
@@ -731,6 +1011,7 @@ def cost_chart(turns, prices):
     # Connect only requests belonging to the same retained history. Summary
     # inputs are standalone gray points, never bridges between contexts.
     histories = {}
+    colors_by_label = {}
     palette = ["#17734b", "#2468b4", "#8a4da0", "#b35c16", "#17858c"]
     for bar in bars:
         key = bar["history_id"]
@@ -738,15 +1019,31 @@ def cost_chart(turns, prices):
             bar["history_color"] = "#777777"
             continue
         if key not in histories:
+            # Separate execution histories can share a role across turns. They
+            # keep distinct lines, but one displayed context name keeps one
+            # color so the plot does not imply unrelated owners.
+            label = bar["history_label"]
+            if label not in colors_by_label:
+                colors_by_label[label] = palette[len(colors_by_label) % len(palette)]
             histories[key] = {"label": bar["history_label"],
-                              "color": palette[len(histories) % len(palette)], "bars": []}
+                              "color": colors_by_label[label], "bars": []}
         histories[key]["bars"].append(bar)
         bar["history_color"] = histories[key]["color"]
+    for history in histories.values():
+        history["points"] = list(history["bars"])
+    for point in tool_points:
+        history = histories[point["history_id"]]
+        point["history_color"] = history["color"]
+        point["token_y"] = 290 - point["context_tokens"] / token_max * 260
+        if point["capacity"]:
+            point["context_y"] = 290 - point["context_tokens"] / point["capacity"] * 100 / context_max * 260
+        history["points"].append(point)
     context_lines, token_lines = [], []
     for history in histories.values():
+        history["points"].sort(key=lambda point: point["start_ns"])
         for field, destination in (("token_y", token_lines), ("context_y", context_lines)):
             points = []
-            for bar in history["bars"]:
+            for bar in history["points"]:
                 if field in bar:
                     points.append(f"{bar['center']},{bar[field]}")
                 elif points:
@@ -763,47 +1060,37 @@ def cost_chart(turns, prices):
             index = sum(b["start_ns"] <= event["step"].end_ns for b in bars)
             marker_groups.setdefault(index, []).append(event)
     markers = []
-    history_budgets = {}
     for index, events in marker_groups.items():
         left = bars[index - 1]["x"] + bar_width if index else 75
         right = bars[index]["x"] if index < len(bars) else left + 8
         for offset, event in enumerate(sorted(events, key=lambda e: e["step"].end_ns)):
             # Keep the popup about the history replacement, not unrelated
             # requests either side of its chronological position.
-            context = event["step"].context
             owner_id = event["agent"].id if event["agent"] else None
             history_bar = next((b for b in bars if b["agent"] and b["agent"].id == owner_id
                                 and not b["summary_request"]), None)
-            label = history_bar["history_label"] if history_bar else "Unassigned history"
-            history_budgets[label] = {"label": label,
-                                     "trigger": context.get("compaction_trigger_tokens", "unreported"),
-                                     "limit": context.get("compaction_max_input_tokens", "unreported")}
-            before = context.get("compaction_before_tokens", "unreported")
-            after = context.get("compaction_after_tokens", "unreported")
-            effect = (f"Change: {after - before:+,} estimated tokens"
-                      if isinstance(before, int) and isinstance(after, int)
-                      else "Change: unreported")
-            # The compact popup shows why this trigger fired. Do not present a
-            # provider baseline -> local fallback as a measured size reduction;
-            # the following model point supplies fresh usage after replacement.
-            description = (label + " | "
-                           + f"Compacted at {before:,} tokens ({context['compaction_before_basis']}) | "
-                           + f"Trigger: {context.get('compaction_trigger_tokens', 'unreported')} context tokens | "
-                           + f"Input error limit: {context.get('compaction_max_input_tokens', 'unreported')} estimated tokens"
-                           if "compaction_before_basis" in context else
-                           label + " | "
-                           + f"History compaction (local estimate): {before} -> {after} tokens | "
-                           + effect + " | "
-                           + f"Compaction trigger: {context.get('compaction_trigger_tokens', 'unreported')} history tokens | "
-                           + f"Error limit: {context.get('compaction_max_input_tokens', 'unreported')} full-input tokens")
+            label = history_bar["history_label"] if history_bar else "Unassigned context"
+            # One shared projection keeps the chart popup aligned with the
+            # diagram, conversation, and table, without extra commentary.
+            facts = compaction_description(event["step"])
+            description = facts.replace("Compaction completed | ",
+                                        f"Compaction completed | {label} | ", 1)
             markers.append({
                 "x": left + (right - left) * (offset + 1) / (len(events) + 1),
                 "description": description,
             })
+    breakers = []
+    for turn in turns:
+        for event in turn.get("circuit_breakers", []):
+            index = sum(b["start_ns"] <= event["step"].end_ns for b in bars)
+            left = bars[index - 1]["x"] + bar_width if index else 75
+            right = bars[index]["x"] if index < len(bars) else left + 16
+            breakers.append({"x": (left + right) / 2, "description": event["description"]})
     # Legend entries require a nonzero plotted segment somewhere; absent
     # categories would otherwise suggest bars contain costs they do not have.
     return {
         "bars": bars,
+        "tool_points": tool_points,
         "histories": list(histories.values()),
         "has_summaries": any(b["summary_request"] for b in bars),
         "width": width,
@@ -815,13 +1102,21 @@ def cost_chart(turns, prices):
         "context_lines": context_lines,
         "token_lines": token_lines,
         "token_max": token_max,
+        "token_triggers": [
+            {"value": value, "y": 290 - value / token_max * 260}
+            for value in token_triggers
+        ],
+        "percent_triggers": [
+            {"value": value, "y": 290 - value / context_max * 260}
+            for value in percent_triggers
+        ],
         "token_ticks": [
             {"value": round(token_max * i / 4),
              "y": 290 - round(token_max * i / 4) / token_max * 260}
             for i in range(5)
         ],
         "compactions": markers,
-        "history_budgets": list(history_budgets.values()),
+        "circuit_breakers": breakers,
         "token_missing": any(b["context_tokens"] is None for b in bars),
         "context_ticks": [
             {"y": 290 - i * 65, "value": context_max * i / 4} for i in range(5)
@@ -832,8 +1127,9 @@ def cost_chart(turns, prices):
         ),
         "ticks": [{"y": 290 - i * 65, "value": scale * i / 4} for i in range(5)],
         "legend": [
-            {"label": label, "color": colors[i]}
-            for i, (_, label) in enumerate(CATEGORIES)
+            {"label": next(b["segments"][i]["label"] for b in bars
+                           if b["segments"][i]["eur"]), "color": colors[i]}
+            for i in range(len(CATEGORIES))
             if any(b["segments"][i]["eur"] for b in bars)
         ],
         "partial": any(b["partial"] for b in bars),
@@ -861,17 +1157,34 @@ def render(run: Run, prices: Prices, destination: Path):
     )
     turns = conversation_turns(run, prices)
     agents = agent_activity(run, prices)
+    # Reuse the same request projection in each section so numbering, comments
+    # and invocation ownership agree, including separate summarizer requests.
+    requests_by_agent = {}
+    for turn in turns:
+        for event in turn["events"]:
+            if event["step"].kind == "model" and event["agent"]:
+                requests_by_agent.setdefault(event["agent"].id, []).append(event)
+    # Middleware can end an agent after a tool request without another model
+    # response. Show its saved outcome without inventing a billed model event
+    # or duplicating the usual final model answer already in Conversation.
+    last_model = next((step for step in reversed(run.steps) if step.kind == "model"), None)
+    terminal_result = run.output if last_model and any(
+        message.get("tool_calls") for message in last_model.response
+    ) else None
     # Lifetime-specific write buckets remain in accounting, but are excluded
     # from the requested compact table columns; the full category list still
     # drives charts and category-cost lookups.
     destination.write_text(
         template.render(
             run=run,
+            terminal_result=terminal_result,
             prices=prices,
             summary=summarize(run, prices),
             rows=execution_tree_view(tree_rows(run, prices), agents["scopes"]),
             turns=turns,
             agents=agents,
+            workflow_diagrams=workflow_diagrams(run),
+            requests_by_agent=requests_by_agent,
             collaboration=collaboration_diagrams(run, agents, turns),
             chart=cost_chart(turns, prices),
             categories=[

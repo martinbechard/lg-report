@@ -138,13 +138,20 @@ class TraceCapture(BaseCallbackHandler):
             # Whitelist report metadata rather than copying arbitrary config,
             # which can contain application secrets unrelated to the trace.
             context_info = {}
+            # The top-level graph supplies a topology snapshot, not runtime
+            # prompts. Inherited copies on every child would bloat the trace.
+            if parent_run_id is None and isinstance(metadata.get("report_workflow_definition"), str):
+                context_info["report_workflow_definition"] = metadata["report_workflow_definition"]
             for key in (
                 "langgraph_node",
                 "langgraph_step",
                 "report_description",
                 "report_purpose",
+                "report_agent",
                 "report_turn",
                 "report_history_id",
+                "report_history_label",
+                "report_context_depth",
                 "thread_id",
                 "cache_ttl",
             ):
@@ -465,6 +472,23 @@ class TraceCapture(BaseCallbackHandler):
         ``outputs`` is that chain's returned value, possibly graph state carrying
         __interrupt__. End its span with the observed pause marker; this callback
         does not answer the interruption or resume the graph."""
+        # Native limit middleware proves termination through its routing update.
+        # Do not classify ordinary tool failures or model-authored text as trips.
+        span = self.spans.get(run_id)
+        name = span.name if span is not None else ""
+        is_limit_hook = (
+            name == "ModelCallLimitMiddleware.before_model"
+            or name == "ToolCallLimitMiddleware.after_model"
+            or (name.startswith("ToolCallLimitMiddleware[") and name.endswith("].after_model"))
+        )
+        if is_limit_hook and isinstance(outputs, dict) and outputs.get("jump_to") == "end":
+            evidence = {"circuit_breaker_event": "tripped", "circuit_breaker_action": "Agent stopped"}
+            if self.capture_content:
+                messages = outputs.get("messages", [])
+                final = next((m for m in reversed(messages) if getattr(m, "type", None) == "ai"), None)
+                if final is not None:
+                    evidence["circuit_breaker_reason"] = str(final.content)
+            self._annotate(run_id, evidence)
         # Only dictionary graph state supports the interrupt key; a nonempty
         # value proves a pause. Other outputs or empty markers mean normal end.
         self._end(

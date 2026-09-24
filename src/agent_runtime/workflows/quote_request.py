@@ -273,10 +273,10 @@ def build_workflow(model=None, *, checkpointer=None):
     graph.add_edge("begin", "assess")
     # The agent contract restricts this edge to ask or complete; any model
     # protocol failure propagates through assess before routing is attempted.
-    graph.add_conditional_edges("assess", route_after_assessment)
+    graph.add_conditional_edges("assess", route_after_assessment, ["ask", "complete"])
     # Cancellation is terminal and clears the current state. A normal answer
     # returns to assess so the model can reconsider all unresolved issues.
-    graph.add_conditional_edges("ask", route_after_answer)
+    graph.add_conditional_edges("ask", route_after_answer, ["assess", END])
     graph.add_edge("complete", END)
     # Bind only supplied persistence; conversation entry points can attach it later.
     compiled = graph.compile(checkpointer=checkpointer)

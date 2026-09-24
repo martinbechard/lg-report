@@ -2,7 +2,7 @@
 
 One immutable budget can configure multiple peers, but their workflow must also
 pass shared messages. A child gets a separate budget and separate middleware.
-Triggers use validated input + output receipts plus estimates for new messages.
+Triggers use validated input plus estimated retained output and new messages.
 Fallback counts and envelope adjustments are local estimates, not tokenizer guarantees. The ceiling
 covers agent requests, including instructions/tools; summary-model calls have
 their own provider limits. Output allowance must be reserved by the caller.
@@ -28,6 +28,55 @@ from langchain_core.messages.utils import count_tokens_approximately
 from langchain_core.utils.function_calling import convert_to_openai_tool
 
 
+def estimated_retained_output_tokens(output_tokens, reasoning_tokens, content):
+    """Estimate how much of one response can enter the next request.
+
+    Provider output includes generated reasoning, but that reasoning only
+    remains in this application's message history when the adapter returns a
+    reasoning item. An encrypted item is carried forward without exposing its
+    private text. Its exact next-input size is unavailable, so use the reported
+    reasoning tokens as an estimate. If no item is retained, use reported
+    non-reasoning output (which can include formatting overhead). The next
+    provider input receipt supersedes this estimate.
+    """
+    has_reasoning_item = isinstance(content, list) and any(
+        isinstance(block, dict) and block.get("type") in {"reasoning", "thinking"}
+        for block in content
+    )
+    return output_tokens if has_reasoning_item else max(0, output_tokens - reasoning_tokens)
+
+
+def _local_history_estimate(messages):
+    """Estimate carried history without tokenizing encrypted reasoning bytes.
+
+    Ciphertext length does not measure the model's reasoning tokens. Count the
+    ordinary message shape and add the reported reasoning count for retained
+    reasoning items when present. Missing usage leaves that portion unknown;
+    the separate input guard still checks its local estimate before the call.
+    """
+    visible = []
+    retained_reasoning = 0
+    for message in messages:
+        if not isinstance(message, AIMessage) or not isinstance(message.content, list):
+            visible.append(message)
+            continue
+        blocks = []
+        encrypted_reasoning = False
+        for block in message.content:
+            if (isinstance(block, dict) and block.get("type") in {"reasoning", "thinking"}
+                    and block.get("encrypted_content")):
+                encrypted_reasoning = True
+                block = {key: value for key, value in block.items()
+                         if key != "encrypted_content"}
+            blocks.append(block)
+        if encrypted_reasoning:
+            details = (message.usage_metadata or {}).get("output_token_details") or {}
+            if isinstance(details.get("reasoning"), int):
+                retained_reasoning += details["reasoning"]
+        visible.append(message.model_copy(update={"content": blocks}))
+    return count_tokens_approximately(visible) + retained_reasoning
+
+
 def _history_fingerprint(messages):
     """Identify the retained message prefix that a usage receipt actually measured.
 
@@ -46,12 +95,13 @@ def _history_fingerprint(messages):
 
 
 def context_estimate(messages):
-    """Use the latest valid input + output receipt, plus newly appended messages.
+    """Use the latest valid input and retained output, plus new messages.
 
     Input already includes cached tokens, instructions and tool definitions;
     adding cache counts or that same envelope again would double-count them.
-    Output includes reasoning, so this is a conservative context estimate, not
-    an exact count of text retained for the next call. A peer may also change
+    A retained reasoning item contributes an estimated reasoning-token amount;
+    reasoning without such an item is excluded from next-request history. This
+    is not an exact count of retained input. A peer may also change
     its instructions/tools. The separate final-input guard checks that request.
 
     Compaction changes the prefix. A receipt from a surviving assistant message
@@ -70,14 +120,20 @@ def context_estimate(messages):
         if receipt.get("prefix") != _history_fingerprint(messages[:index]):
             # Once the latest measured prefix differs, older receipts cannot
             # establish the size of this rewritten conversation either.
-            return (count_tokens_approximately(messages) + receipt["envelope_tokens"],
+            return (_local_history_estimate(messages) + receipt["envelope_tokens"],
                     "local estimate after history replacement")
         if usage is not None and all(type(usage.get(key)) is int and usage[key] >= 0
                                      for key in ("input_tokens", "output_tokens")):
-            added = count_tokens_approximately(messages[index + 1:])
-            return (usage["input_tokens"] + usage["output_tokens"] + added,
-                    "reported input + output" + (" + estimated new messages" if added else ""))
-    return count_tokens_approximately(messages), "local estimate; no valid usage yet"
+            added = _local_history_estimate(messages[index + 1:])
+            reasoning = (usage.get("output_token_details") or {}).get("reasoning", 0)
+            reasoning = reasoning if isinstance(reasoning, int) else 0
+            retained_output = estimated_retained_output_tokens(
+                usage["output_tokens"], reasoning, message.content
+            )
+            return (usage["input_tokens"] + retained_output + added,
+                    "reported input + estimated retained output"
+                    + (" + estimated new messages" if added else ""))
+    return _local_history_estimate(messages), "local estimate; no valid usage yet"
 
 
 def _envelope_tokens(request):
@@ -234,8 +290,8 @@ class InputBudgetMiddleware(AgentMiddleware):
 class ContextBudget:
     """Configure one conversation's policy, independently of model capacity.
 
-    trigger_tokens uses input + output plus new-message estimates; keep_tokens targets recent
-    unsummarized history. Whole messages/tool pairs can exceed that target.
+    trigger_tokens uses input plus retained-output and new-message estimates;
+    keep_tokens targets recent unsummarized history. Whole messages/tool pairs can exceed it.
     max_input_tokens checks the estimated final request including its envelope.
     """
 

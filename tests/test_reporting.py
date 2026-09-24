@@ -505,3 +505,45 @@ def test_empty_and_legacy_tool_definitions(tmp_path, prices):
     output = tmp_path / "report.html"
     render(run, prices, output)
     assert "No tools were bound to this request." in output.read_text()
+
+
+@pytest.mark.parametrize("capture_content", [False, True])
+@pytest.mark.parametrize("hook", ["ToolCallLimitMiddleware[write_file].after_model", "ModelCallLimitMiddleware.before_model", "ordinary_node"])
+def test_circuit_breaker_requires_native_stop_evidence(tmp_path, capture_content, hook):
+    """Only a native stop update creates a trip; message privacy stays opt-in."""
+    from langchain_core.messages import AIMessage
+
+    path = tmp_path / "spans.jsonl"
+    capture = TraceCapture(path, "demo", "scripted-chat", capture_content=capture_content)
+    for stop in (False, True):
+        run_id = uuid4()
+        capture.on_chain_start({}, {}, run_id=run_id, name=hook)
+        capture.on_chain_end({"jump_to": "end" if stop else None,
+                              "messages": [AIMessage(content="private stop reason")]}, run_id=run_id)
+    capture.close()
+    run = normalize(path, title="Breaker evidence")
+    trips = [s for s in run.steps if s.context.get("circuit_breaker_event")]
+    assert len(trips) == (0 if hook == "ordinary_node" else 1)
+    assert ("private stop reason" in path.read_text()) == (capture_content and hook != "ordinary_node")
+
+
+
+def test_request_comments_use_recorded_actions_and_exclude_reasoning():
+    """Hover comments distinguish requested work, summaries and visible answers."""
+    from types import SimpleNamespace
+
+    from reporting.annotations import request_comment
+
+    step = SimpleNamespace(request=[], response=[{
+        "content": [{"type": "reasoning", "text": "private thought"}],
+        "tool_calls": [{"name": "read_file", "args": {"file_path": "/plan.md"}}],
+    }])
+    assert request_comment(step) == "Request reading /plan.md."
+    assert "compaction" in request_comment(step, summary=True)
+    step.response[0]["tool_calls"] = []
+    assert request_comment(step) == "Request purpose unavailable in the captured messages."
+    step.response[0]["content"].append({"type": "text", "text": "Plan written."})
+    assert request_comment(step) == "Recorded answer: Plan written."
+    step.response = []
+    step.request = [{"role": "user", "content": "Inspect <script> | the source"}]
+    assert request_comment(step) == "Respond to: Inspect <script> / the source"

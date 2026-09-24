@@ -90,6 +90,11 @@ def run_sample(name, directory, *, prices, fx_file, env, simulated=False):
                 "approve",
             ]
         )
+    if name == "context_budget":
+        # Preserve the plan and exercise files alongside the stable report.
+        # The child process runs from that report directory, so this relative
+        # workspace remains local to the sample rather than the source tree.
+        command.extend(["--option", 'workspace_dir="workspace"'])
     # These stages depend on one another: the recorder writes run.json, the
     # converter extracts workbook data, and the Python exporter writes Excel.
     commands = [

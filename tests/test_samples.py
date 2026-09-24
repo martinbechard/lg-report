@@ -36,7 +36,8 @@ from reporting.schema import Run
         ("shell_script", 2, 1, 1),
         ("thinking_agent", 7, 6, 1),
         ("subagent_chat", 4, 2, 1),
-        ("context_budget", 15, 6, 2),
+        ("context_budget", 47, 32, 2),
+        ("circuit_breaker", 4, 3, 1),
         ("expert_dispatch", 12, 6, 3),
         ("review_loop", 4, 0, 1),
     ],
@@ -74,48 +75,117 @@ def test_standalone_application(name, calls, tools, turn_count, tmp_path):
     assert str(output / "report.html") in result.stdout
     run = Run.model_validate_json((output / "run.json").read_text())
     assert run.demo and run.status == "ok"
+    # Every ordinary client run captures native graph topology automatically;
+    # samples do not need reporting-specific diagram construction.
+    definitions = [s.context["report_workflow_definition"] for s in run.steps
+                   if "report_workflow_definition" in s.context]
+    assert definitions
+    definition = json.loads(definitions[0])
+    html = (output / "report.html").read_text()
+    assert html.index('id="workflow-state-heading"') < html.index("LLM costs by request")
+    if name == "context_budget":
+        routes = {(e['source'], e['target'], e['label']) for e in definition['edges']}
+        assert ('review_step', 'working_step', 'repair') in routes
+        assert ('review_step', 'plan_update_step', 'approved') in routes
+        assert ('plan_update_step', 'working_step', 'work') in routes
     assert sum(s.kind == "model" for s in run.steps) == calls
     assert sum(s.kind == "tool" for s in run.steps) == tools
     assert all(s.context.get("description") for s in run.steps)
+    # Every sample's outer conversation uses the same plain context name.
+    # Separate child/peer histories retain their own names and line segments.
+    prices = load_prices(output / "prices.json")
+    chart = cost_chart(conversation_turns(run, prices), prices)
+    main_bars = [bar for bar in chart["bars"] if bar["history_label"] == "Main context"]
+    assert main_bars
+    assert len({bar["history_color"] for bar in main_bars}) == 1
+    if name == "circuit_breaker":
+        # Middleware termination is not an LLM response, but must still be
+        # visible in the exported report without adding a billed model call.
+        assert "tool call limit reached" in run.output
+        html = (output / "report.html").read_text()
+        assert 'aria-label="Workflow result"' in html
+        assert "tool call limit reached" in html
+        assert all(s.status == "error" for s in run.steps if s.kind == "tool")
+        trips = [s for s in run.steps if s.context.get("circuit_breaker_event") == "tripped"]
+        assert len(trips) == 1
+        assert trips[0].usage is None
+        assert len(chart["circuit_breakers"]) == 1
+        assert html.count('data-cost-tip="Circuit breaker tripped') == 2
+        assert html.count('class="event circuit-breaker-event"') == 1
+        activities = agent_activity(run, prices)
+        rows = execution_tree_view(tree_rows(run, prices), activities["scopes"])
+        assert not next(row for row in rows if row["step"] == trips[0])["detail_only"]
+
     if name == "context_budget":
         # Native summary retry scopes must expose their role in every report,
         # rather than the scripted/live model adapter's implementation name.
         activities = agent_activity(run, load_prices(output / "prices.json"))
         assert {a["step"].name for a in activities["activities"]} == {
-            "context_planner",
-            "context_responder",
-            "isolated-subagent",
-            "workflow_history_summarizer",
-            "specialist_history_summarizer",
+            "planner",
+            "worker",
+            "isolated-reviewer",
+            "context_summarizer",
         }
+        # The worker creates code and test artifacts; only the planner owns
+        # plan status edits, with a fresh plan read following every such edit.
+        by_id = {step.id: step for step in run.steps}
+        tool_steps = [step for step in run.steps if step.kind == "tool"]
+        plan_edits = [step for step in tool_steps if step.name == "edit_file"
+                      and "/plan.md" in str(step.request)]
+        assert len(plan_edits) == 4
+        for edit in plan_edits:
+            ancestors = []
+            current = edit
+            while current.parent_id in by_id:
+                current = by_id[current.parent_id]
+                ancestors.append(current.name)
+            assert "planner" in ancestors and "worker" not in ancestors
+            assert next(step for step in tool_steps if step.start_ns > edit.start_ns).name == "read_file"
+        reviewer_tools = []
+        for step in tool_steps:
+            current = step
+            while current.parent_id in by_id:
+                current = by_id[current.parent_id]
+                if current.name == "isolated-reviewer":
+                    reviewer_tools.append(step.name)
+                    break
+        assert reviewer_tools == ["read_file"] * 10
         # Count-only compaction evidence survives normalization, is visible in
         # the default tree, and produces one focusable timeline tooltip each.
         compactions = [s for s in run.steps if s.context.get("compaction_event")]
-        assert len(compactions) == 3
+        assert len(compactions) == 2
         prices = load_prices(output / "prices.json")
         rows = execution_tree_view(tree_rows(run, prices), activities["scopes"])
         event_rows = [row for row in rows if row["step"] in compactions]
         assert all(not row["detail_only"] for row in event_rows)
-        assert all("Trigger context:" in row["description"] for row in event_rows)
+        assert all("Context before:" in row["description"] for row in event_rows)
         diagrams = collaboration_diagrams(run, activities, conversation_turns(run, prices))
-        events = [e for d in diagrams for e in d["events"] if e.get("tooltip")]
-        assert len(events) == 3
+        events = [e for d in diagrams for e in d["events"]
+                  if e.get("tooltip", "").startswith("Compaction completed")]
+        assert len(events) == len(compactions)
         html = (output / "report.html").read_text()
-        assert html.count('data-cost-tip="Compaction completed') == 3
-        assert html.count('class="event compaction-event"') == 3
-        assert html.count('class="compaction-marker"') == 3
+        # Both the collaboration boxes and cost-chart markers identify the
+        # event explicitly before their distinct supporting details.
+        assert html.count('data-cost-tip="Compaction completed') == 2 * len(compactions)
+        assert html.count('class="event compaction-event"') == len(compactions)
+        assert html.count('class="compaction-marker"') == len(compactions)
         turns_with_compactions = conversation_turns(run, prices)
         chart = cost_chart(turns_with_compactions, prices)
         # Markers occur in the gap surrounding their recorded completion,
         # without introducing an additional billed request/bar.
         assert len(chart["bars"]) == calls
         # Context identity crosses peer roles but never an isolated task boundary.
-        shared = [h for h in chart["histories"] if h["label"] == "Shared workflow history"]
+        shared = [h for h in chart["histories"] if h["label"] == "Main context"]
         assert len(shared) == 1
-        assert {b["agent_name"] for b in shared[0]["bars"]} == {"context_planner", "context_responder"}
-        isolated = [h for h in chart["histories"] if h["label"].startswith("Isolated task")]
-        assert len(isolated) == 2
-        assert all(len(h["bars"]) == 3 for h in isolated)
+        assert {b["agent_name"] for b in shared[0]["bars"]} == {"planner", "worker"}
+        isolated = [h for h in chart["histories"] if h["label"].startswith("Isolated review")]
+        assert len(isolated) == 4
+        assert {h["label"] for h in isolated} == {
+            "Isolated review T1 attempt 1", "Isolated review T1 attempt 2",
+            "Isolated review T2 attempt 1", "Isolated review T3 attempt 1",
+        }
+        assert sorted(len(h["bars"]) for h in isolated) == [3, 3, 4, 4]
+        assert all("/ turn" not in h["label"] for h in chart["histories"])
         assert all(not b["summary_request"] for h in chart["histories"] for b in h["bars"])
         for marker in chart["compactions"]:
             assert not any(bar["x"] < marker["x"] < bar["x"] + chart["bar_width"]
@@ -130,7 +200,7 @@ def test_standalone_application(name, calls, tools, turn_count, tmp_path):
                 inspect_nodes(n["children"]) for n in nodes)
 
         assert sum(inspect_nodes(t["conversation_nodes"])
-                   for t in turns_with_compactions) == 3
+                   for t in turns_with_compactions) == len(compactions)
     turns = conversation_turns(run, load_prices(output / "prices.json"))
     assert len(turns) == turn_count
     labels = [

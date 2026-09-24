@@ -1,0 +1,11 @@
+{
+  "samples": [
+    {
+      "id": "circuit_breaker",
+      "name": "Circuit breaker",
+      "description": "Repeated forbidden filename writes stopped by native tool-call limits.",
+      "workflow": "agent_runtime.workflows.circuit_breaker:build_workflow",
+      "scripted_run": "samples.circuit_breaker.scripted_run"
+    }
+  ]
+}

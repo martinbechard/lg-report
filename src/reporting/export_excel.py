@@ -19,7 +19,7 @@ from xlsxwriter.utility import xl_col_to_name
 
 UNKNOWN = "Unknown"
 CATEGORIES = (
-    ("Fresh input", (0,)),
+    ("Input at standard rate", (0,)),
     ("Cache read", (1,)),
     ("Cache write", (2, 3, 4)),
     ("Output (non-reasoning)", (5,)),
@@ -262,7 +262,7 @@ def sequence_rows(events):
         add("LLM request", tokens=usage.get("input_tokens"), kind="request")
         if usage.get("cache_read") or growth.get("previous_tokens") is not None:
             charges[1] = add("Conversation history · cache read", cat=1)
-        charges[0] = add("Fresh input", cat=0)
+        charges[0] = add("Input at standard rate", cat=0)
         if growth.get("previous_tokens") is None:
             add(
                 "    Tool definitions",
