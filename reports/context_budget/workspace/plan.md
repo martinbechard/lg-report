@@ -62,3 +62,19 @@ Acceptance criteria:
 - Expected results reflect the documented contract: lowercase ASCII alphanumerics, collapsed/trimmed hyphens, discarded unsupported characters, and `""` when no output characters remain.
 - The added tests do not duplicate internal branches or depend on hidden state, and no tests are run by this workflow.
 - The independent reviewer inspects the changed test file and either approves it or returns this task for repair; reviewer approval is required before this task is closed.
+
+## SLUG-004 — Further strengthen boundary tests in `/test_slug.py`
+Status: complete
+Assigned: worker
+Evidence: Independent reviewer approved the current `/test_slug.py`. The file preserves prior approved coverage and adds focused public-behavior tests for mixed-case accented text with digits and boundaries (`test_mixed_case_accents_and_digits_share_normalized_boundaries`) and unsupported non-decomposing characters discarded without introducing separators (`test_unsupported_letters_are_discarded_without_new_separators`). Review confirmed coverage of the requested empty/whitespace, punctuation/separator, normalization, filtering, digit, unsupported-Unicode, and non-string boundaries, with deterministic standard-library-only assertions and no implementation-detail or external-resource dependencies. Only `/test_slug.py` was changed for this task. Tests were written but not run, so execution remains unverified.
+
+Implementation steps:
+1. Read the current `/slug.py` and `/test_slug.py` before editing, preserving all previously approved tests and the documented contract.
+2. Add only concrete behavioral regression cases that strengthen boundaries not already adequately distinguished, such as empty/whitespace-only values, punctuation and separator runs around text, mixed-case and accented text, unsupported non-decomposing Unicode, digits, and non-string inputs where useful.
+3. Keep assertions against the public `slugify` import, readable and deterministic, using no services, filesystem state, network, or implementation-detail inspection.
+
+Acceptance criteria:
+- `/test_slug.py` retains existing coverage and adds focused boundary tests that can detect plausible regressions in trimming, collapsing, normalization, filtering, empty results, and type validation.
+- Expected values match the established contract: lowercase ASCII alphanumerics, collapsed and trimmed hyphens, discarded unsupported characters, empty output when nothing remains, and `TypeError` for non-strings.
+- Only `/test_slug.py` is changed for this task; tests are written but not run by this workflow.
+- The independent reviewer must inspect the changed test file and either approve it or reject it with source-backed findings; reviewer approval is required before the planner records this task complete. Review and closeout are part of this task, not separate tasks.

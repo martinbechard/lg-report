@@ -9,8 +9,9 @@ and approval/clarification answers. The nested-workflow scenario options select
 fixtures only in demo mode; live models determine their own repair paths and
 verdicts. In the circuit-breaker lesson, normal workflow termination means the
 breaker stopped the repeated failure, not that the file was written.
-The saved quote example records cancellation after the live model asked an
-assembly question beyond the authored answers; no customer answer was invented.
+The saved quote example completed after the live model asked about quantity and
+addressing. Its answer uses the authored fixture: 500 households, identical
+invitations, and 500 addressed envelopes using the supplied spreadsheet.
 `run.json` records the
 provider, model, execution status, and whether a run is simulated.
 

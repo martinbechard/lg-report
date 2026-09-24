@@ -1,17 +1,17 @@
 {
   "schema_version": 1,
-  "id": "01a0d142-4fb9-74b1-9161-3e9286297f58",
+  "id": "01a0d587-42ef-7a82-aea6-fa40a1fdab08",
   "title": "Shell script",
   "demo": false,
   "status": "ok",
   "steps": [
     {
-      "id": "01a0d142-4fb9-74b1-9161-3e9286297f58",
+      "id": "01a0d587-42ef-7a82-aea6-fa40a1fdab08",
       "parent_id": null,
       "name": "shell_agent",
       "kind": "workflow",
-      "start_ns": 1790217179068020000,
-      "end_ns": 1790217182252516000,
+      "start_ns": 1790288806641208000,
+      "end_ns": 1790288808687077000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -22,20 +22,20 @@
       "response": [],
       "tool_definitions": null,
       "context": {
-        "report_workflow_definition": "{\"title\": \"shell_agent\", \"context\": \"Compiled graph; arrows show declared transitions\", \"nodes\": [\"__start__\", \"PatchToolCallsMiddleware.before_agent\", \"model\", \"tools\", \"__end__\"], \"edges\": [{\"source\": \"PatchToolCallsMiddleware.before_agent\", \"target\": \"model\", \"label\": \"\"}, {\"source\": \"__start__\", \"target\": \"PatchToolCallsMiddleware.before_agent\", \"label\": \"\"}, {\"source\": \"tools\", \"target\": \"model\", \"label\": \"model\"}, {\"source\": \"model\", \"target\": \"tools\", \"label\": \"tools\"}, {\"source\": \"model\", \"target\": \"__end__\", \"label\": \"__end__\"}, {\"source\": \"model\", \"target\": \"model\", \"label\": \"model\"}], \"children\": {}, \"delegations\": [{\"source\": \"tools\", \"tool\": \"task\", \"name\": \"general-purpose\", \"graph\": {\"title\": \"general-purpose\", \"context\": \"Compiled graph; arrows show declared transitions\", \"nodes\": [\"__start__\", \"PatchToolCallsMiddleware.before_agent\", \"model\", \"tools\", \"__end__\"], \"edges\": [{\"source\": \"PatchToolCallsMiddleware.before_agent\", \"target\": \"model\", \"label\": \"\"}, {\"source\": \"__start__\", \"target\": \"PatchToolCallsMiddleware.before_agent\", \"label\": \"\"}, {\"source\": \"tools\", \"target\": \"model\", \"label\": \"model\"}, {\"source\": \"model\", \"target\": \"tools\", \"label\": \"tools\"}, {\"source\": \"model\", \"target\": \"__end__\", \"label\": \"__end__\"}, {\"source\": \"model\", \"target\": \"model\", \"label\": \"model\"}], \"children\": {}, \"delegations\": []}}]}",
+        "report_workflow_definition": "{\"annotations\": {\"model\": {\"kind\": \"model\", \"comment\": \"Choose a tool or return an answer\"}, \"tools\": {\"kind\": \"tool\", \"comment\": \"Run tools; append results to history. Available: ls, read_file, write_file, edit_file, delete, glob, grep, execute, task\"}, \"PatchToolCallsMiddleware.before_agent\": {\"kind\": \"process\", \"comment\": \"\"}}, \"title\": \"shell_agent\", \"context\": \"Compiled graph; arrows show declared transitions\", \"nodes\": [\"__start__\", \"PatchToolCallsMiddleware.before_agent\", \"model\", \"tools\", \"__end__\"], \"edges\": [{\"source\": \"PatchToolCallsMiddleware.before_agent\", \"target\": \"model\", \"label\": \"\"}, {\"source\": \"__start__\", \"target\": \"PatchToolCallsMiddleware.before_agent\", \"label\": \"\"}, {\"source\": \"tools\", \"target\": \"model\", \"label\": \"model\"}, {\"source\": \"model\", \"target\": \"tools\", \"label\": \"tools\"}, {\"source\": \"model\", \"target\": \"__end__\", \"label\": \"__end__\"}, {\"source\": \"model\", \"target\": \"model\", \"label\": \"model\"}], \"children\": {}, \"delegations\": [{\"source\": \"tools\", \"tool\": \"task\", \"name\": \"general-purpose\", \"graph\": {\"annotations\": {\"model\": {\"kind\": \"model\", \"comment\": \"Choose a tool or return an answer\"}, \"tools\": {\"kind\": \"tool\", \"comment\": \"Run tools; append results to history. Available: ls, read_file, write_file, edit_file, delete, glob, grep, execute\"}, \"PatchToolCallsMiddleware.before_agent\": {\"kind\": \"process\", \"comment\": \"\"}}, \"title\": \"general-purpose\", \"context\": \"Compiled graph; arrows show declared transitions\", \"nodes\": [\"__start__\", \"PatchToolCallsMiddleware.before_agent\", \"model\", \"tools\", \"__end__\"], \"edges\": [{\"source\": \"PatchToolCallsMiddleware.before_agent\", \"target\": \"model\", \"label\": \"\"}, {\"source\": \"__start__\", \"target\": \"PatchToolCallsMiddleware.before_agent\", \"label\": \"\"}, {\"source\": \"tools\", \"target\": \"model\", \"label\": \"model\"}, {\"source\": \"model\", \"target\": \"tools\", \"label\": \"tools\"}, {\"source\": \"model\", \"target\": \"__end__\", \"label\": \"__end__\"}, {\"source\": \"model\", \"target\": \"model\", \"label\": \"model\"}], \"children\": {}, \"delegations\": []}}]}",
         "report_turn": 1,
-        "thread_id": "5da18c3d-643f-4076-a904-2d045cbf2fd2",
+        "thread_id": "e8daf22c-dff0-4691-a3e1-6a44b6a47454",
         "cache_ttl": "5m",
         "description": "Execute the shell_agent workflow operation and pass its result to the next graph step."
       }
     },
     {
-      "id": "01a0d142-4fbd-7501-913f-6095a96d4f11",
-      "parent_id": "01a0d142-4fb9-74b1-9161-3e9286297f58",
+      "id": "01a0d587-42f2-7a62-b6bb-a43ef2a73202",
+      "parent_id": "01a0d587-42ef-7a82-aea6-fa40a1fdab08",
       "name": "PatchToolCallsMiddleware.before_agent",
       "kind": "workflow",
-      "start_ns": 1790217179069379000,
-      "end_ns": 1790217179069806000,
+      "start_ns": 1790288806642370000,
+      "end_ns": 1790288806642764000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -49,7 +49,7 @@
         "langgraph_node": "PatchToolCallsMiddleware.before_agent",
         "langgraph_step": 1,
         "report_turn": 1,
-        "thread_id": "5da18c3d-643f-4076-a904-2d045cbf2fd2",
+        "thread_id": "e8daf22c-dff0-4691-a3e1-6a44b6a47454",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:1"
@@ -58,12 +58,12 @@
       }
     },
     {
-      "id": "01a0d142-4fbe-7f61-9336-1195e0309092",
-      "parent_id": "01a0d142-4fb9-74b1-9161-3e9286297f58",
+      "id": "01a0d587-42f3-7e71-b2d4-6e6610c51eb3",
+      "parent_id": "01a0d587-42ef-7a82-aea6-fa40a1fdab08",
       "name": "model",
       "kind": "workflow",
-      "start_ns": 1790217179070486000,
-      "end_ns": 1790217180783429000,
+      "start_ns": 1790288806643385000,
+      "end_ns": 1790288807729352000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -77,7 +77,7 @@
         "langgraph_node": "model",
         "langgraph_step": 2,
         "report_turn": 1,
-        "thread_id": "5da18c3d-643f-4076-a904-2d045cbf2fd2",
+        "thread_id": "e8daf22c-dff0-4691-a3e1-6a44b6a47454",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:2"
@@ -86,12 +86,12 @@
       }
     },
     {
-      "id": "01a0d142-4fc4-7743-8b54-9fbce1d8ddab",
-      "parent_id": "01a0d142-4fbe-7f61-9336-1195e0309092",
+      "id": "01a0d587-42f8-7413-8109-860b31181b3c",
+      "parent_id": "01a0d587-42f3-7e71-b2d4-6e6610c51eb3",
       "name": "ChatOpenAI",
       "kind": "model",
-      "start_ns": 1790217179076384000,
-      "end_ns": 1790217180782127000,
+      "start_ns": 1790288806648607000,
+      "end_ns": 1790288807727938000,
       "status": "ok",
       "provider": "openai",
       "model": "gpt-5.6-luna",
@@ -99,8 +99,8 @@
       "usage": {
         "input_tokens": 2310,
         "output_tokens": 37,
-        "cache_read": 2307,
-        "cache_write": 0,
+        "cache_read": 0,
+        "cache_write": 2307,
         "cache_write_5m": 0,
         "cache_write_1h": 0,
         "reasoning": 9
@@ -125,19 +125,19 @@
           "role": "ai",
           "content": [
             {
-              "id": "rs_056f2f78f65d105c006ab48bdc549c87d2ba63244a0418f912",
+              "id": "rs_0305eb8a54a04ee3006ab5a3a755cc87d28c9ebc14ca0f7992",
               "summary": [],
               "type": "reasoning",
               "content": [],
               "index": 0,
-              "encrypted_content": "gAAAAABqtIvca-dztntiyaCCQTmPZ7cet6acr5BMOlGTEjxa1kMiyCRnLbg_hLHVSizBsjibwMS05hjhM9yIRJsdJWwYjgUgxAs_pG5zSX6XyKUJuUD5Hl3NecqcHtnLCvISyzM0oc28MZNP0C9YMFG9WAsIDdJBIeNBWojWm_yueEKhFQKFFfjRneUea_IRcnF-GbYm4Z5YX1xKX_wicLYUZ_54iItcAzog3JWM1U8zSOfabQS-AeJOE2CxRiwQy9PccIzIv5tdd74YNSwtvOJY9QwqZVaVL7esJM0x7k5HTjM9o2WtCviAfZtp0U-8i_p4xhztFE4gwE_x6oOKvkiHOZI-WwT66d_An53eXb-lHYl5pdewp3vRn1lEPeE9gtwzhHh6Mf0ckbczy1EaaTk4QWmtr7dk1xHr8aVDh7o_2xjLOunauEW9RyopaLiKR1R_hXYHJUUSAMnMW5to55nd7ESQX11fOBgO31JvoxVXLJy1lW829OdzQ4MPPQjOpzJHezSvgNnBNfcWtMn2v-Iu0d1QWfbreq9gTvYSIabbtQIcFxUaae-sDWBnRUvVKsIFknV85srM9CBP1tEQBIfCQCe0wjP0IJ0lrAI8272gkGt0hjzByHpq6Q9Lld0CLTIKYgeWHl4d9SdgSHSRVPblTfzGSsMfcQaJq41vNMyhY5NOFZVW-BdpHnuhvpEsu3ZsEOfmg8Yg2NZl7iL9qmzAyONwozFhvRWArKfpscEAmmznxhhJmeMFVkcBThyVMALAtSl-nJGWW8mgx5I2d2Wla3WdYJMOlKoDC9iQucjiLouvrAEnezPXBiIhqJSkcxbs7Kgg8bfb170cwqbT7YnOS76nRR2RwH2kkeCJYhrgK_9YLncVIAKFLUNg1RGCeGd4KggzrsOSON9qbmbNzRRfOdmEqcTMo2KKigtjvOpGMmA1IadP4n1b-ogstLuS76OPuQH6HBNOVpMj-BRIz3VkmZocFxqMsbWp05cC_Ym6d0hFHm7ofgeGRegPlsROmag3N42YE8i_t414WkcWcQpAoPqFw3O73Yt1Eq_1HbZodCBwJEDueoGpk3U_md6gIWGxFyd7PHnHgrWn8wVIMAaVMJcvLplmY6emxH7Tx-S30kJUTFJtEmLObLgTc86DJ6TXQPKu-WKWq_80rmpexw46AHRnIUJhhHIpm4TLH2pXb94I1F_fyUzAduVyupGX82wJ-sxHEtIt"
+              "encrypted_content": "gAAAAABqtaOn2Vx__1CqeTA9UhRWq69sE5va7D4fs9q0zuF2RJNMYiEG23WSCKXy9y0NI3BRyfzeW62j3zjIOWc9ZF1XT9VkeE-xf-6vhR-sUv5n4VuwxQiuWvC96ea_LIljgPujnRNo2J-iV4Uu-pr6MlSAtGinpam70lNGhIePlwgKD_Y11hLy6pkLoQOkOApFENuaiMF09HRKMicQRurilDr0rPf1tnx6zgQYAn677RO1aXdscnv4qA46fhitGsizysVUNA5T7Jj0EWT0XqdMhnOwVY08ugHV9hE2pH1xa1r7XxnMS6_UbbY4Ul6h5sC-4iV-771J3mF25FbeVR7GusmPqCE4dKgJ0OYRQizyoegsJjKkNCAf3voNWY3Zow6SLJHn5D1-Kz1kzU9wvcrY8iSsHkm09XhpEKHwavVyhvkWjcjxPRHRZaIPRaMQKj5Jwz9Uvdhn_EngNHCnuLJHUVlYGPtd8N7ZCh5gBG7OqTw-giWnJ7gTx8p2GzyiJTmQCJG0pj5q6DYLeic8Lonjn-V-p2Cyqiqdu2GWy2YwNxyI0AtAccFzKfZ4LkIaQvjL32KTsC2emlfZlmNV-s1Y3Io_pk6joInlAwAw7XIIIC--MGOmtYkTcjImcj4qW33qY0klEBK8VtjuAHOi1uAixbz9-F2Dr6gvTIuZPzk13OCBUVoEA-VtKCXIEe-7BCL_AsBU1vJKIydCdl7C-lVWwARaubX1kZnJD8V9-C7XgeG-8TRueyKyOOXTKvAgOPwxszbOjLWORCExvXDLWgb6bRBZ0QHdqR8I4pmP3VP4PA15yT-Xu-i2GV6UHdGrULMbosaLjpwnJljzACCEK6NOlkhPqSIlp8rlkgNKEk1Ai4DaACPtr697mT1fiCbQgmejxpp4j1YqsnAKktYxnmbagg4YmCkFuPyCRsDb2JgW8QG2lJLUO6-fW5IaatmMoKBgFWZNXbnLDBMBD9DG2q5VU51NXUYk84fmvBRwggDIWIq-zeeuLo8jeN28Mi2gGwrbrt0CWz0yMddkUGic383qJT0UB5rpLTyz9EkORKv8HVF2uoXA5DiAN5Db1VWsKNeNEGYTTuj4JMRto_TTaIC5BYPSYSz1bjYeNw64g0SvGRRjfW5rmrEi0UOOikr8OFLRiQ4BTxPhj9pQXJnU9hr2kUgIASDGd-QL-ITv0hVZNDF0Kv25ElAz4kkRPyqb151rgIyxzOWG"
             },
             {
               "type": "function_call",
               "name": "execute",
               "arguments": "{\"command\":\"sh ./summarize.sh\",\"timeout\":120}",
-              "call_id": "call_PlpK37RsthN7RecjgOhp11pw",
-              "id": "fc_056f2f78f65d105c006ab48bdc717087d29ed744442d3d816a",
+              "call_id": "call_UhZPcsWNlrqTM86fvtiZZuIF",
+              "id": "fc_0305eb8a54a04ee3006ab5a3a77a9887d2898254c46a853836",
               "index": 1
             }
           ],
@@ -148,7 +148,7 @@
                 "command": "sh ./summarize.sh",
                 "timeout": 120
               },
-              "id": "call_PlpK37RsthN7RecjgOhp11pw",
+              "id": "call_UhZPcsWNlrqTM86fvtiZZuIF",
               "type": "tool_call"
             }
           ],
@@ -438,7 +438,7 @@
         "langgraph_node": "model",
         "langgraph_step": 2,
         "report_turn": 1,
-        "thread_id": "5da18c3d-643f-4076-a904-2d045cbf2fd2",
+        "thread_id": "e8daf22c-dff0-4691-a3e1-6a44b6a47454",
         "cache_ttl": "5m",
         "tags": [
           "seq:step:1"
@@ -456,12 +456,12 @@
       }
     },
     {
-      "id": "01a0d142-5670-7ae0-8d3e-e5377d43b493",
-      "parent_id": "01a0d142-4fb9-74b1-9161-3e9286297f58",
+      "id": "01a0d587-4732-7661-be25-1701b031358e",
+      "parent_id": "01a0d587-42ef-7a82-aea6-fa40a1fdab08",
       "name": "tools",
       "kind": "workflow",
-      "start_ns": 1790217180784528000,
-      "end_ns": 1790217180830649000,
+      "start_ns": 1790288807730515000,
+      "end_ns": 1790288807757939000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -475,7 +475,7 @@
         "langgraph_node": "tools",
         "langgraph_step": 3,
         "report_turn": 1,
-        "thread_id": "5da18c3d-643f-4076-a904-2d045cbf2fd2",
+        "thread_id": "e8daf22c-dff0-4691-a3e1-6a44b6a47454",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:3"
@@ -484,12 +484,12 @@
       }
     },
     {
-      "id": "01a0d142-5671-7cd2-b611-d236227197e9",
-      "parent_id": "01a0d142-5670-7ae0-8d3e-e5377d43b493",
+      "id": "01a0d587-4733-7281-936a-e7b34c0438ff",
+      "parent_id": "01a0d587-4732-7661-be25-1701b031358e",
       "name": "execute",
       "kind": "tool",
-      "start_ns": 1790217180785366000,
-      "end_ns": 1790217180829200000,
+      "start_ns": 1790288807731331000,
+      "end_ns": 1790288807756628000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -507,7 +507,7 @@
           "role": "tool",
           "content": "Orders: 3\nTotal units: 9\n\n[Command succeeded with exit code 0]",
           "tool_calls": [],
-          "tool_call_id": "call_PlpK37RsthN7RecjgOhp11pw"
+          "tool_call_id": "call_UhZPcsWNlrqTM86fvtiZZuIF"
         }
       ],
       "tool_definitions": null,
@@ -515,7 +515,7 @@
         "langgraph_node": "tools",
         "langgraph_step": 3,
         "report_turn": 1,
-        "thread_id": "5da18c3d-643f-4076-a904-2d045cbf2fd2",
+        "thread_id": "e8daf22c-dff0-4691-a3e1-6a44b6a47454",
         "cache_ttl": "5m",
         "tags": [
           "seq:step:1"
@@ -524,12 +524,12 @@
       }
     },
     {
-      "id": "01a0d142-569f-7521-8050-9fa794f475af",
-      "parent_id": "01a0d142-4fb9-74b1-9161-3e9286297f58",
+      "id": "01a0d587-474e-7bb2-9895-90f97a30614a",
+      "parent_id": "01a0d587-42ef-7a82-aea6-fa40a1fdab08",
       "name": "model",
       "kind": "workflow",
-      "start_ns": 1790217180831799000,
-      "end_ns": 1790217182250992000,
+      "start_ns": 1790288807759029000,
+      "end_ns": 1790288808685099000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -543,7 +543,7 @@
         "langgraph_node": "model",
         "langgraph_step": 4,
         "report_turn": 1,
-        "thread_id": "5da18c3d-643f-4076-a904-2d045cbf2fd2",
+        "thread_id": "e8daf22c-dff0-4691-a3e1-6a44b6a47454",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:4"
@@ -552,12 +552,12 @@
       }
     },
     {
-      "id": "01a0d142-56a2-7893-85da-b7289e7433ba",
-      "parent_id": "01a0d142-569f-7521-8050-9fa794f475af",
+      "id": "01a0d587-4750-7b32-ad48-53449c4e54b6",
+      "parent_id": "01a0d587-474e-7bb2-9895-90f97a30614a",
       "name": "ChatOpenAI",
       "kind": "model",
-      "start_ns": 1790217180834760000,
-      "end_ns": 1790217182248936000,
+      "start_ns": 1790288807760943000,
+      "end_ns": 1790288808683138000,
       "status": "ok",
       "provider": "openai",
       "model": "gpt-5.6-luna",
@@ -565,8 +565,8 @@
       "usage": {
         "input_tokens": 2377,
         "output_tokens": 20,
-        "cache_read": 2374,
-        "cache_write": 0,
+        "cache_read": 2307,
+        "cache_write": 67,
         "cache_write_5m": 0,
         "cache_write_1h": 0,
         "reasoning": 0
@@ -589,19 +589,19 @@
           "role": "ai",
           "content": [
             {
-              "id": "rs_056f2f78f65d105c006ab48bdc549c87d2ba63244a0418f912",
+              "id": "rs_0305eb8a54a04ee3006ab5a3a755cc87d28c9ebc14ca0f7992",
               "summary": [],
               "type": "reasoning",
               "content": [],
               "index": 0,
-              "encrypted_content": "gAAAAABqtIvca-dztntiyaCCQTmPZ7cet6acr5BMOlGTEjxa1kMiyCRnLbg_hLHVSizBsjibwMS05hjhM9yIRJsdJWwYjgUgxAs_pG5zSX6XyKUJuUD5Hl3NecqcHtnLCvISyzM0oc28MZNP0C9YMFG9WAsIDdJBIeNBWojWm_yueEKhFQKFFfjRneUea_IRcnF-GbYm4Z5YX1xKX_wicLYUZ_54iItcAzog3JWM1U8zSOfabQS-AeJOE2CxRiwQy9PccIzIv5tdd74YNSwtvOJY9QwqZVaVL7esJM0x7k5HTjM9o2WtCviAfZtp0U-8i_p4xhztFE4gwE_x6oOKvkiHOZI-WwT66d_An53eXb-lHYl5pdewp3vRn1lEPeE9gtwzhHh6Mf0ckbczy1EaaTk4QWmtr7dk1xHr8aVDh7o_2xjLOunauEW9RyopaLiKR1R_hXYHJUUSAMnMW5to55nd7ESQX11fOBgO31JvoxVXLJy1lW829OdzQ4MPPQjOpzJHezSvgNnBNfcWtMn2v-Iu0d1QWfbreq9gTvYSIabbtQIcFxUaae-sDWBnRUvVKsIFknV85srM9CBP1tEQBIfCQCe0wjP0IJ0lrAI8272gkGt0hjzByHpq6Q9Lld0CLTIKYgeWHl4d9SdgSHSRVPblTfzGSsMfcQaJq41vNMyhY5NOFZVW-BdpHnuhvpEsu3ZsEOfmg8Yg2NZl7iL9qmzAyONwozFhvRWArKfpscEAmmznxhhJmeMFVkcBThyVMALAtSl-nJGWW8mgx5I2d2Wla3WdYJMOlKoDC9iQucjiLouvrAEnezPXBiIhqJSkcxbs7Kgg8bfb170cwqbT7YnOS76nRR2RwH2kkeCJYhrgK_9YLncVIAKFLUNg1RGCeGd4KggzrsOSON9qbmbNzRRfOdmEqcTMo2KKigtjvOpGMmA1IadP4n1b-ogstLuS76OPuQH6HBNOVpMj-BRIz3VkmZocFxqMsbWp05cC_Ym6d0hFHm7ofgeGRegPlsROmag3N42YE8i_t414WkcWcQpAoPqFw3O73Yt1Eq_1HbZodCBwJEDueoGpk3U_md6gIWGxFyd7PHnHgrWn8wVIMAaVMJcvLplmY6emxH7Tx-S30kJUTFJtEmLObLgTc86DJ6TXQPKu-WKWq_80rmpexw46AHRnIUJhhHIpm4TLH2pXb94I1F_fyUzAduVyupGX82wJ-sxHEtIt"
+              "encrypted_content": "gAAAAABqtaOn2Vx__1CqeTA9UhRWq69sE5va7D4fs9q0zuF2RJNMYiEG23WSCKXy9y0NI3BRyfzeW62j3zjIOWc9ZF1XT9VkeE-xf-6vhR-sUv5n4VuwxQiuWvC96ea_LIljgPujnRNo2J-iV4Uu-pr6MlSAtGinpam70lNGhIePlwgKD_Y11hLy6pkLoQOkOApFENuaiMF09HRKMicQRurilDr0rPf1tnx6zgQYAn677RO1aXdscnv4qA46fhitGsizysVUNA5T7Jj0EWT0XqdMhnOwVY08ugHV9hE2pH1xa1r7XxnMS6_UbbY4Ul6h5sC-4iV-771J3mF25FbeVR7GusmPqCE4dKgJ0OYRQizyoegsJjKkNCAf3voNWY3Zow6SLJHn5D1-Kz1kzU9wvcrY8iSsHkm09XhpEKHwavVyhvkWjcjxPRHRZaIPRaMQKj5Jwz9Uvdhn_EngNHCnuLJHUVlYGPtd8N7ZCh5gBG7OqTw-giWnJ7gTx8p2GzyiJTmQCJG0pj5q6DYLeic8Lonjn-V-p2Cyqiqdu2GWy2YwNxyI0AtAccFzKfZ4LkIaQvjL32KTsC2emlfZlmNV-s1Y3Io_pk6joInlAwAw7XIIIC--MGOmtYkTcjImcj4qW33qY0klEBK8VtjuAHOi1uAixbz9-F2Dr6gvTIuZPzk13OCBUVoEA-VtKCXIEe-7BCL_AsBU1vJKIydCdl7C-lVWwARaubX1kZnJD8V9-C7XgeG-8TRueyKyOOXTKvAgOPwxszbOjLWORCExvXDLWgb6bRBZ0QHdqR8I4pmP3VP4PA15yT-Xu-i2GV6UHdGrULMbosaLjpwnJljzACCEK6NOlkhPqSIlp8rlkgNKEk1Ai4DaACPtr697mT1fiCbQgmejxpp4j1YqsnAKktYxnmbagg4YmCkFuPyCRsDb2JgW8QG2lJLUO6-fW5IaatmMoKBgFWZNXbnLDBMBD9DG2q5VU51NXUYk84fmvBRwggDIWIq-zeeuLo8jeN28Mi2gGwrbrt0CWz0yMddkUGic383qJT0UB5rpLTyz9EkORKv8HVF2uoXA5DiAN5Db1VWsKNeNEGYTTuj4JMRto_TTaIC5BYPSYSz1bjYeNw64g0SvGRRjfW5rmrEi0UOOikr8OFLRiQ4BTxPhj9pQXJnU9hr2kUgIASDGd-QL-ITv0hVZNDF0Kv25ElAz4kkRPyqb151rgIyxzOWG"
             },
             {
               "type": "function_call",
               "name": "execute",
               "arguments": "{\"command\":\"sh ./summarize.sh\",\"timeout\":120}",
-              "call_id": "call_PlpK37RsthN7RecjgOhp11pw",
-              "id": "fc_056f2f78f65d105c006ab48bdc717087d29ed744442d3d816a",
+              "call_id": "call_UhZPcsWNlrqTM86fvtiZZuIF",
+              "id": "fc_0305eb8a54a04ee3006ab5a3a77a9887d2898254c46a853836",
               "index": 1
             }
           ],
@@ -612,7 +612,7 @@
                 "command": "sh ./summarize.sh",
                 "timeout": 120
               },
-              "id": "call_PlpK37RsthN7RecjgOhp11pw",
+              "id": "call_UhZPcsWNlrqTM86fvtiZZuIF",
               "type": "tool_call"
             }
           ],
@@ -622,7 +622,7 @@
           "role": "tool",
           "content": "Orders: 3\nTotal units: 9\n\n[Command succeeded with exit code 0]",
           "tool_calls": [],
-          "tool_call_id": "call_PlpK37RsthN7RecjgOhp11pw"
+          "tool_call_id": "call_UhZPcsWNlrqTM86fvtiZZuIF"
         }
       ],
       "response": [
@@ -634,7 +634,7 @@
               "text": "Orders: 3  \nTotal units: 9  \n\nExit status: 0",
               "phase": "final_answer",
               "index": 0,
-              "id": "msg_056f2f78f65d105c006ab48bddd1ec87d2924ce6407aa49bd2"
+              "id": "msg_0305eb8a54a04ee3006ab5a3a8587487d29bf4cf5a0efbfa68"
             }
           ],
           "tool_calls": [],
@@ -924,7 +924,7 @@
         "langgraph_node": "model",
         "langgraph_step": 4,
         "report_turn": 1,
-        "thread_id": "5da18c3d-643f-4076-a904-2d045cbf2fd2",
+        "thread_id": "e8daf22c-dff0-4691-a3e1-6a44b6a47454",
         "cache_ttl": "5m",
         "tags": [
           "seq:step:1"
@@ -941,5 +941,5 @@
       }
     }
   ],
-  "output": "[{'type': 'text', 'text': 'Orders: 3  \\nTotal units: 9  \\n\\nExit status: 0', 'phase': 'final_answer', 'index': 0, 'id': 'msg_056f2f78f65d105c006ab48bddd1ec87d2924ce6407aa49bd2'}]"
+  "output": "[{'type': 'text', 'text': 'Orders: 3  \\nTotal units: 9  \\n\\nExit status: 0', 'phase': 'final_answer', 'index': 0, 'id': 'msg_0305eb8a54a04ee3006ab5a3a8587487d29bf4cf5a0efbfa68'}]"
 }

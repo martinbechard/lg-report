@@ -1,17 +1,17 @@
 {
   "schema_version": 1,
-  "id": "01a0d142-6c64-7852-bf06-580c118fab20",
+  "id": "01a0d587-5f45-7db0-a557-720fb0f2c946",
   "title": "Simple chat",
   "demo": false,
   "status": "ok",
   "steps": [
     {
-      "id": "01a0d142-6c64-7852-bf06-580c118fab20",
+      "id": "01a0d587-5f45-7db0-a557-720fb0f2c946",
       "parent_id": null,
       "name": "chat_agent",
       "kind": "workflow",
-      "start_ns": 1790217186406134000,
-      "end_ns": 1790217188865040000,
+      "start_ns": 1790288813895496000,
+      "end_ns": 1790288815921876000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -22,20 +22,20 @@
       "response": [],
       "tool_definitions": null,
       "context": {
-        "report_workflow_definition": "{\"title\": \"chat_agent\", \"context\": \"Compiled graph; arrows show declared transitions\", \"nodes\": [\"__start__\", \"PatchToolCallsMiddleware.before_agent\", \"model\", \"tools\", \"__end__\"], \"edges\": [{\"source\": \"PatchToolCallsMiddleware.before_agent\", \"target\": \"model\", \"label\": \"\"}, {\"source\": \"__start__\", \"target\": \"PatchToolCallsMiddleware.before_agent\", \"label\": \"\"}, {\"source\": \"tools\", \"target\": \"model\", \"label\": \"model\"}, {\"source\": \"model\", \"target\": \"tools\", \"label\": \"tools\"}, {\"source\": \"model\", \"target\": \"__end__\", \"label\": \"__end__\"}, {\"source\": \"model\", \"target\": \"model\", \"label\": \"model\"}], \"children\": {}, \"delegations\": [{\"source\": \"tools\", \"tool\": \"task\", \"name\": \"general-purpose\", \"graph\": {\"title\": \"general-purpose\", \"context\": \"Compiled graph; arrows show declared transitions\", \"nodes\": [\"__start__\", \"PatchToolCallsMiddleware.before_agent\", \"model\", \"tools\", \"__end__\"], \"edges\": [{\"source\": \"PatchToolCallsMiddleware.before_agent\", \"target\": \"model\", \"label\": \"\"}, {\"source\": \"__start__\", \"target\": \"PatchToolCallsMiddleware.before_agent\", \"label\": \"\"}, {\"source\": \"tools\", \"target\": \"model\", \"label\": \"model\"}, {\"source\": \"model\", \"target\": \"tools\", \"label\": \"tools\"}, {\"source\": \"model\", \"target\": \"__end__\", \"label\": \"__end__\"}, {\"source\": \"model\", \"target\": \"model\", \"label\": \"model\"}], \"children\": {}, \"delegations\": []}}]}",
+        "report_workflow_definition": "{\"annotations\": {\"model\": {\"kind\": \"model\", \"comment\": \"Choose a tool or return an answer\"}, \"tools\": {\"kind\": \"tool\", \"comment\": \"Run tools; append results to history. Available: ls, read_file, write_file, edit_file, delete, glob, grep, execute, task\"}, \"PatchToolCallsMiddleware.before_agent\": {\"kind\": \"process\", \"comment\": \"\"}}, \"title\": \"chat_agent\", \"context\": \"Compiled graph; arrows show declared transitions\", \"nodes\": [\"__start__\", \"PatchToolCallsMiddleware.before_agent\", \"model\", \"tools\", \"__end__\"], \"edges\": [{\"source\": \"PatchToolCallsMiddleware.before_agent\", \"target\": \"model\", \"label\": \"\"}, {\"source\": \"__start__\", \"target\": \"PatchToolCallsMiddleware.before_agent\", \"label\": \"\"}, {\"source\": \"tools\", \"target\": \"model\", \"label\": \"model\"}, {\"source\": \"model\", \"target\": \"tools\", \"label\": \"tools\"}, {\"source\": \"model\", \"target\": \"__end__\", \"label\": \"__end__\"}, {\"source\": \"model\", \"target\": \"model\", \"label\": \"model\"}], \"children\": {}, \"delegations\": [{\"source\": \"tools\", \"tool\": \"task\", \"name\": \"general-purpose\", \"graph\": {\"annotations\": {\"model\": {\"kind\": \"model\", \"comment\": \"Choose a tool or return an answer\"}, \"tools\": {\"kind\": \"tool\", \"comment\": \"Run tools; append results to history. Available: ls, read_file, write_file, edit_file, delete, glob, grep, execute\"}, \"PatchToolCallsMiddleware.before_agent\": {\"kind\": \"process\", \"comment\": \"\"}}, \"title\": \"general-purpose\", \"context\": \"Compiled graph; arrows show declared transitions\", \"nodes\": [\"__start__\", \"PatchToolCallsMiddleware.before_agent\", \"model\", \"tools\", \"__end__\"], \"edges\": [{\"source\": \"PatchToolCallsMiddleware.before_agent\", \"target\": \"model\", \"label\": \"\"}, {\"source\": \"__start__\", \"target\": \"PatchToolCallsMiddleware.before_agent\", \"label\": \"\"}, {\"source\": \"tools\", \"target\": \"model\", \"label\": \"model\"}, {\"source\": \"model\", \"target\": \"tools\", \"label\": \"tools\"}, {\"source\": \"model\", \"target\": \"__end__\", \"label\": \"__end__\"}, {\"source\": \"model\", \"target\": \"model\", \"label\": \"model\"}], \"children\": {}, \"delegations\": []}}]}",
         "report_turn": 1,
-        "thread_id": "5efbb3f0-025f-4ee5-8097-6517cc46402f",
+        "thread_id": "79e40dac-0e18-4fd7-bb13-1bac47b2177c",
         "cache_ttl": "5m",
         "description": "Coordinate a direct chat response: prepare messages and invoke the model."
       }
     },
     {
-      "id": "01a0d142-6c67-7a71-89bd-5cabdcc56e78",
-      "parent_id": "01a0d142-6c64-7852-bf06-580c118fab20",
+      "id": "01a0d587-5f48-7c40-b353-bcffc20a7b51",
+      "parent_id": "01a0d587-5f45-7db0-a557-720fb0f2c946",
       "name": "PatchToolCallsMiddleware.before_agent",
       "kind": "workflow",
-      "start_ns": 1790217186407454000,
-      "end_ns": 1790217186408036000,
+      "start_ns": 1790288813896745000,
+      "end_ns": 1790288813897134000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -49,7 +49,7 @@
         "langgraph_node": "PatchToolCallsMiddleware.before_agent",
         "langgraph_step": 1,
         "report_turn": 1,
-        "thread_id": "5efbb3f0-025f-4ee5-8097-6517cc46402f",
+        "thread_id": "79e40dac-0e18-4fd7-bb13-1bac47b2177c",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:1"
@@ -58,12 +58,12 @@
       }
     },
     {
-      "id": "01a0d142-6c68-7c81-b314-af3874d9be6c",
-      "parent_id": "01a0d142-6c64-7852-bf06-580c118fab20",
+      "id": "01a0d587-5f49-78f1-ab9f-9336113e36ec",
+      "parent_id": "01a0d587-5f45-7db0-a557-720fb0f2c946",
       "name": "model",
       "kind": "workflow",
-      "start_ns": 1790217186408851000,
-      "end_ns": 1790217188863990000,
+      "start_ns": 1790288813897765000,
+      "end_ns": 1790288815920841000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -77,7 +77,7 @@
         "langgraph_node": "model",
         "langgraph_step": 2,
         "report_turn": 1,
-        "thread_id": "5efbb3f0-025f-4ee5-8097-6517cc46402f",
+        "thread_id": "79e40dac-0e18-4fd7-bb13-1bac47b2177c",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:2"
@@ -86,19 +86,19 @@
       }
     },
     {
-      "id": "01a0d142-6c6d-7ff0-83ca-3f9242057250",
-      "parent_id": "01a0d142-6c68-7c81-b314-af3874d9be6c",
+      "id": "01a0d587-5f4e-7971-a56f-d7c7cebcf81d",
+      "parent_id": "01a0d587-5f49-78f1-ab9f-9336113e36ec",
       "name": "ChatOpenAI",
       "kind": "model",
-      "start_ns": 1790217186413923000,
-      "end_ns": 1790217188862031000,
+      "start_ns": 1790288813902843000,
+      "end_ns": 1790288815919375000,
       "status": "ok",
       "provider": "openai",
       "model": "gpt-5.6-luna",
       "effort": null,
       "usage": {
         "input_tokens": 1999,
-        "output_tokens": 171,
+        "output_tokens": 156,
         "cache_read": 1996,
         "cache_write": 0,
         "cache_write_5m": 0,
@@ -126,10 +126,10 @@
           "content": [
             {
               "type": "text",
-              "text": "The main steps in an agent workflow are:\n\n1. **Receive a goal** — The agent interprets the user’s request and identifies the desired outcome.\n2. **Plan** — It breaks the goal into smaller tasks and decides what actions or tools are needed.\n3. **Gather information** — It retrieves relevant data from sources such as files, APIs, databases, or the web.\n4. **Act** — It performs the planned operations, such as writing code, editing a document, or calling a service.\n5. **Observe results** — It checks the outputs of its actions and detects errors or missing information.\n6. **Iterate** — It revises the plan and repeats actions when necessary.\n7. **Complete and respond** — It verifies the result and presents the final answer or deliverable to the user.",
+              "text": "The main steps in an agent workflow are:\n\n1. **Receive the goal** – Understand the user’s request and desired outcome.\n2. **Interpret and plan** – Break the goal into tasks and decide what actions or tools are needed.\n3. **Gather information** – Retrieve relevant data, inspect files, query systems, or ask clarifying questions.\n4. **Take action** – Execute the planned steps, such as calling tools, modifying data, or producing an output.\n5. **Observe results** – Check what happened and compare the results with the goal.\n6. **Iterate** – Adjust the plan and continue if the goal has not been met.\n7. **Respond** – Provide the final result, including any relevant explanation or limitations.",
               "phase": "final_answer",
               "index": 0,
-              "id": "msg_0cc09462381229ef006ab48be3280087d2b4712595b06fa866"
+              "id": "msg_0b5779217b0fe380006ab5a3ae871c87d2bd9b4cbaeffbd6bb"
             }
           ],
           "tool_calls": [],
@@ -388,7 +388,7 @@
         "langgraph_node": "model",
         "langgraph_step": 2,
         "report_turn": 1,
-        "thread_id": "5efbb3f0-025f-4ee5-8097-6517cc46402f",
+        "thread_id": "79e40dac-0e18-4fd7-bb13-1bac47b2177c",
         "cache_ttl": "5m",
         "tags": [
           "seq:step:1"
@@ -403,12 +403,12 @@
       }
     },
     {
-      "id": "01a0d142-7612-7a71-b6e5-e758a0f1b3de",
+      "id": "01a0d587-6746-7600-9a7a-c1d711539f85",
       "parent_id": null,
       "name": "chat_agent",
       "kind": "workflow",
-      "start_ns": 1790217188882496000,
-      "end_ns": 1790217190757811000,
+      "start_ns": 1790288815942623000,
+      "end_ns": 1790288817456147000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -419,20 +419,20 @@
       "response": [],
       "tool_definitions": null,
       "context": {
-        "report_workflow_definition": "{\"title\": \"chat_agent\", \"context\": \"Compiled graph; arrows show declared transitions\", \"nodes\": [\"__start__\", \"PatchToolCallsMiddleware.before_agent\", \"model\", \"tools\", \"__end__\"], \"edges\": [{\"source\": \"PatchToolCallsMiddleware.before_agent\", \"target\": \"model\", \"label\": \"\"}, {\"source\": \"__start__\", \"target\": \"PatchToolCallsMiddleware.before_agent\", \"label\": \"\"}, {\"source\": \"tools\", \"target\": \"model\", \"label\": \"model\"}, {\"source\": \"model\", \"target\": \"tools\", \"label\": \"tools\"}, {\"source\": \"model\", \"target\": \"__end__\", \"label\": \"__end__\"}, {\"source\": \"model\", \"target\": \"model\", \"label\": \"model\"}], \"children\": {}, \"delegations\": [{\"source\": \"tools\", \"tool\": \"task\", \"name\": \"general-purpose\", \"graph\": {\"title\": \"general-purpose\", \"context\": \"Compiled graph; arrows show declared transitions\", \"nodes\": [\"__start__\", \"PatchToolCallsMiddleware.before_agent\", \"model\", \"tools\", \"__end__\"], \"edges\": [{\"source\": \"PatchToolCallsMiddleware.before_agent\", \"target\": \"model\", \"label\": \"\"}, {\"source\": \"__start__\", \"target\": \"PatchToolCallsMiddleware.before_agent\", \"label\": \"\"}, {\"source\": \"tools\", \"target\": \"model\", \"label\": \"model\"}, {\"source\": \"model\", \"target\": \"tools\", \"label\": \"tools\"}, {\"source\": \"model\", \"target\": \"__end__\", \"label\": \"__end__\"}, {\"source\": \"model\", \"target\": \"model\", \"label\": \"model\"}], \"children\": {}, \"delegations\": []}}]}",
+        "report_workflow_definition": "{\"annotations\": {\"model\": {\"kind\": \"model\", \"comment\": \"Choose a tool or return an answer\"}, \"tools\": {\"kind\": \"tool\", \"comment\": \"Run tools; append results to history. Available: ls, read_file, write_file, edit_file, delete, glob, grep, execute, task\"}, \"PatchToolCallsMiddleware.before_agent\": {\"kind\": \"process\", \"comment\": \"\"}}, \"title\": \"chat_agent\", \"context\": \"Compiled graph; arrows show declared transitions\", \"nodes\": [\"__start__\", \"PatchToolCallsMiddleware.before_agent\", \"model\", \"tools\", \"__end__\"], \"edges\": [{\"source\": \"PatchToolCallsMiddleware.before_agent\", \"target\": \"model\", \"label\": \"\"}, {\"source\": \"__start__\", \"target\": \"PatchToolCallsMiddleware.before_agent\", \"label\": \"\"}, {\"source\": \"tools\", \"target\": \"model\", \"label\": \"model\"}, {\"source\": \"model\", \"target\": \"tools\", \"label\": \"tools\"}, {\"source\": \"model\", \"target\": \"__end__\", \"label\": \"__end__\"}, {\"source\": \"model\", \"target\": \"model\", \"label\": \"model\"}], \"children\": {}, \"delegations\": [{\"source\": \"tools\", \"tool\": \"task\", \"name\": \"general-purpose\", \"graph\": {\"annotations\": {\"model\": {\"kind\": \"model\", \"comment\": \"Choose a tool or return an answer\"}, \"tools\": {\"kind\": \"tool\", \"comment\": \"Run tools; append results to history. Available: ls, read_file, write_file, edit_file, delete, glob, grep, execute\"}, \"PatchToolCallsMiddleware.before_agent\": {\"kind\": \"process\", \"comment\": \"\"}}, \"title\": \"general-purpose\", \"context\": \"Compiled graph; arrows show declared transitions\", \"nodes\": [\"__start__\", \"PatchToolCallsMiddleware.before_agent\", \"model\", \"tools\", \"__end__\"], \"edges\": [{\"source\": \"PatchToolCallsMiddleware.before_agent\", \"target\": \"model\", \"label\": \"\"}, {\"source\": \"__start__\", \"target\": \"PatchToolCallsMiddleware.before_agent\", \"label\": \"\"}, {\"source\": \"tools\", \"target\": \"model\", \"label\": \"model\"}, {\"source\": \"model\", \"target\": \"tools\", \"label\": \"tools\"}, {\"source\": \"model\", \"target\": \"__end__\", \"label\": \"__end__\"}, {\"source\": \"model\", \"target\": \"model\", \"label\": \"model\"}], \"children\": {}, \"delegations\": []}}]}",
         "report_turn": 2,
-        "thread_id": "5efbb3f0-025f-4ee5-8097-6517cc46402f",
+        "thread_id": "79e40dac-0e18-4fd7-bb13-1bac47b2177c",
         "cache_ttl": "5m",
         "description": "Coordinate a direct chat response: prepare messages and invoke the model."
       }
     },
     {
-      "id": "01a0d142-7613-7463-a789-8c6a26eb2703",
-      "parent_id": "01a0d142-7612-7a71-b6e5-e758a0f1b3de",
+      "id": "01a0d587-6747-7813-8149-42ca83c7b52f",
+      "parent_id": "01a0d587-6746-7600-9a7a-c1d711539f85",
       "name": "PatchToolCallsMiddleware.before_agent",
       "kind": "workflow",
-      "start_ns": 1790217188883488000,
-      "end_ns": 1790217188883836000,
+      "start_ns": 1790288815943645000,
+      "end_ns": 1790288815943937000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -446,7 +446,7 @@
         "langgraph_node": "PatchToolCallsMiddleware.before_agent",
         "langgraph_step": 5,
         "report_turn": 2,
-        "thread_id": "5efbb3f0-025f-4ee5-8097-6517cc46402f",
+        "thread_id": "79e40dac-0e18-4fd7-bb13-1bac47b2177c",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:5"
@@ -455,12 +455,12 @@
       }
     },
     {
-      "id": "01a0d142-7614-7403-8cb7-08a031d210a8",
-      "parent_id": "01a0d142-7612-7a71-b6e5-e758a0f1b3de",
+      "id": "01a0d587-6748-75b1-a3a1-2c34afc10043",
+      "parent_id": "01a0d587-6746-7600-9a7a-c1d711539f85",
       "name": "model",
       "kind": "workflow",
-      "start_ns": 1790217188884403000,
-      "end_ns": 1790217190755856000,
+      "start_ns": 1790288815944600000,
+      "end_ns": 1790288817454344000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -474,7 +474,7 @@
         "langgraph_node": "model",
         "langgraph_step": 6,
         "report_turn": 2,
-        "thread_id": "5efbb3f0-025f-4ee5-8097-6517cc46402f",
+        "thread_id": "79e40dac-0e18-4fd7-bb13-1bac47b2177c",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:6"
@@ -483,21 +483,21 @@
       }
     },
     {
-      "id": "01a0d142-7616-71b2-ae2b-9bfa850cacf1",
-      "parent_id": "01a0d142-7614-7403-8cb7-08a031d210a8",
+      "id": "01a0d587-674a-74c0-9ff5-4cbc5ed0c93a",
+      "parent_id": "01a0d587-6748-75b1-a3a1-2c34afc10043",
       "name": "ChatOpenAI",
       "kind": "model",
-      "start_ns": 1790217188886800000,
-      "end_ns": 1790217190753630000,
+      "start_ns": 1790288815947093000,
+      "end_ns": 1790288817452080000,
       "status": "ok",
       "provider": "openai",
       "model": "gpt-5.6-luna",
       "effort": null,
       "usage": {
-        "input_tokens": 2186,
-        "output_tokens": 117,
+        "input_tokens": 2171,
+        "output_tokens": 104,
         "cache_read": 1996,
-        "cache_write": 187,
+        "cache_write": 172,
         "cache_write_5m": 0,
         "cache_write_1h": 0,
         "reasoning": 0
@@ -521,10 +521,10 @@
           "content": [
             {
               "type": "text",
-              "text": "The main steps in an agent workflow are:\n\n1. **Receive a goal** — The agent interprets the user’s request and identifies the desired outcome.\n2. **Plan** — It breaks the goal into smaller tasks and decides what actions or tools are needed.\n3. **Gather information** — It retrieves relevant data from sources such as files, APIs, databases, or the web.\n4. **Act** — It performs the planned operations, such as writing code, editing a document, or calling a service.\n5. **Observe results** — It checks the outputs of its actions and detects errors or missing information.\n6. **Iterate** — It revises the plan and repeats actions when necessary.\n7. **Complete and respond** — It verifies the result and presents the final answer or deliverable to the user.",
+              "text": "The main steps in an agent workflow are:\n\n1. **Receive the goal** – Understand the user’s request and desired outcome.\n2. **Interpret and plan** – Break the goal into tasks and decide what actions or tools are needed.\n3. **Gather information** – Retrieve relevant data, inspect files, query systems, or ask clarifying questions.\n4. **Take action** – Execute the planned steps, such as calling tools, modifying data, or producing an output.\n5. **Observe results** – Check what happened and compare the results with the goal.\n6. **Iterate** – Adjust the plan and continue if the goal has not been met.\n7. **Respond** – Provide the final result, including any relevant explanation or limitations.",
               "phase": "final_answer",
               "index": 0,
-              "id": "msg_0cc09462381229ef006ab48be3280087d2b4712595b06fa866"
+              "id": "msg_0b5779217b0fe380006ab5a3ae871c87d2bd9b4cbaeffbd6bb"
             }
           ],
           "tool_calls": [],
@@ -543,10 +543,10 @@
           "content": [
             {
               "type": "text",
-              "text": "A tool observation gives the agent feedback about what happened after it took an action. It can reveal data, confirm success, expose errors, or provide context the agent could not access directly.\n\nThe agent uses that feedback to:\n\n- Update its understanding of the situation\n- Check whether the action achieved its goal\n- Correct mistakes or change its plan\n- Decide what tool or action to use next\n- Produce a more accurate final answer\n\nFor example, if an agent runs a database query, the returned results are the observation it uses to answer the user’s question.",
+              "text": "A tool observation gives the agent feedback about what happened after it took an action. It helps the agent:\n\n- **Verify results** — determine whether the action succeeded.\n- **Update its understanding** — incorporate new facts or data.\n- **Choose the next step** — continue, revise the plan, or try another tool.\n- **Avoid errors** — detect failures, missing information, or unexpected outcomes.\n- **Form a better answer** — base the final response on observed evidence rather than assumptions.",
               "phase": "final_answer",
               "index": 0,
-              "id": "msg_0cc09462381229ef006ab48be5773487d2863087813a104f7c"
+              "id": "msg_0b5779217b0fe380006ab5a3b0830487d28b25ecbfbbaa1692"
             }
           ],
           "tool_calls": [],
@@ -805,13 +805,13 @@
         "langgraph_node": "model",
         "langgraph_step": 6,
         "report_turn": 2,
-        "thread_id": "5efbb3f0-025f-4ee5-8097-6517cc46402f",
+        "thread_id": "79e40dac-0e18-4fd7-bb13-1bac47b2177c",
         "cache_ttl": "5m",
         "tags": [
           "seq:step:1"
         ],
         "description": "Generate the next assistant message or tool request from the current conversation.",
-        "input_message_bytes": 1357,
+        "input_message_bytes": 1297,
         "message_count": 4,
         "message_roles": [
           "system",
@@ -822,5 +822,5 @@
       }
     }
   ],
-  "output": "[{'type': 'text', 'text': 'A tool observation gives the agent feedback about what happened after it took an action. It can reveal data, confirm success, expose errors, or provide context the agent could not access directly.\\n\\nThe agent uses that feedback to:\\n\\n- Update its understanding of the situation\\n- Check whether the action achieved its goal\\n- Correct mistakes or change its plan\\n- Decide what tool or action to use next\\n- Produce a more accurate final answer\\n\\nFor example, if an agent runs a database query, the returned results are the observation it uses to answer the user’s question.', 'phase': 'final_answer', 'index': 0, 'id': 'msg_0cc09462381229ef006ab48be5773487d2863087813a104f7c'}]"
+  "output": "[{'type': 'text', 'text': 'A tool observation gives the agent feedback about what happened after it took an action. It helps the agent:\\n\\n- **Verify results** — determine whether the action succeeded.\\n- **Update its understanding** — incorporate new facts or data.\\n- **Choose the next step** — continue, revise the plan, or try another tool.\\n- **Avoid errors** — detect failures, missing information, or unexpected outcomes.\\n- **Form a better answer** — base the final response on observed evidence rather than assumptions.', 'phase': 'final_answer', 'index': 0, 'id': 'msg_0b5779217b0fe380006ab5a3b0830487d28b25ecbfbbaa1692'}]"
 }

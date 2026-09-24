@@ -55,6 +55,13 @@ class SlugifyTests(unittest.TestCase):
     def test_filtering_allows_empty_output_between_separators(self):
         self.assertEqual(slugify("---漢字***"), "")
 
+    def test_mixed_case_accents_and_digits_share_normalized_boundaries(self):
+        value = "  -- ÉxAMPLe... 007 -- "
+        self.assertEqual(slugify(value), "example-007")
+
+    def test_unsupported_letters_are_discarded_without_new_separators(self):
+        self.assertEqual(slugify("left漢字right"), "leftright")
+
 
 if __name__ == "__main__":
     unittest.main()
