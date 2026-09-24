@@ -6,6 +6,10 @@ inputs, and bundled RAG archives. The destination needs Python 3.11+ and pip.
 It does not need uv, Node.js, npm, Git, or Codex. Python packages must be
 available through your configured pip package index.
 
+Download `lg-report-pip.tar.gz` and `SHA256SUMS` from the
+[GitHub Releases page](https://github.com/martinbechard/lg-report/releases/latest).
+Complete distribution archives are release attachments, not tracked Git files.
+
 ## Install on the destination
 
 Extract `lg-report-pip.tar.gz`, open a terminal in its `lg-report` directory,
@@ -97,3 +101,32 @@ The script runs `npm ci` and the production Angular build, then creates
 current source edits and reference assets, but excludes environment secrets,
 virtual environments, dependency caches, and generated conversation reports.
 Rebuild it whenever frontend code changes. npm is needed only on this machine.
+
+
+## Publish a GitHub Release
+
+After rebuilding the pip bundle, build the standard Python distributions and
+record SHA-256 checksums. Use the version in `pyproject.toml` for the release tag:
+
+```sh
+uv build
+python scripts/package_release.py
+```
+
+Commit and push the source changes, then create a release against that exact
+commit. For version 0.1.0, using the authenticated GitHub CLI:
+
+```sh
+gh release create v0.1.0 --target "$(git rev-parse HEAD)" --draft --title "lg-report 0.1.0" --notes "Prebuilt pip bundle and Python distributions. See PIP-INSTALL.md for installation."
+gh release upload v0.1.0 dist/lg-report-pip.tar.gz dist/lg_report-0.1.0.tar.gz dist/lg_report-0.1.0-py3-none-any.whl dist/SHA256SUMS
+gh release edit v0.1.0 --draft=false
+```
+
+Check that every upload succeeded before publishing the draft. For later
+versions, update the tag and versioned filenames in these commands. Upload the
+complete archives without splitting them. Keep build outputs ignored by Git.
+The pip bundle includes the compiled UI and RAG assets; the wheel alone does
+not supply the complete source-relative runtime layout.
+
+After downloading all three artifacts and the checksum file into one directory,
+verify them on macOS/Linux with `shasum -a 256 -c SHA256SUMS`.

@@ -4,10 +4,6 @@ __pycache__/
 *.py[oc]
 build/
 dist/
-# Store explicit release parts; complete archives remain local for delivery.
-!/dist/
-/dist/*
-!/dist/release/
 wheels/
 *.egg-info
 

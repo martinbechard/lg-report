@@ -1,6 +1,0 @@
-# Keep full local archives out of Git; publish only numbered release parts.
-# Copyright (c) 2026 Martin.Bechard@DevConsult.ca
-*
-!.gitignore
-!release/
-!release/**
