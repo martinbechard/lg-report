@@ -19,14 +19,6 @@ SAMPLE = {
     "description": "A parent agent delegates to a specialist.",
 }
 
-# The assignment must stand alone because the specialist starts without the
-# parent's conversation. Only the final summary crosses back to the parent.
-DELEGATED_TASK = "Call echo_tool with the text ReAct and summarize what it returned."
-# A compact child answer is the intended handoff, not its full tool transcript.
-SPECIALIST_SUMMARY = "The echo tool returned Your input was: ReAct. It repeated the supplied text without adding factual evidence."
-# The parent synthesizes the handoff into the user-facing response.
-FINAL_ANSWER = "The specialist echoed ReAct and received Your input was: ReAct. The parent receives its summary; the specialist's internal tool exchange stays in its own context."
-
 
 # "ai" belongs to the model created by the workflow and passed to the parent.
 # A named speaker belongs to a model created by that agent itself. The order
@@ -36,6 +28,7 @@ CONVERSATION = [
         "role": "client",
         "content": "Have the specialist echo ReAct and explain how its tool result returns to the parent.",
     },
+    # The specialist starts with this standalone assignment, not parent history.
     {
         "role": "ai",
         "content": "",
@@ -44,7 +37,7 @@ CONVERSATION = [
                 "name": "task",
                 "args": {
                     "subagent_type": "isolated-subagent",
-                    "description": DELEGATED_TASK,
+                    "description": "Call echo_tool with the text ReAct and summarize what it returned.",
                 },
                 "id": "delegate-1",
             }
@@ -67,14 +60,24 @@ CONVERSATION = [
         "tool_call_id": "specialist-lookup-1",
         "content": "Your input was: ReAct",
     },
-    {"role": "isolated-subagent", "content": SPECIALIST_SUMMARY},
+    {
+        "role": "isolated-subagent",
+        "content": "The echo tool returned Your input was: ReAct. It repeated the supplied text without adding factual evidence.",
+    },
     {
         "role": "tool",
         "name": "task",
         "tool_call_id": "delegate-1",
-        "content": SPECIALIST_SUMMARY,
+        "content": "The echo tool returned Your input was: ReAct. It repeated the supplied text without adding factual evidence.",
     },
-    {"role": "ai", "content": FINAL_ANSWER},
+    {
+        "role": "ai",
+        "content": "The specialist echoed ReAct and received Your input was: ReAct. The parent receives its summary; the specialist's internal tool exchange stays in its own context.",
+    },
 ]
 
 USER_PROMPTS = client_prompts(CONVERSATION)
+# Existing test helpers read the scenario; they do not author its text.
+DELEGATED_TASK = CONVERSATION[1]["tool_calls"][0]["args"]["description"]
+SPECIALIST_SUMMARY = CONVERSATION[4]["content"]
+FINAL_ANSWER = CONVERSATION[-1]["content"]

@@ -26,16 +26,18 @@ SAMPLE = {
     "default_client": "console",
 }
 
-ADDITIONS = ["\nReviewed by the project team.\n", "Next step: request a quote.\n"]
-REQUEST = "Append each of these sentences as a separate change: " + repr(ADDITIONS)
-
-
 # Read the normal path top to bottom. Content placeholders are resolved from real
 # reads, and human decisions resume approvals. A rejection can leave target.txt
 # absent; the reactive adapter then proposes write_file again instead of edit_file.
-# The default list has two additions, but the adapter also supports test overrides.
+# Each mutation records its literal addition here. The adapter reads these
+# defaults below and also supports test overrides; source/before placeholders
+# must remain dynamic so rejected writes never become assumed file contents.
 CONVERSATION = [
-    {"role": "client", "content": REQUEST},
+    {
+        "role": "client",
+        "content": "Append each of these sentences as a separate change: "
+        "['\\nReviewed by the project team.\\n', 'Next step: request a quote.\\n']",
+    },
     {
         "role": "ai",
         "step": "read_source",
@@ -73,6 +75,7 @@ CONVERSATION = [
     {
         "role": "ai",
         "step": "write_target",
+        "addition": "\nReviewed by the project team.\n",
         "content": "",
         "tool_calls": [
             {
@@ -108,6 +111,7 @@ CONVERSATION = [
     {
         "role": "ai",
         "step": "edit_target",
+        "addition": "Next step: request a quote.\n",
         "content": "",
         "tool_calls": [
             {
@@ -238,10 +242,13 @@ class FileEditingFixture(MeteredDemoModel):
 
 def make_simulated_model(additions=None):
     """Create an isolated script and meter for one editing conversation."""
+    # Default additions come from the literal mutation entries in story order.
+    if additions is None:
+        additions = [entry["addition"] for entry in CONVERSATION if "addition" in entry]
     # A fresh instance prevents response position and usage leaking across runs.
     return FileEditingFixture(
         responses=[AIMessage(content="")],
-        additions=ADDITIONS if additions is None else additions,
+        additions=additions,
     )
 
 

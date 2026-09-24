@@ -108,7 +108,8 @@ use the shared tiktoken `o200k_base` estimator over canonical JSON, not a provid
 exact request envelope. Actual provider usage is retained in live mode. All four model calls contribute to the
 turn cost; `task` and the local echo have no additional model-token charge.
 
-Try changing `DELEGATED_TASK` and `SPECIALIST_SUMMARY` in `sample.py`. Inspect
+Try changing the literal task description and specialist reply in `CONVERSATION`
+in `sample.py` (and its matching task-result entry). Inspect
 which agent's input grows and where the summary enters the parent's context.
 Keep the tool request's `subagent_type` aligned with the registered specialist.
 

@@ -11,36 +11,8 @@ Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
 
 import json
-from copy import deepcopy
 
 from agent_runtime.workflows.nested_policy import Limits
-
-TASK = {
-    "objective": "Implement normalize_tags(tags) for a list of strings.",
-    "acceptance": [
-        "Trim whitespace and convert tags to lowercase.",
-        "Remove duplicates while preserving first-occurrence order.",
-        "Discard empty and whitespace-only tags.",
-        "Do not modify the caller's input list.",
-    ],
-    "constraints": ["Use only the Python standard library."],
-}
-USER_REQUEST = (
-    "Implement normalize_tags(tags). Trim and lowercase tags, deduplicate while "
-    "preserving order, discard blank tags, and do not mutate the input. Use the "
-    "Python standard library only. OUTER_ONLY_DETAIL: an incidental planning "
-    "briefing marker, not part of the implementation assignment."
-)
-SOURCE_V1 = """def normalize_tags(tags):
-    return [tag.strip().lower() for tag in tags]
-"""
-SOURCE_V2 = """def normalize_tags(tags):
-    return list(dict.fromkeys(tag.strip().lower() for tag in tags))
-"""
-SOURCE_V3 = """def normalize_tags(tags):
-    cleaned = (tag.strip().lower() for tag in tags)
-    return list(dict.fromkeys(tag for tag in cleaned if tag))
-"""
 
 
 def conversation(options=None):
@@ -50,7 +22,17 @@ def conversation(options=None):
     limits = Limits(
         options.get("max_review_rounds", 3), options.get("max_coding_cycles", 3)
     )
-    steps = [{"role": "client", "content": USER_REQUEST}]
+    # The number of rounds depends on options, so this story is built in order.
+    # Keep each request and candidate literal at its point in the exchange.
+    steps = [
+        {
+            "role": "client",
+            "content": "Implement normalize_tags(tags). Trim and lowercase tags, deduplicate while "
+            "preserving order, discard blank tags, and do not mutate the input. Use the "
+            "Python standard library only. OUTER_ONLY_DETAIL: an incidental planning "
+            "briefing marker, not part of the implementation assignment.",
+        }
+    ]
 
     def reply(role, decision):
         """Place each role's structured decision at its actual place in the story."""
@@ -59,7 +41,23 @@ def conversation(options=None):
     current = 0
 
     def plan(action, note):
-        reply("planner", {"action": action, "task": deepcopy(TASK), "note": note})
+        reply(
+            "planner",
+            {
+                "action": action,
+                "task": {
+                    "objective": "Implement normalize_tags(tags) for a list of strings.",
+                    "acceptance": [
+                        "Trim whitespace and convert tags to lowercase.",
+                        "Remove duplicates while preserving first-occurrence order.",
+                        "Discard empty and whitespace-only tags.",
+                        "Do not modify the caller's input list.",
+                    ],
+                    "constraints": ["Use only the Python standard library."],
+                },
+                "note": note,
+            },
+        )
 
     def supervise(action, directive):
         reply(
@@ -113,7 +111,9 @@ def conversation(options=None):
                 "The rework story requires at least two rounds and two cycles"
             )
         supervise("code", "Implement the task.")
-        develop(SOURCE_V1)
+        develop("""def normalize_tags(tags):
+    return [tag.strip().lower() for tag in tags]
+""")
         assess(
             "reviewer",
             "fail",
@@ -121,7 +121,9 @@ def conversation(options=None):
             "Scripted finding: duplicate tags remain in candidate-1.",
         )
         supervise("code", "Address the review finding about duplicate tags.")
-        develop(SOURCE_V2)
+        develop("""def normalize_tags(tags):
+    return list(dict.fromkeys(tag.strip().lower() for tag in tags))
+""")
         accepted_review()
         assess(
             "tester",
@@ -133,7 +135,10 @@ def conversation(options=None):
         )
         plan("code", "Return tester defects to the existing coding context.")
         supervise("code", "Continue the same task and remove blank tags.")
-        develop(SOURCE_V3)
+        develop("""def normalize_tags(tags):
+    cleaned = (tag.strip().lower() for tag in tags)
+    return list(dict.fromkeys(tag for tag in cleaned if tag))
+""")
         accepted_review()
         assess(
             "tester",
@@ -145,7 +150,9 @@ def conversation(options=None):
     elif scenario == "review_limit":
         for _ in range(limits.max_review_rounds):
             supervise("code", "Correct duplicate handling before returning.")
-            develop(SOURCE_V1)
+            develop("""def normalize_tags(tags):
+    return [tag.strip().lower() for tag in tags]
+""")
             assess(
                 "reviewer",
                 "fail",
@@ -159,7 +166,9 @@ def conversation(options=None):
     elif scenario == "test_limit":
         for cycle in range(limits.max_coding_cycles):
             supervise("code", "Address the task and any returned tester defects.")
-            develop(SOURCE_V2)
+            develop("""def normalize_tags(tags):
+    return list(dict.fromkeys(tag.strip().lower() for tag in tags))
+""")
             accepted_review()
             assess(
                 "tester",
@@ -176,7 +185,10 @@ def conversation(options=None):
                 )
     elif scenario == "first_pass":
         supervise("code", "Implement all acceptance criteria.")
-        develop(SOURCE_V3)
+        develop("""def normalize_tags(tags):
+    cleaned = (tag.strip().lower() for tag in tags)
+    return list(dict.fromkeys(tag for tag in cleaned if tag))
+""")
         accepted_review()
         assess(
             "tester",
@@ -191,6 +203,12 @@ def conversation(options=None):
 
 
 CONVERSATION = conversation()
+# Tests inspect the candidates authored above; these are views of the default story.
+SOURCE_V1, SOURCE_V2, SOURCE_V3 = [
+    json.loads(entry["content"])["source"]
+    for entry in CONVERSATION
+    if entry["role"] == "coder"
+]
 USER_PROMPTS = [entry["content"] for entry in CONVERSATION if entry["role"] == "client"]
 
 

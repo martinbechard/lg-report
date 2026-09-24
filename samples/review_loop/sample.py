@@ -29,56 +29,6 @@ SAMPLE = {
     "options": {"max_rounds": 3, "first_draft_high_level": True},
 }
 
-# Evidence is supplied by the client as part of the request. E1-E4 give the judge
-# a concrete basis for checking claims without needing a retrieval service. The
-# request explicitly asks for operational detail, so a generic overview falls short.
-# Deliberately incomplete, not deliberately false: this demonstrates that a
-# reasonable-sounding answer can still fail the user's requested level of detail.
-FIRST_DRAFT = (
-    "Reduce redundant database access and consider caching account data. Roll "
-    "out cautiously, monitor latency and freshness, and keep a rollback path."
-)
-# Feedback names repairable gaps instead of merely assigning a low score. Each
-# item has something the next author response can address and the judge can check.
-# The graph receives this as model output; it does not hardcode these corrections.
-FIRST_REVIEW = {
-    "verdict": "revise",
-    "rationale": "The overview is plausible but lacks the requested operational detail and evidence links.",
-    "feedback": [
-        "Tie the diagnosis to E1/E2 and explain how the change avoids extra database nodes.",
-        "Specify a proposed cache TTL within E3 and invalidate entries when accounts change.",
-        "Give a staged rollout and a load-test acceptance criterion using E1/E4; do not claim unmeasured success.",
-        "Specify a rollback trigger and the mechanism for restoring the previous path.",
-    ],
-}
-# This candidate addresses the four concerns above. Specific rollout percentages
-# and a 30-second TTL are labelled proposals, not facts supposedly measured in E1-E4.
-# That distinction is important: adding invented evidence would not be improvement.
-REVISED_DRAFT = (
-    "Diagnosis: repeated account lookups coincide with p95 1.8s at 240 requests/s "
-    "[E1]; the pool is limited to 12 connections and more nodes are disallowed [E2]. "
-    "This supports testing reduced lookup demand, but does not prove causation.\n\n"
-    "Proposed fix: deduplicate account lookups within each request, then test a "
-    "30-second account cache. Invalidate affected entries on account changes; this "
-    "TTL stays below the 60-second ceiling [E3]. Cache invalidation failures remain "
-    "a freshness risk, so test update/read races before rollout.\n\n"
-    "Proposed rollout: use a feature flag, canary at 5% traffic, then 25% and 100% "
-    "only after each stage passes checks. At 240 requests/s [E1], require p95 below "
-    "500ms [E4], no observed stale reads after acknowledged account updates, and "
-    "no increase in errors relative to baseline. Monitor pool saturation as well. "
-    "These are proposed checks, not benchmark results; none exist yet.\n\n"
-    "Rollback: disable the cache/deduplication flag to restore the original lookup "
-    "path if stale reads occur or latency/errors regress. Validate this switch in "
-    "staging before canary deployment. No database nodes or schema changes are proposed."
-)
-# Approval closes the loop only because the validated verdict says approve. The
-# graph does not know that this is the fixture's last response or expect two rounds.
-FINAL_REVIEW = {
-    "verdict": "approve",
-    "rationale": "The revision links E1-E4 to a concrete proposal, respects the cache limit, and supplies measurable checks and rollback without inventing results.",
-    "feedback": [],
-}
-
 
 # Both roles read their replies from this one chronological exchange. The judge
 # emits JSON so the real workflow still parses and validates every verdict.
@@ -87,12 +37,62 @@ CONVERSATION = [
         "role": "client",
         "content": "Recommend a concrete latency fix, explaining evidence, rollout, verification, freshness risk, and rollback. Use these fictional incident notes: [E1] p95 latency is 1.8 seconds at 240 requests/second; repeated account lookups are observed. [E2] The database pool has 12 connections; no more database nodes are allowed. [E3] Account data may be cached for at most 60 seconds; changes must invalidate it. [E4] Target p95 is under 500 ms. There are no benchmark results yet. Distinguish a proposed improvement from measured success.",
     },
-    {"role": "author", "content": FIRST_DRAFT},
-    {"role": "judge", "content": json.dumps(FIRST_REVIEW)},
-    {"role": "author", "content": REVISED_DRAFT},
-    {"role": "judge", "content": json.dumps(FINAL_REVIEW)},
+    # This deliberately shallow draft gives the judge concrete gaps to identify.
+    {
+        "role": "author",
+        "content": "Reduce redundant database access and consider caching account data. Roll "
+        "out cautiously, monitor latency and freshness, and keep a rollback path.",
+    },
+    {
+        "role": "judge",
+        "content": json.dumps(
+            {
+                "verdict": "revise",
+                "rationale": "The overview is plausible but lacks the requested operational detail and evidence links.",
+                "feedback": [
+                    "Tie the diagnosis to E1/E2 and explain how the change avoids extra database nodes.",
+                    "Specify a proposed cache TTL within E3 and invalidate entries when accounts change.",
+                    "Give a staged rollout and a load-test acceptance criterion using E1/E4; do not claim unmeasured success.",
+                    "Specify a rollback trigger and the mechanism for restoring the previous path.",
+                ],
+            }
+        ),
+    },
+    {
+        "role": "author",
+        "content": "Diagnosis: repeated account lookups coincide with p95 1.8s at 240 requests/s "
+        "[E1]; the pool is limited to 12 connections and more nodes are disallowed [E2]. "
+        "This supports testing reduced lookup demand, but does not prove causation.\n\n"
+        "Proposed fix: deduplicate account lookups within each request, then test a "
+        "30-second account cache. Invalidate affected entries on account changes; this "
+        "TTL stays below the 60-second ceiling [E3]. Cache invalidation failures remain "
+        "a freshness risk, so test update/read races before rollout.\n\n"
+        "Proposed rollout: use a feature flag, canary at 5% traffic, then 25% and 100% "
+        "only after each stage passes checks. At 240 requests/s [E1], require p95 below "
+        "500ms [E4], no observed stale reads after acknowledged account updates, and "
+        "no increase in errors relative to baseline. Monitor pool saturation as well. "
+        "These are proposed checks, not benchmark results; none exist yet.\n\n"
+        "Rollback: disable the cache/deduplication flag to restore the original lookup "
+        "path if stale reads occur or latency/errors regress. Validate this switch in "
+        "staging before canary deployment. No database nodes or schema changes are proposed.",
+    },
+    {
+        "role": "judge",
+        "content": json.dumps(
+            {
+                "verdict": "approve",
+                "rationale": "The revision links E1-E4 to a concrete proposal, respects the cache limit, and supplies measurable checks and rollback without inventing results.",
+                "feedback": [],
+            }
+        ),
+    },
 ]
 USER_PROMPTS = client_prompts(CONVERSATION)
+# Retain test-facing views while keeping all authored text above in story order.
+FIRST_DRAFT = CONVERSATION[1]["content"]
+FIRST_REVIEW = json.loads(CONVERSATION[2]["content"])
+REVISED_DRAFT = CONVERSATION[3]["content"]
+FINAL_REVIEW = json.loads(CONVERSATION[4]["content"])
 
 
 def make_simulated_model():
