@@ -70,10 +70,16 @@ def model_factory_scope(
         _settings.reset(settings_token)
 
 
-def build_model(model_name: str | None = None, *, caller: str) -> BaseChatModel:
+def build_model(
+    model_name: str | None = None, *, caller: str,
+    symbolic_model_name: str | None = None,
+) -> BaseChatModel:
     """Create the requested provider model or the caller's simulated counterpart.
 
-    Omit model_name to use LG_MODEL and the provider default. A workflow-created
+    Omit both names to use LG_MODEL and the provider default. A symbolic name
+    selects LG_MODEL_<UPPERCASE_NAME> once when constructing a live adapter.
+    Demo mode needs no mapping because it uses scripted responses.
+    A workflow-created
     model receives the whole scenario. Native agent identity selects responses
     at invocation, including when several agents share that model. Missing agent
     names fail at invocation. Each construction owns fresh cursors and ledgers.
@@ -81,7 +87,10 @@ def build_model(model_name: str | None = None, *, caller: str) -> BaseChatModel:
     conversation = _conversation.get()
     if conversation is None:
         return configured_model(
-            model_name, **({"settings": _settings.get()} if _settings.get() else {})
+            model_name,
+            **({"symbolic_model_name": symbolic_model_name}
+               if symbolic_model_name is not None else {}),
+            **({"settings": _settings.get()} if _settings.get() else {})
         )[0]
     resolver = _resolver.get()
     if resolver is not None:

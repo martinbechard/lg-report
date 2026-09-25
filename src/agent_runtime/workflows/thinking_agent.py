@@ -27,9 +27,10 @@ def build_workflow(model: BaseChatModel | None = None) -> CompiledStateGraph:
     user messages, conversation history, and tracing callbacks at invocation;
     building the workflow makes no provider request.
     """
-    # Model selection belongs to the factory; the workflow supplies its role.
+    # Ask for a capability role so deployment choices stay in configuration.
+    # The live factory resolves LG_MODEL_ADVANCED once; demo mode stays offline.
     if model is None:
-        model = build_model(caller="workflow")
+        model = build_model(symbolic_model_name="advanced", caller="workflow")
     # Choose the investigator as one component. Its tool loop decides which
     # evidence to inspect and when to test a plan; this layer must not hard-code
     # the offline fixture's sequence or turn that sequence into live routing.

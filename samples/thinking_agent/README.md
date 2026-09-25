@@ -22,7 +22,20 @@ with the raw trace, normalized run, and prices. `--out reports/my-investigation`
 selects another directory; its generated reports are replaced on rerun.
 
 For a live model, use the repository `.env.local` (copy the root `.env.example` if needed), supply a provider key, choose a model supporting
-the desired reasoning settings, and run:
+the desired reasoning settings, and run. This workflow requests
+`build_model(symbolic_model_name="advanced", caller="workflow")`; configure its
+mapping independently of the default model:
+
+```dotenv
+LG_MODEL_ADVANCED=gpt-6-sol
+```
+
+The factory resolves this once when constructing the live model. Shell values
+override `.env.local`. A missing or blank mapping raises an error asking you to
+set `LG_MODEL_ADVANCED`; demo mode needs no mapping. If you configure
+`LG_AVAILABLE_MODELS`, include the mapped model to avoid the existing fallback
+to `LG_MODEL`.
+
 
 ```bash
 uv run python -m agent_runtime --sample thinking_agent --live --env-file .env.local

@@ -22,7 +22,7 @@ _warning_lock = Lock()
 
 
 def configured_identity(
-    model_name: str | None = None, *, settings=None
+    model_name: str | None = None, *, symbolic_model_name: str | None = None, settings=None
 ) -> tuple[str, str]:
     """Resolve the allowed model so adapters and accounting use the same identity.
 
@@ -37,6 +37,18 @@ def configured_identity(
         raise ValueError("LG_PROVIDER must be openai or anthropic")
     default = "gpt-5.6-luna" if provider == "openai" else "claude-sonnet-5"
     fallback = (values.get("LG_MODEL") or "").strip()
+    # Resolve the symbolic role once at construction, never on each invocation.
+    # File settings support the same names as the shell; shell values win above.
+    if model_name is not None and symbolic_model_name is not None:
+        raise ValueError("Specify either model_name or symbolic_model_name, not both")
+    if symbolic_model_name is not None:
+        variable = f"LG_MODEL_{symbolic_model_name.upper()}"
+        model_name = (values.get(variable) or "").strip()
+        if not model_name:
+            raise ValueError(
+                f"Set {variable} in the environment or .env.local to resolve "
+                f"symbolic model {symbolic_model_name!r}"
+            )
     requested = model_name or fallback or default
     available = {
         name.strip()
@@ -67,7 +79,7 @@ def configured_identity(
     return provider, fallback
 
 
-def configured_model(model_name: str | None = None, *, settings=None):
+def configured_model(model_name: str | None = None, *, symbolic_model_name: str | None = None, settings=None):
     """Give a live sample its configured model and matching accounting identity.
 
     Return ``(model_adapter, provider, model_id)`` for graph construction and
@@ -81,7 +93,10 @@ def configured_model(model_name: str | None = None, *, settings=None):
     provider's responsibility. Missing keys or invalid local settings raise
     ValueError; adapter validation errors also propagate. No request is sent here.
 
-    Each call creates a separate adapter using the same configured model ID.
+    A symbolic_model_name resolves LG_MODEL_<UPPERCASE_NAME> once during
+    construction; a missing or blank mapping names the required variable in an
+    error. Supply either a literal model_name or a symbolic_model_name.
+    Each call creates a separate adapter using the resolved model ID.
     The adapter is lazy with respect to network generation: credentials are
     checked locally, but provider-side model/effort validation may still occur
     only when the adapter is first used.
@@ -91,7 +106,9 @@ def configured_model(model_name: str | None = None, *, settings=None):
     and model ID strings identify the price entry used by the local reporter.
     """
     values = {**(settings or {}), **os.environ}
-    provider, model_id = configured_identity(model_name, settings=values)
+    provider, model_id = configured_identity(
+        model_name, symbolic_model_name=symbolic_model_name, settings=values
+    )
     # The validated provider determines which credential is required; an OpenAI
     # key cannot authenticate an Anthropic request, or vice versa.
     key_name = "OPENAI_API_KEY" if provider == "openai" else "ANTHROPIC_API_KEY"

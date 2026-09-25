@@ -152,3 +152,57 @@ def test_output_limit_default_and_overrides(
         monkeypatch.setenv("LG_MAX_TOKENS", shell_limit)
     adapter, _, _ = configured_model(settings=settings)
     assert adapter.max_tokens == expected
+
+
+@pytest.mark.parametrize("mapping", [None, "", "  "])
+def test_missing_symbolic_mapping_names_required_variable(isolated_models, mapping):
+    """A default must not conceal an unconfigured symbolic role."""
+    with pytest.raises(ValueError, match="Set LG_MODEL_ADVANCED"):
+        configured_identity(
+            symbolic_model_name="advanced",
+            settings={"LG_MODEL": "default-model", "LG_MODEL_ADVANCED": mapping},
+        )
+
+
+def test_symbolic_mapping_shell_precedence_and_fixed_adapter(isolated_models, monkeypatch):
+    """Resolve once at construction and retain the chosen model for later calls."""
+    from agent_runtime.harness.model_factory import build_model, model_factory_scope
+
+    monkeypatch.setenv("LG_MODEL_ADVANCED", "gpt-6-sol")
+    with model_factory_scope(live=True, conversation=[], settings={
+        "LG_MODEL_ADVANCED": "file-model",
+        "OPENAI_API_KEY": "placeholder-not-a-real-key",
+    }):
+        adapter = build_model(symbolic_model_name="advanced", caller="workflow")
+    monkeypatch.setenv("LG_MODEL_ADVANCED", "changed-after-construction")
+    assert adapter.model_name == "gpt-6-sol"
+
+
+def test_symbolic_file_mapping_and_allowlist(isolated_models):
+    """Mapped IDs retain the existing restriction and fallback rules."""
+    settings = {"LG_MODEL_ADVANCED": "gpt-6-sol", "LG_MODEL": "default-model"}
+    assert configured_identity(symbolic_model_name="advanced", settings=settings) == (
+        "openai", "gpt-6-sol"
+    )
+    settings["LG_AVAILABLE_MODELS"] = "default-model"
+    assert configured_identity(symbolic_model_name="advanced", settings=settings) == (
+        "openai", "default-model"
+    )
+
+
+def test_literal_and_symbolic_names_are_ambiguous(isolated_models):
+    """Reject two competing selectors instead of silently ignoring one."""
+    with pytest.raises(ValueError, match="either model_name or symbolic_model_name"):
+        configured_identity("literal", symbolic_model_name="advanced")
+
+
+def test_thinking_sample_requests_advanced_and_demo_needs_no_mapping(isolated_models):
+    """The actual sample declares the role while offline execution stays offline."""
+    from agent_runtime.harness.model_factory import model_factory_scope
+    from agent_runtime.workflows import thinking_agent
+
+    with model_factory_scope(live=False, conversation=[]):
+        with patch.object(thinking_agent, "build_model", wraps=thinking_agent.build_model) as factory:
+            graph = thinking_agent.build_workflow()
+        factory.assert_called_once_with(symbolic_model_name="advanced", caller="workflow")
+        assert graph is not None
