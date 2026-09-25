@@ -11,18 +11,18 @@ Mermaid component and sequence diagrams, ownership table, and failure behavior.
 ## Configuration
 
 ```bash
-cp samples/simple_chat_langfuse/.env.example samples/simple_chat_langfuse/.env
+test -f .env.local || cp .env.example .env.local
 ```
 
 Set `LANGFUSE_BASE_URL`, `LANGFUSE_PUBLIC_KEY`, and `LANGFUSE_SECRET_KEY` for your
 project. For the existing local installation, the endpoint is
-`http://localhost:3001`; keys belong in the private `.env`, not source control.
+`http://localhost:3001`; keys belong in the private root `.env.local`, not source control.
 Live model mode additionally needs the selected provider key and model settings.
 
 ## Scripted test case
 
 ```bash
-uv run python -m agent_runtime --sample simple_chat_langfuse --demo
+uv run python -m agent_runtime --sample simple_chat_langfuse --env-file .env.local --demo
 ```
 
 This reuses `samples/simple_chat/sample.py`: two user prompts and scripted
@@ -32,7 +32,7 @@ configured Langfuse endpoint. Replace `--demo` with `--live --client static` to 
 ## Console chat
 
 ```bash
-uv run python -m agent_runtime --sample simple_chat_langfuse --client console --live
+uv run python -m agent_runtime --sample simple_chat_langfuse --env-file .env.local --client console --live
 ```
 
 Enter prompts at `User:`. `/attach PATH` queues a UTF-8 text file, `/send` sends
