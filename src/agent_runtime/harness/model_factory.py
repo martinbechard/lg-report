@@ -5,6 +5,7 @@ call build_model with an optional model name and their caller name. Simulation
 passes the complete scenario to the simulator, which filters by agent name;
 client prompts and documented tool results never become model responses.
 Each call creates an independent model. Outside a scope, models are real.
+The sample description supplies report fallback metadata, never model prompts.
 AI attribution: Generated with AI assistance.
 Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
@@ -40,6 +41,12 @@ _settings: ContextVar[Mapping[str, str] | None] = ContextVar(
 )
 
 
+# A separate fallback key preserves more specific agent/model annotations.
+_sample_description: ContextVar[str | None] = ContextVar(
+    "model_sample_description", default=None
+)
+
+
 @contextmanager
 def model_factory_scope(
     *,
@@ -47,6 +54,7 @@ def model_factory_scope(
     conversation: Sequence[Mapping[str, Any]],
     resolver: Callable[[str], BaseChatModel] | None = None,
     settings: Mapping[str, str] | None = None,
+    sample_description: str | None = None,
 ) -> Iterator[tuple[str, str]]:
     """Select construction mode and yield the default report accounting identity.
 
@@ -58,6 +66,7 @@ def model_factory_scope(
     token = _conversation.set(None if live else conversation)
     resolver_token = _resolver.set(None if live else resolver)
     settings_token = _settings.set(settings)
+    description_token = _sample_description.set(sample_description)
     try:
         yield (
             configured_identity(**({"settings": settings} if settings else {}))
@@ -68,6 +77,7 @@ def model_factory_scope(
         _conversation.reset(token)
         _resolver.reset(resolver_token)
         _settings.reset(settings_token)
+        _sample_description.reset(description_token)
 
 
 def build_model(
@@ -86,16 +96,26 @@ def build_model(
     """
     conversation = _conversation.get()
     if conversation is None:
-        return configured_model(
+        model = configured_model(
             model_name,
             **({"symbolic_model_name": symbolic_model_name}
                if symbolic_model_name is not None else {}),
             **({"settings": _settings.get()} if _settings.get() else {})
         )[0]
-    resolver = _resolver.get()
-    if resolver is not None:
-        return resolver(caller)
-    return SimulatedModel(conversation=list(conversation))
+    else:
+        resolver = _resolver.get()
+        model = (
+            resolver(caller)
+            if resolver is not None
+            else SimulatedModel(conversation=list(conversation))
+        )
+    # Keep the fallback on the model so tool and middleware spans retain their
+    # own operation descriptions. Explicit report_description still wins at
+    # capture time, including annotations supplied by an enclosing agent.
+    description = _sample_description.get()
+    if description:
+        model.metadata = {"report_sample_description": description, **(model.metadata or {})}
+    return model
 
 
 def client_prompts(conversation: Sequence[Mapping[str, Any]]) -> list[str]:

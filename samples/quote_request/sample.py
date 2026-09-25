@@ -141,4 +141,6 @@ def build_scripted_models(options):
     output tokens, including the structured decision. This fixed story ignores
     options; live mode bypasses this simulation factory.
     """
+    # An explicit simulator is needed to disable the default cache reuse for
+    # requests rebuilt from clarification state instead of retained transcripts.
     return {"workflow": SimulatedModel(conversation=CONVERSATION, cache_reuse=False)}

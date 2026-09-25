@@ -48,6 +48,8 @@ CONVERSATION = [
 ]
 
 
+# This custom simulator inserts the actual shell result into its reply, including
+# failures. A fixed catalog response would not reflect the command outcome.
 class ShellFixture(SimulatedModel):
     """Author one execute call, then report its real observation."""
 

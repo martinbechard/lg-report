@@ -164,6 +164,8 @@ def read_body(message):
     return match[3]
 
 
+# This custom simulator must derive proposed edits from actual file reads and
+# approval outcomes; the catalog's fixed reply queue cannot adapt to either.
 class FileEditingFixture(SimulatedModel):
     """Author the demo's read/write choices using observations from real tools."""
 

@@ -180,6 +180,8 @@ def make_simulated_model(mode):
     conversation = [entry for entry in CONVERSATION if entry.get("mode", mode) == mode]
     # The simulator filters named-agent replies. The explanatory tool entries
     # above cannot substitute canned observations for the real tool executions.
+    # Custom construction selects the mode-specific script and disables cache
+    # reuse because the workflow can rewrite or remove prior context.
     return SimulatedModel(conversation=conversation, cache_reuse=False)
 
 

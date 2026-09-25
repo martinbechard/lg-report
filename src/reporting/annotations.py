@@ -1,7 +1,7 @@
 """Give captured operations human-readable purpose descriptions in reports.
 
-Application-authored metadata takes priority; known sample and framework names
-have descriptions when explicit metadata is absent. A generic description keeps
+Application-authored metadata takes priority; model calls fall back to the sample
+description when available. Known sample and framework names provide further defaults. A generic description keeps
 unrecognized operations visible. These labels describe the operation's role,
 not private model reasoning or evidence that an intended action succeeded.
 
@@ -29,6 +29,11 @@ def describe(kind: str, name: str, metadata: dict, serialized: dict) -> str:
     # carries no useful intent, so continue to known names and role defaults.
     if explicit:
         return str(explicit)
+    # The catalog supplies the lesson's purpose as model-only fallback metadata.
+    # It must not replace a tool's action or imply that every graph step performs
+    # the whole sample. Missing descriptions retain the existing generic labels.
+    if kind == "model" and metadata.get("report_sample_description"):
+        return str(metadata["report_sample_description"])
     samples = {
         "chat_agent": "Coordinate a direct chat response: prepare messages and invoke the model.",
         "chat-agent": "Coordinate a direct chat response: prepare messages and invoke the model.",

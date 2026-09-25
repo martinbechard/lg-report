@@ -21,17 +21,16 @@ import pytest
 from agent_runtime.agents.chat_agent import build_agent as build_chat_agent
 from agent_runtime.agents.investigation_agent import build_agent as build_thinking_agent
 from agent_runtime.agents.reference_chat_agent import build_agent as build_tool_agent
+from agent_runtime.harness.simulated_model import SimulatedModel
 from reporting import exchange
 from reporting.exchange import ExchangeRate, get_exchange_rate
 from reporting.execute_runnable import execute_runnable
 from reporting.pricing import breakdown, cost, load_prices
 from reporting.render import tree_rows
 from reporting.schema import Run, Step, Usage
-from samples.simple_chat.sample import build_scripted_models as build_chat_models
-from samples.thinking_agent.sample import (
-    build_scripted_models as build_thinking_models,
-)
-from samples.tool_chat.sample import build_scripted_models as build_tool_models
+from samples.simple_chat.sample import CONVERSATION as CHAT_CONVERSATION
+from samples.thinking_agent.sample import CONVERSATION as THINKING_CONVERSATION
+from samples.tool_chat.sample import CONVERSATION as TOOL_CONVERSATION
 
 
 @pytest.fixture
@@ -143,7 +142,16 @@ def test_annotated_tool_tree_and_parent_totals(tmp_path, prices):
     out = tmp_path / "run"
     prices.exchange = ExchangeRate(rate="0.871", date="2026-09-17")
     execute_runnable(
-        build_tool_agent({"model": build_tool_models({})["workflow"]}),
+        build_tool_agent({
+            "model": SimulatedModel(
+                conversation=TOOL_CONVERSATION,
+                # This report test supplies the annotation it verifies; the
+                # sample itself needs only the catalog default simulator.
+                metadata={
+                    "report_description": "Request an echo or interpret its observation."
+                },
+            )
+        }),
         {"messages": [("user", "Explain ReAct")]},
         out,
         prices,
@@ -249,7 +257,14 @@ def test_complete_multiturn_sample(tmp_path, prices):
     from reporting.render import conversation_turns
 
     agent = Conversation(
-        build_tool_agent({"model": build_tool_models({})["workflow"]}),
+        build_tool_agent({
+            "model": SimulatedModel(
+                conversation=TOOL_CONVERSATION,
+                # This report test supplies the annotation it verifies; the
+                # sample itself needs only the catalog default simulator.
+                metadata={"report_effort": "fast"},
+            )
+        }),
         MockClient(
             [Request(p) for p in ["Explain ReAct", "Why do observations help?"]]
         ),
@@ -427,9 +442,9 @@ def test_every_request_nests_components_under_fresh_input(tmp_path, prices, tool
     out = tmp_path / "layout"
     execute_runnable(
         Conversation(
-            build_tool_agent({"model": build_tool_models({})["workflow"]})
+            build_tool_agent({"model": SimulatedModel(conversation=TOOL_CONVERSATION)})
             if tool_loop
-            else build_chat_agent({"model": build_chat_models({})["workflow"]}),
+            else build_chat_agent({"model": SimulatedModel(conversation=CHAT_CONVERSATION)}),
             MockClient([Request(p) for p in ["First question", "Follow-up"]]),
         ),
         {},
@@ -496,7 +511,7 @@ def test_thinking_sample_accounts_for_reasoning(tmp_path, prices):
 
     out = tmp_path / "thinking"
     execute_runnable(
-        build_thinking_agent({"model": build_thinking_models({})["workflow"]}),
+        build_thinking_agent({"model": SimulatedModel(conversation=THINKING_CONVERSATION)}),
         {"messages": [("user", "Investigate latency")]},
         out,
         prices,

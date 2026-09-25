@@ -120,10 +120,15 @@ a named caller. Every sample script provides a chronological `CONVERSATION`:
 speaker's replies in order. `quote_request` also derives its interruption answers
 from the human entries. Model reasoning metadata is illustrative when scripted.
 
+The catalog supplies `SAMPLE["description"]` as the report description fallback
+for model calls in both demo and live runs. Explicit operation annotations take
+priority; samples do not need a model factory just to add a description.
+
 Scripts can additionally expose `build_scripted_models(options)`. The catalog explicitly
-calls this optional callback in simulated mode to preserve specialized adapters,
-report metadata, or scenario variants. `options` merges sample defaults with run
-overrides. File and shell adapters resolve script templates against actual tool
+calls this optional callback in simulated mode to preserve specialized adapters
+or scenario variants. Use this hook only when the default simulator cannot meet
+the scenario requirements, and comment why custom construction is necessary.
+`options` merges sample defaults with run overrides. File and shell adapters resolve script templates against actual tool
 observations, while context-budget adapters preserve their compaction accounting.
 The nested-workflow scenario builder emits an ordered list for the selected retry
 story. Conditional steps and on-demand summaries are identified in their scripts;

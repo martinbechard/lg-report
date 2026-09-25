@@ -232,6 +232,7 @@ class SampleCatalog:
                 conversation=conversation,
                 resolver=resolver,
                 settings=settings,
+                sample_description=sample.description,
             ) as identity:
                 graph = getattr(import_module(module), function)(**arguments)
             # Context-policy lessons return their context owner for direct tests.

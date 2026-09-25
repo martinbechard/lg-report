@@ -96,7 +96,7 @@ def test_expert_selection_isolation_and_costs(tmp_path):
 def test_shared_model_retains_separate_tool_bindings(monkeypatch):
     from agent_runtime.harness.simulated_model import SimulatedModel
     from agent_runtime.workflows.expert_dispatch import build_workflow
-    from samples.expert_dispatch.sample import build_scripted_models
+    from samples.expert_dispatch.sample import CONVERSATION
 
     bound_schemas = []
     original = SimulatedModel.bind_tools
@@ -110,7 +110,7 @@ def test_shared_model_retains_separate_tool_bindings(monkeypatch):
         return binding
 
     monkeypatch.setattr(SimulatedModel, "bind_tools", capture_binding)
-    model = build_scripted_models({})["workflow"]
+    model = SimulatedModel(conversation=CONVERSATION)
     Conversation(
         build_workflow(model),
         MockClient([Request(question) for _, question, _ in CASES]),
@@ -134,9 +134,10 @@ def test_shared_model_retains_separate_tool_bindings(monkeypatch):
 # identity through unchanged rather than configuring a second hidden instance.
 def test_live_configures_one_model(monkeypatch):
     from agent_runtime.harness import model_factory
-    from samples.expert_dispatch.sample import build_scripted_models
+    from agent_runtime.harness.simulated_model import SimulatedModel
+    from samples.expert_dispatch.sample import CONVERSATION
 
-    model_instance = build_scripted_models({})["workflow"]
+    model_instance = SimulatedModel(conversation=CONVERSATION)
     configured_calls = []
 
     def configure_once(name):

@@ -27,7 +27,7 @@ The reusable code lives under `src/agent_runtime/`:
 - **`tools/`** is the home for application tools. Simple chat defines none.
 
 This sample directory contains **`sample.py`** with `SAMPLE` discovery metadata,
-the scenario's user prompts, prerecorded model answers, and model factories,
+the scenario's user prompts and prerecorded model answers,
 plus this README and configuration example. A client simulator and a model
 simulator serve different roles even when one test case configures both.
 
@@ -93,11 +93,9 @@ history, and the interrupt boundary without contacting a provider.
 
 All samples follow this structure; Langfuse variants share the same workflows.
 
-## Why the factory is a function
+## Model construction
 
-Importing `sample.py` makes its metadata and conversation available. It does not
-create a model. In simulated mode, `build_scripted_models(options)` creates the standard
-`SimulatedModel` with this lesson's report metadata. Response routing and token
-estimates come from the shared simulator. Live mode bypasses this factory and
-selects the configured provider. Samples without special configuration or report
-metadata need only `SAMPLE` and `CONVERSATION`; the catalog builds their simulator.
+This sample declares only `SAMPLE` and `CONVERSATION`. The shared catalog creates
+its standard simulator for demo runs and selects the configured provider for live
+runs. A sample-specific model factory is needed only when a scenario requires
+custom simulation behavior or configuration.

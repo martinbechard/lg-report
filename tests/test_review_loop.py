@@ -22,7 +22,7 @@ from agent_runtime.workflows.review_loop import build_workflow
 from reporting.execute_runnable import execute_runnable
 from reporting.pricing import cost, load_prices, summarize
 from reporting.schema import Run
-from samples.review_loop.sample import CONVERSATION, build_scripted_models
+from samples.review_loop.sample import CONVERSATION
 
 
 # Rejection feedback must cause a real second review round and remain
@@ -32,7 +32,7 @@ def test_feedback_drives_real_second_round_and_report(tmp_path):
     prompt, first_draft, first_review, revised_draft, _ = CONVERSATION
     client = MockClient([Request(prompt["content"])])
     graph = build_workflow(
-        build_scripted_models({})["workflow"], first_draft_high_level=True
+        SimulatedModel(conversation=CONVERSATION), first_draft_high_level=True
     )
     prices = load_prices(Path(__file__).parents[1] / "models.json")
     execute_runnable(
@@ -154,7 +154,7 @@ def test_invalid_judge_output_is_not_approval():
 # review behavior is guaranteed by construction.
 def test_invalid_round_limit(limit):
     with pytest.raises(ValueError):
-        build_workflow(build_scripted_models({})["workflow"], max_rounds=limit)
+        build_workflow(SimulatedModel(conversation=CONVERSATION), max_rounds=limit)
 
 
 # A new user turn starts a new review cycle rather than reusing the

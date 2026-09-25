@@ -16,7 +16,8 @@ from langchain_core.messages import AIMessage
 from agent_runtime.agents.chat_agent import build_agent
 from agent_runtime.harness.console_client import ConsoleClient
 from agent_runtime.harness.conversation import Attachment, Conversation, Request
-from samples.simple_chat.sample import build_scripted_models
+from agent_runtime.harness.simulated_model import SimulatedModel
+from samples.simple_chat.sample import CONVERSATION
 
 
 @pytest.mark.parametrize("exit_kind", ["quit", "eof", "sigint"])
@@ -95,7 +96,7 @@ def test_static_file_context_and_follow_up():
         ]
     )
     result = Conversation(
-        build_agent({"model": build_scripted_models({})["workflow"]}), client
+        build_agent({"model": SimulatedModel(conversation=CONVERSATION)}), client
     ).invoke({}, {})
     assert len(client.results) == 2
     assert len(result["messages"]) == 4
@@ -192,7 +193,7 @@ def test_console_uses_same_real_graph_session():
     displayed = []
     client = ConsoleClient(read=lambda _: next(entries), write=displayed.append)
     result = Conversation(
-        build_agent({"model": build_scripted_models({})["workflow"]}), client
+        build_agent({"model": SimulatedModel(conversation=CONVERSATION)}), client
     ).invoke({}, {})
     assert len(result["messages"]) == 4
     assert len(displayed) == 2
@@ -216,7 +217,7 @@ def test_console_script_exhaustion_never_reads_terminal():
         prompter=ScriptPrompter([Request("first"), Request("second")]),
     )
     result = Conversation(
-        build_agent({"model": build_scripted_models({})["workflow"]}), client
+        build_agent({"model": SimulatedModel(conversation=CONVERSATION)}), client
     ).invoke({}, {})
     assert len(result["messages"]) == 4
     assert len(displayed) == 2

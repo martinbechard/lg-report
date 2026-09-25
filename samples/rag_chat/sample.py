@@ -78,6 +78,8 @@ def make_simulated_model():
     conversation[-1]["content"] = conversation[-1]["content"].format(
         passage_id=passage_id, excerpt=excerpt
     )
+    # The catalog cannot fill these placeholders: this simulator needs the
+    # passage ID and excerpt selected from the actual local index above.
     return SimulatedModel(
         conversation=conversation,
         metadata={

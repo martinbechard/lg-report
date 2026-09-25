@@ -1,7 +1,7 @@
 """Demonstrate concrete judge feedback improving a deliberately shallow draft.
 
-SAMPLE declares discovery metadata alongside this scenario. Model factories
-create fresh simulated models only when called; live mode uses the provider.
+SAMPLE declares discovery metadata alongside this scenario. The shared catalog
+constructs the offline model from CONVERSATION; live mode uses the provider.
 
 The incident and measurements below are fictional supplied evidence, not claims
 about a real system. Fixed verdicts verify graph routing; live judge quality must
@@ -12,8 +12,6 @@ Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
 
 import json
-
-from agent_runtime.harness.simulated_model import SimulatedModel
 
 # Discovery reads this metadata without constructing a model.
 SAMPLE = {
@@ -81,21 +79,3 @@ CONVERSATION = [
         ),
     },
 ]
-
-
-def build_scripted_models(options):
-    """Create a fresh standard simulator with this lesson's report metadata.
-
-    Response routing and token accounting use the shared SimulatedModel. This
-    fixed conversation ignores options; the callback preserves only the report
-    annotations. Live mode uses the configured provider instead.
-    """
-    return {
-        "workflow": SimulatedModel(
-            conversation=CONVERSATION,
-            metadata={
-                "report_effort": "light",
-                "report_description": "Perform the current author or evidence-review role.",
-            },
-        )
-    }

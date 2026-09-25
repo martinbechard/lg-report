@@ -23,14 +23,14 @@ from langgraph.graph import END, START, StateGraph
 from langgraph.types import Command, interrupt
 
 from agent_runtime.agents.chat_agent import build_agent as build_chat_agent
-from agent_runtime.harness.simulated_model import ScriptedChatModel
+from agent_runtime.harness.simulated_model import ScriptedChatModel, SimulatedModel
 from agent_runtime.harness.trace_capture import TraceCapture
 from reporting.execute_runnable import execute_runnable
 from reporting.normalize import normalize
 from reporting.pricing import cost, load_prices, summarize
 from reporting.render import render
 from reporting.schema import Run, Step, Usage
-from samples.simple_chat.sample import build_scripted_models as build_chat_models
+from samples.simple_chat.sample import CONVERSATION as CHAT_CONVERSATION
 
 
 @pytest.fixture
@@ -53,7 +53,7 @@ def read_run(directory):
 def test_real_deepagents_offline_pipeline(tmp_path, prices):
     out = tmp_path / "run"
     execute_runnable(
-        build_chat_agent({"model": build_chat_models({})["workflow"]}),
+        build_chat_agent({"model": SimulatedModel(conversation=CHAT_CONVERSATION)}),
         {"messages": [("user", "secret input")]},
         out,
         prices,
@@ -313,7 +313,7 @@ def test_interrupt_and_resume_separate_invocations(tmp_path, prices):
 def test_existing_directory_is_not_overwritten(tmp_path, prices):
     with pytest.raises(FileExistsError):
         execute_runnable(
-            build_chat_agent({"model": build_chat_models({})["workflow"]}),
+            build_chat_agent({"model": SimulatedModel(conversation=CHAT_CONVERSATION)}),
             {},
             tmp_path,
             prices,
@@ -571,3 +571,27 @@ def test_request_comments_use_recorded_actions_and_exclude_reasoning():
     step.response = []
     step.request = [{"role": "user", "content": "Inspect <script> | the source"}]
     assert request_comment(step) == "Respond to: Inspect <script> / the source"
+
+
+def test_catalog_sample_description_reaches_saved_report(tmp_path, prices):
+    """The default simulator carries sample intent through capture and HTML output."""
+    from agent_runtime.harness.sample_catalog import SampleCatalog
+
+    catalog = SampleCatalog()
+    graph, provider, model = catalog.create_run("simple_chat", False, tracing=False)
+    execute_runnable(
+        graph,
+        {"messages": [("user", "Explain the main steps in an agent workflow.")]},
+        tmp_path / "sample-description",
+        prices,
+        provider=provider,
+        model=model,
+        demo=True,
+    )
+    run = read_run(tmp_path / "sample-description")
+    models = [step for step in run.steps if step.kind == "model"]
+    assert models
+    assert all(step.context["description"] == catalog.get("simple_chat").description for step in models)
+    assert catalog.get("simple_chat").description in (
+        tmp_path / "sample-description" / "report.html"
+    ).read_text()

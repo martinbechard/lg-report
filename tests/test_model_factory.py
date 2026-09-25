@@ -212,3 +212,37 @@ def test_catalog_meters_rebuilt_quote_requests_without_cache_reuse(monkeypatch):
     assert len(constructed) == 1
     assert isinstance(constructed[0], SimulatedModel)
     assert constructed[0].cache_reuse is False
+
+
+@pytest.mark.parametrize("live", [False, True])
+def test_sample_description_survives_scope_without_replacing_annotations(monkeypatch, live):
+    """Both model routes retain fallback intent while specific annotations win."""
+    from agent_runtime.harness.simulated_model import SimulatedModel
+    from reporting.annotations import describe
+
+    def provider_model(name):
+        """Stand in for provider construction without a network request."""
+        return SimulatedModel(conversation=CONVERSATION), "test", "test-model"
+
+    monkeypatch.setattr(model_factory, "configured_model", provider_model)
+    monkeypatch.setattr(model_factory, "configured_identity", lambda: ("test", "test-model"))
+    with model_factory.model_factory_scope(
+        live=live, conversation=CONVERSATION, sample_description="Explain delegation."
+    ):
+        model = model_factory.build_model(caller="workflow")
+        # An inner scope without a description must not borrow the outer lesson.
+        with model_factory.model_factory_scope(live=False, conversation=CONVERSATION):
+            unannotated = model_factory.build_model(caller="workflow")
+        restored = model_factory.build_model(caller="workflow")
+    assert describe("model", "model", model.metadata, {}) == "Explain delegation."
+    assert restored.metadata == model.metadata
+    assert "report_sample_description" not in (unannotated.metadata or {})
+    outside = model_factory.build_model(caller="workflow")
+    assert "report_sample_description" not in (outside.metadata or {})
+    assert describe("model", "model", {
+        **model.metadata, "report_description": "Review evidence."
+    }, {}) == "Review evidence."
+    assert describe("tool", "lookup", model.metadata, {
+        "description": "Look up a record."
+    }) == "Look up a record."
+    assert describe("model", "unknown", {}, {}).startswith("Generate the next")

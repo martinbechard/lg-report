@@ -873,6 +873,9 @@ def make_simulated_models():
     # Forty authored summary entries bound this scenario's on-demand compactions.
     summary = next(entry for entry in CONVERSATION if entry["role"] == "workflow-summary")
     scenario = [*CONVERSATION, *[dict(summary) for _ in range(39)]]
+    # Custom simulators give callers separate ledgers, disable append-only cache
+    # assumptions during compaction, and identify the direct summary-model calls.
+    # The catalog default cannot provide these caller-specific settings.
     return tuple(
         SimulatedModel(
             conversation=scenario, cache_reuse=False,
