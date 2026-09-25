@@ -141,7 +141,9 @@ def workflow_definition(graph):
     for name, node in builder.nodes.items():
         metadata = node.metadata or {}
         comment = metadata.get("report_comment", "")
-        kind = "process"
+        # Wrappers can own model invocation without a native node named model.
+        # This code-owned declaration describes responsibility, not runtime proof.
+        kind = "model" if metadata.get("report_kind") == "model" else "process"
         if name in children:
             kind = "subgraph"
         elif isinstance(node.runnable, ToolNode):

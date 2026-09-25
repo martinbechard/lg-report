@@ -14,6 +14,7 @@ Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
 
 import json
+import re
 from html import escape
 from textwrap import wrap
 
@@ -243,10 +244,28 @@ def _draw(definition, index):
         if tool:
             text(sx + 8, sy - 10, f"{tool}: call / return", font_size="10")
     for name, label, annotation, x, y, child in nodes:
+        # Native hook identifiers stay in the saved topology and arrow data.
+        # Present the limit and hook timing separately so framework class names
+        # do not become unreadable words in the learner-facing boxes.
+        limit_hook = re.fullmatch(
+            r"(Model|Tool)CallLimitMiddleware(?:\[(.+)\])?\.(before|after)_model",
+            name,
+        )
+        if limit_hook:
+            scope, tool, timing = limit_hook.groups()
+            label = f"{scope} call limit"
+            comment = f"{timing.capitalize()} model call"
+            if tool:
+                comment = f"{tool} · {comment}"
+            annotation = {**annotation, "comment": comment}
         terminal = name in {"__start__", "__end__"}
         kind = annotation.get("kind", "subgraph" if child else "process")
+        if kind == "model":
+            label = "LLM call" if name == "model" else f"{label} · LLM call"
         # Distinct silhouettes describe responsibility, not extra graph states.
         parts.append(f'<g data-node-kind="{escape(kind, quote=True)}">')
+        if limit_hook:
+            parts.append(f'<title>{escape(name)}</title>')
         if kind == "middleware":
             parts.append(f'<rect x="{x}" y="{y}" width="210" height="68" rx="3" fill="#fff3d6" stroke="#936d16" stroke-dasharray="4 3"/>')
             label = "Context compaction hook"

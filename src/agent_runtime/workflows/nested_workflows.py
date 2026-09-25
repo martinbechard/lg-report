@@ -108,10 +108,22 @@ def _build_review_workflow(model, max_rounds):
         }
 
     graph = StateGraph(ReviewState)
-    graph.add_node("begin", begin)
-    graph.add_node("author", write)
-    graph.add_node("judge", assess)
-    graph.add_node("finish", finish)
+    graph.add_node("begin", begin, metadata={
+        "report_comment": "Reset histories and review rounds",
+    })
+    # These adapters invoke role models internally. Declare that responsibility
+    # so the diagram need not infer an LLM call from a function or role name.
+    graph.add_node("author", write, metadata={
+        "report_kind": "model",
+        "report_comment": "Draft or revise using judge feedback",
+    })
+    graph.add_node("judge", assess, metadata={
+        "report_kind": "model",
+        "report_comment": "Assess draft; approve or request fixes",
+    })
+    graph.add_node("finish", finish, metadata={
+        "report_comment": "Return draft and review outcome",
+    })
     graph.add_edge(START, "begin")
     graph.add_edge("begin", "author")
     graph.add_edge("author", "judge")
@@ -121,6 +133,10 @@ def _build_review_workflow(model, max_rounds):
     graph.add_edge("finish", END)
     child = graph.compile(name="assignment_review", checkpointer=False)
     child.report_title = "Child review loop"
+    child.report_context = (
+        f"Separate author and judge histories; at most {max_rounds} drafts. "
+        "Review assesses source; no tests run."
+    )
     return child
 
 
@@ -136,6 +152,7 @@ def build_workflow(model=None, *, max_rounds: int = 3):
     if model is None:
         model = build_model(caller="workflow")
     planner = work_planner.build_agent({"model": model})
+    planner.report_model_comment = "Prepare the complete work assignment"
     child = _build_review_workflow(model, max_rounds)
 
     def plan(state, config):
@@ -153,15 +170,22 @@ def build_workflow(model=None, *, max_rounds: int = 3):
         return {"messages": [AIMessage(content=state["answer"])]}
 
     graph = StateGraph(DeliveryState)
-    graph.add_node("planner", plan)
-    graph.add_node("review_workflow", dispatch)
-    graph.add_node("finish", finish)
+    graph.add_node("planner", plan, metadata={
+        "report_comment": "Prepare assignment from user request",
+    })
+    graph.add_node("review_workflow", dispatch, metadata={
+        "report_comment": "Dispatch assignment; await child result",
+    })
+    graph.add_node("finish", finish, metadata={
+        "report_comment": "Publish child result unchanged",
+    })
     graph.add_edge(START, "planner")
     graph.add_edge("planner", "review_workflow")
     graph.add_edge("review_workflow", "finish")
     graph.add_edge("finish", END)
     compiled = graph.compile(name="nested_workflows")
     compiled.report_title = "Parent dispatch workflow"
+    compiled.report_context = "Plan the assignment, run child review, return its outcome"
     # The adapter changes the state shape, so expose its compiled child for the
     # shared report recorder to discover actual topology rather than copied edges.
     compiled.report_subgraphs = {"review_workflow": child}

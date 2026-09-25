@@ -177,12 +177,21 @@ def test_catalog_cli_report_records_nested_execution(tmp_path, sample, call_coun
         "__end__",
     ]
     child = definition["children"]["review_workflow"]
+    # Wrapped role calls must remain recognizable as model work, while every
+    # orchestration step explains its purpose in the saved portable definition.
+    for name in ("author", "judge"):
+        assert child["annotations"][name]["kind"] == "model"
+    assert all(item["comment"] for item in child["annotations"].values())
+    assert all(item["comment"] for item in definition["annotations"].values())
     assert {edge["target"] for edge in child["edges"] if edge["source"] == "judge"} == {
         "author",
         "finish",
     }
     html = (tmp_path / "report.html").read_text()
     assert "Child review loop" in html
+    assert "Author · LLM call" in html
+    assert "Judge · LLM call" in html
+    assert "Prepare the complete work assignment" in html
     assert html.index('id="workflow-state-heading"') < html.index(
         'id="collaboration-heading"'
     )

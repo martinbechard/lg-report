@@ -1,17 +1,17 @@
 {
   "schema_version": 1,
-  "id": "01a0d5d6-4d9f-75d1-9356-5b812b779622",
+  "id": "01a0d7af-50ad-7933-8355-fd057de403c9",
   "title": "Nested workflows",
   "demo": true,
   "status": "ok",
   "steps": [
     {
-      "id": "01a0d5d6-4d9f-75d1-9356-5b812b779622",
+      "id": "01a0d7af-50ad-7933-8355-fd057de403c9",
       "parent_id": null,
       "name": "nested_workflows",
       "kind": "workflow",
-      "start_ns": 1790293986721116000,
-      "end_ns": 1790293986902356000,
+      "start_ns": 1790324986031368000,
+      "end_ns": 1790324986215472000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -22,20 +22,20 @@
       "response": [],
       "tool_definitions": null,
       "context": {
-        "report_workflow_definition": "{\"annotations\": {\"planner\": {\"kind\": \"subgraph\", \"comment\": \"\"}, \"review_workflow\": {\"kind\": \"subgraph\", \"comment\": \"\"}, \"finish\": {\"kind\": \"process\", \"comment\": \"\"}}, \"title\": \"Parent dispatch workflow\", \"context\": \"Compiled graph; arrows show declared transitions\", \"nodes\": [\"__start__\", \"planner\", \"review_workflow\", \"finish\", \"__end__\"], \"edges\": [{\"source\": \"__start__\", \"target\": \"planner\", \"label\": \"\"}, {\"source\": \"finish\", \"target\": \"__end__\", \"label\": \"\"}, {\"source\": \"planner\", \"target\": \"review_workflow\", \"label\": \"\"}, {\"source\": \"review_workflow\", \"target\": \"finish\", \"label\": \"\"}], \"children\": {\"planner\": {\"annotations\": {\"model\": {\"kind\": \"model\", \"comment\": \"Choose a tool or return an answer\"}}, \"title\": \"work_planner\", \"context\": \"Compiled graph; arrows show declared transitions\", \"nodes\": [\"__start__\", \"model\", \"__end__\"], \"edges\": [{\"source\": \"__start__\", \"target\": \"model\", \"label\": \"\"}, {\"source\": \"model\", \"target\": \"__end__\", \"label\": \"\"}], \"children\": {}, \"delegations\": []}, \"review_workflow\": {\"annotations\": {\"begin\": {\"kind\": \"process\", \"comment\": \"\"}, \"author\": {\"kind\": \"process\", \"comment\": \"\"}, \"judge\": {\"kind\": \"process\", \"comment\": \"\"}, \"finish\": {\"kind\": \"process\", \"comment\": \"\"}}, \"title\": \"Child review loop\", \"context\": \"Compiled graph; arrows show declared transitions\", \"nodes\": [\"__start__\", \"begin\", \"author\", \"judge\", \"finish\", \"__end__\"], \"edges\": [{\"source\": \"__start__\", \"target\": \"begin\", \"label\": \"\"}, {\"source\": \"author\", \"target\": \"judge\", \"label\": \"\"}, {\"source\": \"begin\", \"target\": \"author\", \"label\": \"\"}, {\"source\": \"finish\", \"target\": \"__end__\", \"label\": \"\"}, {\"source\": \"judge\", \"target\": \"author\", \"label\": \"author\"}, {\"source\": \"judge\", \"target\": \"finish\", \"label\": \"finish\"}], \"children\": {}, \"delegations\": []}}, \"delegations\": []}",
+        "report_workflow_definition": "{\"annotations\": {\"planner\": {\"kind\": \"subgraph\", \"comment\": \"Prepare assignment from user request\"}, \"review_workflow\": {\"kind\": \"subgraph\", \"comment\": \"Dispatch assignment; await child result\"}, \"finish\": {\"kind\": \"process\", \"comment\": \"Publish child result unchanged\"}}, \"title\": \"Parent dispatch workflow\", \"context\": \"Plan the assignment, run child review, return its outcome\", \"nodes\": [\"__start__\", \"planner\", \"review_workflow\", \"finish\", \"__end__\"], \"edges\": [{\"source\": \"__start__\", \"target\": \"planner\", \"label\": \"\"}, {\"source\": \"finish\", \"target\": \"__end__\", \"label\": \"\"}, {\"source\": \"planner\", \"target\": \"review_workflow\", \"label\": \"\"}, {\"source\": \"review_workflow\", \"target\": \"finish\", \"label\": \"\"}], \"children\": {\"planner\": {\"annotations\": {\"model\": {\"kind\": \"model\", \"comment\": \"Prepare the complete work assignment\"}}, \"title\": \"work_planner\", \"context\": \"Compiled graph; arrows show declared transitions\", \"nodes\": [\"__start__\", \"model\", \"__end__\"], \"edges\": [{\"source\": \"__start__\", \"target\": \"model\", \"label\": \"\"}, {\"source\": \"model\", \"target\": \"__end__\", \"label\": \"\"}], \"children\": {}, \"delegations\": []}, \"review_workflow\": {\"annotations\": {\"begin\": {\"kind\": \"process\", \"comment\": \"Reset histories and review rounds\"}, \"author\": {\"kind\": \"model\", \"comment\": \"Draft or revise using judge feedback\"}, \"judge\": {\"kind\": \"model\", \"comment\": \"Assess draft; approve or request fixes\"}, \"finish\": {\"kind\": \"process\", \"comment\": \"Return draft and review outcome\"}}, \"title\": \"Child review loop\", \"context\": \"Separate author and judge histories; at most 3 drafts. Review assesses source; no tests run.\", \"nodes\": [\"__start__\", \"begin\", \"author\", \"judge\", \"finish\", \"__end__\"], \"edges\": [{\"source\": \"__start__\", \"target\": \"begin\", \"label\": \"\"}, {\"source\": \"author\", \"target\": \"judge\", \"label\": \"\"}, {\"source\": \"begin\", \"target\": \"author\", \"label\": \"\"}, {\"source\": \"finish\", \"target\": \"__end__\", \"label\": \"\"}, {\"source\": \"judge\", \"target\": \"author\", \"label\": \"author\"}, {\"source\": \"judge\", \"target\": \"finish\", \"label\": \"finish\"}], \"children\": {}, \"delegations\": []}}, \"delegations\": []}",
         "report_turn": 1,
-        "thread_id": "cf180f99-f812-44a6-8cac-c49403c38761",
+        "thread_id": "091a3a26-8d80-4912-a45a-2e9ab655599e",
         "cache_ttl": "5m",
         "description": "Execute the nested_workflows workflow operation and pass its result to the next graph step."
       }
     },
     {
-      "id": "01a0d5d6-4da2-7da1-9e38-0416709960ef",
-      "parent_id": "01a0d5d6-4d9f-75d1-9356-5b812b779622",
+      "id": "01a0d7af-50b0-7ac0-83c0-0363ca223bab",
+      "parent_id": "01a0d7af-50ad-7933-8355-fd057de403c9",
       "name": "planner",
       "kind": "workflow",
-      "start_ns": 1790293986722656000,
-      "end_ns": 1790293986877622000,
+      "start_ns": 1790324986032688000,
+      "end_ns": 1790324986185490000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -49,7 +49,7 @@
         "langgraph_node": "planner",
         "langgraph_step": 1,
         "report_turn": 1,
-        "thread_id": "cf180f99-f812-44a6-8cac-c49403c38761",
+        "thread_id": "091a3a26-8d80-4912-a45a-2e9ab655599e",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:1"
@@ -58,12 +58,12 @@
       }
     },
     {
-      "id": "01a0d5d6-4da2-7da1-9e38-0428c3f29376",
-      "parent_id": "01a0d5d6-4da2-7da1-9e38-0416709960ef",
+      "id": "01a0d7af-50b1-7a00-8eff-9af9c5933946",
+      "parent_id": "01a0d7af-50b0-7ac0-83c0-0363ca223bab",
       "name": "work_planner",
       "kind": "workflow",
-      "start_ns": 1790293986722998000,
-      "end_ns": 1790293986877093000,
+      "start_ns": 1790324986033046000,
+      "end_ns": 1790324986184741000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -77,7 +77,7 @@
         "langgraph_node": "planner",
         "langgraph_step": 1,
         "report_turn": 1,
-        "thread_id": "cf180f99-f812-44a6-8cac-c49403c38761",
+        "thread_id": "091a3a26-8d80-4912-a45a-2e9ab655599e",
         "cache_ttl": "5m",
         "tags": [
           "seq:step:1"
@@ -86,12 +86,12 @@
       }
     },
     {
-      "id": "01a0d5d6-4da3-7a11-ad6e-7b260438d71a",
-      "parent_id": "01a0d5d6-4da2-7da1-9e38-0428c3f29376",
+      "id": "01a0d7af-50b1-7a00-8eff-9b03d1a9f9ee",
+      "parent_id": "01a0d7af-50b1-7a00-8eff-9af9c5933946",
       "name": "model",
       "kind": "workflow",
-      "start_ns": 1790293986723851000,
-      "end_ns": 1790293986876190000,
+      "start_ns": 1790324986033965000,
+      "end_ns": 1790324986184021000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -105,7 +105,7 @@
         "langgraph_node": "model",
         "langgraph_step": 1,
         "report_turn": 1,
-        "thread_id": "cf180f99-f812-44a6-8cac-c49403c38761",
+        "thread_id": "091a3a26-8d80-4912-a45a-2e9ab655599e",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:1"
@@ -114,12 +114,12 @@
       }
     },
     {
-      "id": "01a0d5d6-4da5-7970-bd49-f6d02afba159",
-      "parent_id": "01a0d5d6-4da3-7a11-ad6e-7b260438d71a",
+      "id": "01a0d7af-50b3-7a70-ac3b-018626956c3d",
+      "parent_id": "01a0d7af-50b1-7a00-8eff-9b03d1a9f9ee",
       "name": "SimulatedModel",
       "kind": "model",
-      "start_ns": 1790293986725195000,
-      "end_ns": 1790293986875724000,
+      "start_ns": 1790324986035421000,
+      "end_ns": 1790324986183497000,
       "status": "ok",
       "provider": "demo",
       "model": "scripted-chat",
@@ -161,12 +161,12 @@
         "langgraph_node": "model",
         "langgraph_step": 1,
         "report_turn": 1,
-        "thread_id": "cf180f99-f812-44a6-8cac-c49403c38761",
+        "thread_id": "091a3a26-8d80-4912-a45a-2e9ab655599e",
         "cache_ttl": "5m",
         "tags": [
           "seq:step:1"
         ],
-        "description": "Generate the next assistant message or tool request from the current conversation.",
+        "description": "A parent dispatches an assignment to a child author/judge review loop.",
         "input_message_bytes": 667,
         "message_count": 2,
         "message_roles": [
@@ -181,12 +181,12 @@
       }
     },
     {
-      "id": "01a0d5d6-4e3e-7071-a2e2-b809b27e572b",
-      "parent_id": "01a0d5d6-4d9f-75d1-9356-5b812b779622",
+      "id": "01a0d7af-514a-79f2-a977-9a8ac86e573c",
+      "parent_id": "01a0d7af-50ad-7933-8355-fd057de403c9",
       "name": "review_workflow",
       "kind": "workflow",
-      "start_ns": 1790293986878275000,
-      "end_ns": 1790293986901065000,
+      "start_ns": 1790324986186171000,
+      "end_ns": 1790324986213766000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -200,7 +200,7 @@
         "langgraph_node": "review_workflow",
         "langgraph_step": 2,
         "report_turn": 1,
-        "thread_id": "cf180f99-f812-44a6-8cac-c49403c38761",
+        "thread_id": "091a3a26-8d80-4912-a45a-2e9ab655599e",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:2"
@@ -209,12 +209,12 @@
       }
     },
     {
-      "id": "01a0d5d6-4e3e-7071-a2e2-b812e134fba4",
-      "parent_id": "01a0d5d6-4e3e-7071-a2e2-b809b27e572b",
+      "id": "01a0d7af-514a-79f2-a977-9a90d27f299b",
+      "parent_id": "01a0d7af-514a-79f2-a977-9a8ac86e573c",
       "name": "assignment_review",
       "kind": "workflow",
-      "start_ns": 1790293986878547000,
-      "end_ns": 1790293986900616000,
+      "start_ns": 1790324986186503000,
+      "end_ns": 1790324986213316000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -228,7 +228,7 @@
         "langgraph_node": "review_workflow",
         "langgraph_step": 2,
         "report_turn": 1,
-        "thread_id": "cf180f99-f812-44a6-8cac-c49403c38761",
+        "thread_id": "091a3a26-8d80-4912-a45a-2e9ab655599e",
         "cache_ttl": "5m",
         "tags": [
           "seq:step:1"
@@ -237,12 +237,12 @@
       }
     },
     {
-      "id": "01a0d5d6-4e3f-71e0-af44-52c58c3949bb",
-      "parent_id": "01a0d5d6-4e3e-7071-a2e2-b812e134fba4",
+      "id": "01a0d7af-514b-77c2-8d6e-67bf005b6c80",
+      "parent_id": "01a0d7af-514a-79f2-a977-9a90d27f299b",
       "name": "begin",
       "kind": "workflow",
-      "start_ns": 1790293986879118000,
-      "end_ns": 1790293986879331000,
+      "start_ns": 1790324986187145000,
+      "end_ns": 1790324986187380000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -256,7 +256,7 @@
         "langgraph_node": "begin",
         "langgraph_step": 1,
         "report_turn": 1,
-        "thread_id": "cf180f99-f812-44a6-8cac-c49403c38761",
+        "thread_id": "091a3a26-8d80-4912-a45a-2e9ab655599e",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:1"
@@ -265,12 +265,12 @@
       }
     },
     {
-      "id": "01a0d5d6-4e3f-71e0-af44-52d0735e76dc",
-      "parent_id": "01a0d5d6-4e3e-7071-a2e2-b812e134fba4",
+      "id": "01a0d7af-514b-77c2-8d6e-67ce8c39a7a8",
+      "parent_id": "01a0d7af-514a-79f2-a977-9a90d27f299b",
       "name": "author",
       "kind": "workflow",
-      "start_ns": 1790293986879746000,
-      "end_ns": 1790293986884435000,
+      "start_ns": 1790324986187991000,
+      "end_ns": 1790324986193461000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -284,7 +284,7 @@
         "langgraph_node": "author",
         "langgraph_step": 2,
         "report_turn": 1,
-        "thread_id": "cf180f99-f812-44a6-8cac-c49403c38761",
+        "thread_id": "091a3a26-8d80-4912-a45a-2e9ab655599e",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:2"
@@ -293,12 +293,12 @@
       }
     },
     {
-      "id": "01a0d5d6-4e40-7581-b321-2ee31dd0955e",
-      "parent_id": "01a0d5d6-4e3f-71e0-af44-52d0735e76dc",
+      "id": "01a0d7af-514c-7931-9a6d-a3bbfc1754de",
+      "parent_id": "01a0d7af-514b-77c2-8d6e-67ce8c39a7a8",
       "name": "review_author",
       "kind": "workflow",
-      "start_ns": 1790293986880303000,
-      "end_ns": 1790293986884186000,
+      "start_ns": 1790324986188403000,
+      "end_ns": 1790324986193139000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -313,7 +313,7 @@
         "langgraph_step": 2,
         "report_description": "Draft or revise the answer using evidence and judge feedback.",
         "report_turn": 1,
-        "thread_id": "cf180f99-f812-44a6-8cac-c49403c38761",
+        "thread_id": "091a3a26-8d80-4912-a45a-2e9ab655599e",
         "cache_ttl": "5m",
         "tags": [
           "seq:step:1"
@@ -322,12 +322,12 @@
       }
     },
     {
-      "id": "01a0d5d6-4e40-7581-b321-2efe7d4b5fa4",
-      "parent_id": "01a0d5d6-4e40-7581-b321-2ee31dd0955e",
+      "id": "01a0d7af-514c-7931-9a6d-a3c3d141f236",
+      "parent_id": "01a0d7af-514c-7931-9a6d-a3bbfc1754de",
       "name": "review_author",
       "kind": "workflow",
-      "start_ns": 1790293986880772000,
-      "end_ns": 1790293986883888000,
+      "start_ns": 1790324986188885000,
+      "end_ns": 1790324986192796000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -342,18 +342,18 @@
         "langgraph_step": 2,
         "report_description": "Draft or revise the answer using evidence and judge feedback.",
         "report_turn": 1,
-        "thread_id": "cf180f99-f812-44a6-8cac-c49403c38761",
+        "thread_id": "091a3a26-8d80-4912-a45a-2e9ab655599e",
         "cache_ttl": "5m",
         "description": "Draft or revise the answer using evidence and judge feedback."
       }
     },
     {
-      "id": "01a0d5d6-4e41-7521-a24d-ce2d5c64361f",
-      "parent_id": "01a0d5d6-4e40-7581-b321-2efe7d4b5fa4",
+      "id": "01a0d7af-514d-7e22-977d-7fcec16bc888",
+      "parent_id": "01a0d7af-514c-7931-9a6d-a3c3d141f236",
       "name": "model",
       "kind": "workflow",
-      "start_ns": 1790293986881480000,
-      "end_ns": 1790293986883390000,
+      "start_ns": 1790324986189762000,
+      "end_ns": 1790324986192227000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -368,7 +368,7 @@
         "langgraph_step": 1,
         "report_description": "Draft or revise the answer using evidence and judge feedback.",
         "report_turn": 1,
-        "thread_id": "cf180f99-f812-44a6-8cac-c49403c38761",
+        "thread_id": "091a3a26-8d80-4912-a45a-2e9ab655599e",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:1"
@@ -377,12 +377,12 @@
       }
     },
     {
-      "id": "01a0d5d6-4e41-7521-a24d-ce37848233c9",
-      "parent_id": "01a0d5d6-4e41-7521-a24d-ce2d5c64361f",
+      "id": "01a0d7af-514e-7020-81c9-720666e7ede6",
+      "parent_id": "01a0d7af-514d-7e22-977d-7fcec16bc888",
       "name": "SimulatedModel",
       "kind": "model",
-      "start_ns": 1790293986881844000,
-      "end_ns": 1790293986883112000,
+      "start_ns": 1790324986190255000,
+      "end_ns": 1790324986191859000,
       "status": "ok",
       "provider": "demo",
       "model": "scripted-chat",
@@ -431,7 +431,7 @@
         "langgraph_step": 1,
         "report_description": "Draft or revise the answer using evidence and judge feedback.",
         "report_turn": 1,
-        "thread_id": "cf180f99-f812-44a6-8cac-c49403c38761",
+        "thread_id": "091a3a26-8d80-4912-a45a-2e9ab655599e",
         "cache_ttl": "5m",
         "tags": [
           "seq:step:1"
@@ -452,12 +452,12 @@
       }
     },
     {
-      "id": "01a0d5d6-4e44-7980-8820-090ea7f681fa",
-      "parent_id": "01a0d5d6-4e3e-7071-a2e2-b812e134fba4",
+      "id": "01a0d7af-5151-7351-9a4d-9f556e9279a1",
+      "parent_id": "01a0d7af-514a-79f2-a977-9a90d27f299b",
       "name": "judge",
       "kind": "workflow",
-      "start_ns": 1790293986884797000,
-      "end_ns": 1790293986889865000,
+      "start_ns": 1790324986193953000,
+      "end_ns": 1790324986199861000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -471,7 +471,7 @@
         "langgraph_node": "judge",
         "langgraph_step": 3,
         "report_turn": 1,
-        "thread_id": "cf180f99-f812-44a6-8cac-c49403c38761",
+        "thread_id": "091a3a26-8d80-4912-a45a-2e9ab655599e",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:3"
@@ -480,12 +480,12 @@
       }
     },
     {
-      "id": "01a0d5d6-4e45-7213-857c-7048920fc78b",
-      "parent_id": "01a0d5d6-4e44-7980-8820-090ea7f681fa",
+      "id": "01a0d7af-5152-7810-aa36-d9b6636e59df",
+      "parent_id": "01a0d7af-5151-7351-9a4d-9f556e9279a1",
       "name": "evidence_judge",
       "kind": "workflow",
-      "start_ns": 1790293986885119000,
-      "end_ns": 1790293986889129000,
+      "start_ns": 1790324986194316000,
+      "end_ns": 1790324986198911000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -500,7 +500,7 @@
         "langgraph_step": 3,
         "report_description": "Check coverage, evidence, and actionable detail before approving.",
         "report_turn": 1,
-        "thread_id": "cf180f99-f812-44a6-8cac-c49403c38761",
+        "thread_id": "091a3a26-8d80-4912-a45a-2e9ab655599e",
         "cache_ttl": "5m",
         "tags": [
           "seq:step:1"
@@ -509,12 +509,12 @@
       }
     },
     {
-      "id": "01a0d5d6-4e45-7213-857c-705562958d01",
-      "parent_id": "01a0d5d6-4e45-7213-857c-7048920fc78b",
+      "id": "01a0d7af-5152-7810-aa36-d9ca9b2a879f",
+      "parent_id": "01a0d7af-5152-7810-aa36-d9b6636e59df",
       "name": "evidence_judge",
       "kind": "workflow",
-      "start_ns": 1790293986885431000,
-      "end_ns": 1790293986888227000,
+      "start_ns": 1790324986194651000,
+      "end_ns": 1790324986198491000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -529,18 +529,18 @@
         "langgraph_step": 3,
         "report_description": "Check coverage, evidence, and actionable detail before approving.",
         "report_turn": 1,
-        "thread_id": "cf180f99-f812-44a6-8cac-c49403c38761",
+        "thread_id": "091a3a26-8d80-4912-a45a-2e9ab655599e",
         "cache_ttl": "5m",
         "description": "Check coverage, evidence, and actionable detail before approving."
       }
     },
     {
-      "id": "01a0d5d6-4e46-77a1-8a83-549285af77ed",
-      "parent_id": "01a0d5d6-4e45-7213-857c-705562958d01",
+      "id": "01a0d7af-5153-7ce0-ab9c-32ea066da84f",
+      "parent_id": "01a0d7af-5152-7810-aa36-d9ca9b2a879f",
       "name": "model",
       "kind": "workflow",
-      "start_ns": 1790293986886040000,
-      "end_ns": 1790293986887771000,
+      "start_ns": 1790324986195459000,
+      "end_ns": 1790324986197817000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -555,7 +555,7 @@
         "langgraph_step": 1,
         "report_description": "Check coverage, evidence, and actionable detail before approving.",
         "report_turn": 1,
-        "thread_id": "cf180f99-f812-44a6-8cac-c49403c38761",
+        "thread_id": "091a3a26-8d80-4912-a45a-2e9ab655599e",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:1"
@@ -564,12 +564,12 @@
       }
     },
     {
-      "id": "01a0d5d6-4e46-77a1-8a83-54a63720c84e",
-      "parent_id": "01a0d5d6-4e46-77a1-8a83-549285af77ed",
+      "id": "01a0d7af-5153-7ce0-ab9c-32f8aa59ddda",
+      "parent_id": "01a0d7af-5153-7ce0-ab9c-32ea066da84f",
       "name": "SimulatedModel",
       "kind": "model",
-      "start_ns": 1790293986886441000,
-      "end_ns": 1790293986887473000,
+      "start_ns": 1790324986195965000,
+      "end_ns": 1790324986197446000,
       "status": "ok",
       "provider": "demo",
       "model": "scripted-chat",
@@ -612,7 +612,7 @@
         "langgraph_step": 1,
         "report_description": "Check coverage, evidence, and actionable detail before approving.",
         "report_turn": 1,
-        "thread_id": "cf180f99-f812-44a6-8cac-c49403c38761",
+        "thread_id": "091a3a26-8d80-4912-a45a-2e9ab655599e",
         "cache_ttl": "5m",
         "tags": [
           "seq:step:1"
@@ -632,12 +632,12 @@
       }
     },
     {
-      "id": "01a0d5d6-4e49-7ea0-9816-e46ee83bb145",
-      "parent_id": "01a0d5d6-4e44-7980-8820-090ea7f681fa",
+      "id": "01a0d7af-5157-77e0-9738-416e521467f4",
+      "parent_id": "01a0d7af-5151-7351-9a4d-9f556e9279a1",
       "name": "route",
       "kind": "workflow",
-      "start_ns": 1790293986889422000,
-      "end_ns": 1790293986889583000,
+      "start_ns": 1790324986199258000,
+      "end_ns": 1790324986199509000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -651,7 +651,7 @@
         "langgraph_node": "judge",
         "langgraph_step": 3,
         "report_turn": 1,
-        "thread_id": "cf180f99-f812-44a6-8cac-c49403c38761",
+        "thread_id": "091a3a26-8d80-4912-a45a-2e9ab655599e",
         "cache_ttl": "5m",
         "tags": [
           "seq:step:3"
@@ -660,12 +660,12 @@
       }
     },
     {
-      "id": "01a0d5d6-4e4a-71b0-ad02-b4b52ddf5fbf",
-      "parent_id": "01a0d5d6-4e3e-7071-a2e2-b812e134fba4",
+      "id": "01a0d7af-5158-7a10-9c5b-baa08c42c6e1",
+      "parent_id": "01a0d7af-514a-79f2-a977-9a90d27f299b",
       "name": "author",
       "kind": "workflow",
-      "start_ns": 1790293986890396000,
-      "end_ns": 1790293986894464000,
+      "start_ns": 1790324986200415000,
+      "end_ns": 1790324986206556000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -679,7 +679,7 @@
         "langgraph_node": "author",
         "langgraph_step": 4,
         "report_turn": 1,
-        "thread_id": "cf180f99-f812-44a6-8cac-c49403c38761",
+        "thread_id": "091a3a26-8d80-4912-a45a-2e9ab655599e",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:4"
@@ -688,12 +688,12 @@
       }
     },
     {
-      "id": "01a0d5d6-4e4a-71b0-ad02-b4ce8482976d",
-      "parent_id": "01a0d5d6-4e4a-71b0-ad02-b4b52ddf5fbf",
+      "id": "01a0d7af-5158-7a10-9c5b-bab9e423c283",
+      "parent_id": "01a0d7af-5158-7a10-9c5b-baa08c42c6e1",
       "name": "review_author",
       "kind": "workflow",
-      "start_ns": 1790293986890769000,
-      "end_ns": 1790293986894246000,
+      "start_ns": 1790324986201034000,
+      "end_ns": 1790324986206187000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -708,7 +708,7 @@
         "langgraph_step": 4,
         "report_description": "Draft or revise the answer using evidence and judge feedback.",
         "report_turn": 1,
-        "thread_id": "cf180f99-f812-44a6-8cac-c49403c38761",
+        "thread_id": "091a3a26-8d80-4912-a45a-2e9ab655599e",
         "cache_ttl": "5m",
         "tags": [
           "seq:step:1"
@@ -717,12 +717,12 @@
       }
     },
     {
-      "id": "01a0d5d6-4e4b-7fc1-856b-bbf20429513d",
-      "parent_id": "01a0d5d6-4e4a-71b0-ad02-b4ce8482976d",
+      "id": "01a0d7af-5159-7b03-91fb-fdc4ab12fe21",
+      "parent_id": "01a0d7af-5158-7a10-9c5b-bab9e423c283",
       "name": "review_author",
       "kind": "workflow",
-      "start_ns": 1790293986891092000,
-      "end_ns": 1790293986893953000,
+      "start_ns": 1790324986201404000,
+      "end_ns": 1790324986205765000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -737,18 +737,18 @@
         "langgraph_step": 4,
         "report_description": "Draft or revise the answer using evidence and judge feedback.",
         "report_turn": 1,
-        "thread_id": "cf180f99-f812-44a6-8cac-c49403c38761",
+        "thread_id": "091a3a26-8d80-4912-a45a-2e9ab655599e",
         "cache_ttl": "5m",
         "description": "Draft or revise the answer using evidence and judge feedback."
       }
     },
     {
-      "id": "01a0d5d6-4e4b-7fc1-856b-bc01af3ba798",
-      "parent_id": "01a0d5d6-4e4b-7fc1-856b-bbf20429513d",
+      "id": "01a0d7af-515a-7f51-b583-06f32b8b24ee",
+      "parent_id": "01a0d7af-5159-7b03-91fb-fdc4ab12fe21",
       "name": "model",
       "kind": "workflow",
-      "start_ns": 1790293986891770000,
-      "end_ns": 1790293986893496000,
+      "start_ns": 1790324986202210000,
+      "end_ns": 1790324986204460000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -763,7 +763,7 @@
         "langgraph_step": 1,
         "report_description": "Draft or revise the answer using evidence and judge feedback.",
         "report_turn": 1,
-        "thread_id": "cf180f99-f812-44a6-8cac-c49403c38761",
+        "thread_id": "091a3a26-8d80-4912-a45a-2e9ab655599e",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:1"
@@ -772,12 +772,12 @@
       }
     },
     {
-      "id": "01a0d5d6-4e4c-72a2-a274-b1e5600c2342",
-      "parent_id": "01a0d5d6-4e4b-7fc1-856b-bc01af3ba798",
+      "id": "01a0d7af-515a-7f51-b583-070eb4c2c3b5",
+      "parent_id": "01a0d7af-515a-7f51-b583-06f32b8b24ee",
       "name": "SimulatedModel",
       "kind": "model",
-      "start_ns": 1790293986892126000,
-      "end_ns": 1790293986893194000,
+      "start_ns": 1790324986202634000,
+      "end_ns": 1790324986203885000,
       "status": "ok",
       "provider": "demo",
       "model": "scripted-chat",
@@ -838,7 +838,7 @@
         "langgraph_step": 1,
         "report_description": "Draft or revise the answer using evidence and judge feedback.",
         "report_turn": 1,
-        "thread_id": "cf180f99-f812-44a6-8cac-c49403c38761",
+        "thread_id": "091a3a26-8d80-4912-a45a-2e9ab655599e",
         "cache_ttl": "5m",
         "tags": [
           "seq:step:1"
@@ -862,12 +862,12 @@
       }
     },
     {
-      "id": "01a0d5d6-4e4e-7000-90ce-c5e02e13a5d7",
-      "parent_id": "01a0d5d6-4e3e-7071-a2e2-b812e134fba4",
+      "id": "01a0d7af-515f-7e92-a66b-32780cec21d5",
+      "parent_id": "01a0d7af-514a-79f2-a977-9a90d27f299b",
       "name": "judge",
       "kind": "workflow",
-      "start_ns": 1790293986894821000,
-      "end_ns": 1790293986899657000,
+      "start_ns": 1790324986207055000,
+      "end_ns": 1790324986212322000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -881,7 +881,7 @@
         "langgraph_node": "judge",
         "langgraph_step": 5,
         "report_turn": 1,
-        "thread_id": "cf180f99-f812-44a6-8cac-c49403c38761",
+        "thread_id": "091a3a26-8d80-4912-a45a-2e9ab655599e",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:5"
@@ -890,12 +890,12 @@
       }
     },
     {
-      "id": "01a0d5d6-4e4f-7b83-8ae9-bcc5fd72f98f",
-      "parent_id": "01a0d5d6-4e4e-7000-90ce-c5e02e13a5d7",
+      "id": "01a0d7af-515f-7e92-a66b-328e3adf6798",
+      "parent_id": "01a0d7af-515f-7e92-a66b-32780cec21d5",
       "name": "evidence_judge",
       "kind": "workflow",
-      "start_ns": 1790293986895134000,
-      "end_ns": 1790293986899007000,
+      "start_ns": 1790324986207438000,
+      "end_ns": 1790324986211560000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -910,7 +910,7 @@
         "langgraph_step": 5,
         "report_description": "Check coverage, evidence, and actionable detail before approving.",
         "report_turn": 1,
-        "thread_id": "cf180f99-f812-44a6-8cac-c49403c38761",
+        "thread_id": "091a3a26-8d80-4912-a45a-2e9ab655599e",
         "cache_ttl": "5m",
         "tags": [
           "seq:step:1"
@@ -919,12 +919,12 @@
       }
     },
     {
-      "id": "01a0d5d6-4e4f-7b83-8ae9-bcd9778ae240",
-      "parent_id": "01a0d5d6-4e4f-7b83-8ae9-bcc5fd72f98f",
+      "id": "01a0d7af-515f-7e92-a66b-329950e158ce",
+      "parent_id": "01a0d7af-515f-7e92-a66b-328e3adf6798",
       "name": "evidence_judge",
       "kind": "workflow",
-      "start_ns": 1790293986895431000,
-      "end_ns": 1790293986898693000,
+      "start_ns": 1790324986207816000,
+      "end_ns": 1790324986211216000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -939,18 +939,18 @@
         "langgraph_step": 5,
         "report_description": "Check coverage, evidence, and actionable detail before approving.",
         "report_turn": 1,
-        "thread_id": "cf180f99-f812-44a6-8cac-c49403c38761",
+        "thread_id": "091a3a26-8d80-4912-a45a-2e9ab655599e",
         "cache_ttl": "5m",
         "description": "Check coverage, evidence, and actionable detail before approving."
       }
     },
     {
-      "id": "01a0d5d6-4e50-77e1-81d4-e22db0151156",
-      "parent_id": "01a0d5d6-4e4f-7b83-8ae9-bcd9778ae240",
+      "id": "01a0d7af-5160-72d0-9ba6-276518706080",
+      "parent_id": "01a0d7af-515f-7e92-a66b-329950e158ce",
       "name": "model",
       "kind": "workflow",
-      "start_ns": 1790293986896134000,
-      "end_ns": 1790293986898157000,
+      "start_ns": 1790324986208715000,
+      "end_ns": 1790324986210729000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -965,7 +965,7 @@
         "langgraph_step": 1,
         "report_description": "Check coverage, evidence, and actionable detail before approving.",
         "report_turn": 1,
-        "thread_id": "cf180f99-f812-44a6-8cac-c49403c38761",
+        "thread_id": "091a3a26-8d80-4912-a45a-2e9ab655599e",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:1"
@@ -974,12 +974,12 @@
       }
     },
     {
-      "id": "01a0d5d6-4e50-77e1-81d4-e23886162f9c",
-      "parent_id": "01a0d5d6-4e50-77e1-81d4-e22db0151156",
+      "id": "01a0d7af-5161-7570-8453-b3b29dccb5f2",
+      "parent_id": "01a0d7af-5160-72d0-9ba6-276518706080",
       "name": "SimulatedModel",
       "kind": "model",
-      "start_ns": 1790293986896514000,
-      "end_ns": 1790293986897830000,
+      "start_ns": 1790324986209126000,
+      "end_ns": 1790324986210392000,
       "status": "ok",
       "provider": "demo",
       "model": "scripted-chat",
@@ -1034,7 +1034,7 @@
         "langgraph_step": 1,
         "report_description": "Check coverage, evidence, and actionable detail before approving.",
         "report_turn": 1,
-        "thread_id": "cf180f99-f812-44a6-8cac-c49403c38761",
+        "thread_id": "091a3a26-8d80-4912-a45a-2e9ab655599e",
         "cache_ttl": "5m",
         "tags": [
           "seq:step:1"
@@ -1057,12 +1057,12 @@
       }
     },
     {
-      "id": "01a0d5d6-4e53-74c3-aec9-7fa3cdd5d452",
-      "parent_id": "01a0d5d6-4e4e-7000-90ce-c5e02e13a5d7",
+      "id": "01a0d7af-5163-7b63-b561-eeaa18f70a6e",
+      "parent_id": "01a0d7af-515f-7e92-a66b-32780cec21d5",
       "name": "route",
       "kind": "workflow",
-      "start_ns": 1790293986899307000,
-      "end_ns": 1790293986899469000,
+      "start_ns": 1790324986211898000,
+      "end_ns": 1790324986212064000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -1076,7 +1076,7 @@
         "langgraph_node": "judge",
         "langgraph_step": 5,
         "report_turn": 1,
-        "thread_id": "cf180f99-f812-44a6-8cac-c49403c38761",
+        "thread_id": "091a3a26-8d80-4912-a45a-2e9ab655599e",
         "cache_ttl": "5m",
         "tags": [
           "seq:step:3"
@@ -1085,12 +1085,12 @@
       }
     },
     {
-      "id": "01a0d5d6-4e54-74b3-a81b-58e047860bf2",
-      "parent_id": "01a0d5d6-4e3e-7071-a2e2-b812e134fba4",
+      "id": "01a0d7af-5164-70d1-8022-ab935a524223",
+      "parent_id": "01a0d7af-514a-79f2-a977-9a90d27f299b",
       "name": "finish",
       "kind": "workflow",
-      "start_ns": 1790293986900061000,
-      "end_ns": 1790293986900329000,
+      "start_ns": 1790324986212744000,
+      "end_ns": 1790324986213022000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -1104,7 +1104,7 @@
         "langgraph_node": "finish",
         "langgraph_step": 6,
         "report_turn": 1,
-        "thread_id": "cf180f99-f812-44a6-8cac-c49403c38761",
+        "thread_id": "091a3a26-8d80-4912-a45a-2e9ab655599e",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:6"
@@ -1113,12 +1113,12 @@
       }
     },
     {
-      "id": "01a0d5d6-4e55-7be0-94f9-0b1c43a4d989",
-      "parent_id": "01a0d5d6-4d9f-75d1-9356-5b812b779622",
+      "id": "01a0d7af-5166-78d0-b673-d2530b41bffb",
+      "parent_id": "01a0d7af-50ad-7933-8355-fd057de403c9",
       "name": "finish",
       "kind": "workflow",
-      "start_ns": 1790293986901553000,
-      "end_ns": 1790293986901860000,
+      "start_ns": 1790324986214424000,
+      "end_ns": 1790324986214760000,
       "status": "ok",
       "provider": null,
       "model": null,
@@ -1132,7 +1132,7 @@
         "langgraph_node": "finish",
         "langgraph_step": 3,
         "report_turn": 1,
-        "thread_id": "cf180f99-f812-44a6-8cac-c49403c38761",
+        "thread_id": "091a3a26-8d80-4912-a45a-2e9ab655599e",
         "cache_ttl": "5m",
         "tags": [
           "graph:step:3"
