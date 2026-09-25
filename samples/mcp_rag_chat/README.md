@@ -35,9 +35,9 @@ Local embedding CPU and MCP transport have no separate LLM token charge.
 ## Ask your own questions
 
 ```sh
-cp samples/mcp_rag_chat/.env.example samples/mcp_rag_chat/.env
+test -f .env.local || cp .env.example .env.local
 # Configure the provider, model, and API key in that file.
-uv run python -m agent_runtime --sample mcp_rag_chat --client console --live
+uv run python -m agent_runtime --sample mcp_rag_chat --client console --live --env-file .env.local
 ```
 
 Use `/quit` to finish and export the report. `/attach PATH` supplies UTF-8 text to

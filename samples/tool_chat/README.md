@@ -21,11 +21,10 @@ Each run writes raw spans, normalized data, the pricing snapshot, and HTML under
 `reports/tool_chat/`, replacing the previous run. Use `--out reports/my-tool-run` to select
 another reusable directory.
 
-For a real model, copy `samples/tool_chat/.env.example` to
-`samples/tool_chat/.env`, provide the selected key, and run:
+For a real model, use the repository `.env.local` (copy the root `.env.example` if needed), provide the selected key, and run:
 
 ```bash
-uv run python -m agent_runtime --sample tool_chat --live
+uv run python -m agent_runtime --sample tool_chat --live --env-file .env.local
 ```
 
 `--demo` runs use the simulator, so they do not call a model provider. FX reads the shared
@@ -75,7 +74,7 @@ assumptions. The reporting library never infers real cache usage from history.
 
 ## Interactive client
 
-Replace `--demo` with `--client console --live` in the launch command after configuring this sample's
-`.env`. The shared console accepts prompts and `/attach PATH` text files, `/send`,
+Replace `--demo` with `--client console --live --env-file .env.local` in the launch command after configuring the repository
+`.env.local`. The shared console accepts prompts and `/attach PATH` text files, `/send`,
 and `/quit`. Both clients use the same workflow and retained conversation history.
 See [component and sequence diagrams](../../docs/chat-composition.md).

@@ -18,9 +18,9 @@ recognition of every issue is not guaranteed by deterministic business rules.
 Run a real conversation with your configured provider:
 
 ```sh
-cp samples/quote_request/.env.example samples/quote_request/.env
-# Set your provider credentials in the local .env file.
-uv run python -m agent_runtime --sample quote_request --live --client console
+test -f .env.local || cp .env.example .env.local
+# Set your provider credentials in .env.local.
+uv run python -m agent_runtime --sample quote_request --live --env-file .env.local --client console
 ```
 
 The console displays the model's reason and question. Answer in ordinary language.

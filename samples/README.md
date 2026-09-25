@@ -155,8 +155,12 @@ All samples use LangGraphAgent. Console and scripted clients consume AG-UI event
 
 ## Model selection and configuration
 
-Demo runs use an offline model with a stateful context simulator and need no LLM API key. To enable live execution by default, copy the application’s `.env.example` to its own `.env` and configure `LG_PROVIDER` and its API key. `--demo` forces scripted execution even with credentials; `--live` forces real execution and reports missing or invalid credentials as errors. The two flags are mutually exclusive.
-Shell environment variables take precedence. `--env-file` selects another file.
+Demo runs use an offline model with a stateful context simulator and need no LLM API key. For live execution, copy the repository root `.env.example` to `.env.local` if that file does not already exist, configure `LG_PROVIDER` and its API key, and pass `--env-file .env.local` to the sample command. `--demo` forces scripted execution even with credentials; `--live` forces real execution and reports missing or invalid credentials as errors. The two flags are mutually exclusive.
+Shell environment variables take precedence. Without `--env-file`, the launcher still reads the selected sample’s `.env`; it does not automatically load the root `.env.local`.
+
+Only `simple_chat_langfuse` and `subagent_chat_langfuse` retain local `.env.example` templates because they require Langfuse endpoint and project keys. Copy those templates to `.env` in their sample directory when using that configuration. `.env.example` files are templates only; the runtime never loads them automatically.
+
+The runtime defaults to 32,768 output tokens for both providers, including full-document replacement tool arguments. No environment file is needed to set this default. `LG_MAX_TOKENS` explicitly overrides it; existing environment files and shell settings retain their configured limits.
 Provider behavior, reasoning visibility, cache hits, and call counts can differ
 from the offline sequence; the report uses actual reported provider usage.
 

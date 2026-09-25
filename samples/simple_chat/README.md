@@ -55,9 +55,9 @@ keeps built-in file operations in graph state rather than the local filesystem.
 ## Console chat
 
 ```bash
-cp samples/simple_chat/.env.example samples/simple_chat/.env
+test -f .env.local || cp .env.example .env.local
 # Configure an OpenAI or Anthropic API key in that file.
-uv run python -m agent_runtime --sample simple_chat --client console --live
+uv run python -m agent_runtime --sample simple_chat --client console --live --env-file .env.local
 ```
 
 Enter a prompt and read the response. Commands:
@@ -76,7 +76,7 @@ is sent to the configured provider in live mode and appears in local trace/repor
 content unless `--metadata-only` is selected.
 
 Console requires live mode (selected automatically when a provider key is configured): fixed offline answers would be misleading for arbitrary
-human questions. To run the same scripted test against a real provider, replace `--demo` with `--live --client static`.
+human questions. To run the same scripted test against a real provider, replace `--demo` with `--live --env-file .env.local --client static`.
 
 ## Reports and checks
 

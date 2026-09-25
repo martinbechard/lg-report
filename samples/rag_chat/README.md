@@ -85,9 +85,9 @@ quality. It produces a local HTML report with two model calls and one tool call.
 For arbitrary user questions:
 
 ```sh
-cp samples/rag_chat/.env.example samples/rag_chat/.env
+test -f .env.local || cp .env.example .env.local
 # Configure LG_PROVIDER, LG_MODEL and its API key.
-uv run python -m agent_runtime --sample rag_chat --client console --live
+uv run python -m agent_runtime --sample rag_chat --client console --live --env-file .env.local
 ```
 
 Use `/quit` to finish and write the report. `/attach PATH` includes a UTF-8 file in

@@ -36,7 +36,8 @@ LG_PROVIDER=openai
 LG_MODEL=YOUR-GPT-4.1-DEPLOYMENT-NAME
 OPENAI_API_KEY=YOUR-AZURE-RESOURCE-KEY
 OPENAI_BASE_URL=https://YOUR-RESOURCE.openai.azure.com/openai/v1/
-LG_MAX_TOKENS=2048
+# Optional override; defaults to 32768 output tokens.
+# LG_MAX_TOKENS=32768
 LG_EFFORT=
 ```
 
@@ -186,7 +187,7 @@ Langfuse project. It has separate setup instructions and adds Langfuse traces al
 The parent/subagent lesson also has matching [local-report](samples/subagent_chat/README.md)
 and [Langfuse](samples/subagent_chat_langfuse/README.md) applications.
 
-Start with the [sample catalog](samples/README.md). The launcher defaults to live, interactive execution when the selected provider has an API key; otherwise it uses scripted responses and the sample’s default client (usually fixed prompts; file approval still asks a human). Use `--demo` to force demo mode even when a key is configured. Copy the sample’s `.env.example` to its own `.env`, or select `--env-file PATH`; shell variables take precedence. `LG_PROVIDER` selects OpenAI (the default) or Anthropic, and only that provider’s key enables automatic live mode. `--live` explicitly requires real execution; provider errors never fall back to demo mode. `--demo` and `--live` cannot be combined. For fixed prompts against a real model, use `--live --client static`.
+Start with the [sample catalog](samples/README.md). The launcher defaults to live, interactive execution when the selected provider has an API key; otherwise it uses scripted responses and the sample’s default client (usually fixed prompts; file approval still asks a human). Use `--demo` to force demo mode even when a key is configured. Configure the root `.env.example` as `.env.local` and pass `--env-file .env.local`; shell variables take precedence. Samples with specific configuration needs retain their own templates (see the [sample configuration guide](samples/README.md#model-selection-and-configuration)). `LG_PROVIDER` selects OpenAI (the default) or Anthropic, and only that provider’s key enables automatic live mode. `--live` explicitly requires real execution; provider errors never fall back to demo mode. `--demo` and `--live` cannot be combined. For fixed prompts against a real model, use `--live --client static`.
 
 ### Run all local samples and export Excel
 

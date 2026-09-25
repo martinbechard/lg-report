@@ -134,16 +134,15 @@ Output directories are reused. Omit `--out` to replace the report bundle and
 ## Compare actual agent decisions
 
 ```bash
-cp samples/edit_with_reloaded_state/.env.example samples/edit_with_patched_state/.env
-cp samples/edit_with_reloaded_state/.env.example samples/edit_with_reloaded_state/.env
-# Configure provider credentials and model in each variant file.
-uv run python -m agent_runtime --sample edit-with-patched-state --live --mode edit-with-patched-state --show-context --out reports/claims-live-edit-with-patched-state
-uv run python -m agent_runtime --sample edit-with-reloaded-state --live --mode edit-with-reloaded-state --show-context --out reports/claims-live-edit-with-reloaded-state
+test -f .env.local || cp .env.example .env.local
+# Configure provider credentials and model in .env.local.
+uv run python -m agent_runtime --sample edit-with-patched-state --live --env-file .env.local --mode edit-with-patched-state --show-context --out reports/claims-live-edit-with-patched-state
+uv run python -m agent_runtime --sample edit-with-reloaded-state --live --env-file .env.local --mode edit-with-reloaded-state --show-context --out reports/claims-live-edit-with-reloaded-state
 ```
 
 These runs share user questions, tools, and agent instructions. The real model
 chooses which record to load, when to edit, whether to reread, and how to answer.
-For your own queries, replace `--demo` with `--client console --live`; `/quit` ends the session.
+For your own queries, replace `--demo` with `--client console --live --env-file .env.local`; `/quit` ends the session.
 Console `/attach` supplies ordinary text context, not a stored claim or policy.
 
 A live model may answer correctly in both modes, reread proactively, or make a

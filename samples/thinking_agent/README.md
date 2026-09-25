@@ -21,12 +21,11 @@ The report is written as `reports/thinking_agent/report.html` together
 with the raw trace, normalized run, and prices. `--out reports/my-investigation`
 selects another directory; its generated reports are replaced on rerun.
 
-For a live model, copy `samples/thinking_agent/.env.example` to
-`samples/thinking_agent/.env`, supply a provider key, choose a model supporting
+For a live model, use the repository `.env.local` (copy the root `.env.example` if needed), supply a provider key, choose a model supporting
 the desired reasoning settings, and run:
 
 ```bash
-uv run python -m agent_runtime --sample thinking_agent --live
+uv run python -m agent_runtime --sample thinking_agent --live --env-file .env.local
 ```
 
 Do not assume the model accepts every effort setting. The default offline
@@ -82,7 +81,7 @@ of the cache simulation. The tools are demonstrations, not a production agent.
 
 ## Interactive client
 
-Replace `--demo` with `--client console --live` in the launch command after configuring this sample's
-`.env`. The shared console accepts prompts and `/attach PATH` text files, `/send`,
+Replace `--demo` with `--client console --live --env-file .env.local` in the launch command after configuring the repository
+`.env.local`. The shared console accepts prompts and `/attach PATH` text files, `/send`,
 and `/quit`. Both clients use the same workflow and retained conversation history.
 See [component and sequence diagrams](../../docs/chat-composition.md).

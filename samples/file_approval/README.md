@@ -57,14 +57,16 @@ own approve/reject/cancel protocol to show cancellation ending the graph.
 uv run python -m agent_runtime --sample file_approval --source samples/file_approval/input.txt --target reports/edited-summary.txt --demo --client console
 
 # Real model decisions, with exactly the same automatic approval gate
-uv run python -m agent_runtime --sample file_approval --live --source samples/file_approval/input.txt --target reports/edited-summary.txt --request 'Add a short next-steps section.'
+uv run python -m agent_runtime --sample file_approval --live --env-file .env.local --source samples/file_approval/input.txt --target reports/edited-summary.txt --request 'Add a short next-steps section.'
 
 # Explicitly bypass human approval for this run
 uv run python -m agent_runtime --sample file_approval --source samples/file_approval/input.txt --target reports/automatic-summary.txt --mode autoapprove --demo
 ```
 
-Configure `LG_PROVIDER`, `LG_MODEL`, and the provider key in the environment or
-the sample's `.env` for `--live`. Custom `--request` text requires live mode.
+Configure `LG_PROVIDER`, `LG_MODEL`, and the provider key in the shell or
+the repository `.env.local` (copy the root `.env.example` if needed). The command
+above selects that file explicitly. The runtime defaults to 32,768 output tokens
+so replacement documents need no sample-specific limit; `LG_MAX_TOKENS` overrides it. Custom `--request` text requires live mode.
 The default offline fixture authors two successive additions and fresh reads;
 it proves tool interception and execution, not live editing quality. Rejection
 handling is scripted in that fixture; a live model decides how to continue from

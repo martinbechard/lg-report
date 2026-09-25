@@ -43,9 +43,9 @@ Model-price refreshes can otherwise use the network; FX only reads the shared sa
 ## Real questions in the console
 
 ```sh
-cp samples/expert_dispatch/.env.example samples/expert_dispatch/.env
+test -f .env.local || cp .env.example .env.local
 # Set LG_PROVIDER, LG_MODEL, and the corresponding provider key.
-uv run python -m agent_runtime --sample expert_dispatch --client console --live
+uv run python -m agent_runtime --sample expert_dispatch --client console --live --env-file .env.local
 ```
 
 Use `User:` to submit questions; `/attach PATH` queues UTF-8 text, `/send` submits
@@ -53,7 +53,7 @@ files alone, and `/quit` ends the session. All four agents share one configured 
 is phrase-based retrieval, not an embedding/vector database or live web search.
 Unmatched questions produce an explicit retrieval miss; experts are instructed
 to explain the coverage limit.
-For the fixed three-question scenario with a provider, use `--live --client static`.
+For the fixed three-question scenario with a provider, use `--live --env-file .env.local --client static`.
 
 ## Read the code
 

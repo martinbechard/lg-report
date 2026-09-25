@@ -126,3 +126,29 @@ def test_openai_endpoint_from_env_file(tmp_path, file_url, shell_url, expected):
         assert adapter.use_responses_api is True
         assert (provider, model) == ("openai", "my-gpt-4.1-deployment")
         assert dict(os.environ) == environment
+
+
+@pytest.mark.parametrize("provider", ["openai", "anthropic"])
+@pytest.mark.parametrize(
+    ("file_limit", "shell_limit", "expected"),
+    [(None, None, 32768), ("8192", None, 8192), ("8192", "16384", 16384)],
+)
+def test_output_limit_default_and_overrides(
+    isolated_models, monkeypatch, provider, file_limit, shell_limit, expected
+):
+    """Both SDK adapters get 32K by default while explicit limits keep precedence.
+
+    Construct real adapters with dummy keys but never invoke them: this checks
+    the provider boundary without network calls or billable model generation.
+    """
+    settings = {
+        "LG_PROVIDER": provider,
+        "OPENAI_API_KEY": "placeholder-not-a-real-key",
+        "ANTHROPIC_API_KEY": "placeholder-not-a-real-key",
+    }
+    if file_limit is not None:
+        settings["LG_MAX_TOKENS"] = file_limit
+    if shell_limit is not None:
+        monkeypatch.setenv("LG_MAX_TOKENS", shell_limit)
+    adapter, _, _ = configured_model(settings=settings)
+    assert adapter.max_tokens == expected

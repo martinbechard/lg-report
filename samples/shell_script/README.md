@@ -19,7 +19,7 @@ as failure in the final answer; the fixture does not invent totals.
 uv run python -m agent_runtime --sample shell_script --prices models.json --demo
 
 # Real model using the same backend and bundled script
-uv run python -m agent_runtime --sample shell_script --live --prices models.json
+uv run python -m agent_runtime --sample shell_script --live --env-file .env.local --prices models.json
 
 # Angular client, using the same workflow
 uv run python -m agent_runtime --sample shell_script --client angular --prices models.json --demo
@@ -53,4 +53,4 @@ Earlier filesystem effects are not rolled back after failure or timeout.
 Despite the protocol name, this is **local execution, not an OS sandbox**.
 The temporary directory separates sample files; shell commands can access the host
 with the current user's permissions and environment. This sample has no human
-approval gate. Use trusted scripts and requests, including with `--live`.
+approval gate. Use trusted scripts and requests, including with `--live --env-file .env.local`.

@@ -57,10 +57,10 @@ The explicit `--demo` mode makes no provider calls. To avoid model-price network
 supply `--prices models.json`. FX reads the saved shared `exchange-rate.json`.
 
 ```sh
-cp samples/review_loop/.env.example samples/review_loop/.env
+test -f .env.local || cp .env.example .env.local
 # Configure the provider and API key in that file.
-uv run python -m agent_runtime --sample review_loop --live
-uv run python -m agent_runtime --sample review_loop --client console --live
+uv run python -m agent_runtime --sample review_loop --live --env-file .env.local
+uv run python -m agent_runtime --sample review_loop --client console --live --env-file .env.local
 ```
 
 Console mode supports `/attach PATH` for UTF-8 evidence files, `/send`, and `/quit`.

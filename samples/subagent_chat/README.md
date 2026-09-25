@@ -26,14 +26,14 @@ The command prints the HTML path and creates `spans.jsonl`, `run.json`,
 For a real model:
 
 ```sh
-cp samples/subagent_chat/.env.example samples/subagent_chat/.env
+test -f .env.local || cp .env.example .env.local
 # Configure LG_PROVIDER, LG_MODEL, and the selected provider's API key.
-uv run python -m agent_runtime --sample subagent_chat --live
+uv run python -m agent_runtime --sample subagent_chat --live --env-file .env.local
 ```
 
 The same provider/model configuration is used for both agents, with separate
 adapter instances. Live mode incurs provider charges and can produce a different
-number of calls. Environment variables override the sample's `.env`.
+number of calls. Shell environment variables override `.env.local`.
 
 ## Read the code
 
@@ -118,7 +118,7 @@ and simulation so you can compare the same workflow through two tracing systems.
 
 ## Interactive client
 
-Replace `--demo` with `--client console --live` in the launch command after configuring this sample's
-`.env`. The shared console accepts prompts and `/attach PATH` text files, `/send`,
+Replace `--demo` with `--client console --live --env-file .env.local` in the launch command after configuring the repository
+`.env.local`. The shared console accepts prompts and `/attach PATH` text files, `/send`,
 and `/quit`. Both clients use the same workflow and retained conversation history.
 See [component and sequence diagrams](../../docs/chat-composition.md).

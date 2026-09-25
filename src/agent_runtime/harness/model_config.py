@@ -99,7 +99,10 @@ def configured_model(model_name: str | None = None, *, settings=None):
     # before graph execution rather than discovering this after a paid run starts.
     if not values.get(key_name, "").strip():
         raise ValueError(f"Set {key_name} in the environment or .env")
-    max_tokens = int(values.get("LG_MAX_TOKENS", "1024"))
+    # Tool arguments can contain complete replacement documents. Give every
+    # sample a 32K output allowance without requiring a copied environment file.
+    # Explicit settings still let callers match their model or workload limits.
+    max_tokens = int(values.get("LG_MAX_TOKENS", "32768"))
     # A nonpositive output budget cannot produce an answer. int() above already
     # rejects nonnumeric settings; this check rejects numeric but unusable values.
     if max_tokens <= 0:
