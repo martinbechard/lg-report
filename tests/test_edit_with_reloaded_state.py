@@ -22,11 +22,16 @@ from agent_runtime.workflows.edit_with_reloaded_state import (
     ClaimsContext,
     ContextAudit,
 )
-from samples.edit_with_reloaded_state.sample import (
-    CORRECTED_DESCRIPTION,
-    USER_PROMPTS,
-    make_simulated_model,
+from samples.edit_with_reloaded_state.sample import CONVERSATION, make_simulated_model
+
+# Expected values are test projections of the authored conversation.
+CORRECTED_DESCRIPTION = next(
+    call["args"]["description"]
+    for entry in CONVERSATION
+    for call in entry.get("tool_calls", [])
+    if call["name"] == "edit_claim"
 )
+USER_PROMPTS = [entry["content"] for entry in CONVERSATION if entry["role"] == "client"]
 
 
 def run_demo(mode, *, prompts=USER_PROMPTS, model=None, capture=True):
@@ -108,23 +113,34 @@ def test_multiple_edits_in_one_turn_reload_the_combined_result(mode):
     """
     model = make_simulated_model(mode)
     final_description = "The damaged laptop was repaired at the local service centre."
-    insertion = [i for i, entry in enumerate(model.conversation) if entry["role"] == "claims_agent"][5]
-    model.conversation[insertion:insertion] = [{"role": "claims_agent", "content": response.content, "tool_calls": response.tool_calls} for response in [
-        AIMessage(
-            content="",
-            tool_calls=[
-                {
-                    "name": "edit_claim",
-                    "id": "second-correction",
-                    "args": {
-                        "expected_revision": 2,
-                        "description": final_description,
-                        "status": "approved",
-                    },
-                }
-            ],
-        ),
-    ]]
+    insertion = [
+        i
+        for i, entry in enumerate(model.conversation)
+        if entry["role"] == "claims_agent"
+    ][5]
+    model.conversation[insertion:insertion] = [
+        {
+            "role": "claims_agent",
+            "content": response.content,
+            "tool_calls": response.tool_calls,
+        }
+        for response in [
+            AIMessage(
+                content="",
+                tool_calls=[
+                    {
+                        "name": "edit_claim",
+                        "id": "second-correction",
+                        "args": {
+                            "expected_revision": 2,
+                            "description": final_description,
+                            "status": "approved",
+                        },
+                    }
+                ],
+            ),
+        ]
+    ]
     session, _ = run_demo(mode, model=model)
     assert session.agent.context_version == 3
     assert session.agent.evidence()["final_claim"]["description"] == final_description
@@ -190,7 +206,17 @@ def test_failed_edit_preserves_claim_and_history():
     session, _ = run_demo(
         "edit-with-reloaded-state",
         prompts=USER_PROMPTS[1:4],
-        model=SimulatedModel(cache_reuse=False, conversation=[{"role": "claims_agent", "content": response.content, "tool_calls": response.tool_calls} for response in responses]),
+        model=SimulatedModel(
+            cache_reuse=False,
+            conversation=[
+                {
+                    "role": "claims_agent",
+                    "content": response.content,
+                    "tool_calls": response.tool_calls,
+                }
+                for response in responses
+            ],
+        ),
     )
     assert session.agent.context_version == 1
     assert session.events == []
@@ -227,7 +253,17 @@ def test_metadata_only_omits_claim_and_prompt_content():
 
 def test_no_edit_keeps_history_without_reload():
     """edit-with-reloaded-state mode preserves normal continuity until an actual edit succeeds."""
-    model = SimulatedModel(cache_reuse=False, conversation=[{"role": "claims_agent", "content": response.content, "tool_calls": response.tool_calls} for response in [AIMessage(content="Hello"), AIMessage(content="Hi")]])
+    model = SimulatedModel(
+        cache_reuse=False,
+        conversation=[
+            {
+                "role": "claims_agent",
+                "content": response.content,
+                "tool_calls": response.tool_calls,
+            }
+            for response in [AIMessage(content="Hello"), AIMessage(content="Hi")]
+        ],
+    )
     session, _ = run_demo(
         "edit-with-reloaded-state", prompts=["Hello", "Again"], model=model
     )
@@ -251,7 +287,17 @@ def test_policy_follow_up_does_not_reload_claim_after_edit():
 
 def test_no_read_happens_unless_model_requests_one():
     """No preload and no hidden retrieval even when a question mentions a claim."""
-    model = SimulatedModel(cache_reuse=False, conversation=[{"role": "claims_agent", "content": response.content, "tool_calls": response.tool_calls} for response in [AIMessage(content="Which detail do you need?")]])
+    model = SimulatedModel(
+        cache_reuse=False,
+        conversation=[
+            {
+                "role": "claims_agent",
+                "content": response.content,
+                "tool_calls": response.tool_calls,
+            }
+            for response in [AIMessage(content="Which detail do you need?")]
+        ],
+    )
     session, _ = run_demo(
         "edit-with-reloaded-state", prompts=["Help with my claim"], model=model
     )
@@ -288,19 +334,29 @@ def test_agent_can_read_claim_without_workflow_or_policy_loading():
     Supply a fresh human question directly to the agent. Its model requests only
     the claim; no workflow is present to select or execute an application read.
     """
-    model = SimulatedModel(cache_reuse=False, conversation=[{"role": "claims_agent", "content": response.content, "tool_calls": response.tool_calls} for response in [
-            AIMessage(
-                content="",
-                tool_calls=[
-                    {
-                        "name": "read_claim",
-                        "args": {},
-                        "id": "claim-only",
-                    }
-                ],
-            ),
-            AIMessage(content="The claim is pending."),
-        ]])
+    model = SimulatedModel(
+        cache_reuse=False,
+        conversation=[
+            {
+                "role": "claims_agent",
+                "content": response.content,
+                "tool_calls": response.tool_calls,
+            }
+            for response in [
+                AIMessage(
+                    content="",
+                    tool_calls=[
+                        {
+                            "name": "read_claim",
+                            "args": {},
+                            "id": "claim-only",
+                        }
+                    ],
+                ),
+                AIMessage(content="The claim is pending."),
+            ]
+        ],
+    )
     result = build_agent({"model": model}, ClaimStore()).invoke(
         {
             "messages": [{"role": "user", "content": "What is the claim's status?"}],

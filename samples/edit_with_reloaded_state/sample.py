@@ -8,14 +8,13 @@ the records. None of the dictionaries below directly edits or reads that store.
 
 Offline model decisions demonstrate tool execution and context mechanics only.
 Both modes answer correctly in this fixture: we do not manufacture model failure
-by hard-coding a wrong edit-with-patched-state answer. Live mode reuses only USER_PROMPTS and lets
+by hard-coding a wrong edit-with-patched-state answer. Live mode reuses only the client entries and lets
 the configured model choose actions; only live runs can reveal model confusion.
 
 AI attribution: Generated with AI assistance (Northstar).
 Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
 
-from agent_runtime.harness.model_factory import client_prompts
 from agent_runtime.harness.simulated_model import SimulatedModel
 
 # Keeping a separate catalog ID gives this comparison its own configuration
@@ -34,9 +33,6 @@ SAMPLE = {
     "implementation": "edit_with_reloaded_state",
 }
 
-# Tests use this expected value to check the actual stored record independently
-# of the canned final answer. An authored answer alone cannot prove an edit ran.
-CORRECTED_DESCRIPTION = "The laptop screen cracked when it fell from a desk at home."
 
 # Read this as a chronological teaching script, not as preloaded agent context:
 # - client entries become the successive human requests in a scripted run;
@@ -169,9 +165,6 @@ CONVERSATION = [
         "content": "The laptop screen cracked when it fell from a desk at home. The status is approved.",
     },
 ]
-# Extract only client entries, preserving identical questions for both modes.
-# Tests consume this list directly; the catalog also extracts from CONVERSATION.
-USER_PROMPTS = client_prompts(CONVERSATION)
 
 
 def make_simulated_model(mode):

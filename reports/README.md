@@ -4,10 +4,11 @@
 Open [the report index](index.html) to view HTML or download Excel for every sample.
 No model credentials, Python installation, or sample execution are needed to inspect
 these saved outputs. The index identifies completed and failed runs from the latest
-batch. The refreshed reports use real provider models with scripted user requests
-and approval/clarification answers. The nested-workflow scenario options select
-fixtures only in demo mode; live models determine their own repair paths and
-verdicts. In the circuit-breaker lesson, normal workflow termination means the
+batch. The saved reports use real provider models with scripted user requests
+and approval/clarification answers, except the two nested-workflow reports,
+which are explicitly simulated examples of parent dispatch and child review.
+Their live runs may take different review paths. The obsolete tester-loop
+variant was removed when the nested sample was simplified. In the circuit-breaker lesson, normal workflow termination means the
 breaker stopped the repeated failure, not that the file was written.
 The saved quote example completed after the live model asked about quantity and
 addressing. Its answer uses the authored fixture: 500 households, identical

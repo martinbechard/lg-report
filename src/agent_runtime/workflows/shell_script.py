@@ -25,7 +25,7 @@ def build_workflow(model=None, *, working_directory=None):
     from pathlib import Path
     from tempfile import TemporaryDirectory
 
-    import samples.shell_script
+    import samples
 
     workspace = (
         TemporaryDirectory(prefix="lg-shell-script-")
@@ -37,7 +37,7 @@ def build_workflow(model=None, *, working_directory=None):
             working_directory = workspace.name
             for name in ("summarize.sh", "orders.csv"):
                 shutil.copyfile(
-                    Path(samples.shell_script.__file__).with_name(name),
+                    Path(samples.__file__).parent / "shell_script" / name,
                     Path(working_directory) / name,
                 )
             script = Path(working_directory) / "summarize.sh"

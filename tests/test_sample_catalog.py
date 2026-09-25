@@ -495,9 +495,10 @@ def test_discovery_does_not_call_model_factories(monkeypatch):
         """Fail if discovery crosses the model construction boundary."""
         pytest.fail("Discovery created a simulated model")
 
-    monkeypatch.setattr(sample, "make_simulated_model", unexpected)
     monkeypatch.setattr(sample, "build_scripted_models", unexpected)
     catalog = SampleCatalog()
     assert catalog.get("simple_chat").name == sample.SAMPLE["name"]
-    assert catalog.prompts("simple_chat") == sample.USER_PROMPTS
+    assert catalog.prompts("simple_chat") == [
+        entry["content"] for entry in sample.CONVERSATION if entry["role"] == "client"
+    ]
     assert "edit_with_reloaded_state" not in catalog.samples

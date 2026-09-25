@@ -11,7 +11,7 @@ Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 
 from langchain_core.messages import ToolMessage
 
-from agent_runtime.harness.model_factory import client_prompts, model_responses
+from agent_runtime.harness.model_factory import model_responses
 from agent_runtime.harness.simulated_model import SimulatedModel
 
 # Discovery reads this metadata without constructing a model.
@@ -46,7 +46,6 @@ CONVERSATION = [
     },
     {"role": "shell_agent", "content": "Shell tool returned:\n{tool_result}"},
 ]
-USER_PROMPTS = client_prompts(CONVERSATION)
 
 
 class ShellFixture(SimulatedModel):

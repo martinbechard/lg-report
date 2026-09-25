@@ -13,7 +13,6 @@ Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 
 import json
 
-from agent_runtime.harness.model_factory import client_prompts
 from agent_runtime.harness.simulated_model import SimulatedModel
 
 # Discovery reads this metadata without constructing a model.
@@ -859,11 +858,6 @@ class SlugTests(unittest.TestCase):
         "when": "On demand when middleware compacts context; not a fixed step in the exchange.",
     },
 ]
-USER_PROMPTS = client_prompts(CONVERSATION)
-# Test-facing views come from the chronological script, not separate prose.
-PLAN = CONVERSATION[1]["tool_calls"][0]["args"]["content"]
-PEER_BRIEF = json.loads(CONVERSATION[3]["content"])["message"]
-FINAL_ANSWER = json.loads(CONVERSATION[-2]["content"])["message"]
 
 
 def make_simulated_models():

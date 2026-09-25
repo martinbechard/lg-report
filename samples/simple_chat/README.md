@@ -96,7 +96,8 @@ All samples follow this structure; Langfuse variants share the same workflows.
 ## Why the factory is a function
 
 Importing `sample.py` makes its metadata and conversation available. It does not
-create a model. In simulated mode, `build_scripted_models(options)` calls
-`make_simulated_model()` to create a fresh response cursor and usage ledger for
-the conversation. Live mode bypasses these factories and selects the configured
-provider. The factory is the same one previously used by this lesson.
+create a model. In simulated mode, `build_scripted_models(options)` creates the standard
+`SimulatedModel` with this lesson's report metadata. Response routing and token
+estimates come from the shared simulator. Live mode bypasses this factory and
+selects the configured provider. Samples without special configuration or report
+metadata need only `SAMPLE` and `CONVERSATION`; the catalog builds their simulator.

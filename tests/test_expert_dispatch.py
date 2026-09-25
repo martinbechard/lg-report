@@ -21,7 +21,22 @@ from reporting.pricing import cost, load_prices, summarize
 from reporting.schema import Run
 
 create_run = partial(SampleCatalog().create_run, "expert_dispatch")
-from samples.expert_dispatch.sample import CASES
+from samples.expert_dispatch.sample import CONVERSATION
+
+# Expected values are test projections of the authored conversation.
+dispatcher_replies = [
+    entry for entry in CONVERSATION if entry["role"] == "dispatcher_agent"
+]
+CASES = [
+    (
+        request["tool_calls"][0]["args"]["subagent_type"],
+        request["tool_calls"][0]["args"]["description"],
+        answer["content"],
+    )
+    for request, answer in zip(
+        dispatcher_replies[::2], dispatcher_replies[1::2], strict=True
+    )
+]
 
 
 # Exercise every scripted routing case and prove selected experts
@@ -81,7 +96,7 @@ def test_expert_selection_isolation_and_costs(tmp_path):
 def test_shared_model_retains_separate_tool_bindings(monkeypatch):
     from agent_runtime.harness.simulated_model import SimulatedModel
     from agent_runtime.workflows.expert_dispatch import build_workflow
-    from samples.expert_dispatch.sample import make_simulated_model
+    from samples.expert_dispatch.sample import build_scripted_models
 
     bound_schemas = []
     original = SimulatedModel.bind_tools
@@ -95,7 +110,7 @@ def test_shared_model_retains_separate_tool_bindings(monkeypatch):
         return binding
 
     monkeypatch.setattr(SimulatedModel, "bind_tools", capture_binding)
-    model = make_simulated_model()
+    model = build_scripted_models({})["workflow"]
     Conversation(
         build_workflow(model),
         MockClient([Request(question) for _, question, _ in CASES]),
@@ -119,9 +134,9 @@ def test_shared_model_retains_separate_tool_bindings(monkeypatch):
 # identity through unchanged rather than configuring a second hidden instance.
 def test_live_configures_one_model(monkeypatch):
     from agent_runtime.harness import model_factory
-    from samples.expert_dispatch.sample import make_simulated_model
+    from samples.expert_dispatch.sample import build_scripted_models
 
-    model_instance = make_simulated_model()
+    model_instance = build_scripted_models({})["workflow"]
     configured_calls = []
 
     def configure_once(name):

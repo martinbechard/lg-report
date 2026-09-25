@@ -53,7 +53,6 @@ CONVERSATION = [
     },
     {"role": "wikipedia_rag_agent", "content": "Retrieved reference excerpt [{passage_id}]:\n{excerpt}"},
 ]
-USER_PROMPTS = client_prompts(CONVERSATION)
 
 
 def make_simulated_model():
@@ -69,7 +68,7 @@ def make_simulated_model():
     # an absent/incomplete index raises. The app/workflow never pass storage
     # into the agent.
     collection = open_index(WIKIPEDIA_INDEX_DIRECTORY)
-    result = collection.query(query_texts=USER_PROMPTS, n_results=1)
+    result = collection.query(query_texts=client_prompts(CONVERSATION), n_results=1)
     # This is Chroma's direct query result, not an agent invocation result.
     # The outer list identifies our first query; the inner list its first match.
     # An empty index cannot provide the required excerpt and fails here.

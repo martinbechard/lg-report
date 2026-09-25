@@ -136,9 +136,11 @@ def test_console_and_sse_sample_parity(
     if sample == "file_approval":
         answers = ["approve", "approve"]
     elif sample == "quote_request":
-        from samples.quote_request.sample import ANSWERS
+        from samples.quote_request.sample import CONVERSATION
 
-        answers = list(ANSWERS)
+        answers = [
+            entry["content"] for entry in CONVERSATION if entry["role"] == "human"
+        ]
     prompts = sample_info(sample)["prompts"]
     file = tmp_path / "context.txt"
     file.write_text("Human-supplied context.\n", encoding="utf-8")

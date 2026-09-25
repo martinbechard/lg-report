@@ -64,7 +64,12 @@ One shared recorder captures the session in HTML and independent `run.json`.
 `--out` selects another reusable output directory; `--metadata-only` omits report payloads
 but does not prevent sending the request to the model. `--prices models.json` and
 `--fx-file /path/to/fx.json` select saved model-price and FX references; FX never performs a lookup here. Live usage comes from provider
-callbacks; absent usage remains explicit. Offline decisions invent no usage.
+callbacks; absent provider usage remains explicit. Offline runs use the standard
+`SimulatedModel` and report token estimates, not provider usage or actual charges.
+Each clarification assessment rebuilds its request, so the sample disables
+simulated cache reuse and estimates each request independently.
+`CONVERSATION` supplies the scripted decisions and human answers; the small
+`build_scripted_models()` factory only configures this accounting behavior.
 
 Local reports default to `report.html`, `run.json`, `spans.jsonl`, and
 `prices.json` in `reports/quote_request/`. The next default run replaces

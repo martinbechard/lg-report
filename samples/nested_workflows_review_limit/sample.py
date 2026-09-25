@@ -1,21 +1,15 @@
-"""Declare a teaching variant that shares another sample's implementation.
+"""Demonstrate a child returning an unapproved result at its review limit.
 
-The catalog uses SAMPLE for selection and loads conversation/model factories
-from the declared implementation. Importing this file does not build a model.
+The catalog uses the nested-workflows conversation with only one draft allowed.
+The parent returns the child's unresolved feedback without claiming approval.
 AI attribution: Generated with AI assistance by Northstar.
 Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
 
-# Discovery reads this metadata without constructing a model.
 SAMPLE = {
     "id": "nested_workflows_review_limit",
-    "name": "Nested workflows: review circuit breaker",
-    "description": "The coding workflow exhausts its review rounds, returns blocked, and "
-    "never invokes the tester.",
-    "options": {
-        "scenario": "review_limit",
-        "max_review_rounds": 3,
-        "max_coding_cycles": 3,
-    },
+    "name": "Nested workflows: review limit",
+    "description": "The child reaches its review limit and the parent returns the unapproved draft.",
+    "options": {"max_rounds": 1},
     "implementation": "nested_workflows",
 }

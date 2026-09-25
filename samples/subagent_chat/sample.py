@@ -1,7 +1,7 @@
 """Describe the example conversation in execution order, including the child exchange.
 
-SAMPLE declares discovery metadata alongside this scenario. Model factories
-create fresh simulated models only when called; live mode uses the provider.
+SAMPLE declares discovery metadata alongside this scenario. The catalog supplies
+CONVERSATION to the shared model factory; live mode uses the provider.
 
 The factory extracts assistant messages by speaker; the static client extracts
 client messages. Tool entries document expected observations only: the graph
@@ -9,8 +9,6 @@ still executes the real tools and supplies their actual results.
 AI attribution: Generated with AI assistance.
 Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
-
-from agent_runtime.harness.model_factory import client_prompts
 
 # Discovery reads this metadata without constructing a model.
 SAMPLE = {
@@ -75,9 +73,3 @@ CONVERSATION = [
         "content": "The specialist echoed ReAct and received Your input was: ReAct. The parent receives its summary; the specialist's internal tool exchange stays in its own context.",
     },
 ]
-
-USER_PROMPTS = client_prompts(CONVERSATION)
-# Existing test helpers read the scenario; they do not author its text.
-DELEGATED_TASK = CONVERSATION[1]["tool_calls"][0]["args"]["description"]
-SPECIALIST_SUMMARY = CONVERSATION[4]["content"]
-FINAL_ANSWER = CONVERSATION[-1]["content"]

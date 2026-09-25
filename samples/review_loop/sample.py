@@ -83,17 +83,19 @@ CONVERSATION = [
 ]
 
 
-def make_simulated_model():
-    """Extract each role's replies while retaining separate shared-model ledgers."""
-    return SimulatedModel(
-        conversation=CONVERSATION,
-        metadata={
-            "report_effort": "light",
-            "report_description": "Perform the current author or evidence-review role.",
-        },
-    )
-
-
 def build_scripted_models(options):
-    """Retain role routing in simulated mode; this fixed story ignores options."""
-    return {"workflow": make_simulated_model()}
+    """Create a fresh standard simulator with this lesson's report metadata.
+
+    Response routing and token accounting use the shared SimulatedModel. This
+    fixed conversation ignores options; the callback preserves only the report
+    annotations. Live mode uses the configured provider instead.
+    """
+    return {
+        "workflow": SimulatedModel(
+            conversation=CONVERSATION,
+            metadata={
+                "report_effort": "light",
+                "report_description": "Perform the current author or evidence-review role.",
+            },
+        )
+    }

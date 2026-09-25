@@ -22,7 +22,7 @@ from agent_runtime.workflows.review_loop import build_workflow
 from reporting.execute_runnable import execute_runnable
 from reporting.pricing import cost, load_prices, summarize
 from reporting.schema import Run
-from samples.review_loop.sample import CONVERSATION, make_simulated_model
+from samples.review_loop.sample import CONVERSATION, build_scripted_models
 
 
 # Rejection feedback must cause a real second review round and remain
@@ -31,7 +31,9 @@ def test_feedback_drives_real_second_round_and_report(tmp_path):
     # Expected values come from the authored exchange, not sample-level aliases.
     prompt, first_draft, first_review, revised_draft, _ = CONVERSATION
     client = MockClient([Request(prompt["content"])])
-    graph = build_workflow(make_simulated_model(), first_draft_high_level=True)
+    graph = build_workflow(
+        build_scripted_models({})["workflow"], first_draft_high_level=True
+    )
     prices = load_prices(Path(__file__).parents[1] / "models.json")
     execute_runnable(
         Conversation(graph, client),
@@ -88,22 +90,26 @@ def model_with_reviews(reviews):
     # reviews supplies ordered verdict dictionaries, serialized as assistant
     # message text for the real judge parser. Matching author responses let
     # routing consume one draft per verdict; no live judgment occurs here.
-    return SimulatedModel(conversation=[
-        entry
-        for review in reviews
-        for entry in (
-            {"role": "review_author", "content": "Draft proposal"},
-            {"role": "evidence_judge", "content": json.dumps(review)},
-        )
-    ])
-
+    return SimulatedModel(
+        conversation=[
+            entry
+            for review in reviews
+            for entry in (
+                {"role": "review_author", "content": "Draft proposal"},
+                {"role": "evidence_judge", "content": json.dumps(review)},
+            )
+        ]
+    )
 
 
 # Approval on the first judge response must stop iteration immediately
 # and avoid fabricating a later draft.
 def test_first_round_can_be_approved():
     result = build_workflow(
-        model_with_reviews([{"verdict": "approve", "rationale": "Meets the request.", "feedback": []}]), first_draft_high_level=True
+        model_with_reviews(
+            [{"verdict": "approve", "rationale": "Meets the request.", "feedback": []}]
+        ),
+        first_draft_high_level=True,
     ).invoke({"messages": [("user", "Give a brief overview")]})
     assert result["round"] == 1 and result["outcome"] == "approved"
 
@@ -111,10 +117,14 @@ def test_first_round_can_be_approved():
 # Persistent rejection must honor the round limit and never be
 # rewritten as approval merely because execution ended.
 def test_rejection_stops_at_limit_without_claiming_approval():
-    review = {"verdict": "revise", "rationale": "Missing detail.", "feedback": ["Give a concrete plan."]}
-    result = build_workflow(
-        model_with_reviews([review] * 3), max_rounds=3
-    ).invoke({"messages": [("user", "Give a concrete plan")]})
+    review = {
+        "verdict": "revise",
+        "rationale": "Missing detail.",
+        "feedback": ["Give a concrete plan."],
+    }
+    result = build_workflow(model_with_reviews([review] * 3), max_rounds=3).invoke(
+        {"messages": [("user", "Give a concrete plan")]}
+    )
     assert result["round"] == 3 and result["outcome"] == "limit_reached"
     assert "NOT approved" in result["messages"][-1].content
     assert review["feedback"][0] in result["messages"][-1].content
@@ -123,10 +133,12 @@ def test_rejection_stops_at_limit_without_claiming_approval():
 # Invalid judge output is a contract failure, not an approval signal;
 # the workflow must surface that distinction.
 def test_invalid_judge_output_is_not_approval():
-    model = SimulatedModel(conversation=[
-        {"role": "review_author", "content": "Draft proposal"},
-        {"role": "evidence_judge", "content": "looks fine to me"},
-    ])
+    model = SimulatedModel(
+        conversation=[
+            {"role": "review_author", "content": "Draft proposal"},
+            {"role": "evidence_judge", "content": "looks fine to me"},
+        ]
+    )
     with pytest.raises(ValidationError):
         build_workflow(model).invoke({"messages": [("user", "A plan please")]})
     with pytest.raises(ValidationError):
@@ -142,7 +154,7 @@ def test_invalid_judge_output_is_not_approval():
 # review behavior is guaranteed by construction.
 def test_invalid_round_limit(limit):
     with pytest.raises(ValueError):
-        build_workflow(make_simulated_model(), max_rounds=limit)
+        build_workflow(build_scripted_models({})["workflow"], max_rounds=limit)
 
 
 # A new user turn starts a new review cycle rather than reusing the
@@ -153,9 +165,25 @@ def test_new_user_turn_starts_new_review_cycle():
     model = ScriptedChatModel(
         responses=[
             AIMessage(content="First answer"),
-            AIMessage(content=json.dumps({"verdict": "approve", "rationale": "Meets the request.", "feedback": []})),
+            AIMessage(
+                content=json.dumps(
+                    {
+                        "verdict": "approve",
+                        "rationale": "Meets the request.",
+                        "feedback": [],
+                    }
+                )
+            ),
             AIMessage(content="Second answer"),
-            AIMessage(content=json.dumps({"verdict": "approve", "rationale": "Meets the request.", "feedback": []})),
+            AIMessage(
+                content=json.dumps(
+                    {
+                        "verdict": "approve",
+                        "rationale": "Meets the request.",
+                        "feedback": [],
+                    }
+                )
+            ),
         ]
     )
     client = MockClient([Request("First question"), Request("Second question")])

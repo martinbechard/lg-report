@@ -1,74 +1,66 @@
-"""Feed the real nested graphs independent, explicitly simulated role decisions.
+"""Show a parent assignment followed by a child drafting and review conversation.
 
-SAMPLE declares discovery metadata alongside this scenario. Model factories
-create fresh simulated models only when called; live mode uses the provider.
-
-Every request is metered independently: a new reviewer context must not be
-mistaken for an append-only conversation or imply cache reuse. This accounting
-choice neither changes nor shortens any message history. Queues fail when
-exhausted instead of silently cycling back to an earlier approval.
-
+CONVERSATION is the single authored source for the client prompt and simulated
+role replies. Live mode uses the same graphs with provider responses instead.
+The code below is fixture text: neither mode executes the proposed function.
 AI attribution: Generated with AI assistance by Northstar.
 Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
 
-from pydantic import PrivateAttr
+import json
 
-from agent_runtime.harness.simulated_model import SimulatedModel
-from samples.nested_workflows.scenarios import (
-    CONVERSATION as CONVERSATION,  # noqa: PLC0414 - chronological catalog export
-)
-from samples.nested_workflows.scenarios import (
-    USER_PROMPTS as USER_PROMPTS,  # noqa: PLC0414 - catalog export
-)
-from samples.nested_workflows.scenarios import (
-    conversation,
-)
-
-# Discovery reads this metadata without constructing a model.
 SAMPLE = {
     "id": "nested_workflows",
-    "name": "Nested workflows and context scopes",
-    "description": "Planner/tester share outer context; supervisor/coder share a nested "
-    "context; each review is isolated. Includes review repair and "
-    "tester-driven re-entry.",
-    "options": {"scenario": "rework", "max_review_rounds": 3, "max_coding_cycles": 3},
+    "name": "Nested workflows",
+    "description": "A parent dispatches an assignment to a child author/judge review loop.",
+    "options": {"max_rounds": 3},
 }
 
-
-class NestedDemoModel(SimulatedModel):
-    """Keep one role's response cursor while recording each actual prompt for tests."""
-
-    _seen: list = PrivateAttr(default_factory=list)
-
-    @property
-    def requests(self):
-        """Expose defensive copies of observed inputs, not authored expectations."""
-        return [
-            [message.model_copy(deep=True) for message in messages]
-            for messages in self._seen
-        ]
-
-    def _generate(self, messages, *args, **kwargs):
-        """Record actual input before the common simulator selects and meters a reply."""
-        self._seen.append([message.model_copy(deep=True) for message in messages])
-        return super()._generate(messages, *args, **kwargs)
-
-
-def build_scripted_models(options):
-    """Extract named replies from the selected chronological scenario.
-
-    options merges sample defaults and run overrides. scenario selects the story;
-    max_review_rounds and max_coding_cycles bound its scripted retries. The catalog
-    uses this callback to preserve the independent metering and exhaustion checks.
-    """
-    steps = conversation(options)
-    return {
-        name: NestedDemoModel(
-            conversation=steps, cache_reuse=False,
-            metadata={
-                "report_description": f"Scripted nested-workflow {name} decisions."
-            },
-        )
-        for name in ("planner", "coding_supervisor", "coder", "reviewer", "tester")
-    }
+CONVERSATION = [
+    {
+        "role": "client",
+        "content": "Implement normalize_tags(tags). Trim and lowercase strings, remove "
+        "duplicates while preserving order, discard blank tags, and do not mutate "
+        "the input. Use the Python standard library only.",
+    },
+    {
+        "role": "work_planner",
+        "content": "Write normalize_tags(tags) using only the Python standard library. "
+        "Return a new list of trimmed, lowercase, nonblank strings, deduplicated in "
+        "first-occurrence order. Preserve the caller's input list.",
+    },
+    {
+        "role": "review_author",
+        "content": "def normalize_tags(tags):\n"
+        "    return [tag.strip().lower() for tag in tags]\n",
+    },
+    {
+        "role": "evidence_judge",
+        "content": json.dumps(
+            {
+                "verdict": "revise",
+                "rationale": "The draft trims and lowercases but retains duplicates and blanks.",
+                "feedback": [
+                    "Remove duplicate normalized tags while preserving order.",
+                    "Discard empty normalized tags.",
+                ],
+            }
+        ),
+    },
+    {
+        "role": "review_author",
+        "content": "def normalize_tags(tags):\n"
+        "    cleaned = (tag.strip().lower() for tag in tags)\n"
+        "    return list(dict.fromkeys(tag for tag in cleaned if tag))\n",
+    },
+    {
+        "role": "evidence_judge",
+        "content": json.dumps(
+            {
+                "verdict": "approve",
+                "rationale": "The revised source meets the assignment by inspection; no tests were executed.",
+                "feedback": [],
+            }
+        ),
+    },
+]

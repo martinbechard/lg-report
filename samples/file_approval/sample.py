@@ -14,7 +14,7 @@ import re
 
 from langchain_core.messages import AIMessage, ToolMessage
 
-from agent_runtime.harness.model_factory import client_prompts, model_responses
+from agent_runtime.harness.model_factory import model_responses
 from agent_runtime.harness.simulated_model import SimulatedModel
 
 # Discovery reads this metadata without constructing a model.
@@ -137,7 +137,6 @@ CONVERSATION = [
         "content": "Finished the requested proposals; see tool results for applied or rejected changes.",
     },
 ]
-USER_PROMPTS = client_prompts(CONVERSATION)
 # Explicit simulated human decision; live clients still ask the user.
 APPROVAL_DECISION = next(
     entry["content"] for entry in CONVERSATION if entry["role"] == "human"

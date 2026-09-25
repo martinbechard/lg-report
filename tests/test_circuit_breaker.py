@@ -17,10 +17,11 @@ from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 
 from agent_runtime.agents import planner
 from agent_runtime.harness.model_factory import build_model, model_factory_scope
+from agent_runtime.harness.sample_catalog import SampleCatalog
 from agent_runtime.harness.simulated_model import SimulatedModel
 from agent_runtime.workflows.circuit_breaker import build_workflow
 from agent_runtime.workflows.exercise_backend import ExerciseBackend
-from samples.circuit_breaker.sample import CONVERSATION, USER_PROMPTS
+from samples.circuit_breaker.sample import CONVERSATION
 
 
 @pytest.mark.parametrize("asynchronous", [False, True])
@@ -30,7 +31,8 @@ def test_breaker_blocks_fourth_write_and_ends(tmp_path, asynchronous):
     with model_factory_scope(live=False, conversation=CONVERSATION):
         model = build_model(caller="worker")
     graph = build_workflow(model=model, workspace_dir=tmp_path)
-    state = {"messages": [HumanMessage(USER_PROMPTS[0])]}
+    prompt = SampleCatalog().prompts("circuit_breaker")[0]
+    state = {"messages": [HumanMessage(prompt)]}
     result = asyncio.run(graph.ainvoke(state)) if asynchronous else graph.invoke(state)
     replies = [m for m in result["messages"] if isinstance(m, ToolMessage)]
     assert len(replies) == 4

@@ -27,7 +27,10 @@ from agent_runtime.harness import app, model_factory
 from agent_runtime.harness import langfuse_runtime as runtime
 from agent_runtime.harness.conversation import Request
 from agent_runtime.harness.sample_catalog import SampleCatalog
-from samples.simple_chat.sample import USER_PROMPTS
+from samples.simple_chat.sample import CONVERSATION
+
+# Expected values are test projections of the authored conversation.
+USER_PROMPTS = [entry["content"] for entry in CONVERSATION if entry["role"] == "client"]
 
 
 def trace_conversation(
@@ -237,11 +240,14 @@ def test_failed_authentication_stops_before_model_selection(monkeypatch):
 def test_langfuse_delegation_keeps_child_under_task(capture):
     """The actual task tool must propagate one callback into the child's graph."""
     from agent_runtime.harness.sample_catalog import SampleCatalog
-    from samples.subagent_chat.sample import (
-        DELEGATED_TASK,
-        SPECIALIST_SUMMARY,
-        USER_PROMPTS,
-    )
+    from samples.subagent_chat.sample import CONVERSATION
+
+    # Expected values are test projections of the authored conversation.
+    DELEGATED_TASK = CONVERSATION[1]["tool_calls"][0]["args"]["description"]
+    SPECIALIST_SUMMARY = CONVERSATION[4]["content"]
+    USER_PROMPTS = [
+        entry["content"] for entry in CONVERSATION if entry["role"] == "client"
+    ]
 
     client, callback, exporter = capture
     trace_id, history = trace_conversation(

@@ -32,13 +32,13 @@ def build_workflow(
     """
     from tempfile import TemporaryDirectory
 
-    import samples.file_approval
+    import samples
 
     workspace = (
         TemporaryDirectory(prefix="lg-file-approval-") if target is None else None
     )
     target = Path(workspace.name) / "edited-summary.txt" if workspace else Path(target)
-    source = source or Path(samples.file_approval.__file__).with_name("input.txt")
+    source = source or Path(samples.__file__).parent / "file_approval" / "input.txt"
     try:
         if model is None:
             model = build_model(caller="workflow")

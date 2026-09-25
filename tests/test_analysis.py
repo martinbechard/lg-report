@@ -27,11 +27,11 @@ from reporting.execute_runnable import execute_runnable
 from reporting.pricing import breakdown, cost, load_prices
 from reporting.render import tree_rows
 from reporting.schema import Run, Step, Usage
-from samples.simple_chat.sample import make_simulated_model as make_chat_model
+from samples.simple_chat.sample import build_scripted_models as build_chat_models
 from samples.thinking_agent.sample import (
-    make_simulated_model as make_thinking_model,
+    build_scripted_models as build_thinking_models,
 )
-from samples.tool_chat.sample import make_simulated_model as make_tool_model
+from samples.tool_chat.sample import build_scripted_models as build_tool_models
 
 
 @pytest.fixture
@@ -143,7 +143,7 @@ def test_annotated_tool_tree_and_parent_totals(tmp_path, prices):
     out = tmp_path / "run"
     prices.exchange = ExchangeRate(rate="0.871", date="2026-09-17")
     execute_runnable(
-        build_tool_agent({"model": make_tool_model()}),
+        build_tool_agent({"model": build_tool_models({})["workflow"]}),
         {"messages": [("user", "Explain ReAct")]},
         out,
         prices,
@@ -249,7 +249,7 @@ def test_complete_multiturn_sample(tmp_path, prices):
     from reporting.render import conversation_turns
 
     agent = Conversation(
-        build_tool_agent({"model": make_tool_model()}),
+        build_tool_agent({"model": build_tool_models({})["workflow"]}),
         MockClient(
             [Request(p) for p in ["Explain ReAct", "Why do observations help?"]]
         ),
@@ -427,9 +427,9 @@ def test_every_request_nests_components_under_fresh_input(tmp_path, prices, tool
     out = tmp_path / "layout"
     execute_runnable(
         Conversation(
-            build_tool_agent({"model": make_tool_model()})
+            build_tool_agent({"model": build_tool_models({})["workflow"]})
             if tool_loop
-            else build_chat_agent({"model": make_chat_model()}),
+            else build_chat_agent({"model": build_chat_models({})["workflow"]}),
             MockClient([Request(p) for p in ["First question", "Follow-up"]]),
         ),
         {},
@@ -496,7 +496,7 @@ def test_thinking_sample_accounts_for_reasoning(tmp_path, prices):
 
     out = tmp_path / "thinking"
     execute_runnable(
-        build_thinking_agent({"model": make_thinking_model()}),
+        build_thinking_agent({"model": build_thinking_models({})["workflow"]}),
         {"messages": [("user", "Investigate latency")]},
         out,
         prices,
@@ -517,7 +517,8 @@ def test_thinking_sample_accounts_for_reasoning(tmp_path, prices):
     assert 'class="thinking-preview"' in html
     # Request IDs identify the model event even when HTML attributes change.
     heavy_html = next(
-        block for block in re.split(r'<details[^>]*class="event ', html)
+        block
+        for block in re.split(r'<details[^>]*class="event ', html)
         if heavy.context["thinking_text"] in block
     )
     assert (
@@ -607,10 +608,14 @@ def test_context_chart_gaps_axes_and_thinner_line(tmp_path, prices):
     chart = cost_chart(conversation_turns(run, prices), prices)
     assert len(chart["context_lines"]) == 3
     assert chart["context_missing"] and chart["context_illustrative"]
-    assert chart["bars"][0]["context"]["percent"] == pytest.approx(525_010 / 1_050_000 * 100)
+    assert chart["bars"][0]["context"]["percent"] == pytest.approx(
+        525_010 / 1_050_000 * 100
+    )
     assert chart["bars"][2]["context_y"] < 290
     assert chart["bars"][3]["context_y"] == 30
-    assert chart["context_ticks"][-1]["value"] == pytest.approx(1_575_010 / 1_050_000 * 100)
+    assert chart["context_ticks"][-1]["value"] == pytest.approx(
+        1_575_010 / 1_050_000 * 100
+    )
     assert len(chart["token_lines"]) == 3
     assert chart["token_max"] == 1_800_000
     assert chart["bars"][2]["token_y"] < 290
@@ -634,11 +639,26 @@ def test_raw_context_chart_does_not_require_known_capacity(prices, count):
     from reporting.render import conversation_turns, cost_chart
 
     prices.exchange = ExchangeRate(rate="0.8", date="2026-09-20")
-    run = Run(id="raw", title="Raw", status="ok", steps=[
-        Step(id="m", name="model", kind="model", start_ns=0, end_ns=1,
-             status="ok", provider="unknown", model="unknown",
-             usage=None if count is None else Usage(input_tokens=count, output_tokens=0))
-    ])
+    run = Run(
+        id="raw",
+        title="Raw",
+        status="ok",
+        steps=[
+            Step(
+                id="m",
+                name="model",
+                kind="model",
+                start_ns=0,
+                end_ns=1,
+                status="ok",
+                provider="unknown",
+                model="unknown",
+                usage=None
+                if count is None
+                else Usage(input_tokens=count, output_tokens=0),
+            )
+        ],
+    )
     chart = cost_chart(conversation_turns(run, prices), prices)
     assert chart["context_missing"]
     assert chart["bars"][0]["context_tokens"] == count
@@ -649,7 +669,9 @@ def test_raw_context_chart_does_not_require_known_capacity(prices, count):
 
 
 @pytest.mark.parametrize("lifetime_buckets", [False, True])
-def test_cost_chart_tooltips_break_down_inclusive_token_totals(tmp_path, prices, lifetime_buckets):
+def test_cost_chart_tooltips_break_down_inclusive_token_totals(
+    tmp_path, prices, lifetime_buckets
+):
     """Every chart mark shares one readable, nonduplicated token explanation."""
     from html.parser import HTMLParser
 
@@ -662,19 +684,38 @@ def test_cost_chart_tooltips_break_down_inclusive_token_totals(tmp_path, prices,
     rate.cache_write = Decimal(2)
     rate.cache_write_5m = Decimal(3)
     rate.cache_write_1h = Decimal(4)
-    run = Run(id="breakdown", title="Token breakdown", status="ok", steps=[
-        Step(id="m", name="model", kind="model", start_ns=0, end_ns=1,
-             status="ok", provider="demo", model="scripted-chat",
-             usage=Usage(input_tokens=1000, cache_read=200, cache_write=100,
-                         cache_write_5m=30 if lifetime_buckets else 0,
-                         cache_write_1h=20 if lifetime_buckets else 0,
-                         output_tokens=300, reasoning=50))
-    ])
+    run = Run(
+        id="breakdown",
+        title="Token breakdown",
+        status="ok",
+        steps=[
+            Step(
+                id="m",
+                name="model",
+                kind="model",
+                start_ns=0,
+                end_ns=1,
+                status="ok",
+                provider="demo",
+                model="scripted-chat",
+                usage=Usage(
+                    input_tokens=1000,
+                    cache_read=200,
+                    cache_write=100,
+                    cache_write_5m=30 if lifetime_buckets else 0,
+                    cache_write_1h=20 if lifetime_buckets else 0,
+                    output_tokens=300,
+                    reasoning=50,
+                ),
+            )
+        ],
+    )
     destination = tmp_path / "breakdown.html"
     render(run, prices, destination)
 
     class Tooltips(HTMLParser):
         """Read rendered attributes so escaping cannot hide a broken tooltip."""
+
         def handle_starttag(self, tag, attrs):
             value = dict(attrs).get("data-cost-tip", "")
             if value.startswith("Request 1 ·"):
@@ -687,22 +728,39 @@ def test_cost_chart_tooltips_break_down_inclusive_token_totals(tmp_path, prices,
     Tooltips().feed(destination.read_text())
     assert len(tips) >= 4  # Cost segments, cumulative point, and both context modes.
     for tip in tips:
-        for expected in ("• Post-call Context: 1,250", "Total input: 1,000",
-                         "Previous context: 0 tokens",
-                         "• Fresh input: 800", "• Cache read: 200",
-                         "Cache write: 100",
-                         "Output: 300", "• Non-reasoning output: 250", "• Reasoning: 50"):
+        for expected in (
+            "• Post-call Context: 1,250",
+            "Total input: 1,000",
+            "Previous context: 0 tokens",
+            "• Fresh input: 800",
+            "• Cache read: 200",
+            "Cache write: 100",
+            "Output: 300",
+            "• Non-reasoning output: 250",
+            "• Reasoning: 50",
+        ):
             assert expected in tip
         # Every category appears once, with its count on the same line. The
         # prior context is not an extra additive amount in the billing buckets.
         lines = tip.split(" | ")
-        for label in ("• Fresh input", "• Cache read", "Cache write",
-                      "Output", "• Non-reasoning output", "• Reasoning", "• Post-call Context"):
+        for label in (
+            "• Fresh input",
+            "• Cache read",
+            "Cache write",
+            "Output",
+            "• Non-reasoning output",
+            "• Reasoning",
+            "• Post-call Context",
+        ):
             matches = [line for line in lines if line.startswith(label + ":")]
             assert len(matches) == 1
             assert "tokens" in matches[0]
-        assert lines.index("Output: 300 tokens") < lines.index("• Non-reasoning output: 250 tokens")
-        assert lines.index("• Reasoning: 50 tokens") < lines.index("• Post-call Context: 1,250 tokens")
+        assert lines.index("Output: 300 tokens") < lines.index(
+            "• Non-reasoning output: 250 tokens"
+        )
+        assert lines.index("• Reasoning: 50 tokens") < lines.index(
+            "• Post-call Context: 1,250 tokens"
+        )
         assert "Token breakdown for this request" not in tip
         assert "(this segment)" not in tip
         assert "Reasoning item retained" not in tip
@@ -714,32 +772,49 @@ def test_cost_chart_tooltips_break_down_inclusive_token_totals(tmp_path, prices,
     assert bar["segments"][0]["label"] == "Fresh input"
     assert bar["segments"][0]["tokens"] == 800
     assert sum(segment["eur"] for segment in bar["segments"]) == bar["total"]
-    assert sum(segment["eur"] for segment in bar["segments"][2:5]) == (
-        sum(cell["usd"] for cell in breakdown(run.steps[0], prices)[2:5])
-        - Decimal(100) * rate.input / Decimal(1_000_000)
-    ) * prices.exchange.rate
+    assert (
+        sum(segment["eur"] for segment in bar["segments"][2:5])
+        == (
+            sum(cell["usd"] for cell in breakdown(run.steps[0], prices)[2:5])
+            - Decimal(100) * rate.input / Decimal(1_000_000)
+        )
+        * prices.exchange.rate
+    )
     html = destination.read_text()
     assert ".cost-tip-detail{font-size:11px" in html
     assert "text.startsWith('• ')" in html
     # A retained reasoning item changes only the estimated carried context;
     # billing breakdown rows still report the same complete model output.
-    run.steps[0].response = [{"content": [
-        {"type": "reasoning", "encrypted_content": "opaque"},
-        {"type": "text", "text": "answer"},
-    ]}]
+    run.steps[0].response = [
+        {
+            "content": [
+                {"type": "reasoning", "encrypted_content": "opaque"},
+                {"type": "text", "text": "answer"},
+            ]
+        }
+    ]
     chart = cost_chart(conversation_turns(run, prices), prices)
     assert chart["bars"][0]["context_tokens"] == 1300
     assert "• Post-call Context: 1,300 tokens" in chart["bars"][0]["token_breakdown"]
-    assert "• Reasoning: 50 tokens (added to context)" in chart["bars"][0]["token_breakdown"]
+    assert (
+        "• Reasoning: 50 tokens (added to context)"
+        in chart["bars"][0]["token_breakdown"]
+    )
     run.steps[0].usage = None
     chart = cost_chart(conversation_turns(run, prices), prices)
     assert chart["bars"][0]["token_breakdown"] == "Token usage: unreported"
     # Later known requests cannot turn an incomplete cumulative subtotal into
     # a complete total. The tooltip qualifier follows all preceding receipts.
-    run.steps.append(run.steps[0].model_copy(update={
-        "id": "known", "start_ns": 2, "end_ns": 3,
-        "usage": Usage(input_tokens=10, output_tokens=1),
-    }))
+    run.steps.append(
+        run.steps[0].model_copy(
+            update={
+                "id": "known",
+                "start_ns": 2,
+                "end_ns": 3,
+                "usage": Usage(input_tokens=10, output_tokens=1),
+            }
+        )
+    )
     chart = cost_chart(conversation_turns(run, prices), prices)
     assert chart["bars"][1]["cumulative_partial"]
 
@@ -753,32 +828,78 @@ def test_previous_context_follows_post_call_and_compaction_baselines(prices):
     from reporting.render import conversation_turns, cost_chart
 
     prices.exchange = ExchangeRate(rate="0.8", date="2026-09-20")
-    run = Run(id="history", title="Context carry-over", status="ok", steps=[
-        Step(id="agent", name="responder", kind="workflow", start_ns=0, end_ns=9,
-             status="ok"),
-        Step(id="first", parent_id="agent", name="model", kind="model",
-             start_ns=1, end_ns=2, status="ok", provider="demo",
-             model="scripted-chat", context={"report_history_id": "shared"},
-             usage=Usage(input_tokens=100, output_tokens=20, cache_write=90)),
-        Step(id="compact", parent_id="agent", name="SummarizationMiddleware.before_model",
-             kind="workflow", start_ns=3, end_ns=4, status="ok", context={
-                 "compaction_event": "completed",
-                 "compaction_before_tokens": 120,
-                 "compaction_after_tokens": 40,
-                 "compaction_before_basis": "reported input + estimated retained output",
-                 "compaction_after_basis": "local estimate after history replacement",
-                 "compaction_trigger_tokens": 100,
-                 "compaction_max_input_tokens": 500,
-             }),
-        Step(id="second", parent_id="agent", name="model", kind="model",
-             start_ns=5, end_ns=6, status="ok", provider="demo",
-             model="scripted-chat", context={"report_history_id": "shared"},
-             usage=Usage(input_tokens=60, output_tokens=10)),
-        Step(id="third", parent_id="agent", name="model", kind="model",
-             start_ns=7, end_ns=8, status="ok", provider="demo",
-             model="scripted-chat", context={"report_history_id": "shared"},
-             usage=Usage(input_tokens=95, output_tokens=5)),
-    ])
+    run = Run(
+        id="history",
+        title="Context carry-over",
+        status="ok",
+        steps=[
+            Step(
+                id="agent",
+                name="responder",
+                kind="workflow",
+                start_ns=0,
+                end_ns=9,
+                status="ok",
+            ),
+            Step(
+                id="first",
+                parent_id="agent",
+                name="model",
+                kind="model",
+                start_ns=1,
+                end_ns=2,
+                status="ok",
+                provider="demo",
+                model="scripted-chat",
+                context={"report_history_id": "shared"},
+                usage=Usage(input_tokens=100, output_tokens=20, cache_write=90),
+            ),
+            Step(
+                id="compact",
+                parent_id="agent",
+                name="SummarizationMiddleware.before_model",
+                kind="workflow",
+                start_ns=3,
+                end_ns=4,
+                status="ok",
+                context={
+                    "compaction_event": "completed",
+                    "compaction_before_tokens": 120,
+                    "compaction_after_tokens": 40,
+                    "compaction_before_basis": "reported input + estimated retained output",
+                    "compaction_after_basis": "local estimate after history replacement",
+                    "compaction_trigger_tokens": 100,
+                    "compaction_max_input_tokens": 500,
+                },
+            ),
+            Step(
+                id="second",
+                parent_id="agent",
+                name="model",
+                kind="model",
+                start_ns=5,
+                end_ns=6,
+                status="ok",
+                provider="demo",
+                model="scripted-chat",
+                context={"report_history_id": "shared"},
+                usage=Usage(input_tokens=60, output_tokens=10),
+            ),
+            Step(
+                id="third",
+                parent_id="agent",
+                name="model",
+                kind="model",
+                start_ns=7,
+                end_ns=8,
+                status="ok",
+                provider="demo",
+                model="scripted-chat",
+                context={"report_history_id": "shared"},
+                usage=Usage(input_tokens=95, output_tokens=5),
+            ),
+        ],
+    )
     chart = cost_chart(conversation_turns(run, prices), prices)
     first, second, third = chart["bars"]
     description = chart["compactions"][0]["description"]
@@ -809,18 +930,32 @@ def test_input_composition_is_separate_from_cache_billing(prices):
     from reporting.render import conversation_turns, cost_chart
 
     prices.exchange = ExchangeRate(rate="0.8", date="2026-09-20")
-    step = Step(id="r7", name="model", kind="model", start_ns=1, end_ns=2,
-                status="ok", provider="demo", model="scripted-chat",
-                context={"simulated_system_tokens": 1107, "simulated_definitions_tokens": 993},
-                usage=Usage(input_tokens=5948, output_tokens=73, cache_read=100))
+    step = Step(
+        id="r7",
+        name="model",
+        kind="model",
+        start_ns=1,
+        end_ns=2,
+        status="ok",
+        provider="demo",
+        model="scripted-chat",
+        context={"simulated_system_tokens": 1107, "simulated_definitions_tokens": 993},
+        usage=Usage(input_tokens=5948, output_tokens=73, cache_read=100),
+    )
     run = Run(id="composition", title="Input composition", status="ok", steps=[step])
-    tip = cost_chart(conversation_turns(run, prices), prices)["bars"][0]["token_breakdown"]
+    tip = cost_chart(conversation_turns(run, prices), prices)["bars"][0][
+        "token_breakdown"
+    ]
     assert "• System prompt: 1,107 tokens" in tip
     assert "• Tool documentation: 993 tokens" in tip
     assert "• Conversation: 3,848 tokens" in tip
-    assert "Input billing | • Fresh input: 5,848 tokens | • Cache read: 100 tokens" in tip
+    assert (
+        "Input billing | • Fresh input: 5,848 tokens | • Cache read: 100 tokens" in tip
+    )
     step.context.clear()
-    tip = cost_chart(conversation_turns(run, prices), prices)["bars"][0]["token_breakdown"]
+    tip = cost_chart(conversation_turns(run, prices), prices)["bars"][0][
+        "token_breakdown"
+    ]
     assert "• System prompt: unreported" in tip
     assert "• Tool documentation: unreported" in tip
     assert "• Conversation: unreported" in tip
@@ -831,16 +966,29 @@ def test_compaction_threshold_is_visible_before_any_compaction(prices):
     from reporting.render import conversation_turns, cost_chart
 
     prices.exchange = ExchangeRate(rate="0.8", date="2026-09-20")
-    step = Step(id="policy", name="model", kind="model", start_ns=1, end_ns=2,
-                status="ok", provider="demo", model="scripted-chat",
-                context={"compaction_trigger_tokens": 6500},
-                usage=Usage(input_tokens=100, output_tokens=20))
+    step = Step(
+        id="policy",
+        name="model",
+        kind="model",
+        start_ns=1,
+        end_ns=2,
+        status="ok",
+        provider="demo",
+        model="scripted-chat",
+        context={"compaction_trigger_tokens": 6500},
+        usage=Usage(input_tokens=100, output_tokens=20),
+    )
     run = Run(id="threshold", title="Compaction threshold", status="ok", steps=[step])
     chart = cost_chart(conversation_turns(run, prices), prices)
     assert chart["token_max"] > 6500
-    assert chart["token_triggers"] == [{"value": 6500, "y": 290 - 6500 / chart["token_max"] * 260}]
+    assert chart["token_triggers"] == [
+        {"value": 6500, "y": 290 - 6500 / chart["token_max"] * 260}
+    ]
     if chart["bars"][0]["context"]:
-        assert chart["percent_triggers"][0]["value"] == 6500 / chart["bars"][0]["context"]["capacity"] * 100
+        assert (
+            chart["percent_triggers"][0]["value"]
+            == 6500 / chart["bars"][0]["context"]["capacity"] * 100
+        )
     step.context.clear()
     chart = cost_chart(conversation_turns(run, prices), prices)
     assert chart["token_triggers"] == []
@@ -866,21 +1014,31 @@ def test_context_capacity_resolves_explicit_alias(prices):
     assert context_utilization(step, prices)["percent"] == 10
 
 
-@pytest.mark.parametrize("before,after", [
-    (726, 794),
-    (1189, 846),
-    (500, 500),
-])
+@pytest.mark.parametrize(
+    "before,after",
+    [
+        (726, 794),
+        (1189, 846),
+        (500, 500),
+    ],
+)
 def test_compaction_description_reports_counts_without_commentary(before, after):
     """Legacy replacement evidence lists actual counts without an interpretation."""
     from reporting.context import compaction_description
 
-    step = Step(id="compact", name="summary", kind="workflow", start_ns=0,
-                end_ns=1, status="ok", context={
-                    "compaction_event": "completed",
-                    "compaction_before_tokens": before,
-                    "compaction_after_tokens": after,
-                })
+    step = Step(
+        id="compact",
+        name="summary",
+        kind="workflow",
+        start_ns=0,
+        end_ns=1,
+        status="ok",
+        context={
+            "compaction_event": "completed",
+            "compaction_before_tokens": before,
+            "compaction_after_tokens": after,
+        },
+    )
     description = compaction_description(step)
     assert f"History before: {before:,} tokens" in description
     assert f"History after: {after:,} tokens" in description
@@ -902,11 +1060,27 @@ def test_scripted_context_tool_points_show_threshold_crossings(tmp_path):
     root = Path(__file__).resolve().parents[1]
     folder = tmp_path / "context_budget"
     subprocess.run(
-        [sys.executable, "-m", "agent_runtime", "--sample", "context_budget",
-         "--demo", "--client", "static", "--out", str(folder),
-         "--prices", str(root / "models.json"),
-         "--fx-file", str(root / "exchange-rate.json")],
-        cwd=root, check=True, capture_output=True, text=True, timeout=60,
+        [
+            sys.executable,
+            "-m",
+            "agent_runtime",
+            "--sample",
+            "context_budget",
+            "--demo",
+            "--client",
+            "static",
+            "--out",
+            str(folder),
+            "--prices",
+            str(root / "models.json"),
+            "--fx-file",
+            str(root / "exchange-rate.json"),
+        ],
+        cwd=root,
+        check=True,
+        capture_output=True,
+        text=True,
+        timeout=60,
     )
     run = Run.model_validate_json((folder / "run.json").read_text())
     prices = load_prices(folder / "prices.json")
@@ -928,7 +1102,10 @@ def test_scripted_context_tool_points_show_threshold_crossings(tmp_path):
     assert all(p["history_label"].startswith("Isolated review ") for p in isolated)
     assert all(p["context_tokens"] < 8500 for p in isolated)
     for point in chart["tool_points"]:
-        assert any(f"{point['center']},{point['token_y']}" in line["points"] for line in chart["token_lines"])
+        assert any(
+            f"{point['center']},{point['token_y']}" in line["points"]
+            for line in chart["token_lines"]
+        )
     with TemporaryDirectory() as temporary:
         output = Path(temporary) / "report.html"
         render(run, prices, output)

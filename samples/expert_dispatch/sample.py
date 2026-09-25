@@ -10,7 +10,6 @@ AI attribution: Generated with AI assistance by Northstar.
 Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
 
-from agent_runtime.harness.model_factory import client_prompts, model_responses
 from agent_runtime.harness.simulated_model import SimulatedModel
 
 # Discovery reads this metadata without constructing a model.
@@ -174,35 +173,21 @@ CONVERSATION = [
         "Source: https://www.stiftung-berliner-mauer.de/de/ueber-uns/leichte-sprache/geschichte",
     },
 ]
-USER_PROMPTS = client_prompts(CONVERSATION)
-# Keep the compact case view used by integration tests derived from the script.
-_dispatcher = model_responses(CONVERSATION, "dispatcher_agent")
-CASES = [
-    (
-        request.tool_calls[0]["args"]["subagent_type"],
-        request.tool_calls[0]["args"]["description"],
-        answer.content,
-    )
-    for request, answer in zip(_dispatcher[::2], _dispatcher[1::2], strict=True)
-]
-del _dispatcher
-
-
-def make_simulated_model():
-    """Select named agents' replies from the complete chronological scenario.
-
-    Each role retains an independent response cursor and usage ledger. Actual
-    delegation and retrieval still execute in the graph between model calls.
-    """
-    return SimulatedModel(
-        conversation=CONVERSATION,
-        metadata={
-            "report_description": "Execute this agent's role using the shared LLM and its bound tool.",
-            "report_effort": "light",
-        },
-    )
 
 
 def build_scripted_models(options):
-    """Retain shared-model routing; this fixed script ignores workflow options."""
-    return {"workflow": make_simulated_model()}
+    """Create a fresh standard simulator with this lesson's report metadata.
+
+    Response routing and token accounting use the shared SimulatedModel. This
+    fixed conversation ignores options; the callback preserves only the report
+    annotations. Live mode uses the configured provider instead.
+    """
+    return {
+        "workflow": SimulatedModel(
+            conversation=CONVERSATION,
+            metadata={
+                "report_description": "Execute this agent's role using the shared LLM and its bound tool.",
+                "report_effort": "light",
+            },
+        )
+    }

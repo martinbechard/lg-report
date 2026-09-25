@@ -1,7 +1,7 @@
 """Describe the circuit-breaker conversation in the order its steps occur.
 
-SAMPLE declares discovery metadata alongside this scenario. Model factories
-create fresh simulated models only when called; live mode uses the provider.
+SAMPLE declares discovery metadata alongside this scenario. The catalog supplies
+CONVERSATION to the shared model factory; live mode uses the provider.
 
 User messages, scripted AI explanations and tool calls, and expected tool results
 share one chronological list. Several AI/tool steps may follow one user message.
@@ -12,8 +12,6 @@ AI attribution: Generated with AI assistance by Northstar.
 Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
 
-from agent_runtime.harness.model_factory import client_prompts
-
 # Discovery reads this metadata without constructing a model.
 SAMPLE = {
     "id": "circuit_breaker",
@@ -22,10 +20,9 @@ SAMPLE = {
     "limits.",
 }
 
-# sample.py points the catalog to this module. It recognizes CONVERSATION and
-# supplies it to the shared model factory, so no build_scripted_models callback is needed.
-# The client extracts "client" entries. build_model(caller="worker") extracts
-# "worker" entries as successive model replies. Tool and middleware entries only
+# The catalog extracts "client" entries and supplies CONVERSATION to the shared
+# model factory, so no build_scripted_models callback is needed. The simulated
+# model selects "worker" replies using the native agent name. Tool and middleware entries only
 # document expected results; they are never substituted for actual execution.
 # There is no required alternation of user and AI: one user turn may contain
 # many model/tool exchanges before the next user message.
@@ -132,7 +129,3 @@ CONVERSATION = [
         "content": "'write_file' tool call limit reached: run limit exceeded (4/3 calls).",
     },
 ]
-
-# Extract only user input here. The shared build_model factory independently
-# extracts the worker replies into its model response collection, in list order.
-USER_PROMPTS = client_prompts(CONVERSATION)

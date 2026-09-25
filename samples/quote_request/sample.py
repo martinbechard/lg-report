@@ -13,10 +13,7 @@ Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 
 import json
 
-from langchain_core.messages import AIMessage
-
-from agent_runtime.harness.model_factory import client_prompts, model_responses
-from agent_runtime.harness.simulated_model import ScriptedChatModel
+from agent_runtime.harness.simulated_model import SimulatedModel
 
 # Discovery reads this metadata without constructing a model.
 SAMPLE = {
@@ -131,44 +128,17 @@ CONVERSATION = [
     },
 ]
 
-USER_PROMPTS = client_prompts(CONVERSATION)
-INITIAL_VALUES = json.loads(USER_PROMPTS[0])
+
+# The static client consumes these human answers when resuming clarifications.
 ANSWERS = [entry["content"] for entry in CONVERSATION if entry["role"] == "human"]
-DECISIONS = [message.tool_calls[0]["args"] for message in model_responses(CONVERSATION, "quote_interpreter")]
-
-
-def make_simulated_model(decisions=None):
-    """Extract the quote replies, or accept replacement decisions for routing tests.
-
-    Preserve the unmetered adapter: missing provider usage remains unavailable.
-    The workflow validates each QuoteDecision and pauses for real or scripted
-    human answers; this function neither executes tools nor resumes interrupts.
-    """
-    responses = (
-        model_responses(CONVERSATION, "quote_interpreter")
-        if decisions is None
-        else [
-            AIMessage(
-                content="",
-                tool_calls=[
-                    {
-                        "name": "QuoteDecision",
-                        "args": decision,
-                        "id": f"decision-{index}",
-                    }
-                ],
-            )
-            for index, decision in enumerate(decisions)
-        ]
-    )
-    return ScriptedChatModel(responses=responses)
-
 
 def build_scripted_models(options):
-    """Keep quote decisions unmetered through the catalog's optional callback.
+    """Estimate each rebuilt quote request without assuming append-only caching.
 
-    options contains sample defaults merged with run overrides. This fixed story
-    ignores them. The workflow caller receives a fresh model; live mode bypasses
-    this callback entirely.
+    The quote agent reconstructs its request from the initial values and human
+    answers on every assessment. It does not retain its prior model transcript,
+    so cache reuse is disabled. The standard model still estimates all input and
+    output tokens, including the structured decision. This fixed story ignores
+    options; live mode bypasses this simulation factory.
     """
-    return {"workflow": make_simulated_model()}
+    return {"workflow": SimulatedModel(conversation=CONVERSATION, cache_reuse=False)}

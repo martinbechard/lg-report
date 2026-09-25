@@ -17,7 +17,10 @@ from agent_runtime.backends.shell_backend import ShellBackend
 from agent_runtime.harness.sample_catalog import SampleCatalog
 
 create_run = partial(SampleCatalog().create_run, "shell_script")
-from samples.shell_script.sample import USER_PROMPTS
+from samples.shell_script.sample import CONVERSATION
+
+# Expected values are test projections of the authored conversation.
+USER_PROMPTS = [entry["content"] for entry in CONVERSATION if entry["role"] == "client"]
 
 
 @pytest.mark.parametrize("asynchronous", [False, True])

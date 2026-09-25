@@ -1,563 +1,168 @@
-"""Nest delivery, coding, and isolated review without implicitly sharing context.
+"""Dispatch an assignment from a parent graph to a child author/judge review loop.
 
-The outer planner/tester history and inner supervisor/coder history are separate
-message lists. A wrapper projects an assignment into the coding graph and a
-result back out. An opaque-to-the-LLMs coding-memory field preserves the inner
-history during test-driven re-entry. Every reviewer invocation starts empty.
-
-This is model-context isolation, not a process or security sandbox. The host and
-its trace recorder can inspect every scope. The nested graphs disable their own
-checkpoints: explicit state carry-over, not hidden session memory, is the lesson.
-
+The parent prepares work and returns the child's result. The child owns drafting,
+review, revision, and its round limit. This sample reuses the review roles, while
+keeping its own workflow definitions so the two levels can be read together.
+Reviews are model assessments; this workflow does not execute generated code.
 AI attribution: Generated with AI assistance by Northstar.
 Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
 
-import json
 from typing import Annotated
-from uuid import uuid4
 
-from langchain_core.messages import (
-    AIMessage,
-    BaseMessage,
-    HumanMessage,
-    convert_to_messages,
-)
-from langchain_core.runnables import RunnableLambda
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.message import add_messages
 from typing_extensions import TypedDict
 
-from agent_runtime.agents.nested_contracts import Implementation
-from agent_runtime.agents.nested_development import build_agent
+from agent_runtime.agents import evidence_judge, review_author, work_planner
 from agent_runtime.harness.model_factory import build_model
-from agent_runtime.workflows.nested_policy import (
-    Limits,
-    bind_assessment,
-    planner_action,
-    require_action,
-    supervisor_action,
-)
-
-
-class DeliveryState(TypedDict, total=False):
-    """Outer state; only messages and explicit packets are supplied to its agents."""
-
-    messages: Annotated[list[BaseMessage], add_messages]  # Planner + tester context.
-    task_id: str  # Runtime identifier, not an agent-selected session identifier.
-    task: dict | None  # Stable, explicit requirements created on the first plan.
-    coding_memory: dict  # Host-owned carry-over; NEVER injected into outer prompts.
-    coding_result: dict | None  # Deliberate public handoff, not a child transcript.
-    test_result: dict | None  # Verdict for the current candidate only.
-    coding_cycles: int  # Monotonic across all test-fix re-entry for this task.
-    next_action: str  # Validated planner action, checked against deterministic policy.
-    planner_note: str
-    outcome: str  # pending, completed, or blocked.
-
-
-class CodingState(TypedDict, total=False):
-    """Private child state; supervisor and coder consume the same coding_history."""
-
-    task_id: str
-    task: dict
-    defects: list[str]  # Explicit tester feedback, not the outer transcript.
-    memory: dict  # Previous coding visit's retained history/artifact/attempt count.
-    cycle: int
-    coding_history: list[BaseMessage]  # Replaced with each peer's complete history.
-    artifact: dict | None
-    review: dict | None  # Reset on re-entry so an old pass cannot skip development.
-    rounds: int  # Attempts in THIS coding visit.
-    total_rounds: int  # Attempts across all visits, used for unique candidate IDs.
-    directive: str
-    next_action: str
-    result: dict  # Public output contract assembled only at the return boundary.
 
 
 class ReviewState(TypedDict, total=False):
-    """Third scope: its input is a review packet, never CodingState or DeliveryState."""
+    """Hold one assignment and the working state of its bounded review loop."""
 
-    packet: dict
-    history_id: str  # Fresh logical context identifier for this individual review.
-    assessment: dict
-
-
-def _scope(config, history_id: str, depth: int):
-    """Preserve callbacks while explicitly overriding inherited context labels."""
-    # A stable ID controls history continuity; the label explains that scope
-    # to report readers without exposing the runtime UUID as its display name.
-    label = {1: "Main context", 2: "Coding context", 3: "Isolated review context"}[
-        depth
-    ]
-    if depth == 3:
-        label += f" #{history_id.rsplit(':', 1)[-1]}"
-    return {
-        **config,
-        "metadata": {
-            **config.get("metadata", {}),
-            "report_history_id": history_id,
-            "report_history_label": label,
-            "report_context_depth": depth,
-        },
-    }
+    assignment: str  # Parent's complete work request.
+    author_history: list[BaseMessage]  # Drafts and feedback retained for revision.
+    judge_history: list[BaseMessage]  # Judge's prior assessments of this assignment.
+    draft: str  # Latest proposed deliverable.
+    review: dict  # Validated verdict and feedback from the judge.
+    round: int  # Completed drafts, including the first attempt.
+    outcome: str  # approved or limit_reached when the child returns.
+    answer: str  # Deliverable with unresolved feedback if the limit was reached.
 
 
-def _role_node(agent, prepare, accept, identity, depth):
-    """Invoke one role on a selected projection, identically in both client modes.
+class DeliveryState(TypedDict, total=False):
+    """Keep the user conversation and the child's returned result in the parent."""
 
-    prepare is intentionally the only place choosing LLM-visible state. accept
-    publishes the result into the owning graph; it never receives a model client.
-    """
+    messages: Annotated[list[BaseMessage], add_messages]
+    assignment: str  # Replaced by the planner for each user turn.
+    answer: str  # Returned by the child; never rewritten as an approval.
+    outcome: str  # Child review outcome, propagated to the caller.
 
-    def run(state, config):
-        result = agent.invoke(
-            prepare(state), config=_scope(config, identity(state), depth)
+
+def _build_review_workflow(model, max_rounds):
+    """Compose the same author/judge roles as review_loop in a local child graph."""
+    author = review_author.build_agent({"model": model})
+    judge = evidence_judge.build_agent({"model": model})
+
+    def begin(state):
+        """Start each dispatched assignment with fresh draft and review state."""
+        return {
+            "author_history": [],
+            "judge_history": [],
+            "round": 0,
+            "draft": "",
+            "review": {},
+        }
+
+    def write(state, config):
+        """Write the assignment or revise it using the previous judge feedback."""
+        result = author.invoke(
+            {
+                "conversation": [HumanMessage(content=state["assignment"])],
+                "history": state["author_history"],
+                "review": state["review"] if state["round"] else None,
+                "high_level": False,
+            },
+            config=config,
         )
-        return accept(state, result)
+        return {
+            "author_history": result["history"],
+            "draft": result["draft"],
+            "round": state["round"] + 1,
+        }
 
-    async def arun(state, config):
-        result = await agent.ainvoke(
-            prepare(state),
-            config=_scope(config, identity(state), depth),
+    def assess(state, config):
+        """Review every draft against the parent's assignment before returning."""
+        result = judge.invoke(
+            {
+                "conversation": [HumanMessage(content=state["assignment"])],
+                "history": state["judge_history"],
+                "draft": state["draft"],
+            },
+            config=config,
         )
-        return accept(state, result)
+        return {"judge_history": result["history"], "review": result["review"]}
 
-    return RunnableLambda(run, afunc=arun)
+    def route(state):
+        """Repeat only while the judge requests changes and attempts remain."""
+        if state["review"]["verdict"] == "approve" or state["round"] >= max_rounds:
+            return "finish"
+        return "author"
 
-
-def _review_workflow(reviewer):
-    """Make the third-level boundary explicit and stateless on every invocation."""
-
-    def prepare(state):
-        # No parent history, prior reviewer history, coder notes, or supervisor
-        # directives are included. Relevant requirements travel in the packet.
-        return {"history": [], "packet": state["packet"]}
-
-    def accept(state, result):
-        decision = result["data"]
-        bind_assessment(decision, state["packet"]["artifact"])
-        # Return only the decision. The fresh reviewer transcript stays private
-        # to this invocation and is visible only through ordinary tracing.
-        return {"assessment": decision}
+    def finish(state):
+        """Return the draft without disguising an exhausted limit as approval."""
+        approved = state["review"]["verdict"] == "approve"
+        answer = state["draft"]
+        if not approved:
+            answer = (
+                "Review limit reached — draft NOT approved.\n\n"
+                + answer
+                + "\n\nOutstanding review:\n"
+                + "\n".join(state["review"]["feedback"])
+            )
+        return {
+            "answer": answer,
+            "outcome": "approved" if approved else "limit_reached",
+        }
 
     graph = StateGraph(ReviewState)
-    graph.add_node(
-        "reviewer",
-        _role_node(
-            reviewer,
-            prepare,
-            accept,
-            lambda s: s["history_id"],
-            3,
-        ),
-    )
-    graph.add_edge(START, "reviewer")
-    graph.add_edge("reviewer", END)
-    return graph.compile(name="isolated_review_workflow", checkpointer=False)
-
-
-def _coding_workflow(supervisor, coder, review_workflow, limits):
-    """Run supervisor -> coder -> isolated review -> supervisor under a hard guard."""
-
-    def begin(state):
-        memory = state.get("memory", {})
-        return {
-            "coding_history": list(memory.get("history", [])),
-            "artifact": memory.get("artifact"),
-            "total_rounds": memory.get("total_rounds", 0),
-            "rounds": 0,
-            "review": None,
-            "next_action": "code",
-            "directive": "",
-        }
-
-    def supervisor_input(state):
-        allowed = supervisor_action(
-            state["review"], state["rounds"], limits.max_review_rounds
-        )
-        return {
-            "history": state["coding_history"],
-            "packet": {
-                "allowed_action": allowed,
-                "task": state["task"],
-                "cycle": state["cycle"],
-                "completed_rounds": state["rounds"],
-                "max_review_rounds": limits.max_review_rounds,
-                "tester_defects": state["defects"],
-                "latest_review": state["review"],
-            },
-        }
-
-    def supervisor_output(state, result):
-        data = result["data"]
-        require_action(
-            data["action"],
-            supervisor_action(
-                state["review"],
-                state["rounds"],
-                limits.max_review_rounds,
-            ),
-        )
-        return {
-            "coding_history": result["history"],
-            "next_action": data["action"],
-            "directive": data["directive"],
-        }
-
-    def coder_input(state):
-        return {
-            "history": state["coding_history"],
-            "packet": {
-                "task": state["task"],
-                "directive": state["directive"],
-                "tester_defects": state["defects"],
-                "latest_review": state["review"],
-                "candidate_id": f"candidate-{state['total_rounds'] + 1}",
-            },
-        }
-
-    def coder_output(state, result):
-        implementation = Implementation.model_validate(result["data"])
-        expected_id = f"candidate-{state['total_rounds'] + 1}"
-        if implementation.candidate_id != expected_id:
-            raise ValueError("Coder changed the workflow-assigned candidate ID")
-        return {
-            "coding_history": result["history"],
-            "artifact": implementation.handoff().model_dump(),
-            "review": None,  # Any earlier review is now invalid.
-            "rounds": state["rounds"] + 1,
-            "total_rounds": state["total_rounds"] + 1,
-        }
-
-    def review_input(state):
-        # This projection is the context boundary. Never pass the entire state
-        # or copy coding_history into a freshly named reviewer session.
-        return {
-            "history_id": f"review:{state['task_id']}:{state['total_rounds']}",
-            "packet": {
-                "task": state["task"],
-                "artifact": state["artifact"],
-                "reported_defects": state["defects"],
-            },
-        }
-
-    def review(state, config):
-        result = review_workflow.invoke(review_input(state), config=config)
-        return {"review": result["assessment"]}
-
-    async def areview(state, config):
-        result = await review_workflow.ainvoke(review_input(state), config=config)
-        return {"review": result["assessment"]}
-
-    def finish(state):
-        passed = state["next_action"] == "return"
-        if passed:
-            bind_assessment(state["review"], state["artifact"])
-            if state["review"]["verdict"] != "pass":
-                raise ValueError("Cannot return unapproved code for testing")
-        return {
-            "result": {
-                "status": "approved_for_testing" if passed else "blocked",
-                "artifact": state["artifact"],
-                "review": state["review"],
-                "rounds_this_cycle": state["rounds"],
-                "total_rounds": state["total_rounds"],
-                "reason": "Review passed" if passed else "Review-round limit reached",
-            }
-        }
-
-    def identity(state):
-        """Keep the coding context label stable across visits for this task."""
-        return f"coding:{state['task_id']}"
-
-    graph = StateGraph(CodingState)
-    graph.add_node("begin_coding_visit", begin)
-    graph.add_node(
-        "coding_supervisor",
-        _role_node(
-            supervisor,
-            supervisor_input,
-            supervisor_output,
-            identity,
-            2,
-        ),
-    )
-    graph.add_node("coder", _role_node(coder, coder_input, coder_output, identity, 2))
-    graph.add_node("isolated_review", RunnableLambda(review, afunc=areview))
-    graph.add_node("return_coding_result", finish)
-    graph.add_edge(START, "begin_coding_visit")
-    graph.add_edge("begin_coding_visit", "coding_supervisor")
+    graph.add_node("begin", begin)
+    graph.add_node("author", write)
+    graph.add_node("judge", assess)
+    graph.add_node("finish", finish)
+    graph.add_edge(START, "begin")
+    graph.add_edge("begin", "author")
+    graph.add_edge("author", "judge")
     graph.add_conditional_edges(
-        "coding_supervisor",
-        lambda s: s["next_action"],
-        {
-            "code": "coder",
-            "return": "return_coding_result",
-            "escalate": "return_coding_result",
-        },
+        "judge", route, {"author": "author", "finish": "finish"}
     )
-    graph.add_edge("coder", "isolated_review")
-    graph.add_edge("isolated_review", "coding_supervisor")
-    graph.add_edge("return_coding_result", END)
-    return graph.compile(name="coding_workflow", checkpointer=False)
+    graph.add_edge("finish", END)
+    child = graph.compile(name="assignment_review", checkpointer=False)
+    child.report_title = "Child review loop"
+    return child
 
 
-def build_workflow(
-    planner_model=None,
-    supervisor_model=None,
-    coder_model=None,
-    reviewer_model=None,
-    tester_model=None,
-    *,
-    max_review_rounds: int = 3,
-    max_coding_cycles: int = 3,
-    scenario: str = "rework",
-):
-    """Build the new sample using the existing model factory and sample catalog.
+def build_workflow(model=None, *, max_rounds: int = 3):
+    """Build parent dispatch and child review using one shared model adapter.
 
-    No provider call occurs during construction. Defaults keep both graphs well
-    below the standard recursion guard. Raising limits substantially may require
-    a larger invocation recursion_limit; that framework guard is only a backup.
-    Errors or invalid model JSON fail visibly instead of being retried forever.
+    Graph edges enforce review; no model must echo a precomputed routing action.
+    A single ordinary child call works with both sync invocation and LangGraph's
+    async execution of synchronous nodes, just like the review_loop sample.
     """
-    # SampleCatalog passes the same options to fixture and workflow factories.
-    # The scenario selects OFFLINE scripts only; live verdicts are not forced.
-    if scenario not in {"rework", "review_limit", "test_limit", "first_pass"}:
-        raise ValueError(f"Unknown scenario: {scenario}")
-    limits = Limits(max_review_rounds, max_coding_cycles)
-    supplied = dict(
-        zip(
-            ("planner", "coding_supervisor", "coder", "reviewer", "tester"),
-            (
-                planner_model,
-                supervisor_model,
-                coder_model,
-                reviewer_model,
-                tester_model,
-            ),
-            strict=True,
-        )
-    )
-    # Workflow ownership is explicit, just as in the original sample. Agents
-    # own role instructions; the workflow owns tools, middleware and retention.
-    agents = {
-        name: build_agent(
-            name,
-            {
-                "model": model if model is not None else build_model(caller=name),
-                "tools": [],
-                "middleware": [],
-                "checkpointer": False,
-            },
-        )
-        for name, model in supplied.items()
-    }
-    review_workflow = _review_workflow(agents["reviewer"])
-    coding_workflow = _coding_workflow(
-        agents["coding_supervisor"],
-        agents["coder"],
-        review_workflow,
-        limits,
-    )
+    if type(max_rounds) is not int or max_rounds < 1:
+        raise ValueError("max_rounds must be a positive integer")
+    if model is None:
+        model = build_model(caller="workflow")
+    planner = work_planner.build_agent({"model": model})
+    child = _build_review_workflow(model, max_rounds)
 
-    def begin(state):
-        # Reset private work for a NEW user task, not for a test-fix re-entry.
-        # The outer conversation may be retained by the existing chat harness.
-        return {
-            "messages": convert_to_messages(state.get("messages", [])),
-            "task_id": str(uuid4()),
-            "task": None,
-            "coding_memory": {},
-            "coding_result": None,
-            "test_result": None,
-            "coding_cycles": 0,
-            "next_action": "code",
-            "planner_note": "",
-            "outcome": "pending",
-        }
+    def plan(state, config):
+        """Let the planner prepare the work that the next node will dispatch."""
+        result = planner.invoke({"messages": state["messages"]}, config=config)
+        return {"assignment": result["messages"][-1].text}
 
-    def planner_input(state):
-        return {
-            "history": state["messages"],
-            "packet": {
-                "allowed_action": planner_action(
-                    state["coding_result"],
-                    state["test_result"],
-                    state["coding_cycles"],
-                    limits.max_coding_cycles,
-                ),
-                "stable_task": state["task"],
-                "coding_cycles_used": state["coding_cycles"],
-                "max_coding_cycles": limits.max_coding_cycles,
-            },
-        }
-
-    def planner_output(state, result):
-        data = result["data"]
-        require_action(
-            data["action"],
-            planner_action(
-                state["coding_result"],
-                state["test_result"],
-                state["coding_cycles"],
-                limits.max_coding_cycles,
-            ),
-        )
-        if state["task"] is not None and data["task"] != state["task"]:
-            raise ValueError(
-                "A re-entry cannot silently change the acceptance contract"
-            )
-        # No history is removed or summarized. Append just the new request/reply
-        # so add_messages does not duplicate the previous shared conversation.
-        return {
-            "messages": result["history"][len(state["messages"]) :],
-            "task": data["task"],
-            "next_action": data["action"],
-            "planner_note": data["note"],
-        }
-
-    def coding_input(state):
-        if state["coding_cycles"] >= limits.max_coding_cycles:
-            raise ValueError("Coding-cycle guard forbids another child invocation")
-        return {
-            "task_id": state["task_id"],
-            "task": state["task"],
-            "defects": []
-            if state["test_result"] is None
-            else state["test_result"]["findings"],
-            "memory": state["coding_memory"],
-            "cycle": state["coding_cycles"] + 1,
-        }
-
-    def coding_output(state, child):
-        result = child["result"]
-        # Public handoff and private carry-over are intentionally distinct.
-        # The planner/tester sees result, but never the memory history below.
-        return {
-            "coding_memory": {
-                "history": child["coding_history"],
-                "artifact": child["artifact"],
-                "total_rounds": child["total_rounds"],
-            },
-            "coding_result": result,
-            "test_result": None,
-            "coding_cycles": state["coding_cycles"] + 1,
-            "messages": [
-                HumanMessage(name="coding_workflow_result", content=json.dumps(result))
-            ],
-        }
-
-    def coding(state, config):
-        # Actual nested workflow invocation, not five flattened peer agents.
-        child = coding_workflow.invoke(coding_input(state), config=config)
-        return coding_output(state, child)
-
-    async def acoding(state, config):
-        child = await coding_workflow.ainvoke(coding_input(state), config=config)
-        return coding_output(state, child)
-
-    def tester_input(state):
-        if state["coding_result"]["status"] != "approved_for_testing":
-            raise ValueError("Tester must not receive blocked coding work")
-        return {
-            "history": state["messages"],
-            "packet": {
-                "task": state["task"],
-                "artifact": state["coding_result"]["artifact"],
-            },
-        }
-
-    def tester_output(state, result):
-        bind_assessment(result["data"], state["coding_result"]["artifact"])
-        return {
-            "messages": result["history"][len(state["messages"]) :],
-            "test_result": result["data"],
-        }
+    def dispatch(state, config):
+        """Call the actual compiled child graph and collect its completed result."""
+        result = child.invoke({"assignment": state["assignment"]}, config=config)
+        return {"answer": result["answer"], "outcome": result["outcome"]}
 
     def finish(state):
-        completed = state["next_action"] == "finish"
-        status = "completed" if completed else "blocked"
-        if completed:
-            explanation = "The scripted/model assessment passed. This sample did not execute code or tests."
-        elif state["coding_result"] and state["coding_result"]["status"] == "blocked":
-            explanation = (
-                "Review-round limit reached. The candidate is NOT approved for testing."
-            )
-        else:
-            explanation = (
-                "Test-fix cycle limit reached. Acceptance defects remain unresolved."
-            )
-        return {
-            "outcome": status,
-            "messages": [
-                AIMessage(
-                    name="planner",
-                    content=f"{status.upper()}: {state['planner_note']}\n{explanation}",
-                )
-            ],
-        }
-
-    def identity(state):
-        """Identify the one history shared by the planner and tester."""
-        return f"outer:{state['task_id']}"
+        """Publish the child result unchanged, including any unresolved review."""
+        return {"messages": [AIMessage(content=state["answer"])]}
 
     graph = StateGraph(DeliveryState)
-    graph.add_node("begin_delivery", begin)
-    graph.add_node(
-        "planner",
-        _role_node(
-            agents["planner"],
-            planner_input,
-            planner_output,
-            identity,
-            1,
-        ),
-    )
-    graph.add_node(
-        "coding_workflow",
-        RunnableLambda(coding, afunc=acoding),
-        metadata={
-            "report_description": "Enter a nested workflow with a separate shared coding context.",
-        },
-    )
-    graph.add_node(
-        "tester",
-        _role_node(
-            agents["tester"],
-            tester_input,
-            tester_output,
-            identity,
-            1,
-        ),
-    )
-    graph.add_node("finish_delivery", finish)
-    graph.add_edge(START, "begin_delivery")
-    graph.add_edge("begin_delivery", "planner")
-    graph.add_conditional_edges(
-        "planner",
-        lambda s: s["next_action"],
-        {
-            "code": "coding_workflow",
-            "test": "tester",
-            "finish": "finish_delivery",
-            "escalate": "finish_delivery",
-        },
-    )
-    graph.add_edge("coding_workflow", "planner")
-    graph.add_edge("tester", "planner")
-    graph.add_edge("finish_delivery", END)
+    graph.add_node("planner", plan)
+    graph.add_node("review_workflow", dispatch)
+    graph.add_node("finish", finish)
+    graph.add_edge(START, "planner")
+    graph.add_edge("planner", "review_workflow")
+    graph.add_edge("review_workflow", "finish")
+    graph.add_edge("finish", END)
     compiled = graph.compile(name="nested_workflows")
-    # Native discovery excludes these checkpoint-disabled wrapper calls. Expose
-    # their actual graph references at the call sites; the shared recorder reads
-    # nodes and transitions automatically at execution time. These annotations
-    # explain context ownership without duplicating any executable topology.
-    review_workflow.report_title = "Isolated review workflow"
-    review_workflow.report_context = "Reviewer: fresh context on every invocation"
-    coding_workflow.report_title = "Coding workflow"
-    coding_workflow.report_context = (
-        "Supervisor + coder: shared coding history, retained on re-entry"
-    )
-    coding_workflow.report_subgraphs = {"isolated_review": review_workflow}
-    compiled.report_title = "Delivery workflow"
-    compiled.report_context = "Planner + tester: shared outer history"
-    compiled.report_subgraphs = {"coding_workflow": coding_workflow}
+    compiled.report_title = "Parent dispatch workflow"
+    # The adapter changes the state shape, so expose its compiled child for the
+    # shared report recorder to discover actual topology rather than copied edges.
+    compiled.report_subgraphs = {"review_workflow": child}
     return compiled

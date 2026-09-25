@@ -19,11 +19,12 @@ from reporting.execute_runnable import execute_runnable
 from reporting.pricing import cost, load_prices, summarize
 from reporting.render import agent_activity, conversation_turns
 from reporting.schema import Run
-from samples.subagent_chat.sample import (
-    DELEGATED_TASK,
-    SPECIALIST_SUMMARY,
-    USER_PROMPTS,
-)
+from samples.subagent_chat.sample import CONVERSATION
+
+# Expected values are test projections of the authored conversation.
+DELEGATED_TASK = CONVERSATION[1]["tool_calls"][0]["args"]["description"]
+SPECIALIST_SUMMARY = CONVERSATION[4]["content"]
+USER_PROMPTS = [entry["content"] for entry in CONVERSATION if entry["role"] == "client"]
 
 
 def test_delegation_context_and_costs(tmp_path):

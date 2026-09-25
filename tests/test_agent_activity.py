@@ -23,9 +23,10 @@ def test_quote_request_reports_native_agent_name(tmp_path):
     The adapter name alone is insufficient: the nested native graph is the
     nearest owner of model calls, so its name must identify the quote role too.
     """
+    from fixtures.quote_scenario import DECISIONS, make_simulated_model
+
     from agent_runtime.workflows.quote_request import build_workflow
     from reporting.execute_runnable import execute_runnable
-    from samples.quote_request.sample import DECISIONS, make_simulated_model
 
     prices = load_prices(Path(__file__).parent / "fixtures/accounting_prices.json")
     directory = tmp_path / "quote"

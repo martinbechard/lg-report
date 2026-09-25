@@ -11,7 +11,11 @@ from langchain_core.messages import HumanMessage, ToolMessage
 
 from agent_runtime.harness import model_factory
 from agent_runtime.harness.console_client import ConsoleClient
-from samples.subagent_chat.sample import CONVERSATION, FINAL_ANSWER, USER_PROMPTS
+from samples.subagent_chat.sample import CONVERSATION
+
+# Expected values are test projections of the authored conversation.
+FINAL_ANSWER = CONVERSATION[-1]["content"]
+USER_PROMPTS = [entry["content"] for entry in CONVERSATION if entry["role"] == "client"]
 
 
 def test_conversation_routing_and_fresh_models():
@@ -25,10 +29,20 @@ def test_conversation_routing_and_fresh_models():
     config = {"metadata": {"lc_agent_name": "delegating_parent"}}
     delegation = parent.invoke([request], config=config)
     assert delegation.tool_calls[0]["name"] == "task"
-    assert child.invoke("echo", config={"metadata": {"lc_agent_name": "isolated-subagent"}}).tool_calls[0]["name"] == "echo_tool"
+    assert (
+        child.invoke(
+            "echo", config={"metadata": {"lc_agent_name": "isolated-subagent"}}
+        ).tool_calls[0]["name"]
+        == "echo_tool"
+    )
     result = ToolMessage(content="Child summary", tool_call_id="delegate-1")
-    assert parent.invoke([request, delegation, result], config=config).content == FINAL_ANSWER
-    assert second_parent.invoke("delegate", config=config).tool_calls[0]["name"] == "task"
+    assert (
+        parent.invoke([request, delegation, result], config=config).content
+        == FINAL_ANSWER
+    )
+    assert (
+        second_parent.invoke("delegate", config=config).tool_calls[0]["name"] == "task"
+    )
     assert model_factory.client_prompts(CONVERSATION) == USER_PROMPTS
     assert parent.conversation == child.conversation == CONVERSATION
     assert parent._positions == {"delegating_parent": 2}
@@ -92,7 +106,18 @@ def test_subagent_live_build_does_not_load_script(monkeypatch):
 
     def provider_model(name):
         """Return a distinct valid adapter for each real-mode factory request."""
-        model = SimulatedModel(conversation=[{"role": "test-agent", "content": response.content, "tool_calls": response.tool_calls, "response_metadata": response.response_metadata} for response in [AIMessage(content="unused")]], agent_name="test-agent")
+        model = SimulatedModel(
+            conversation=[
+                {
+                    "role": "test-agent",
+                    "content": response.content,
+                    "tool_calls": response.tool_calls,
+                    "response_metadata": response.response_metadata,
+                }
+                for response in [AIMessage(content="unused")]
+            ],
+            agent_name="test-agent",
+        )
         models.append(model)
         return model, "openai", "selected-model"
 
@@ -164,11 +189,10 @@ def test_chronological_extraction_preserves_metadata_and_isolates_runs():
     assert conversation[1]["response_metadata"]["simulated_reasoning_tokens"] == 12000
 
 
-def test_catalog_keeps_specialized_adapter_with_conversation(monkeypatch):
-    """Chronological data must not replace unmetered quote decisions with estimates."""
+def test_catalog_meters_rebuilt_quote_requests_without_cache_reuse(monkeypatch):
+    """Quote simulation estimates each request without assuming retained transcripts."""
     from agent_runtime.harness.sample_catalog import SampleCatalog
     from agent_runtime.harness.simulated_model import (
-        ScriptedChatModel,
         SimulatedModel,
     )
 
@@ -186,5 +210,5 @@ def test_catalog_keeps_specialized_adapter_with_conversation(monkeypatch):
     monkeypatch.setattr(script, "build_scripted_models", record_models)
     catalog.create_run("quote_request", False, tracing=False)
     assert len(constructed) == 1
-    assert isinstance(constructed[0], ScriptedChatModel)
-    assert not isinstance(constructed[0], SimulatedModel)
+    assert isinstance(constructed[0], SimulatedModel)
+    assert constructed[0].cache_reuse is False

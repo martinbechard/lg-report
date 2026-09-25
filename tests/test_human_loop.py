@@ -192,15 +192,15 @@ def test_agent_can_finish_without_requesting_a_write(tmp_path):
 # Each human answer must reach the next assessment in the retained context.
 def test_quote_model_questions_resolve_multiple_issues():
     """Complete fields still pause; each human answer reaches the next model call."""
-    from langchain_core.callbacks import BaseCallbackHandler
-
-    from agent_runtime.agents.quote_interpreter import SYSTEM_PROMPT
-    from samples.quote_request.sample import (
+    from fixtures.quote_scenario import (
         ANSWERS,
         DECISIONS,
         INITIAL_VALUES,
         make_simulated_model,
     )
+    from langchain_core.callbacks import BaseCallbackHandler
+
+    from agent_runtime.agents.quote_interpreter import SYSTEM_PROMPT
 
     class Capture(BaseCallbackHandler):
         """Observe actual model inputs to prove clarification context is retained."""
@@ -252,7 +252,7 @@ def test_quote_model_questions_resolve_multiple_issues():
 # the model decision rather than enforce a fixed question count.
 def test_quote_model_can_complete_without_questions():
     """Routing follows the model, not mandatory fields or a fixed question count."""
-    from samples.quote_request.sample import make_simulated_model
+    from fixtures.quote_scenario import make_simulated_model
 
     decision = {
         "action": "complete",
@@ -270,7 +270,7 @@ def test_quote_model_can_complete_without_questions():
 # gets another turn with the first answer retained in conversation state.
 def test_quote_unclear_answer_can_trigger_another_question():
     """The human's first reply does not automatically resolve the model's concern."""
-    from samples.quote_request.sample import (
+    from fixtures.quote_scenario import (
         DECISIONS,
         INITIAL_VALUES,
         make_simulated_model,
@@ -289,7 +289,7 @@ def test_quote_unclear_answer_can_trigger_another_question():
 # Explicit cancellation must clear partial values, conversation, and request
 # from the returned state. This does not test deletion of checkpoint history.
 def test_quote_abandon_discards_partial_request():
-    from samples.quote_request.sample import INITIAL_VALUES, make_simulated_model
+    from fixtures.quote_scenario import INITIAL_VALUES, make_simulated_model
 
     graph = quote_workflow(make_simulated_model(), checkpointer=InMemorySaver())
     graph.invoke({"values": INITIAL_VALUES}, CONFIG)
@@ -337,7 +337,10 @@ def test_standalone_samples(tmp_path, sample, extra, stdin):
     args = [
         sys.executable,
         "-m",
-        "agent_runtime", "--demo", "--sample", sample,
+        "agent_runtime",
+        "--demo",
+        "--sample",
+        sample,
         "--prices",
         str(root / "models.json"),
         "--fx-file",
@@ -348,7 +351,14 @@ def test_standalone_samples(tmp_path, sample, extra, stdin):
     ]
     if sample == "file_approval":
         source, target, _ = files(tmp_path)
-        args += ["--source", str(source), "--target", str(target), "--client", "console"]
+        args += [
+            "--source",
+            str(source),
+            "--target",
+            str(target),
+            "--client",
+            "console",
+        ]
     result = subprocess.run(
         args,
         cwd=tmp_path,
@@ -362,6 +372,16 @@ def test_standalone_samples(tmp_path, sample, extra, stdin):
     assert (output / "report.html").exists()
     run = json.loads((output / "run.json").read_text())
     assert run["status"] == "ok"
+    if sample == "quote_request":
+        # Every actual assessment is estimated, including after resume. Rebuilt
+        # requests must not claim cached tokens or turn missing usage into zero.
+        calls = [step for step in run["steps"] if step["kind"] == "model"]
+        assert len(calls) == (1 if "cancel" in extra else 4)
+        for call in calls:
+            assert call["usage"]["input_tokens"] > 0
+            assert call["usage"]["output_tokens"] > 0
+            assert call["usage"]["cache_read"] == 0
+        assert run["demo"] is True
     assert (
         '"status": "cancelled"' in result.stdout
         if "cancel" in stdin or "cancel" in extra
@@ -431,8 +451,9 @@ def test_batched_restricted_calls_are_gated(tmp_path, cancel_batch):
 @pytest.mark.parametrize("supplied", [False, True])
 def test_workflow_persistence_is_caller_owned(tmp_path, kind, supplied):
     """Factories neither allocate savers nor replace caller-provided persistence."""
+    from fixtures.quote_scenario import make_simulated_model as quote_model
+
     from samples.file_approval.sample import make_simulated_model as file_model
-    from samples.quote_request.sample import make_simulated_model as quote_model
 
     saver = InMemorySaver() if supplied else None
     kwargs = {"checkpointer": saver} if supplied else {}
