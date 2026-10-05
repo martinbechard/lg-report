@@ -79,6 +79,8 @@ def test_first_free_port_and_recorded_reuse(runtime):
     assert saved["connection_token"]
     assert runtime.path.stat().st_mode & 0o777 == 0o600
     assert factory.call_count == 2
+    assert factory.call_args.kwargs["mode"] == "copilot-cli"
+    assert factory.call_args.kwargs["use_logged_in_user"] is True
     failed.stop.assert_awaited_once()
 
 
@@ -150,6 +152,10 @@ def test_request_disables_tools_and_preserves_unknown_usage(runtime, receipt):
     assert options["available_tools"] == options["tools"] == []
     assert options["system_message"] == {"mode": "replace", "content": "system"}
     assert options["infinite_sessions"] == {"enabled": False}
+    assert options["enable_config_discovery"] is False
+    assert options["enable_skills"] is False
+    assert options["enable_file_hooks"] is False
+    assert options["skip_custom_instructions"] is True
     assert options["on_permission_request"](None, None).kind == "reject"
     message = response.generations[0].message
     assert message.content == "answer"

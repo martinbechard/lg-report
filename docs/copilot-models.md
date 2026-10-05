@@ -79,7 +79,10 @@ shutdown `finally` block.
 
 Each invocation creates a fresh SDK session with the selected model, empty
 `available_tools` and `tools` lists, and a deny-all permission handler. SDK
-`mode="empty"` disables plugin, skill, hook, and repository-instruction discovery.
+`mode="copilot-cli"` with `use_logged_in_user=True` uses the authenticated
+Copilot SDK path. Authentication does not enable tools: session options separately
+disable configuration discovery, custom instructions, skills, file hooks, host Git
+operations, and the session store; no plugin, skill, or MCP configuration is supplied.
 The supplied system message replaces Copilot's default instructions; conversation
 history is passed as role-labelled JSON text. This is a text history encoding,
 not a native multi-message model API. There is no streaming or automatic context

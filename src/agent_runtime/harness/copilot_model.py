@@ -89,9 +89,9 @@ class CopilotServer:
                         f"127.0.0.1:{candidate}", connection_token=token
                     )
                 client = CopilotClient(
-                    connection=connection, mode="empty",
-                    # Use the normal login location. Empty mode disables repo
-                    # discovery, plugins, skills and hooks at session creation.
+                    connection=connection, mode="copilot-cli", use_logged_in_user=True,
+                    # Reuse the authenticated Copilot login. Session options below
+                    # independently constrain this adapter to request/response.
                     base_directory=str(Path.home() / ".copilot"),
                 )
                 try:
@@ -144,6 +144,12 @@ class CopilotServer:
             system_message={"mode": "replace", "content": system},
             reasoning_effort=effort,
             infinite_sessions={"enabled": False},
+            # Authentication and tool availability are separate decisions. Keep
+            # local discovery and side effects off in normal Copilot SDK mode.
+            enable_config_discovery=False, skip_custom_instructions=True,
+            enable_skills=False, enable_file_hooks=False,
+            enable_host_git_operations=False, enable_session_store=False,
+            plugin_directories=[], skill_directories=[], mcp_servers={},
             on_permission_request=lambda *_: PermissionDecisionReject(
                 feedback="lg-report Copilot requests have tools disabled"
             ),
