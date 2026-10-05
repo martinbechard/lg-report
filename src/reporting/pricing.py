@@ -12,7 +12,7 @@ from datetime import date, datetime
 from decimal import Decimal
 from pathlib import Path
 
-from pydantic import Field
+from pydantic import Field, PrivateAttr
 
 from reporting.exchange import ExchangeRate
 from reporting.schema import Record, Run, Step
@@ -59,6 +59,11 @@ class Prices(Record):
     fuzzy matches. For example, load_prices(path) supplies this object to both
     renderers so an export does not silently substitute newer tariffs.
     """
+
+    # Only automatic startup enables network discovery during recording. Keep
+    # this process-local setting out of prices.json so loading a saved snapshot
+    # never enables network access or changes historical export accounting.
+    _lookup_cache_dir: Path | None = PrivateAttr(default=None)
 
     calibrations: dict[str, ModelCalibration] = Field(default_factory=dict)
     refresh_errors: dict[str, str] = Field(default_factory=dict)

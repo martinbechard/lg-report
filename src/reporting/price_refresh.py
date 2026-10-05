@@ -1,4 +1,4 @@
-"""Refresh supported standard token tariffs once per day from official sources.
+"""Refresh standard token tariffs and discover missing models from official sources.
 
 Parsing is deliberately strict: a changed page must not silently become a new
 price. Each model retains its last verified tariff when a lookup fails.
@@ -9,6 +9,7 @@ Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 
 import hashlib
 import re
+from collections.abc import Iterable
 from datetime import UTC, datetime
 from decimal import Decimal
 from html.parser import HTMLParser
@@ -16,11 +17,13 @@ from pathlib import Path
 from urllib.request import Request, urlopen
 
 from reporting.pricing import Prices, Rate, load_prices
+from reporting.schema import Run
 
-# Only known page formats are supported; an unfamiliar model needs an explicit
-# tariff instead of a best-guess scrape that could silently misprice a run.
+# These bundled models remain useful source references, but are not an allowlist.
+# New identities use the same strict provider page contracts below.
 OPENAI_MODELS = ("gpt-5.5", "gpt-5.6-luna", "gpt-5.6-sol")
 ANTHROPIC = "https://platform.claude.com/docs/en/about-claude/pricing"
+ANTHROPIC_OVERVIEW = "https://platform.claude.com/docs/en/about-claude/models/overview"
 ANTHROPIC_MODELS = {
     "anthropic:claude-sonnet-5": "Claude Sonnet 5",
     "anthropic:claude-opus-4-8": "Claude Opus 4.8",
@@ -33,6 +36,62 @@ SOURCES = {
     },
     **{key: ANTHROPIC for key in ANTHROPIC_MODELS},
 }
+
+
+def source_url(key: str) -> str | None:
+    """Choose an official source without letting captured IDs change the host/path.
+
+    OpenAI dated snapshots share a model page, but parsing still requires that
+    page to explicitly name the requested snapshot. Unsupported providers and
+    malformed identifiers stay unpriced instead of becoming arbitrary URLs.
+    """
+    provider, separator, model = key.partition(":")
+    if not separator or not re.fullmatch(r"[a-z0-9][a-z0-9.-]*", model):
+        return None
+    if provider == "openai":
+        page_model = re.sub(r"-\d{4}-\d{2}-\d{2}$", "", model)
+        return f"https://developers.openai.com/api/docs/models/{page_model}.md"
+    if provider == "anthropic":
+        return ANTHROPIC
+    return None
+
+
+def anthropic_name(model: str, model_text: str | None = None) -> str:
+    """Translate exact canonical Claude IDs into the provider's table spelling.
+
+    Both version-first legacy names and family-first names are supported. Dated
+    and latest aliases require an exact ID in the official model overview; do
+    not guess which canonical tariff an unrecognized identifier represents.
+    """
+    if re.search(r"-(?:\d{8}|latest)$", model):
+        parser = TableRows()
+        parser.feed(model_text or "")
+        names = []
+        header = []
+        for row in parser.rows:
+            if not row:
+                header = []
+            elif row[0] == "Feature":
+                header = row
+            elif row and row[0] in {"Claude API ID", "Claude API alias"}:
+                names.extend(
+                    header[index]
+                    for index, value in enumerate(row)
+                    if value == model and index < len(header)
+                )
+        if len(set(names)) != 1:
+            raise ValueError("Anthropic snapshot identity was not verified")
+        return names[0]
+    match = re.fullmatch(r"claude-([a-z]+)-(\d+)(?:-(\d+))?", model)
+    if match:
+        family, major, minor = match.groups()
+    else:
+        match = re.fullmatch(r"claude-(\d+)(?:-(\d+))?-([a-z]+)", model)
+        if not match:
+            raise ValueError("Unrecognized Anthropic model identity")
+        major, minor, family = match.groups()
+    version = major + (f".{minor}" if minor else "")
+    return f"Claude {family.title()} {version}"
 
 
 class TableRows(HTMLParser):
@@ -54,11 +113,13 @@ class TableRows(HTMLParser):
         self.row = []
         self.cell = None
         self.in_sup = False
+        self.model_link = None
+        self.in_model_link = False
 
     def handle_starttag(self, tag, attrs):
         """Keep price columns separate as HTMLParser encounters opening tags.
 
-        ``tag`` is the element name; ``attrs`` contains unused HTML attributes.
+        ``tag`` is the element name; ``attrs`` identifies official model links.
         Reset the active row/cell or enter footnote suppression for later text.
         """
         # Footnote digits are not tariff digits; row/cell boundaries reset the
@@ -69,6 +130,16 @@ class TableRows(HTMLParser):
             self.row = []
         elif tag in ("td", "th"):
             self.cell = ""
+            self.model_link = None
+        elif (
+            tag == "a"
+            and self.cell is not None
+            and dict(attrs).get("href", "").startswith("/docs/en/models/")
+        ):
+            # Current model cells include marketing text after the model link.
+            # Keep the exact linked name rather than prefix-matching that prose.
+            self.model_link = ""
+            self.in_model_link = True
 
     def handle_data(self, data):
         """Collect tariff text for the current cell without importing page prose.
@@ -80,6 +151,8 @@ class TableRows(HTMLParser):
         # prose or superscripts could otherwise masquerade as a price.
         if self.cell is not None and not self.in_sup:
             self.cell += data
+            if self.in_model_link:
+                self.model_link += data
 
     def handle_endtag(self, tag):
         """Make completed tariff rows available for later price validation.
@@ -89,34 +162,48 @@ class TableRows(HTMLParser):
         """
         # Footnote digits are not tariff digits; row/cell boundaries reset the
         # accumulator so only one table cell contributes to each price field.
-        if tag == "sup":
+        if tag == "a":
+            self.in_model_link = False
+        elif tag == "sup":
             self.in_sup = False
         # Only an actually opened cell may be committed; unmatched closing tags
         # must not inject empty/misaligned columns into the extracted table.
         elif tag in ("td", "th") and self.cell is not None:
-            self.row.append(self.cell.strip())
+            self.row.append((self.model_link or self.cell).strip())
             self.cell = None
         elif tag == "tr":
             self.rows.append(self.row)
+        elif tag == "table":
+            # A verified header cannot grant meaning to a later unrelated table.
+            self.rows.append([])
 
 
-def parse_rate(key: str, text: str) -> Rate:
+def parse_rate(key: str, text: str, *, model_text: str | None = None) -> Rate:
     """Establish a trustworthy tariff before the refresh loop replaces saved prices.
 
-    ``key`` is an allowlisted provider:model identity and ``text`` is its fetched
-    page body; return a Rate only when the expected pricing structure matches.
+    ``key`` is an exact provider:model identity and ``text`` is its fetched
+    page body; model_text supplies official Anthropic snapshot identity evidence
+    when needed. Return a Rate only when the expected pricing structure matches.
 
     Require exact identity, units, and a unique row so page redesigns fail closed.
     The returned Rate has amounts only: get_prices adds provenance after parsing
     succeeds. Unsupported/ambiguous content raises ValueError; absent expected
     section delimiters can raise IndexError. This function performs no network I/O.
     """
-    # Provider identity and an allowlisted model select a known page contract;
-    # Anthropic uses its table parser, while unsupported identities fail closed.
-    if key.startswith("openai:") and key in SOURCES:
+    # Validate a provider page contract, not a fixed list of model releases.
+    if source_url(key) is None:
+        raise ValueError("No official-source parser for this model")
+    if key.startswith("openai:"):
         model = key.split(":", 1)[1]
         # A redirected or wrong-model page must not acquire this model's identity.
-        if f"Model ID: `{model}`" not in text:
+        canonical = re.sub(r"-\d{4}-\d{2}-\d{2}$", "", model)
+        if f"Model ID: `{canonical}`" not in text or (
+            model != canonical
+            and f"- Default snapshot: `{model}`" not in text
+            and not re.search(
+                r"(?m)^- `" + re.escape(model) + r"`$", text.split("## Snapshots\n")[-1]
+            )
+        ):
             raise ValueError("Unexpected OpenAI model page")
         section = text.split("### Text tokens\n", 1)[1].split("\n## ", 1)[0]
         values = {}
@@ -133,19 +220,29 @@ def parse_rate(key: str, text: str) -> Rate:
             if len(matches) != 1:
                 raise ValueError("Missing or ambiguous OpenAI rate")
             values[field] = Decimal(matches[0])
-        # These supported models publish a separate write multiplier; other
-        # models retain an unknown write tariff rather than inheriting it.
-        if model in ("gpt-5.6-luna", "gpt-5.6-sol"):
-            multiplier = re.search(
-                r"Cache writes are billed at (\d+(?:\.\d+)?)x the uncached input token rate",
-                section,
-            )
-            # The write price is required for this model contract; without it
-            # the scrape cannot count as a newly verified complete tariff.
-            if multiplier is None:
-                raise ValueError("Missing OpenAI cache-write price")
-            values["cache_write"] = values["input"] * Decimal(multiplier[1])
-    elif key in ANTHROPIC_MODELS:
+        # New releases can publish a write row, a multiplier, or neither. Never
+        # copy another model's multiplier; absent evidence leaves writes unknown.
+        writes = re.findall(
+            r"\| Cache writes \| \$(\d+(?:\.\d+)?) \| 1M tokens \|", section
+        )
+        multipliers = re.findall(
+            r"Cache writes are billed at (\d+(?:\.\d+)?)x the uncached input token rate",
+            section,
+        )
+        if len(writes) > 1 or len(multipliers) > 1:
+            raise ValueError("Ambiguous OpenAI cache-write price")
+        if "| Cache writes |" in section and not writes:
+            raise ValueError("Unexpected OpenAI cache-write units")
+        if writes:
+            values["cache_write"] = Decimal(writes[0])
+        if multipliers:
+            write_rate = values["input"] * Decimal(multipliers[0])
+            if writes and values["cache_write"] != write_rate:
+                raise ValueError("Conflicting OpenAI cache-write prices")
+            values["cache_write"] = write_rate
+        if model in ("gpt-5.6-luna", "gpt-5.6-sol") and "cache_write" not in values:
+            raise ValueError("Missing OpenAI cache-write price")
+    elif key.startswith("anthropic:"):
         parser = TableRows()
         parser.feed(text)
         header = [
@@ -156,26 +253,47 @@ def parse_rate(key: str, text: str) -> Rate:
             "Cache hits and refreshes",
             "Output tokens",
         ]
-        # Positional extraction is safe only while provider columns retain their
-        # expected meaning; a reordered/redesigned table must fail validation.
-        if header not in parser.rows:
-            raise ValueError("Anthropic pricing columns changed")
-        # Ignore empty/unrelated rows and require all six columns for the exact
-        # model name; partial rows cannot safely map to token categories.
-        rows = [
-            row
-            for row in parser.rows
-            if row and row[0] == ANTHROPIC_MODELS[key] and len(row) == 6
+        current_header = [
+            "Name",
+            "Input",
+            "Output",
+            "5m writes",
+            "1h writes",
+            "Hits and refreshes",
         ]
-        # Missing and duplicate model rows both leave tariff selection uncertain.
+        layouts = {
+            tuple(header): (
+                "input",
+                "cache_write_5m",
+                "cache_write_1h",
+                "cache_read",
+                "output",
+            ),
+            tuple(current_header): (
+                "input",
+                "output",
+                "cache_write_5m",
+                "cache_write_1h",
+                "cache_read",
+            ),
+        }
+        # Select columns from the preceding verified header. The provider moved
+        # output ahead of caching; relying on the old positions would misprice it.
+        fields = None
+        rows = []
+        name = anthropic_name(key.split(":", 1)[1], model_text)
+        for row in parser.rows:
+            if not row:
+                fields = None
+            elif tuple(row) in layouts:
+                fields = layouts[tuple(row)]
+            elif row and row[0] == name and len(row) == 6 and fields:
+                rows.append((fields, row))
         if len(rows) != 1:
             raise ValueError("Missing or ambiguous Anthropic rate")
         values = {}
-        for field, cell in zip(
-            ("input", "cache_write_5m", "cache_write_1h", "cache_read", "output"),
-            rows[0][1:],
-            strict=True,
-        ):
+        fields, row = rows[0]
+        for field, cell in zip(fields, row[1:], strict=True):
             match = re.fullmatch(r"\$(\d+(?:\.\d+)?) / MTok", cell)
             # Accept only USD per million tokens; silently reading another unit
             # would multiply every estimate by the wrong scale.
@@ -190,7 +308,7 @@ def parse_rate(key: str, text: str) -> Rate:
 def fetch_text(url: str) -> str:
     """Supply the refresh parser with the source evidence for a tariff lookup.
 
-    ``url`` comes from the supported-source mapping. Execute a request with a
+    ``url`` comes from the validated provider source resolver. Execute a request with a
     fifteen-second timeout and return the page body for parsing and retention.
 
     Return decoded UTF-8 text; network and decoding errors propagate to the
@@ -215,7 +333,8 @@ def get_prices(
     from default_file, prefer newer cached rates, and store successful lookups
     under cache_dir by model and local calendar day. Source bodies are retained
     beside parsed JSON for audit. Same-day successes are reused; failed attempts
-    may retry on the next run and never advance a verification date.
+    may retry on the next launch and never advance a verification date. The
+    returned snapshot also enables missing-model discovery when traces are saved.
 
     Per-model refresh errors are attached to the returned Prices while retaining
     available tariffs. Invalid initial/supplied files still raise: they cannot be
@@ -227,14 +346,62 @@ def get_prices(
         return load_prices(supplied_file)
     prices = load_prices(default_file)
     prices.refresh_errors = {}
+    prices._lookup_cache_dir = cache_dir
+    _refresh_models(prices, prices.models, cache_dir)
+    for key, rate in list(prices.models.items()):
+        # Derived demo rates must follow the basis actually selected above,
+        # including its unchanged old date if refresh failed.
+        if rate.based_on:
+            basis = prices.models[rate.based_on]
+            prices.models[key] = basis.model_copy(
+                update={
+                    "based_on": rate.based_on,
+                    "source": f"Illustrative demo rates based on {rate.based_on}; no provider billing",
+                }
+            )
+    return prices
+
+
+def ensure_run_prices(run: Run, prices: Prices) -> None:
+    """Fill missing observed model tariffs before saving an automatic run snapshot.
+
+    This also catches models used by nested agents or resolved by a provider.
+    Existing rates and explicit aliases remain authoritative. Failed identities
+    are tried once per Prices lifetime so browser turns do not repeatedly block
+    on an unavailable page; a fresh launch can retry. Loaded/supplied snapshots
+    have no lookup cache configured and remain strictly offline.
+    """
+    if prices._lookup_cache_dir is None:
+        return
+    keys = {
+        prices.aliases.get(
+            f"{step.provider}:{step.model}", f"{step.provider}:{step.model}"
+        )
+        for step in run.steps
+        if step.kind == "model"
+        and step.provider in {"openai", "anthropic"}
+        and step.model
+    }
+    missing = keys - prices.models.keys() - prices.refresh_errors.keys()
+    _refresh_models(prices, missing, prices._lookup_cache_dir)
+
+
+def _refresh_models(prices: Prices, keys: Iterable[str], cache_dir: Path) -> None:
+    """Merge verified daily cache/fetch results into a mutable automatic snapshot.
+
+    Missing models have no fallback: failed retrieval must leave their rate absent.
+    Source bodies and parsed rates are saved together for reuse on later launches.
+    Existing models keep their most recent verified fallback if refresh fails.
+    """
     today = datetime.now().astimezone().date()
     pages = {}
-    for key, old_rate in list(prices.models.items()):
+    for key in sorted(set(keys)):
+        old_rate = prices.models.get(key)
         # Derived demo entries have no independent provider page; update them
         # after their real-model basis has completed its refresh attempt.
-        if old_rate.based_on:
+        if old_rate and old_rate.based_on:
             continue
-        url = SOURCES.get(key)
+        url = source_url(key)
         # Unsupported models cannot be scraped safely. Retain their old tariff
         # and flag real providers; illustrative demo entries need no web source.
         if url is None:
@@ -260,13 +427,17 @@ def get_prices(
                 if (
                     cached.source == url
                     and cached.as_of
-                    and cached.as_of >= (old_rate.as_of or prices.as_of)
+                    and (
+                        old_rate is None
+                        or cached.as_of >= (old_rate.as_of or prices.as_of)
+                    )
                 ):
                     prices.models[key] = cached
             # Skip fetching only when today's file exists AND the selected tariff
             # is verified today from this source; file existence alone is not proof.
             if (
                 path.exists()
+                and key in prices.models
                 and prices.models[key].as_of == today
                 and prices.models[key].source == url
             ):
@@ -276,32 +447,34 @@ def get_prices(
             if url not in pages:
                 pages[url] = fetch_text(url)
             body = pages[url]
-            rate = parse_rate(key, body)
+            model_text = None
+            if key.startswith("anthropic:") and re.search(r"-(?:\d{8}|latest)$", key):
+                # A dated API response must be tied to the provider's published
+                # model name before using that name's tariff. Retain both pages.
+                if ANTHROPIC_OVERVIEW not in pages:
+                    pages[ANTHROPIC_OVERVIEW] = fetch_text(ANTHROPIC_OVERVIEW)
+                model_text = pages[ANTHROPIC_OVERVIEW]
+            rate = parse_rate(key, body, model_text=model_text)
             rate.as_of = today
             rate.source = url
             rate.fetched_at = datetime.now(UTC)
             model_dir.mkdir(parents=True, exist_ok=True)
             # Retain the exact source alongside the parsed tariff for auditing.
             path.with_suffix(".source.txt").write_text(body, encoding="utf-8")
+            if model_text is not None:
+                path.with_suffix(".models.source.txt").write_text(
+                    model_text, encoding="utf-8"
+                )
             # Publish a complete parsed snapshot atomically so interruption cannot
             # leave a partial JSON file that looks like today's successful cache.
             temporary = path.with_suffix(".tmp")
             temporary.write_text(rate.model_dump_json(indent=2), encoding="utf-8")
             temporary.replace(path)
             prices.models[key] = rate
+            prices.refresh_errors.pop(key, None)
         except (OSError, ValueError, IndexError) as exc:
-            prices.refresh_errors[key] = (
-                f"Refresh failed ({type(exc).__name__}); retained last verified prices."
+            prices.refresh_errors[key] = f"Refresh failed ({type(exc).__name__}); " + (
+                "retained last verified prices."
+                if key in prices.models
+                else "pricing remains unknown."
             )
-    for key, rate in list(prices.models.items()):
-        # Derived demo rates must follow the basis actually selected above,
-        # including its unchanged old date if refresh failed.
-        if rate.based_on:
-            basis = prices.models[rate.based_on]
-            prices.models[key] = basis.model_copy(
-                update={
-                    "based_on": rate.based_on,
-                    "source": f"Illustrative demo rates based on {rate.based_on}; no provider billing",
-                }
-            )
-    return prices

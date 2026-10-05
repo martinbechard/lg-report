@@ -1,7 +1,8 @@
 """Export captured execution evidence as a local reporting bundle.
 
-save_report normalizes closed spans and writes run.json, the pricing snapshot,
-and HTML. clear_report removes only generated artifacts before replacement.
+save_report normalizes closed spans, resolves missing automatic model tariffs,
+and writes run.json, the pricing snapshot, and HTML. clear_report removes only
+generated artifacts before replacement.
 Console execution and streamed web runs share these functions; this module does
 not execute workflows or own capture lifetime. Empty evidence never proves success.
 Architecture and ownership: docs/chat-composition.md.
@@ -13,6 +14,7 @@ from pathlib import Path
 from uuid import uuid4
 
 from reporting.normalize import normalize
+from reporting.price_refresh import ensure_run_prices
 from reporting.render import render
 from reporting.schema import Run
 
@@ -67,6 +69,10 @@ def save_report(
         )
     )
     (directory / "run.json").write_text(run.model_dump_json(indent=2), encoding="utf-8")
+    # Resolve observed identities, including subagents and provider-selected
+    # snapshots, before every exporter receives the same saved accounting basis.
+    # Explicit pricing files remain offline; failed lookups remain unpriced.
+    ensure_run_prices(run, prices)
     (directory / "prices.json").write_text(
         prices.model_dump_json(indent=2), encoding="utf-8"
     )
