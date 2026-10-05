@@ -42,6 +42,10 @@ def execute_conversation(
     # Tracing adds callbacks and scopes to the same execution. Authenticate before
     # constructing models; the stack closes the SDK even if construction fails.
     with ExitStack() as resources:
+        from .copilot_model import close_copilot_servers
+
+        # SDK pipes need their event loop until all turns and reporting finish.
+        resources.callback(close_copilot_servers)
         recorder = None
         scope = nullcontext(None)
         config = {}

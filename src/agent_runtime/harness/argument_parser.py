@@ -39,7 +39,7 @@ def argument_parser(
         "--live",
         action="store_true",
         default=None,
-        help="Use the real model (default when the selected provider has an API key)",
+        help="Use the real model (default with a provider API key or Copilot selection)",
     )
     mode.add_argument(
         "--demo",
@@ -125,7 +125,7 @@ def parse_arguments(catalog, argv=None):
 
 
 def resolve_live_mode(args, settings):
-    """Select demo explicitly, otherwise detect the selected provider's key.
+    """Select demo explicitly, otherwise detect API keys or Copilot selection.
 
     Shell values override the selected dotenv file, matching model construction.
     Detection only checks presence; invalid live credentials must still fail in
@@ -139,5 +139,8 @@ def resolve_live_mode(args, settings):
         return args.live
     values = {**settings, **os.environ}
     provider, _ = configured_identity(settings=values)
+    # Selecting Copilot is an explicit live-provider choice; its SDK checks login.
+    if provider == "copilot":
+        return True
     key = "OPENAI_API_KEY" if provider == "openai" else "ANTHROPIC_API_KEY"
     return bool((values.get(key) or "").strip())

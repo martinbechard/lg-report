@@ -53,6 +53,14 @@ no `api-version` parameter. Leave reasoning effort empty for GPT-4.1. This setup
 uses API-key authentication and the Responses API; use Azure-specific rates for
 accurate cost estimates. See [Azure's Responses API documentation](https://learn.microsoft.com/en-us/azure/foundry/openai/how-to/responses).
 
+### GitHub Copilot local server
+
+Use `LG_PROVIDER=copilot` with an explicit model code such as `LG_MODEL=gpt-5.4`.
+Install the optional dependency with `uv sync --extra copilot`. The runtime starts
+on demand on the first free port from 7001 and records the endpoint in local
+configuration. This provider runs text request/response with all tools disabled.
+See [Copilot installation, configuration, and model codes](docs/copilot-models.md).
+
 ### Run all samples as a batch
 
 The batch runs all local samples and produces HTML reports, Excel workbooks,
@@ -187,7 +195,7 @@ Langfuse project. It has separate setup instructions and adds Langfuse traces al
 The parent/subagent lesson also has matching [local-report](samples/subagent_chat/README.md)
 and [Langfuse](samples/subagent_chat_langfuse/README.md) applications.
 
-Start with the [sample catalog](samples/README.md). The launcher defaults to live, interactive execution when the selected provider has an API key; otherwise it uses scripted responses and the sample’s default client (usually fixed prompts; file approval still asks a human). Use `--demo` to force demo mode even when a key is configured. Configure the root `.env.example` as `.env.local` and pass `--env-file .env.local`; shell variables take precedence. The same root template includes Langfuse settings (see the [sample configuration guide](samples/README.md#model-selection-and-configuration)). `LG_PROVIDER` selects OpenAI (the default) or Anthropic, and only that provider’s key enables automatic live mode. `--live` explicitly requires real execution; provider errors never fall back to demo mode. `--demo` and `--live` cannot be combined. For fixed prompts against a real model, use `--live --client static`.
+Start with the [sample catalog](samples/README.md). The launcher defaults to live, interactive execution when the selected provider has an API key; otherwise it uses scripted responses and the sample’s default client (usually fixed prompts; file approval still asks a human). Use `--demo` to force demo mode even when a key is configured. Configure the root `.env.example` as `.env.local` and pass `--env-file .env.local`; shell variables take precedence. The same root template includes Langfuse settings (see the [sample configuration guide](samples/README.md#model-selection-and-configuration)). `LG_PROVIDER` selects OpenAI (the default), Anthropic, or Copilot. For OpenAI and Anthropic, only that provider’s key enables automatic live mode; selecting Copilot enables live mode using its local login. `--live` explicitly requires real execution; provider errors never fall back to demo mode. `--demo` and `--live` cannot be combined. For fixed prompts against a real model, use `--live --client static`.
 
 ### Run all local samples and export Excel
 

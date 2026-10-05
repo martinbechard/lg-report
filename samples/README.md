@@ -160,6 +160,12 @@ All samples use LangGraphAgent. Console and scripted clients consume AG-UI event
 
 ## Model selection and configuration
 
+For GitHub Copilot, select `LG_PROVIDER=copilot` and an explicit `LG_MODEL` code.
+The [Copilot guide](../docs/copilot-models.md) covers installation, automatic local
+server startup from port 7001, persisted connection configuration, and model codes.
+Copilot uses its local login and defaults to live mode without a vendor API key.
+It supports tool-free text request/response; begin with `simple_chat`.
+
 Demo runs use an offline model with a stateful context simulator and need no LLM API key. For live execution, copy the repository root `.env.example` to `.env.local` if that file does not already exist, configure `LG_PROVIDER` and its API key, and pass `--env-file .env.local` to the sample command. `--demo` forces scripted execution even with credentials; `--live` forces real execution and reports missing or invalid credentials as errors. The two flags are mutually exclusive.
 Shell environment variables take precedence. Without `--env-file`, the launcher still reads the selected sample’s `.env`; it does not automatically load the root `.env.local`.
 

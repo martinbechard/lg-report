@@ -29,13 +29,15 @@ def configured_identity(
     LG_AVAILABLE_MODELS is an optional comma-separated allowlist for the selected
     provider (deployment names for Azure). Blank means unrestricted. This local
     declaration does not probe provider access or recover from network failures.
-    Only an explicitly configured, allowed LG_MODEL can replace a rejected model.
+    Only an explicitly configured, allowed LG_MODEL can replace a rejected model
+    for API providers. Copilot always requires the exact requested model.
     """
     values = {**(settings or {}), **os.environ}
     provider = values.get("LG_PROVIDER", "openai").lower()
-    if provider not in {"openai", "anthropic"}:
-        raise ValueError("LG_PROVIDER must be openai or anthropic")
-    default = "gpt-5.6-luna" if provider == "openai" else "claude-sonnet-5"
+    if provider not in {"openai", "anthropic", "copilot"}:
+        raise ValueError("LG_PROVIDER must be openai, anthropic, or copilot")
+    default = {"openai": "gpt-5.6-luna", "anthropic": "claude-sonnet-5",
+               "copilot": ""}[provider]
     fallback = (values.get("LG_MODEL") or "").strip()
     # Resolve the symbolic role once at construction, never on each invocation.
     # File settings support the same names as the shell; shell values win above.
@@ -50,6 +52,8 @@ def configured_identity(
                 f"symbolic model {symbolic_model_name!r}"
             )
     requested = model_name or fallback or default
+    if provider == "copilot" and (not requested or requested == "auto"):
+        raise ValueError("Copilot requires an explicit LG_MODEL code; auto is not supported")
     available = {
         name.strip()
         for name in (values.get("LG_AVAILABLE_MODELS") or "").split(",")
@@ -57,6 +61,9 @@ def configured_identity(
     }
     if not available or requested in available:
         return provider, requested
+
+    if provider == "copilot":
+        raise ValueError(f"Copilot model {requested!r} is not in LG_AVAILABLE_MODELS")
 
     # Never bypass the restriction with an unavailable default, and never pick
     # an arbitrary allowed model: LG_MODEL is the user's fallback decision.
@@ -87,7 +94,9 @@ def configured_model(model_name: str | None = None, *, symbolic_model_name: str 
 
     An explicit ``model_name`` overrides LG_MODEL when allowed by
     LG_AVAILABLE_MODELS; otherwise the allowed LG_MODEL is the fallback.
-    Read ``LG_PROVIDER`` (``openai``/``anthropic``), ``LG_MODEL``, the matching API key, positive
+    Copilot uses a tool-free SDK adapter and the local runtime login. It requires
+    an explicit model ID and does not support an output-token override.
+    Read ``LG_PROVIDER`` (``openai``/``anthropic``/``copilot``), ``LG_MODEL``, the matching API key, positive
     LG_MAX_TOKENS, optional LG_EFFORT, and optional OPENAI_BASE_URL from the sample settings overlaid by the process environment.
     No sample writes its .env into global process state. Model access and supported effort values remain the
     provider's responsibility. Missing keys or invalid local settings raise
@@ -109,6 +118,22 @@ def configured_model(model_name: str | None = None, *, symbolic_model_name: str 
     provider, model_id = configured_identity(
         model_name, symbolic_model_name=symbolic_model_name, settings=values
     )
+    if provider == "copilot":
+        # Copilot authenticates through its local runtime, not a vendor API key.
+        # Require explicit model selection and leave startup until first use.
+        try:
+            import copilot  # noqa: F401 - validate the optional install locally
+        except ImportError as exc:
+            raise ValueError("Install Copilot support with uv sync --extra copilot") from exc
+        from .copilot_model import CopilotChatModel
+
+        if values.get("LG_MAX_TOKENS"):
+            raise ValueError("Copilot SDK does not expose LG_MAX_TOKENS; unset it for Copilot")
+        return CopilotChatModel(
+            model_name=model_id,
+            config_path=values.get("LG_COPILOT_CONFIG") or ".cache/lg-report/copilot.json",
+            reasoning_effort=values.get("LG_EFFORT") or None,
+        ), provider, model_id
     # The validated provider determines which credential is required; an OpenAI
     # key cannot authenticate an Anthropic request, or vice versa.
     key_name = "OPENAI_API_KEY" if provider == "openai" else "ANTHROPIC_API_KEY"
