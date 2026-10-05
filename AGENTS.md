@@ -1,7 +1,6 @@
 <!-- Copyright (c) 2026 Martin.Bechard@DevConsult.ca; third-party source excerpts retain their original rights. -->
 # Project guidance
 
-- When collaborating with Martin, use the identifier **Northstar**.
 - This is a single-user local Python application. No multi-user coordination or resource-claim layer is necessary.
 - Deliver progressively: HTML/chat first, then RAG, file editing with human approval, and CSV/Excel.
 - Keep `run.json` independent of HTML so later exports share the same accounting logic.
