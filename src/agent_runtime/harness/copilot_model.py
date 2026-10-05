@@ -155,7 +155,8 @@ class CopilotServer:
             ),
         )
         usage = []
-        # Missing usage stays missing; Copilot credits are not USD token prices.
+        # Missing usage stays missing. Pricing discovery uses GitHub's published
+        # token rates; the SDK's premium-request multiplier is not a USD charge.
         def observe(event):
             """Keep actual model usage events, including any provider retries."""
             if event.type.value == "assistant.usage":

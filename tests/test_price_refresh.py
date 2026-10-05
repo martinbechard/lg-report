@@ -17,7 +17,6 @@ import pytest
 
 from reporting import price_refresh as refresh
 
-ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = Path(__file__).parent / "fixtures/pricing"
 
 
@@ -45,7 +44,7 @@ def test_daily_refresh_cache_and_override(monkeypatch, tmp_path):
         return source(url)
 
     monkeypatch.setattr(refresh, "fetch_text", fetch)
-    prices = refresh.get_prices(ROOT / "models.json", cache_dir=tmp_path)
+    prices = refresh.get_prices(FIXTURES / "catalog.json", cache_dir=tmp_path)
     assert not prices.refresh_errors
     assert len(calls) == 4
     assert prices.models["anthropic:claude-sonnet-5"].cache_write_5m == Decimal("2.50")
@@ -53,11 +52,13 @@ def test_daily_refresh_cache_and_override(monkeypatch, tmp_path):
         r.as_of == datetime.now().astimezone().date() for r in prices.models.values()
     )
     assert all(r.fetched_at for r in prices.models.values())
-    again = refresh.get_prices(ROOT / "models.json", cache_dir=tmp_path)
+    again = refresh.get_prices(FIXTURES / "catalog.json", cache_dir=tmp_path)
     assert again == prices
     assert len(calls) == 4
     supplied = refresh.get_prices(
-        ROOT / "models.json", supplied_file=ROOT / "models.json", cache_dir=tmp_path
+        FIXTURES / "catalog.json",
+        supplied_file=FIXTURES / "catalog.json",
+        cache_dir=tmp_path,
     )
     assert supplied.models["openai:gpt-5.6-luna"].as_of == date(2026, 9, 18)
     assert len(calls) == 4
@@ -67,7 +68,7 @@ def test_daily_refresh_cache_and_override(monkeypatch, tmp_path):
 # rather than presenting an unverified or zero-valued price.
 def test_failure_keeps_latest_verified_snapshot(monkeypatch, tmp_path):
     monkeypatch.setattr(refresh, "fetch_text", source)
-    prices = refresh.get_prices(ROOT / "models.json", cache_dir=tmp_path)
+    prices = refresh.get_prices(FIXTURES / "catalog.json", cache_dir=tmp_path)
     seed = tmp_path / "seed.json"
     for rate in prices.models.values():
         rate.as_of = date(2000, 1, 1)
@@ -122,8 +123,8 @@ def test_network_failure_preserves_dates(monkeypatch, tmp_path):
         raise OSError("offline")
 
     monkeypatch.setattr(refresh, "fetch_text", unavailable)
-    original = refresh.load_prices(ROOT / "models.json")
-    result = refresh.get_prices(ROOT / "models.json", cache_dir=tmp_path)
+    original = refresh.load_prices(FIXTURES / "catalog.json")
+    result = refresh.get_prices(FIXTURES / "catalog.json", cache_dir=tmp_path)
     assert len(result.refresh_errors) == 6
     assert {k: r.as_of for k, r in result.models.items()} == {
         k: r.as_of for k, r in original.models.items()

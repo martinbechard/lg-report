@@ -94,9 +94,16 @@ tools. A forced tool choice is rejected. The local graph still owns the workflow
 tool-disabled Copilot never executes its built-in file, shell, or MCP tools.
 
 Reported usage counts are captured when supplied. Missing counts remain unknown.
-Reports use provider `copilot`, so direct OpenAI or Anthropic token tariffs are
-not mistakenly applied to Copilot subscription/credit billing. Dollar costs remain
-unknown unless you supply an appropriate explicit `copilot:<model>` price entry.
+Reports retain provider `copilot`. Missing model prices are retrieved from
+[GitHub's Copilot pricing tables](https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing),
+saved in the daily cache, and included in the run's `prices.json`. Model codes
+such as `claude-opus-5.5` keep Copilot's spelling and rates. Published long-context
+rates apply above their input-token threshold in both HTML and Excel.
+
+These dollar estimates describe token usage before plan allowances, not your
+subscription invoice or legacy premium-request billing. Unavailable models,
+changed page formats, and missing usage remain explicitly unknown. An explicit
+`--prices` file still disables fetching and can supply `copilot:<model>` overrides.
 
 ## Model names and codes
 

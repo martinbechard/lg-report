@@ -18,7 +18,28 @@ from reporting.exchange import ExchangeRate
 from reporting.schema import Record, Run, Step
 
 
-class Rate(Record):
+class TokenRates(Record):
+    """Share disjoint USD token buckets between default and long-context tariffs.
+
+    Missing cache prices remain unknown; neither an absent field nor a provider's
+    'not applicable' label proves that reported cache writes are free.
+    """
+
+    input: Decimal = Field(ge=0, allow_inf_nan=False)
+    output: Decimal = Field(ge=0, allow_inf_nan=False)
+    cache_read: Decimal | None = Field(default=None, ge=0, allow_inf_nan=False)
+    cache_write: Decimal | None = Field(default=None, ge=0, allow_inf_nan=False)
+    cache_write_5m: Decimal | None = Field(default=None, ge=0, allow_inf_nan=False)
+    cache_write_1h: Decimal | None = Field(default=None, ge=0, allow_inf_nan=False)
+
+
+class LongContextRate(TokenRates):
+    """Apply published higher rates to the whole call above an input threshold."""
+
+    threshold: int = Field(gt=0)
+
+
+class Rate(TokenRates):
     """A model tariff in USD per million tokens, with verification provenance.
 
     For example, Rate(input="2", output="10") prices standard-rate input/output;
@@ -30,12 +51,7 @@ class Rate(Record):
     based_on: str | None = None
     as_of: date | None = None
     source: str | None = None
-    input: Decimal = Field(ge=0, allow_inf_nan=False)
-    output: Decimal = Field(ge=0, allow_inf_nan=False)
-    cache_read: Decimal | None = Field(default=None, ge=0, allow_inf_nan=False)
-    cache_write: Decimal | None = Field(default=None, ge=0, allow_inf_nan=False)
-    cache_write_5m: Decimal | None = Field(default=None, ge=0, allow_inf_nan=False)
-    cache_write_1h: Decimal | None = Field(default=None, ge=0, allow_inf_nan=False)
+    long_context: LongContextRate | None = None
 
 
 class ModelCalibration(Record):
@@ -103,6 +119,24 @@ CATEGORIES = [
 ]
 
 
+def rate_for_step(step: Step, prices: Prices) -> TokenRates | None:
+    """Select the saved tariff for the call, using inclusive input for tier limits.
+
+    The threshold is strict: a call exactly at the limit keeps default prices.
+    No network access occurs here, including when a model or usage is unknown.
+    """
+    key = f"{step.provider}:{step.model}"
+    rate = prices.models.get(prices.aliases.get(key, key))
+    if (
+        rate
+        and rate.long_context
+        and step.usage
+        and step.usage.input_tokens > rate.long_context.threshold
+    ):
+        return rate.long_context
+    return rate
+
+
 def breakdown(step: Step, prices: Prices) -> list[dict]:
     """Explain what each token category contributes to a recorded call's price.
 
@@ -114,8 +148,7 @@ def breakdown(step: Step, prices: Prices) -> list[dict]:
     model tariff exists. Reasoning uses the output rate without charging those
     tokens again as visible output. No I/O or rounding occurs here.
     """
-    key = f"{step.provider}:{step.model}"
-    rate = prices.models.get(prices.aliases.get(key, key))
+    rate = rate_for_step(step, prices)
     usage = step.usage
     # Without usage, leave every category unknown. With usage, subtract included
     # cache/reasoning buckets so each reported token is charged exactly once.

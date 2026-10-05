@@ -24,6 +24,9 @@ from reporting.schema import Run
 OPENAI_MODELS = ("gpt-5.5", "gpt-5.6-luna", "gpt-5.6-sol")
 ANTHROPIC = "https://platform.claude.com/docs/en/about-claude/pricing"
 ANTHROPIC_OVERVIEW = "https://platform.claude.com/docs/en/about-claude/models/overview"
+COPILOT = (
+    "https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing"
+)
 ANTHROPIC_MODELS = {
     "anthropic:claude-sonnet-5": "Claude Sonnet 5",
     "anthropic:claude-opus-4-8": "Claude Opus 4.8",
@@ -53,6 +56,8 @@ def source_url(key: str) -> str | None:
         return f"https://developers.openai.com/api/docs/models/{page_model}.md"
     if provider == "anthropic":
         return ANTHROPIC
+    if provider == "copilot":
+        return COPILOT
     return None
 
 
@@ -193,6 +198,8 @@ def parse_rate(key: str, text: str, *, model_text: str | None = None) -> Rate:
     # Validate a provider page contract, not a fixed list of model releases.
     if source_url(key) is None:
         raise ValueError("No official-source parser for this model")
+    if key.startswith("copilot:"):
+        return parse_copilot_rate(key.split(":", 1)[1], text)
     if key.startswith("openai:"):
         model = key.split(":", 1)[1]
         # A redirected or wrong-model page must not acquire this model's identity.
@@ -305,6 +312,75 @@ def parse_rate(key: str, text: str, *, model_text: str | None = None) -> Rate:
     return Rate(**values)
 
 
+def parse_copilot_rate(model: str, text: str) -> Rate:
+    """Read GitHub's USD token tariffs, keeping Copilot billing separate by key.
+
+    GitHub's model names differ only in case/spaces from supported CLI codes
+    (for example Claude Opus 5.5 -> claude-opus-5.5). Never erase punctuation or
+    mode qualifiers to force a match. Default and long-context rows must agree
+    on their boundary; unknown layouts, currencies, or duplicate rows fail closed.
+    These are usage estimates before account allowances, not subscription bills.
+    """
+    parser = TableRows()
+    parser.feed(text)
+    # Validate the page-wide unit independently of bare dollar-valued cells.
+    if not re.search(
+        r"All prices are (?:<strong>)?per 1 million tokens(?:</strong>)?\.", text
+    ):
+        raise ValueError("Unexpected Copilot price units")
+    prefix = ["Model", "Release status", "Category"]
+    suffix = ["Input", "Cached input"]
+    layouts = [
+        prefix + tier + suffix + write + ["Output"]
+        for tier in ([], ["Tier", "Threshold (input tokens)"])
+        for write in ([], ["Cache write"])
+    ]
+    header = None
+    rows = {}
+    for row in parser.rows:
+        if not row:
+            header = None
+        elif row in layouts:
+            header = row
+        elif header and row[0].lower().replace(" ", "-") == model:
+            if len(row) != len(header):
+                raise ValueError("Copilot pricing columns changed")
+            entry = dict(zip(header, row, strict=True))
+            tier = entry.get("Tier", "Default")
+            if tier not in {"Default", "Long context"} or tier in rows:
+                raise ValueError("Ambiguous Copilot pricing tier")
+            values = {}
+            for label, field in [
+                ("Input", "input"),
+                ("Cached input", "cache_read"),
+                ("Cache write", "cache_write"),
+                ("Output", "output"),
+            ]:
+                cell = entry.get(label)
+                if label == "Cache write" and cell in {None, "Not applicable"}:
+                    continue
+                match = re.fullmatch(r"\$(\d+(?:\.\d+)?)", cell or "")
+                if match is None:
+                    raise ValueError("Unexpected Copilot price amount")
+                values[field] = Decimal(match[1])
+            rows[tier] = (
+                values,
+                entry.get("Threshold (input tokens)", "Not applicable"),
+            )
+    if "Default" not in rows:
+        raise ValueError("Missing Copilot model rate")
+    values, threshold = rows["Default"]
+    if threshold != "Not applicable":
+        match = re.fullmatch(r"≤ (\d+)K", threshold)
+        long_values, long_threshold = rows.get("Long context", ({}, ""))
+        if match is None or long_threshold != f"> {match[1]}K":
+            raise ValueError("Missing or inconsistent Copilot long-context tier")
+        values["long_context"] = {**long_values, "threshold": int(match[1]) * 1000}
+    elif "Long context" in rows:
+        raise ValueError("Unexpected Copilot long-context tier")
+    return Rate(**values)
+
+
 def fetch_text(url: str) -> str:
     """Supply the refresh parser with the source evidence for a tariff lookup.
 
@@ -379,7 +455,7 @@ def ensure_run_prices(run: Run, prices: Prices) -> None:
         )
         for step in run.steps
         if step.kind == "model"
-        and step.provider in {"openai", "anthropic"}
+        and step.provider in {"openai", "anthropic", "copilot"}
         and step.model
     }
     missing = keys - prices.models.keys() - prices.refresh_errors.keys()

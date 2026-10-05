@@ -33,7 +33,9 @@ def test_calibration_checks_all_real_models_and_preserves_prices(monkeypatch):
 
     monkeypatch.setattr(calibration, "verify_model", verify)
     assert calibration.calibrate(data) is False
-    assert len(calls) == 6
+    assert set(calls) == {
+        key for key, rate in original_models.items() if not rate.get("based_on")
+    }
     assert data["models"] == original_models
     assert "secret" not in json.dumps(data)
     prices = Prices.model_validate(data)
@@ -95,5 +97,8 @@ def test_cli_writes_config_only_when_invoked(monkeypatch, tmp_path):
         calibration, "verify_model", lambda p, m: (10000, "metadata", m)
     )
     assert calibration.main() == 0
-    assert len(load_prices(config).calibrations) == 6
+    prices = load_prices(config)
+    assert set(prices.calibrations) == {
+        key for key, rate in prices.models.items() if not rate.based_on
+    }
     assert list(tmp_path.iterdir()) == [config]

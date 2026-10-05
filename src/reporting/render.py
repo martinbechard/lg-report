@@ -28,7 +28,7 @@ from reporting.context import (
     context_change,
     context_utilization,
 )
-from reporting.pricing import CATEGORIES, Prices, breakdown, summarize
+from reporting.pricing import CATEGORIES, Prices, breakdown, rate_for_step, summarize
 from reporting.schema import Run
 from reporting.workflow_diagram import workflow_diagrams
 
@@ -853,8 +853,7 @@ def cost_chart(turns, prices):
              "eur": cell["usd"] * prices.exchange.rate, "color": colors[i]}
             for i, cell in enumerate(event["cells"])
         ]
-        price_key = f"{event['step'].provider}:{event['step'].model}"
-        rate = prices.models.get(prices.aliases.get(price_key, price_key))
+        rate = rate_for_step(event["step"], prices)
         if (usage is not None and rate is not None and rate.input is not None
                 and all(event["cells"][i]["usd"] is not None for i in (0, 2, 3, 4))):
             write_cells = event["cells"][2:5]

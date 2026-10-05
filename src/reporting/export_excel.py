@@ -208,7 +208,13 @@ def reference_sheet(workbook, data):
     for col, label in enumerate(headers):
         ref.value(15, col, label, ref.heading)
     rate_rows = {}
-    for row, (key, rate) in enumerate(prices["models"].items(), 16):
+    # Give each saved context tier its own editable reference row. Formula
+    # recalculation must use the same tier as Python's original charge.
+    reference_rates = dict(prices["models"])
+    for key, rate in prices["models"].items():
+        if rate.get("long_context"):
+            reference_rates[f"{key} [long context]"] = {**rate, **rate["long_context"]}
+    for row, (key, rate) in enumerate(reference_rates.items(), 16):
         rate_rows[key] = row
         values = [
             key,
@@ -223,7 +229,9 @@ def reference_sheet(workbook, data):
             number(rate.get("output")),
             rate.get("as_of") or prices.get("as_of"),
             rate.get("source") or "; ".join(prices.get("sources", [])),
-            "Cache write assumes 5m when unspecified",
+            f"Above {rate['threshold']:,} input tokens"
+            if "threshold" in rate
+            else "Cache write assumes 5m when unspecified",
         ]
         for col, value in enumerate(values):
             ref.value(row, col, value, ref.money if 1 <= col <= 5 else ref.content)
@@ -345,7 +353,15 @@ def write_charges(sheet, row, event, category, ref, rate_rows, data):
     tokens = sum(c["tokens"] for c in cells) if step.get("usage") else UNKNOWN
     sheet.value(row, 3, tokens, sheet.integer)
     key = f"{step['provider']}:{step['model']}"
-    tariff = rate_rows.get(data["prices"].get("aliases", {}).get(key, key))
+    key = data["prices"].get("aliases", {}).get(key, key)
+    rate = data["prices"]["models"].get(key, {})
+    long_context = rate.get("long_context")
+    if (
+        long_context
+        and (step.get("usage") or {}).get("input_tokens", 0) > long_context["threshold"]
+    ):
+        key = f"{key} [long context]"
+    tariff = rate_rows.get(key)
     usd = UNKNOWN
     if tariff and not any(c["partial"] for c in cells):
         usd = sum((Decimal(str(c["usd"])) for c in cells), Decimal(0))
