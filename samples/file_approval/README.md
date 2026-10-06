@@ -54,13 +54,13 @@ own approve/reject/cancel protocol to show cancellation ending the graph.
 
 ```sh
 # Scripted model decisions; real tools and console approval
-uv run python -m agent_runtime --sample file_approval --source samples/file_approval/input.txt --target reports/edited-summary.txt --demo --client console
+uv run python -m agent_runtime --sample file_approval --source samples/file_approval/input.txt --target reports/edited-summary.txt --static --client console
 
 # Real model decisions, with exactly the same automatic approval gate
 uv run python -m agent_runtime --sample file_approval --live --env-file .env.local --source samples/file_approval/input.txt --target reports/edited-summary.txt --request 'Add a short next-steps section.'
 
 # Explicitly bypass human approval for this run
-uv run python -m agent_runtime --sample file_approval --source samples/file_approval/input.txt --target reports/automatic-summary.txt --mode autoapprove --demo
+uv run python -m agent_runtime --sample file_approval --source samples/file_approval/input.txt --target reports/automatic-summary.txt --mode autoapprove --static
 ```
 
 Configure `LG_PROVIDER`, `LG_MODEL`, and the provider key in the shell or
@@ -93,7 +93,7 @@ not atomic; the sample assumes a single-user local application.
 For unattended demonstrations, simulate human decisions explicitly:
 
 ```sh
-uv run python -m agent_runtime --sample file_approval --source samples/file_approval/input.txt --target reports/scripted-summary.txt --demo --decision approve
+uv run python -m agent_runtime --sample file_approval --source samples/file_approval/input.txt --target reports/scripted-summary.txt --static --decision approve
 ```
 
 `--decision reject` and `--decision cancel` exercise other outcomes. Demo

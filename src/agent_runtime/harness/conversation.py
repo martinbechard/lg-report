@@ -1,7 +1,7 @@
 """Run a conversation between an agent and an interchangeable user-side client.
 
 Request and Attachment describe one submitted turn. ChatClient lets a console,
-static test case, or future user-avatar produce requests and consume results.
+static test case, or adaptive model user produce requests and consume results.
 The checkpoint owns message history; Conversation supplies client turns; the agent
 never imports test prompts or needs to know which client supplied them.
 
@@ -57,7 +57,7 @@ class Request:
 
 
 class ChatClient(Protocol):
-    """User-side boundary shared by console, static test, or a future avatar agent.
+    """User-side boundary shared by console, static test, or an adaptive model user.
 
     ``receive`` returns the next ``Request``, or ``None`` to end the conversation.
     ``respond`` receives the full graph result before the next receive, allowing
@@ -125,6 +125,10 @@ class Conversation:
         thread = str(uuid4())
         saver = InMemorySaver()
         result = None
+        # Adaptive clients generate billable model calls outside the graph.
+        # Pass the same recording callbacks so their costs are never hidden.
+        if hasattr(self.client, "set_run_config"):
+            self.client.set_run_config(config)
         turn = 0
         while (request := self.client.receive()) is not None:
             turn += 1

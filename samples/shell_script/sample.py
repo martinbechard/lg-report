@@ -16,6 +16,8 @@ from agent_runtime.harness.simulated_model import SimulatedModel
 
 # Discovery reads this metadata without constructing a model.
 SAMPLE = {
+    # The adaptive test user evaluates this goal before requesting another turn.
+    "goal": 'The assistant reports the actual result of running sh ./summarize.sh, including order totals when available and the exit status, and explains any execution failure rather than inventing successful totals.',
     "id": "shell_script",
     "name": "Shell script",
     "description": "Run a local script through DeepAgent’s native execute tool.",

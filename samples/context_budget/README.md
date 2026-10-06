@@ -35,7 +35,7 @@ The context estimate uses reported total input plus estimated output retained fo
 From the repository root:
 
 ```sh
-uv run python -m agent_runtime --sample context_budget --prices models.json --demo
+uv run python -m agent_runtime --sample context_budget --prices models.json --static
 ```
 
 Open the saved [HTML report](../../reports/context_budget/report.html). The two-turn offline run uses deterministic model decisions but real file tools, isolated reviewer invocations, checkpointing, and compaction. Inspect the Conversation section to see the plan write, each status edit and reread, the reviewer's file reads, and the returned report. Orange compaction events appear in the collaboration diagram, execution and conversation tables, and as thin lines in the LLM cost chart. The chart can show raw Post-call Context tokens or context as a percentage of model capacity.
@@ -43,7 +43,7 @@ Open the saved [HTML report](../../reports/context_budget/report.html). The two-
 To keep the exercise files after a run, supply a workspace directory:
 
 ```sh
-uv run python -m agent_runtime --sample context_budget --prices models.json --demo --out reports/context_budget --option 'workspace_dir="reports/context_budget/workspace"'
+uv run python -m agent_runtime --sample context_budget --prices models.json --static --out reports/context_budget --option 'workspace_dir="reports/context_budget/workspace"'
 ```
 
 Without that option, the launcher uses a temporary workspace and removes it when the run closes. Only `/plan.md`, `/slug.py`, and `/test_slug.py` are exposed to the agents. The reviewer receives only `read_file`; the planner and worker receive `read_file`, `write_file`, and `edit_file`, with backend write permissions restricted to `/plan.md` for the planner and the two Python files for the worker.

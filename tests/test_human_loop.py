@@ -338,7 +338,7 @@ def test_standalone_samples(tmp_path, sample, extra, stdin):
         sys.executable,
         "-m",
         "agent_runtime",
-        "--demo",
+        "--static",
         "--sample",
         sample,
         "--prices",

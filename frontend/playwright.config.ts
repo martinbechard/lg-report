@@ -17,7 +17,7 @@ export default defineConfig({
   // startup offline and capacity unknown for context-meter tests. The report
   // path isolates all selected samples.
   webServer: {
-    command: '../.venv/bin/python -m agent_runtime --client angular --demo --port 18765 --out ../reports/chat-e2e/simple_chat --prices ../tests/fixtures/accounting_prices.json --metadata-only',
+    command: '../.venv/bin/python -m agent_runtime --client angular --static --port 18765 --out ../reports/chat-e2e/simple_chat --prices ../tests/fixtures/accounting_prices.json --metadata-only',
     url: 'http://127.0.0.1:18765/api/samples',
     reuseExistingServer: false,
     timeout: 120_000,

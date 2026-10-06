@@ -17,7 +17,7 @@ from urllib.parse import quote
 from jinja2 import Environment, select_autoescape
 
 from reporting.pricing import Prices, load_prices, summarize
-from reporting.render import conversation_turns, cost_chart
+from reporting.render import conversation_turns, cost_chart, user_test_outcome
 from reporting.schema import Run
 
 
@@ -51,9 +51,18 @@ def comparison_entry(run: Run, prices: Prices, source: str) -> dict:
         prices.exchange.base != "USD" or prices.exchange.quote != "EUR"
     ):
         raise ValueError("Comparison exchange rate must describe USD to EUR")
-    models = sorted((step for step in run.steps if step.kind == "model"),
+    user_calls = [step for step in run.steps
+                  if step.kind == "model" and step.context.get("model_role") == "user"]
+    # Keep source evidence intact. In the assistant-only projection user calls
+    # become non-billable enclosing operations, preserving valid parent links
+    # and elapsed run time while excluding test-input generation from the plot.
+    target = run.model_copy(update={"steps": [
+        step.model_copy(update={"kind": "workflow"}) if step in user_calls else step
+        for step in run.steps
+    ]})
+    models = sorted((step for step in target.steps if step.kind == "model"),
                     key=lambda step: step.start_ns)
-    summary = summarize(run, prices)
+    summary = summarize(target, prices)
     # Price completeness and token completeness are independent. A missing
     # tariff does not erase observed tokens; missing usage prevents a full cost.
     return {
@@ -67,7 +76,10 @@ def comparison_entry(run: Run, prices: Prices, source: str) -> dict:
         }),
         "efforts": sorted({step.effort or "Not recorded" for step in models}),
         "calls": models,
-        "chart": cost_chart(conversation_turns(run, prices), prices),
+        "chart": cost_chart(conversation_turns(target, prices), prices),
+        "user_models": sorted({f"{step.provider}:{step.model}" for step in user_calls}),
+        "user_test": user_test_outcome(run),
+        "user_summary": summarize(run.model_copy(update={"steps": user_calls}), prices),
     }
 
 

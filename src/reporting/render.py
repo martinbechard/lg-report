@@ -33,6 +33,25 @@ from reporting.schema import Run
 from reporting.workflow_diagram import workflow_diagrams
 
 
+def user_test_outcome(run: Run) -> dict | None:
+    """Share the recorded stop receipt across full and comparison reports.
+
+    A successful execution is not evidence of goal completion. Older reports
+    have no receipt; content-disabled reports still retain the termination type.
+    """
+    receipt = next((step.context for step in reversed(run.steps)
+                    if "user_test_status" in step.context), None)
+    if receipt is None:
+        return None
+    labels = {"goal_met": "Goal met (user-model assessment)",
+              "turn_limit": "Turn limit reached — goal not met", "cancelled": "Cancelled"}
+    return {"status": receipt["user_test_status"],
+            "label": labels.get(receipt["user_test_status"], receipt["user_test_status"]),
+            "turns": receipt.get("user_test_turns"),
+            "goal": receipt.get("user_test_goal", "Goal text not captured"),
+            "reason": receipt.get("user_test_reason", "Stop explanation not captured")}
+
+
 def model_metrics(models, prices: Prices) -> dict:
     """Give a report group its token totals, known costs, and completeness flags.
 
@@ -1176,6 +1195,7 @@ def render(run: Run, prices: Prices, destination: Path):
     destination.write_text(
         template.render(
             run=run,
+            user_test=user_test_outcome(run),
             terminal_result=terminal_result,
             prices=prices,
             summary=summarize(run, prices),

@@ -20,6 +20,8 @@ from agent_runtime.harness.simulated_model import SimulatedModel
 
 # Discovery reads this metadata without constructing a model.
 SAMPLE = {
+    # The adaptive test user evaluates this goal before requesting another turn.
+    "goal": 'The assistant explains how the Australian raven has adapted to urban environments, grounding its answer in retrieved local Wikipedia evidence and identifying its sources or evidence limitations.',
     "id": "rag_chat",
     "name": "Wikipedia RAG",
     "description": "Search your prepared local Wikipedia index.",

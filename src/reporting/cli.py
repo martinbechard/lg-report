@@ -78,7 +78,7 @@ def main():
         help="Saved trace (default: ./spans.jsonl)",
     )
     command_parser.add_argument("--title", default="Imported agent run")
-    command_parser.add_argument("--demo", action="store_true")
+    command_parser.add_argument("--static", action="store_true", help="Mark fixed-text, simulated model traces")
     command_parser.add_argument(
         "--out", type=Path, help="Output JSON (default: run.json beside input)"
     )
@@ -121,7 +121,7 @@ def main():
         # This command stops at portable run.json so other exporters can consume
         # the trace without HTML or any pricing lookup being a prerequisite.
         if args.command == "normalize":
-            run = normalize(args.spans, title=args.title, demo=args.demo)
+            run = normalize(args.spans, title=args.title, demo=args.static)
             args.out.write_text(run.model_dump_json(indent=2), encoding="utf-8")
             print(args.out.resolve())
             return

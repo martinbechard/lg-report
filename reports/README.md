@@ -3,7 +3,13 @@
 
 Open [the report index](index.html) to view HTML or download Excel for every sample.
 The [model comparison](model_comparison/report.html) combines separate live
-GPT-5.5, GPT-5.6-luna, and Codex GPT-6-sol runs of the same two simple-chat user prompts.
+GPT-5.5, GPT-5.6-luna, and Codex GPT-6-sol runs starting from the same simple-chat request. GPT-6 Luna (Codex, high effort)
+plays the user in every run, adapting follow-ups to each assistant. Conversations
+may therefore end at different turns. The shared goal covers workflow steps and
+tool observations, with no minimum turn count. Each run records the user model's
+stop explanation and distinguishes goal completion from the safety cap.
+User-model costs are shown separately from
+the tested assistants in the comparison graph.
 Codex uses its local CLI and account; its usage includes harness overhead.
 Its estimated cost uses the corresponding OpenAI API token rates, with the
 exact mapping retained in the saved pricing aliases. Its nested

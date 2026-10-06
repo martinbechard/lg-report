@@ -14,6 +14,8 @@ Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 
 # Discovery reads this metadata without constructing a model.
 SAMPLE = {
+    # The adaptive test user evaluates this goal before requesting another turn.
+    "goal": 'The assistant reports that repeated rejected writes from the deliberately defective plan were stopped by the circuit breaker, explains the limit, and does not claim that the forbidden file was written.',
     "id": "circuit_breaker",
     "name": "Circuit breaker",
     "description": "Repeated forbidden filename writes stopped by native tool-call "

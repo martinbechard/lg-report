@@ -17,6 +17,8 @@ from agent_runtime.harness.simulated_model import SimulatedModel
 
 # Discovery reads this metadata without constructing a model.
 SAMPLE = {
+    # The adaptive test user evaluates this goal before requesting another turn.
+    "goal": 'The assistant reports a detailed file plan, a service-independent Python slug implementation, strengthened boundary tests with their actual results, and an independent review with its outcome recorded. Missing execution or review evidence must not be claimed as complete.',
     "id": "context_budget",
     "name": "Context budgets",
     "description": "File-backed planner and worker with shared compaction and an isolated "

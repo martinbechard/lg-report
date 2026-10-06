@@ -12,6 +12,8 @@ Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 
 # Discovery reads this metadata without constructing a model.
 SAMPLE = {
+    # The adaptive test user evaluates this goal before requesting another turn.
+    "goal": 'The user understands the main steps of an agent workflow AND how a tool observation supplies evidence for the next action or final answer. Both topics must be explained clearly, with an example of using a tool observation.',
     "id": "simple_chat",
     "name": "Simple chat",
     "description": "A direct conversation with a Deep Agent.",

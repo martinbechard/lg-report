@@ -31,7 +31,7 @@ tool results show. A real workflow could route that blocked outcome to a planner
 Run the deterministic demonstration from the repository root:
 
 ```sh
-uv run python -m agent_runtime --sample circuit_breaker --demo --prices models.json --out reports/circuit_breaker
+uv run python -m agent_runtime --sample circuit_breaker --static --prices models.json --out reports/circuit_breaker
 ```
 
 Open the [saved report](../../reports/circuit_breaker/report.html). Expect four

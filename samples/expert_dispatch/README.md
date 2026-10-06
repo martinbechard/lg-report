@@ -30,7 +30,7 @@ From the repository root:
 
 ```sh
 uv sync --locked
-uv run python -m agent_runtime --sample expert_dispatch --demo
+uv run python -m agent_runtime --sample expert_dispatch --static
 ```
 
 The default test case asks three questions in one conversation, one per domain.

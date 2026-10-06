@@ -12,6 +12,8 @@ Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 
 # Discovery reads this metadata without constructing a model.
 SAMPLE = {
+    # The adaptive test user evaluates this goal before requesting another turn.
+    "goal": 'The specialist has echoed ReAct and the parent has explained how the specialist tool result returns to the parent, supported by the reported result.',
     "id": "subagent_chat",
     "name": "Subagent chat",
     "description": "A parent agent delegates to a specialist.",

@@ -45,8 +45,8 @@ def test_factory_is_lazy_and_live_without_vendor_keys(isolated):
         assert isinstance(model, copilot_model.CopilotChatModel)
         assert (provider, code) == ("copilot", "gpt-5.4")
         server.assert_not_called()
-    assert resolve_live_mode(SimpleNamespace(demo=False, live=None), settings)
-    assert not resolve_live_mode(SimpleNamespace(demo=True, live=None), settings)
+    assert resolve_live_mode(SimpleNamespace(static=False, live=None), settings)
+    assert not resolve_live_mode(SimpleNamespace(static=True, live=None), settings)
     with pytest.raises(ValueError, match="LG_MAX_TOKENS"):
         configured_model(settings={**settings, "LG_MAX_TOKENS": "100"})
     with pytest.raises(ValueError, match="LG_AVAILABLE_MODELS"):

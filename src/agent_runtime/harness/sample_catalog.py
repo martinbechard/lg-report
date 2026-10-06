@@ -30,6 +30,8 @@ class Sample:
     description: str
     implementation: str
     directory: Path
+    # A user-test completion criterion, not an instruction to the assistant.
+    goal: str | None = None
     options: dict = field(default_factory=dict)
     tracing: str = "local"
     mcp_tools: tuple[str, ...] = ()
@@ -87,6 +89,10 @@ class SampleCatalog:
                 for key in ("id", "name", "description"):
                     if not isinstance(entry.get(key), str) or not entry[key].strip():
                         raise ValueError(f"{key} must be a nonempty string")
+                if "goal" in entry and (
+                    not isinstance(entry["goal"], str) or not entry["goal"].strip()
+                ):
+                    raise ValueError("goal must be a nonempty string when specified")
                 # Public IDs also serve as CLI choices and report directory
                 # names, so allow descriptive hyphenated names. Python imports
                 # still require a valid implementation module, checked below.
@@ -130,6 +136,7 @@ class SampleCatalog:
                     description=entry["description"],
                     implementation=implementation,
                     directory=path.parent,
+                    goal=entry.get("goal"),
                     options=entry.get("options", {}),
                     tracing=entry.get("tracing", "local"),
                     mcp_tools=tuple(tools),

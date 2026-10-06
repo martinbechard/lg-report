@@ -104,8 +104,8 @@ Failed edits alone do not invalidate anything.
 ## Run the comparison
 
 ```bash
-uv run python -m agent_runtime --sample edit-with-patched-state --show-context --out reports/claims-edit-with-patched-state --demo
-uv run python -m agent_runtime --sample edit-with-reloaded-state --show-context --out reports/claims-edit-with-reloaded-state --demo
+uv run python -m agent_runtime --sample edit-with-patched-state --show-context --out reports/claims-edit-with-patched-state --static
+uv run python -m agent_runtime --sample edit-with-reloaded-state --show-context --out reports/claims-edit-with-reloaded-state --static
 ```
 
 The demonstration asks five questions:
@@ -129,7 +129,7 @@ usage counts the actual inputs; neither mode models provider cache reuse.
 Output directories are reused. Omit `--out` to replace the report bundle and
 `context.json` in `reports/edit-with-patched-state/` or `reports/edit-with-reloaded-state/`. Use `--prices models.json` and
 `--fx-file PATH` for supplied pricing and exchange snapshots. FX otherwise reads the shared
-`exchange-rate.json` without a lookup. Use `--demo` to keep model calls scripted even when an API key is configured.
+`exchange-rate.json` without a lookup. Use `--static` to keep model calls scripted even when an API key is configured.
 
 ## Compare actual agent decisions
 
@@ -142,7 +142,7 @@ uv run python -m agent_runtime --sample edit-with-reloaded-state --live --env-fi
 
 These runs share user questions, tools, and agent instructions. The real model
 chooses which record to load, when to edit, whether to reread, and how to answer.
-For your own queries, replace `--demo` with `--client console --live --env-file .env.local`; `/quit` ends the session.
+For your own queries, replace `--static` with `--client console --live --env-file .env.local`; `/quit` ends the session.
 Console `/attach` supplies ordinary text context, not a stored claim or policy.
 
 A live model may answer correctly in both modes, reread proactively, or make a

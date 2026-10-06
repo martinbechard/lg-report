@@ -7,6 +7,8 @@ Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
 
 SAMPLE = {
+    # The adaptive test user evaluates this goal before requesting another turn.
+    "goal": 'The parent returns the child result at its configured review limit and clearly discloses the actual approval status and unresolved review feedback. An unapproved draft must not be presented as approved.',
     "id": "nested_workflows_review_limit",
     "name": "Nested workflows: review limit",
     "description": "The child reaches its review limit and the parent returns the unapproved draft.",

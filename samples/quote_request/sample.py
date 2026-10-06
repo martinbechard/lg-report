@@ -17,6 +17,8 @@ from agent_runtime.harness.simulated_model import SimulatedModel
 
 # Discovery reads this metadata without constructing a model.
 SAMPLE = {
+    # The adaptive test user evaluates this goal before requesting another turn.
+    "goal": 'The assistant resolves the invitation quantity, recipients, addressing, envelopes, and delivery ambiguities using the user facts in the sample conversation, and returns a consistent final quote request without silently inventing missing requirements.',
     "id": "quote_request",
     "name": "Quote clarification",
     "description": "Answer the agent’s clarification questions.",

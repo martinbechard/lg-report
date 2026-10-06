@@ -54,12 +54,35 @@ Prompt sequencing belongs to a client, with one cursor per conversation:
 - `ConsoleClient` reads human input and, when given a catalog, handles `/samples`,
   `/sample ID`, and `/new` between turns; interruption answers pass through unchanged.
   Structured approval/quote lessons use an authored initial request, then return
-  to the selection menu after completion. Ordinary console chat requires live mode, selected automatically when the configured provider has an API key. `--demo` selects scripted responses and fixed terminal prompts.
+  to the selection menu after completion. Ordinary console chat requires live mode, selected automatically when the configured provider has an API key. `--static` selects fixed text; `--demo` runs unattended with either static text or live agents.
 
 `WebConversation` does not use the Python prompter or own a prompt cursor. It handles
 requests arriving over HTTP and retains the graph, checkpoint, and pending
 interactions. Switching samples creates fresh models and conversation state,
 closes the old session's resources, and resets the browser prompter.
+
+### Adaptive test user
+
+Live runs default to `--client agent` and wrap the terminal client
+in `ModelUserClient`. Its generic prompt reads the sample's existing user-side
+scenario; it retains a fresh history per run and adapts to actual assistant
+replies. The initial authored request remains exact. Static and interactive clients
+keep their existing behavior. User-model construction uses `ModelProvider`, with
+independent role settings and no fallback to the tested assistant's model.
+The default is Codex GPT-6 Luna at high effort. Optional `SAMPLE["goal"]` defines
+the stop criteria and replaces any minimum turn count. Without it, the authored
+user-request count is the minimum. Every terminal decision includes an explanation;
+the maximum-turn guard and cancellation remain distinct from goal completion.
+A `user_test_outcome` callback records the decision as a non-billable workflow span.
+Status and turn count survive metadata-only capture; goal/reason text require
+content capture. Both HTML views consume that same saved receipt.
+
+`Conversation` passes recording callbacks to clients that implement
+`set_run_config`. User calls carry `model_role=user`, their conversation turn,
+and a separate history label. Full reports retain these calls and costs;
+comparison projections exclude them from the tested-assistant chart and answer
+columns and disclose user-model costs separately. Existing approval policies
+remain on the wrapped client; generated clarification answers do not grant consent.
 
 ### Provider boundary
 

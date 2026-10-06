@@ -43,11 +43,11 @@ The [`review limit` variant](../nested_workflows_review_limit/README.md) allows
 only one round, so the first rejection returns an explicitly unapproved draft.
 
 ```bash
-uv run python -m agent_runtime --sample nested_workflows --demo
-uv run python -m agent_runtime --sample nested_workflows_review_limit --demo
+uv run python -m agent_runtime --sample nested_workflows --static
+uv run python -m agent_runtime --sample nested_workflows_review_limit --static
 ```
 
-Replace `--demo` with `--live` to use configured provider models. In live mode,
+Replace `--static` with `--live` to use configured provider models. In live mode,
 the number of review rounds depends on actual responses. A review is a model
 assessment: neither mode executes the generated function or runs its tests.
 The default maximum is three drafts, including the first. Approval on the last

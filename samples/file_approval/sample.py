@@ -19,6 +19,8 @@ from agent_runtime.harness.simulated_model import SimulatedModel
 
 # Discovery reads this metadata without constructing a model.
 SAMPLE = {
+    # The adaptive test user evaluates this goal before requesting another turn.
+    "goal": 'Both requested additions have been considered separately under the configured approval decisions. The assistant reports which changes were approved or rejected and the resulting file content, without claiming a rejected write occurred.',
     "id": "file_approval",
     "name": "File approval",
     "description": "Review restricted writes proposed by the agent.",

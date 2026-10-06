@@ -317,7 +317,7 @@ def test_launcher_delegates_terminal_script_policy_to_console_application(
     )
     monkeypatch.setattr(server, "start_workflow_api_listener", lambda **kw: None)
     argv = ["agent_runtime", "--sample", "simple_chat", "--client", client_mode]
-    argv.append("--live" if live else "--demo")
+    argv.append("--live" if live else "--static")
     monkeypatch.setattr(sys, "argv", argv)
     app.main()
     assert len(configured) == expected_scripts
@@ -367,11 +367,11 @@ def test_static_console_application_exits_when_script_is_exhausted(monkeypatch):
     [
         ("openai", "", [], False, "static"),
         ("openai", "   ", [], False, "static"),
-        ("openai", "test-key", [], True, "console"),
-        ("anthropic", "test-key", [], True, "console"),
-        ("openai", "test-key", ["--demo"], False, "static"),
-        ("openai", "", ["--live"], True, "console"),
-        ("openai", "test-key", ["--demo", "--client", "angular"], False, "angular"),
+        ("openai", "test-key", [], True, "agent"),
+        ("anthropic", "test-key", [], True, "agent"),
+        ("openai", "test-key", ["--static"], False, "static"),
+        ("openai", "", ["--live"], True, "agent"),
+        ("openai", "test-key", ["--static", "--client", "angular"], False, "angular"),
         ("openai", "test-key", ["--live", "--client", "static"], True, "static"),
     ],
 )
@@ -409,13 +409,13 @@ def test_launcher_env_override_and_conflicting_modes(tmp_path, monkeypatch):
     _, args = parse_arguments(catalog, argv)
     assert args.live is True
     with pytest.raises(SystemExit):
-        parse_arguments(catalog, [*argv, "--demo", "--live"])
+        parse_arguments(catalog, [*argv, "--static", "--live"])
 
 
-def test_file_approval_demo_is_explicit_and_no_key_keeps_human_approval(
+def test_file_approval_static_is_explicit_and_no_key_keeps_human_approval(
     tmp_path, monkeypatch
 ):
-    """Only explicit demo mode replaces this lesson's default human answers."""
+    """Explicit fixed-text mode replaces this lesson's default human answers."""
     from agent_runtime.harness.argument_parser import parse_arguments
 
     monkeypatch.delenv("LG_PROVIDER", raising=False)
@@ -426,9 +426,9 @@ def test_file_approval_demo_is_explicit_and_no_key_keeps_human_approval(
     catalog = SampleCatalog()
     _, args = parse_arguments(catalog, argv)
     assert (args.live, args.client) == (False, "console")
-    _, args = parse_arguments(catalog, [*argv, "--demo"])
+    _, args = parse_arguments(catalog, [*argv, "--static"])
     assert (args.live, args.client) == (False, "static")
-    _, args = parse_arguments(catalog, [*argv, "--demo", "--client", "console"])
+    _, args = parse_arguments(catalog, [*argv, "--static", "--client", "console"])
     assert (args.live, args.client) == (False, "console")
 
 
@@ -502,3 +502,21 @@ def test_discovery_does_not_call_model_factories(monkeypatch):
         entry["content"] for entry in sample.CONVERSATION if entry["role"] == "client"
     ]
     assert "edit_with_reloaded_state" not in catalog.samples
+
+
+@pytest.mark.parametrize("goal", ["", "   ", None, 42, {"condition": "done"}])
+def test_malformed_optional_goal_fails_discovery(tmp_path, goal):
+    """A misspecified stop criterion cannot silently disable goal evaluation."""
+    directory = register(tmp_path, "goal_test", "goal_test")
+    path = directory / "sample.py"
+    data = ast.literal_eval(path.read_text().removeprefix("SAMPLE = "))
+    data["goal"] = goal
+    path.write_text("SAMPLE = " + repr(data))
+    with pytest.raises(ValueError, match="goal must be a nonempty string"):
+        SampleCatalog(tmp_path)
+
+
+def test_goal_can_be_omitted_from_custom_sample(tmp_path):
+    """Existing third-party samples retain authored-length completion semantics."""
+    register(tmp_path, "no_goal", "no_goal")
+    assert SampleCatalog(tmp_path).get("no_goal").goal is None

@@ -21,6 +21,8 @@ from agent_runtime.harness.simulated_model import SimulatedModel
 # directory and default report destination. Both experiments share the scenario,
 # agent instructions, and authoritative in-memory store implementation.
 SAMPLE = {
+    # The adaptive test user evaluates this goal before requesting another turn.
+    "goal": 'The user knows the policy deductible and coverage limit, has received the original claim description and status, has requested the authored correction, and has received a final confirmation that the laptop screen cracked after falling from a desk at home and the claim is approved. The final answer must reflect the successful edit rather than the stale theft account.',
     "id": "edit-with-reloaded-state",
     "name": "edit-with-reloaded-state",
     "description": "Discard stale claim context after edits; let the agent reload when needed.",
@@ -193,7 +195,7 @@ def build_scripted_models(options):
     """
     # The key matches build_model(caller="workflow") in the shared workflow.
     # Return a fresh adapter so each run starts at the first scripted response.
-    # The catalog uses this hook only in demo mode; live construction bypasses it.
+    # The catalog uses this hook only in static mode; live construction bypasses it.
     return {
         "workflow": make_simulated_model(
             options.get("mode", "edit-with-reloaded-state")

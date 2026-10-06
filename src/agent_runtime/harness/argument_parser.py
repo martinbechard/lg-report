@@ -15,13 +15,15 @@ from pathlib import Path
 
 def argument_parser(
     app_file: str | None = None,
-    description: str = "Run an agent sample interactively, as a scripted demo, or in web chat.",
+    description: str = "Run a static or live sample, unattended with --demo or with a human client.",
 ) -> argparse.ArgumentParser:
     """Build options without reading configuration or starting a workflow.
 
     Optional app_file anchors the dotenv default for direct sample callers.
     The shared launcher leaves it unset so selection determines the sample folder.
     """
+    from .model_user import DEFAULT_USER_MODEL
+
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument(
         "--list",
@@ -31,21 +33,27 @@ def argument_parser(
     parser.add_argument("--sample", default="simple_chat")
     parser.add_argument(
         "--client",
-        choices=("console", "static", "angular"),
-        help="Client: console for live chat, angular for browser chat, static for fixed prompts",
+        choices=("console", "static", "agent", "angular"),
+        help="User input: fixed text (static), a model (agent), terminal (console), or browser (angular)",
     )
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument(
         "--live",
         action="store_true",
         default=None,
-        help="Use the real model (default with a provider API key or Copilot selection)",
+        help="Use the real model (default with a provider API key or Codex/Copilot selection)",
     )
     mode.add_argument(
-        "--demo",
+        "--static",
         action="store_true",
-        help="Use scripted responses and fixed terminal prompts, even with an API key",
+        help="Use fixed sample text instead of real model responses, even with credentials",
     )
+    parser.add_argument("--demo", action="store_true",
+                        help="Run the sample by itself; combine with --live or --static to choose its model mode")
+    parser.add_argument("--user-model", nargs="?", const=DEFAULT_USER_MODEL,
+                        help="Model playing the user in live runs (default: gpt-6-luna)")
+    parser.add_argument("--user-provider", help="Provider for the user model (default: codex)")
+    parser.add_argument("--user-turns", type=int, help="Maximum user turns including the scenario seed (default: 3)")
     parser.add_argument("--out", type=Path)
     parser.add_argument(
         "--env-file",
@@ -94,18 +102,33 @@ def parse_arguments(catalog, argv=None):
             key, value = option.split("=", 1)
             args.options[key] = json.loads(value)
         sample = catalog.get(args.sample)
-        args.live = resolve_live_mode(
-            args, catalog.configuration(args.sample, args.env_file)
+        values = {**catalog.configuration(args.sample, args.env_file), **os.environ}
+        args.live = resolve_live_mode(args, values)
+        from .model_user import DEFAULT_USER_MODEL, DEFAULT_USER_PROVIDER
+
+        # Live runs use an independent user agent by default. Explicit fixed-text
+        # and human clients never become model users because credentials exist.
+        args.user_model = (
+            args.user_model or values.get("LG_USER_MODEL") or (DEFAULT_USER_MODEL if args.live else None)
         )
-        # A demo must finish its authored prompts rather than accept arbitrary
-        # questions that a scripted model cannot answer. Explicit clients still
-        # support browser demos and fixed-prompt live batch runs.
+        args.user_provider = args.user_provider or values.get("LG_USER_PROVIDER") or DEFAULT_USER_PROVIDER
+        # Demo controls unattended execution, independently of fixed/live text.
+        # Static also defaults to fixed user input; an explicit human client can
+        # still demonstrate approvals around scripted model decisions.
         args.client = args.client or (
-            "console" if args.live else "static" if args.demo else sample.default_client
+            "agent" if args.live else "static" if args.static or args.demo else sample.default_client
         )
+        if args.demo and args.client in {"console", "angular"}:
+            parser.error("--demo runs unattended; choose --client agent or --client static")
+        if args.client == "agent" and not args.live:
+            parser.error("--client agent requires live models; use --live")
+        if args.user_turns is None:
+            args.user_turns = int(values.get("LG_USER_MAX_TURNS") or "3") if args.client == "agent" else 3
+        if args.client == "agent" and args.user_turns < 1:
+            raise ValueError("--user-turns must be positive")
         if args.client == "console" and not args.live and not sample.interaction:
             parser.error(
-                "Console conversation requires a provider API key or --live; use --demo for scripted prompts"
+                "Console conversation requires a provider API key or --live; use --static for fixed text"
             )
         if (
             args.live
@@ -113,7 +136,7 @@ def parse_arguments(catalog, argv=None):
             and sample.interaction == "clarification"
         ):
             parser.error(
-                "Use --client console with --live so a human answers model questions"
+                "Live clarification requires --client agent or --client console to answer model questions"
             )
         if args.public_trace and (
             sample.tracing != "langfuse" or args.client == "angular"
@@ -125,7 +148,7 @@ def parse_arguments(catalog, argv=None):
 
 
 def resolve_live_mode(args, settings):
-    """Select demo explicitly, otherwise detect API keys or a local CLI provider.
+    """Select fixed text explicitly, otherwise detect API keys or a CLI provider.
 
     Shell values override the selected dotenv file, matching model construction.
     Detection only checks presence; invalid live credentials must still fail in
@@ -133,7 +156,7 @@ def resolve_live_mode(args, settings):
     """
     from .model_config import configured_identity
 
-    if args.demo:
+    if args.static:
         return False
     if args.live is not None:
         return args.live

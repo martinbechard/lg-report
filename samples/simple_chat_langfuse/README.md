@@ -22,12 +22,12 @@ Live model mode additionally needs the selected provider key and model settings.
 ## Scripted test case
 
 ```bash
-uv run python -m agent_runtime --sample simple_chat_langfuse --env-file .env.local --demo
+uv run python -m agent_runtime --sample simple_chat_langfuse --env-file .env.local --static
 ```
 
 This reuses `samples/simple_chat/sample.py`: two user prompts and scripted
 assistant responses. It makes no LLM provider call, but sends real traces to the
-configured Langfuse endpoint. Replace `--demo` with `--live --client static` to use the same requests with a real model.
+configured Langfuse endpoint. Replace `--static` with `--live --client static` to use the same requests with a real model.
 
 ## Console chat
 

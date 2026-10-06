@@ -18,7 +18,7 @@ These settings can instead be saved in `.env.local`. `LG_CODEX_CLI` optionally
 selects a different executable; on Windows use the native Codex executable.
 `LG_AVAILABLE_MODELS` and symbolic model mappings apply as for other providers,
 but an unavailable or disallowed model fails instead of falling back. Omit
-`LG_EFFORT` to retain the CLI default. `--demo` still selects the scripted model.
+`LG_EFFORT` to retain the CLI default. `--static` still selects the scripted model.
 `LG_MAX_TOKENS` is unsupported and must be unset or blank.
 
 `CodexChatModel` and `CopilotChatModel` share `TextOnlyChatModel` for history,

@@ -149,6 +149,7 @@ class TraceCapture(BaseCallbackHandler):
                 "report_purpose",
                 "report_agent",
                 "report_turn",
+                "model_role",
                 "report_history_id",
                 "report_history_label",
                 "report_context_depth",
@@ -270,12 +271,27 @@ class TraceCapture(BaseCallbackHandler):
         self._start("workflow", serialized, run_id, parent_run_id, **kwargs)
 
     def on_custom_event(self, name, data, *, run_id, **kwargs):
-        """Attach count-only compaction evidence to its existing middleware span.
+        """Record test outcomes or attach count-only compaction evidence.
 
         Custom events use their enclosing runnable's ID. Whitelist the event
         fields so arbitrary event payloads cannot enter content-disabled traces.
         The event has no usage of its own; summary model calls remain billable.
         """
+        if name == "user_test_outcome":
+            # A terminal client decision has no enclosing graph invocation. Give
+            # it its own non-billable span so run.json remains the export authority.
+            # Criteria/reasons can contain scenario data, so obey content opt-in.
+            if not isinstance(data, dict) or data.get("user_test_status") not in {"goal_met", "turn_limit", "cancelled"}:
+                return
+            fields = {"user_test_status", "user_test_turns"}
+            if self.capture_content:
+                fields |= {"user_test_goal", "user_test_reason"}
+            self._start("workflow", {"name": "User test outcome",
+                                      "description": "Record why the adaptive user ended the test; this receipt has no model usage."}, run_id, None)
+            self._annotate(run_id, {key: value for key, value in data.items()
+                                    if key in fields and type(value) in (str, int)})
+            self._end(run_id)
+            return
         if name != "context_compaction" or run_id not in self.active:
             return
         fields = {

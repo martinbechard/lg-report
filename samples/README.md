@@ -30,9 +30,9 @@ See [composition diagrams](../docs/chat-composition.md).
 Run from the repository root after `uv sync`:
 
 ```bash
-uv run python -m agent_runtime --sample simple_chat --demo
-uv run python -m agent_runtime --sample tool_chat --demo
-uv run python -m agent_runtime --sample thinking_agent --demo
+uv run python -m agent_runtime --sample simple_chat --static
+uv run python -m agent_runtime --sample tool_chat --static
+uv run python -m agent_runtime --sample thinking_agent --static
 ```
 
 Each command writes **`reports/<sample>/report.html`** and prints its absolute
@@ -49,8 +49,7 @@ uv run scripts/run_samples.py
 open reports/index.html
 ```
 
-Real calls use `.env.local` (or `--env-file PATH`); shell settings win. The quote
-sample asks questions in the terminal. For an unattended offline run, use
+Real calls use `.env.local` (or `--env-file PATH`); shell settings win. Live demos use the user agent to answer clarification questions. For an unattended offline run, use
 `uv run scripts/run_samples.py --simulated`.
 
 The live batch refreshes the shared `exchange-rate.json` once before running
@@ -71,7 +70,7 @@ the local report bundle. Its simulated model still requires a Langfuse project.
 ```sh
 uv run python -m agent_runtime --list
 uv run python -m agent_runtime --sample simple_chat --client console --live
-uv run python -m agent_runtime --sample subagent_chat --client angular --demo
+uv run python -m agent_runtime --sample subagent_chat --client angular --static
 ```
 
 The console accepts `/samples`, `/sample tool_chat`, and `/new`. Selection closes
@@ -105,7 +104,7 @@ for example, `edit-with-patched-state` and `edit-with-reloaded-state` each decla
 its metadata. Do not store `workflow` or `definition_module` import strings. Optional
 `tracing: "langfuse"`, `interaction: "approval"` or `"clarification"`, and
 `mcp_tools` describe harness behavior. `default_client` defaults to `static`;
-file approval declares `console` so, without a key or an explicit mode, it still asks a human before editing. Live mode defaults to `console`; explicit `--demo` defaults to fixed prompts and scripted answers. An explicit `--client` overrides these defaults. No shared registration code changes.
+file approval declares `console` so, without a key or an explicit mode, it still asks a human before editing. Live mode defaults to `agent`; explicit `--static` defaults to fixed prompts and scripted answers. An explicit `--client` overrides these defaults. No shared registration code changes.
 
 Workflows obtain models through `build_model`; agents may request their own with
 a named caller. Every sample script provides a chronological `CONVERSATION`:
@@ -121,7 +120,7 @@ speaker's replies in order. `quote_request` also derives its interruption answer
 from the human entries. Model reasoning metadata is illustrative when scripted.
 
 The catalog supplies `SAMPLE["description"]` as the report description fallback
-for model calls in both demo and live runs. Explicit operation annotations take
+for model calls in both static and live runs. Explicit operation annotations take
 priority; samples do not need a model factory just to add a description.
 
 Scripts can additionally expose `build_scripted_models(options)`. The catalog explicitly
@@ -150,13 +149,20 @@ position; the catalog only supplies data. Neither prompter supplies model respon
 6. **`src/agent_runtime/harness/`** provides the common client loop and tracing lifecycle.
 7. **`src/reporting/`** captures, normalizes, prices, and exports local traces.
 
-With the selected provider’s API key configured, applications default to live console execution. Use `--demo` for scripted model decisions and fixed prompts. Without a key, applications use scripted models and their declared client default. File approval retains human approval in that case; `--demo --client console` also keeps human approval with scripted model decisions.
+With the selected provider’s API key configured, applications default to live agent conversations. Use `--static` for scripted model decisions and fixed prompts. Without a key, applications use scripted models and their declared client default. File approval retains human approval in that case; `--static --client console` also keeps human approval with scripted model decisions.
 For chat applications, use `--client console --live`
 for interactive prompts and UTF-8 text attachments. `/attach PATH` queues a file,
 `/send` submits attachments alone, and `/quit` ends the session. Console mode
 requires a configured provider; chat scripted mode can use either simulated or live models.
-Quote clarification uses the shared console for interruption answers and requires a human client in live mode.
+Quote clarification uses either the default user agent or an explicitly selected human console client in live mode.
 All samples use LangGraphAgent. Console and scripted clients consume AG-UI events directly; Angular uses AG-UI over HTTP/SSE. Approval and clarification are normal resumable interactions.
+
+`--demo` means the sample runs unattended. Combine `--demo --live` for real
+assistant/user agents, or `--demo --static` for fixed text. Demo alone uses the
+configured provider when available, otherwise fixed text. It cannot be combined
+with a human console or browser client. The live user defaults to Codex GPT-6 Luna
+at high effort; `LG_USER_PROVIDER` and `LG_USER_MODEL` can select Copilot or an
+API-key provider independently of the assistant.
 
 ## Model selection and configuration
 
@@ -166,10 +172,10 @@ server startup from port 7001, persisted connection configuration, and model cod
 Copilot uses its local login and defaults to live mode without a vendor API key.
 It supports tool-free text request/response; begin with `simple_chat`.
 
-Demo runs use an offline model with a stateful context simulator and need no LLM API key. For live execution, copy the repository root `.env.example` to `.env.local` if that file does not already exist, configure `LG_PROVIDER` and its API key, and pass `--env-file .env.local` to the sample command. `--demo` forces scripted execution even with credentials; `--live` forces real execution and reports missing or invalid credentials as errors. The two flags are mutually exclusive.
+Static runs use an offline model with a stateful context simulator and need no LLM API key. For live execution, copy the repository root `.env.example` to `.env.local` if that file does not already exist, configure `LG_PROVIDER` and its API key, and pass `--env-file .env.local` to the sample command. `--static` forces scripted execution even with credentials; `--live` forces real execution and reports missing or invalid credentials as errors. The two flags are mutually exclusive.
 Shell environment variables take precedence. Without `--env-file`, the launcher still reads the selected sample’s `.env`; it does not automatically load the root `.env.local`.
 
-The root `.env.example` also contains the Langfuse endpoint and project-key settings for `simple_chat_langfuse` and `subagent_chat_langfuse`. Configure them in `.env.local` and pass `--env-file .env.local`, including for `--demo` runs that send real traces. The `.env.example` file is a template only; the runtime never loads it automatically.
+The root `.env.example` also contains the Langfuse endpoint and project-key settings for `simple_chat_langfuse` and `subagent_chat_langfuse`. Configure them in `.env.local` and pass `--env-file .env.local`, including for `--static` runs that send real traces. The `.env.example` file is a template only; the runtime never loads it automatically.
 
 The runtime defaults to 32,768 output tokens for both providers, including full-document replacement tool arguments. No environment file is needed to set this default. `LG_MAX_TOKENS` explicitly overrides it; existing environment files and shell settings retain their configured limits.
 Provider behavior, reasoning visibility, cache hits, and call counts can differ

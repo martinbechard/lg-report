@@ -52,7 +52,7 @@ sending a prompt, and an unavailable model is an error.
 Unset `LG_MAX_TOKENS`: this SDK session interface has no equivalent output-token
 limit. Stop sequences, multimodal messages, tool results, and arbitrary invocation
 overrides are also unsupported and raise errors. No OpenAI or Anthropic API key
-is required. Selecting Copilot enables live mode; `--demo` still forces simulation.
+is required. Selecting Copilot enables live mode; `--static` still forces simulation.
 
 ```sh
 uv run --extra copilot python -m agent_runtime --sample simple_chat --live --env-file .env.local

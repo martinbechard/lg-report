@@ -12,6 +12,8 @@ Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 
 # Discovery reads this metadata without constructing a model.
 SAMPLE = {
+    # The adaptive test user evaluates this goal before requesting another turn.
+    "goal": 'The assistant investigates the service latency evidence, states and tests a concrete hypothesis, and reports a validated plan against the observed constraints, clearly separating measured results from assumptions and disclosing unresolved limitations.',
     "id": "thinking_agent",
     "name": "Thinking agent",
     "description": "Investigate evidence and test a hypothesis.",

@@ -12,6 +12,8 @@ Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 
 # Discovery reads this metadata without constructing a model.
 SAMPLE = {
+    # The adaptive test user evaluates this goal before requesting another turn.
+    "goal": 'The assistant has echoed both ReAct and Tool observations through the echo tool and reported the returned text for each.',
     "id": "tool_chat",
     "name": "Tool chat",
     "description": "Watch an agent echo your input through a tool.",

@@ -20,7 +20,7 @@ From the repository root:
 
 ```sh
 uv sync --locked
-uv run python -m agent_runtime --sample subagent_chat_langfuse --env-file .env.local --public-trace --demo
+uv run python -m agent_runtime --sample subagent_chat_langfuse --env-file .env.local --public-trace --static
 ```
 
 For the local Langfuse project `lg-report-dev`, set `LANGFUSE_BASE_URL` to
@@ -34,9 +34,9 @@ if that file does not already exist, and set
 belong to the chosen Langfuse project. Authentication is checked before invoking
 any model. Shell environment variables override `.env.local`.
 
-`--demo` uses simulated LLMs but sends real traces. To use real models, set
+`--static` uses simulated LLMs but sends real traces. To use real models, set
 `LG_PROVIDER`, `LG_MODEL`, and the provider key in the same `.env.local`, then replace
-`--demo` with `--live --client static` in the command. Both agents use that provider configuration; calls are
+`--static` with `--live --client static` in the command. Both agents use that provider configuration; calls are
 billable. Every run also produces the local `run.json`, `spans.jsonl`,
 `prices.json`, and `report.html` bundle in `reports/subagent_chat_langfuse/`
 (or `--out`). Excel remains a separate export. Both recorders observe one

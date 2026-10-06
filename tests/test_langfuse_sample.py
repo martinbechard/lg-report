@@ -34,7 +34,8 @@ USER_PROMPTS = [entry["content"] for entry in CONVERSATION if entry["role"] == "
 
 
 def trace_conversation(
-    graph, client, callback, *, chat_client, simulated, trace_name, public_trace=False
+    graph, client, callback, *, chat_client, simulated, trace_name, public_trace=False,
+    metadata=None,
 ):
     """Exercise tracing hooks with the real loop independently of CLI setup.
 
@@ -55,7 +56,7 @@ def trace_conversation(
         ) as trace,
     ):
         result = Conversation(graph, chat_client, turn_scope=trace.turn_scope).invoke(
-            {}, {"callbacks": [callback]}
+            {}, {"callbacks": [callback], "metadata": metadata or {}}
         )
         trace.complete(result)
     return trace.trace_id, result.get("messages", []) if result else []
@@ -96,6 +97,9 @@ def test_two_turns_share_trace_and_preserve_usage(capture):
         simulated=True,
         chat_client=MockClient([Request(p) for p in USER_PROMPTS]),
         trace_name="simple-chat-langfuse",
+        # The simulator does not invent an effort setting. Supply the explicit
+        # annotation whose propagation this test checks alongside usage/turns.
+        metadata={"report_effort": "light"},
     )
     client.flush()
     spans = exporter.get_finished_spans()

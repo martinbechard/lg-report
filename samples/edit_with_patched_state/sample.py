@@ -21,6 +21,8 @@ Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 # edit_with_reloaded_state, selecting its own context policy without copying the
 # questions or responses. Each folder owns its configuration and report identity.
 SAMPLE = {
+    # The adaptive test user evaluates this goal before requesting another turn.
+    "goal": 'The user knows the policy deductible and coverage limit, has received the original claim description and status, has requested the authored correction, and has received a final confirmation that the laptop screen cracked after falling from a desk at home and the claim is approved. The final answer must reflect the successful edit rather than the stale theft account.',
     "id": "edit-with-patched-state",
     "name": "edit-with-patched-state",
     "description": "Reconstruct current claim state from retained reads and successful edits.",

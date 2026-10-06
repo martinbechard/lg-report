@@ -58,8 +58,8 @@ def test_independent_provider_works_without_factory_branches(monkeypatch):
     monkeypatch.setitem(PROVIDERS, "example", provider)
     settings = {"LG_PROVIDER": "example", "EXAMPLE_KEY": "placeholder"}
     assert configured_identity(settings=settings) == ("example", "example-default")
-    assert resolve_live_mode(SimpleNamespace(demo=False, live=None), settings)
-    assert not resolve_live_mode(SimpleNamespace(demo=False, live=None), {"LG_PROVIDER": "example"})
+    assert resolve_live_mode(SimpleNamespace(static=False, live=None), settings)
+    assert not resolve_live_mode(SimpleNamespace(static=False, live=None), {"LG_PROVIDER": "example"})
     adapter, name, model = configured_model(settings=settings)
     assert adapter is built and (name, model) == ("example", "example-default")
     assert calls == [("example-default", "placeholder")]

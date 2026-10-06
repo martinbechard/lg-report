@@ -95,8 +95,8 @@ def test_factory_live_selection_and_restrictions():
     assert (provider, code, model.executable, model.reasoning_effort) == (
         "codex", "chosen", "custom-codex", "low"
     )
-    assert resolve_live_mode(SimpleNamespace(demo=False, live=None), settings)
-    assert not resolve_live_mode(SimpleNamespace(demo=True, live=None), settings)
+    assert resolve_live_mode(SimpleNamespace(static=False, live=None), settings)
+    assert not resolve_live_mode(SimpleNamespace(static=True, live=None), settings)
     with pytest.raises(ValueError, match="LG_AVAILABLE_MODELS"):
         configured_identity("other", settings={**settings, "LG_AVAILABLE_MODELS": "chosen"})
     with pytest.raises(ValueError, match="LG_MAX_TOKENS"):

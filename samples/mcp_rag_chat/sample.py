@@ -12,6 +12,8 @@ Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 
 # Discovery reads this metadata without constructing a model.
 SAMPLE = {
+    # The adaptive test user evaluates this goal before requesting another turn.
+    "goal": 'The assistant explains how the Australian raven has adapted to urban environments, grounding its answer in local Wikipedia evidence retrieved through MCP and identifying its sources or evidence limitations.',
     "id": "mcp_rag_chat",
     "name": "MCP Wikipedia RAG",
     "description": "Reach the local Wikipedia index through MCP.",

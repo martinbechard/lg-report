@@ -124,7 +124,7 @@ def test_catalog_cli_report_records_nested_execution(tmp_path, sample, call_coun
             "agent_runtime",
             "--sample",
             sample,
-            "--demo",
+            "--static",
             "--prices",
             str(root / "models.json"),
             "--fx-file",

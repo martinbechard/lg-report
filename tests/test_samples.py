@@ -55,7 +55,7 @@ def test_standalone_application(name, calls, tools, turn_count, tmp_path):
             sys.executable,
             "-m",
             "agent_runtime",
-            "--demo",
+            "--static",
             "--sample",
             name,
             "--prices",
@@ -218,7 +218,7 @@ def test_standalone_application(name, calls, tools, turn_count, tmp_path):
             sys.executable,
             "-m",
             "agent_runtime",
-            "--demo",
+            "--static",
             "--sample",
             name,
             "--prices",
@@ -272,7 +272,7 @@ def test_working_directory_defaults_and_report_commands(tmp_path):
         stdout = execute(
             "-m",
             "agent_runtime",
-            "--demo",
+            "--static",
             "--sample",
             sample,
             "--prices",
@@ -295,7 +295,7 @@ def test_working_directory_defaults_and_report_commands(tmp_path):
     # The no-argument commands consume the latest bundle. Explicit input paths
     # place derived outputs beside that input; explicit --out still wins.
     (output / "run.json").unlink()
-    execute("-m", "reporting", "normalize", "--demo")
+    execute("-m", "reporting", "normalize", "--static")
     rebuilt = Run.model_validate_json((output / "run.json").read_text())
     assert rebuilt.demo
     assert sum(step.kind == "model" for step in rebuilt.steps) == 4
@@ -306,7 +306,7 @@ def test_working_directory_defaults_and_report_commands(tmp_path):
     saved.mkdir()
     for name in ("spans.jsonl", "prices.json"):
         (saved / name).write_bytes((output / name).read_bytes())
-    execute("-m", "reporting", "normalize", "saved/spans.jsonl", "--demo")
+    execute("-m", "reporting", "normalize", "saved/spans.jsonl", "--static")
     execute("-m", "reporting", "--fx-file", str(rate), "render", "saved/run.json")
     assert (saved / "report.html").stat().st_size > 0
     execute("-m", "reporting", "normalize", "--out", "rebuilt.json")
@@ -465,7 +465,7 @@ def test_batch_model_mode_and_shared_config(tmp_path, monkeypatch, simulated):
 def test_batch_child_model_and_interaction_mode(
     tmp_path, monkeypatch, simulated, sample
 ):
-    """Real calls pass --live; live quote questions retain terminal input/output."""
+    """Every demo runs unattended, with live agents or explicitly fixed text."""
     import runpy
 
     root = Path(__file__).resolve().parents[1]
@@ -490,13 +490,11 @@ def test_batch_child_model_and_interaction_mode(
     assert calls[2][0][:3] == [sys.executable, "-m", "reporting.export_excel"]
     command, options = calls[0]
     assert ("--live" in command) is not simulated
-    assert ("--demo" in command) is simulated
-    interactive = sample == "quote_request" and not simulated
-    assert command[command.index("--client") + 1] == (
-        "console" if interactive else "static"
-    )
-    assert options["stdin"] == (None if interactive else subprocess.DEVNULL)
-    assert (options["stdout"] is None) is interactive
+    assert ("--static" in command) is simulated
+    assert "--demo" in command
+    assert command[command.index("--client") + 1] == ("static" if simulated else "agent")
+    assert options["stdin"] == subprocess.DEVNULL
+    assert options["stdout"] is not None
     assert all(options["stdin"] == subprocess.DEVNULL for _, options in calls[1:])
 
 

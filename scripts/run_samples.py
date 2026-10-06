@@ -39,8 +39,9 @@ def run_sample(name, directory, *, prices, fx_file, env, simulated=False):
     Remove earlier report artifacts, run the selected model mode, convert run.json
     to workbook input, then export Excel. A failing child stops this sequence
     and raises to main; run.log retains its output. Success returns None after
-    checking both reports are nonempty. Requests and file approvals are scripted;
-    live quote clarification uses the terminal for model-generated questions.
+    checking both reports are nonempty. Live requests and clarification replies
+    use the default adaptive user through the shared provider adapters; simulated
+    runs retain authored input. File approvals use the explicit test policy.
     Its dialogue is captured in the report; run.log records the export stages.
     The file lesson modifies its own batch output file.
     """
@@ -72,9 +73,9 @@ def run_sample(name, directory, *, prices, fx_file, env, simulated=False):
         "--prices",
         str(prices),
         "--client",
-        "console" if name == "quote_request" and not simulated else "static",
+        "static" if simulated else "agent",
     ]
-    command.append("--demo" if simulated else "--live")
+    command.extend(["--demo", "--static" if simulated else "--live"])
     if fx_file:
         command.extend(["--fx-file", str(fx_file)])
     if name == "file_approval":
@@ -116,21 +117,15 @@ def run_sample(name, directory, *, prices, fx_file, env, simulated=False):
         ],
     ]
     with (directory / "run.log").open("w", encoding="utf-8") as log:
-        for stage, command in enumerate(commands):
-            # Live clarification must show the actual model question and accept
-            # an answer. Redirecting its stdin to DEVNULL would silently cancel.
-            interactive = stage == 0 and name == "quote_request" and not simulated
-            if interactive:
-                log.write(
-                    "Live quote dialogue shown in terminal; see report for recorded answers.\n"
-                )
-                log.flush()
+        for command in commands:
+            # Both generated and authored users are unattended. A batch must
+            # never hang waiting for terminal input from a clarification prompt.
             subprocess.run(
                 command,
                 cwd=directory,
                 env=env,
-                stdin=None if interactive else subprocess.DEVNULL,
-                stdout=None if interactive else log,
+                stdin=subprocess.DEVNULL,
+                stdout=log,
                 stderr=subprocess.STDOUT,
                 check=True,
             )

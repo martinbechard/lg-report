@@ -1081,7 +1081,7 @@ def test_scripted_context_tool_points_show_threshold_crossings(tmp_path):
             "agent_runtime",
             "--sample",
             "context_budget",
-            "--demo",
+            "--static",
             "--client",
             "static",
             "--out",

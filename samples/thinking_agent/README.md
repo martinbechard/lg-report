@@ -14,7 +14,7 @@ From the repository root:
 
 ```bash
 uv sync
-uv run python -m agent_runtime --sample thinking_agent --demo
+uv run python -m agent_runtime --sample thinking_agent --static
 ```
 
 The report is written as `reports/thinking_agent/report.html` together
@@ -32,7 +32,7 @@ LG_MODEL_ADVANCED=gpt-6-sol
 
 The factory resolves this once when constructing the live model. Shell values
 override `.env.local`. A missing or blank mapping raises an error asking you to
-set `LG_MODEL_ADVANCED`; demo mode needs no mapping. If you configure
+set `LG_MODEL_ADVANCED`; static mode needs no mapping. If you configure
 `LG_AVAILABLE_MODELS`, include the mapped model to avoid the existing fallback
 to `LG_MODEL`.
 
@@ -94,7 +94,7 @@ of the cache simulation. The tools are demonstrations, not a production agent.
 
 ## Interactive client
 
-Replace `--demo` with `--client console --live --env-file .env.local` in the launch command after configuring the repository
+Replace `--static` with `--client console --live --env-file .env.local` in the launch command after configuring the repository
 `.env.local`. The shared console accepts prompts and `/attach PATH` text files, `/send`,
 and `/quit`. Both clients use the same workflow and retained conversation history.
 See [component and sequence diagrams](../../docs/chat-composition.md).

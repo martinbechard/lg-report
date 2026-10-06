@@ -10,6 +10,8 @@ Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 import json
 
 SAMPLE = {
+    # The adaptive test user evaluates this goal before requesting another turn.
+    "goal": 'The parent returns the child implementation of normalize_tags with a review outcome. The implementation trims and lowercases strings, removes duplicates while preserving order, discards blanks, does not mutate input, and uses only the standard library; unresolved review issues must be disclosed.',
     "id": "nested_workflows",
     "name": "Nested workflows",
     "description": "A parent dispatches an assignment to a child author/judge review loop.",

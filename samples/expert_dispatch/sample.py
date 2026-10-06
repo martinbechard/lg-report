@@ -12,6 +12,8 @@ Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 
 # Discovery reads this metadata without constructing a model.
 SAMPLE = {
+    # The adaptive test user evaluates this goal before requesting another turn.
+    "goal": 'The assistant has answered all three sample questions: who directed Spirited Away, how many basketball players a team has on court, and the year the Berlin Wall fell, using the relevant specialists.',
     "id": "expert_dispatch",
     "name": "Expert dispatch",
     "description": "Movie, sports and history specialists.",

@@ -16,13 +16,13 @@ as failure in the final answer; the fixture does not invent totals.
 
 ```sh
 # Offline model; real local shell execution and HTML report
-uv run python -m agent_runtime --sample shell_script --prices models.json --demo
+uv run python -m agent_runtime --sample shell_script --prices models.json --static
 
 # Real model using the same backend and bundled script
 uv run python -m agent_runtime --sample shell_script --live --env-file .env.local --prices models.json
 
 # Angular client, using the same workflow
-uv run python -m agent_runtime --sample shell_script --client angular --prices models.json --demo
+uv run python -m agent_runtime --sample shell_script --client angular --prices models.json --static
 ```
 
 The sample requires a POSIX host with `sh`, `awk`, and `cat` (macOS or Linux).

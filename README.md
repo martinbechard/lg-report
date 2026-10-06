@@ -76,7 +76,7 @@ uv run scripts/run_samples.py
 
 Open [reports/index.html](reports/index.html) when the batch finishes.
 Each sample has a `report.html` and `report.xlsx` under `reports/<sample>/`.
-The live quote sample asks clarification questions in the terminal.
+Live demos use a user agent to answer clarification questions automatically.
 
 For an unattended batch with scripted model responses and no provider key:
 
@@ -90,25 +90,38 @@ See [batch setup and output details](#run-all-local-samples-and-export-excel).
 
 ### Run one sample from the command line
 
-Use `--demo` to run a sample's fixed prompts and scripted responses:
+Choose model behavior and whether the sample runs by itself:
+
+| Command | Behavior |
+| --- | --- |
+| `--demo --static` | Unattended sample using fixed user and assistant text |
+| `--demo --live` | Unattended conversation between real assistant and user agents |
+| `--live --client console` | A human chats with the real assistant |
+| `--live --client static` | Fixed user text sent to the real assistant |
+
+`--demo` alone runs unattended and selects live agents when the assistant provider
+is configured, otherwise fixed text. `--live` and `--static` are mutually exclusive.
+Codex, Copilot, and API-key providers use the same adapters for either agent.
+
+Use fixed text for a repeatable offline sample:
 
 ```sh
-uv run python -m agent_runtime --sample simple_chat --demo
+uv run python -m agent_runtime --sample simple_chat --demo --static
 ```
 
 Open [reports/simple_chat/report.html](reports/simple_chat/report.html) after the run.
 Individual sample commands produce HTML and supporting run data; the batch also exports Excel.
 Rerunning replaces that sample's previous report bundle.
 
-For live console chat, use your provider configuration and omit `--demo`:
+For human console chat, select the console client explicitly:
 
 ```sh
-uv run python -m agent_runtime --sample simple_chat --env-file .env.local
+uv run python -m agent_runtime --sample simple_chat --client console --env-file .env.local
 ```
 
 A configured key for the selected provider enables live mode automatically.
 Without a key, the launcher uses scripted responses. `--live` explicitly requires
-real execution; `--demo` forces scripted responses even when a key is configured.
+real execution; `--static` forces scripted responses even when a key is configured.
 If you omit `--env-file`, the launcher reads the sample's own `.env` instead.
 
 Use `/quit` to end console chat and write its report. `/samples` lists samples,
@@ -134,7 +147,7 @@ Start the server with your provider configuration:
 uv run --extra chat python -m agent_runtime --sample simple_chat --client angular --env-file .env.local
 ```
 
-Add `--demo` for scripted responses. The same provider-key detection applies as
+Add `--static` for scripted responses. The same provider-key detection applies as
 in the console. Use `--port 8001` to select another port; stop the server with Ctrl-C.
 
 - [Chat](http://127.0.0.1:8000/): select a sample and send messages.
@@ -195,7 +208,7 @@ Langfuse project. It has separate setup instructions and adds Langfuse traces al
 The parent/subagent lesson also has matching [local-report](samples/subagent_chat/README.md)
 and [Langfuse](samples/subagent_chat_langfuse/README.md) applications.
 
-Start with the [sample catalog](samples/README.md). The launcher defaults to live, interactive execution when the selected provider has an API key; otherwise it uses scripted responses and the sample’s default client (usually fixed prompts; file approval still asks a human). Use `--demo` to force demo mode even when a key is configured. Configure the root `.env.example` as `.env.local` and pass `--env-file .env.local`; shell variables take precedence. The same root template includes Langfuse settings (see the [sample configuration guide](samples/README.md#model-selection-and-configuration)). `LG_PROVIDER` selects OpenAI (the default), Anthropic, Copilot, or Codex. For OpenAI and Anthropic, only that provider’s key enables automatic live mode; selecting Copilot or Codex enables live mode using its local login. `--live` explicitly requires real execution; provider errors never fall back to demo mode. `--demo` and `--live` cannot be combined. For fixed prompts against a real model, use `--live --client static`.
+Start with the [sample catalog](samples/README.md). The launcher defaults to live agents when the selected provider has an API key; otherwise it uses scripted responses and the sample’s default client (usually fixed prompts; file approval still asks a human). Use `--static` for fixed sample text even when a key is configured. `--demo` runs a sample unattended and can combine with either `--live` or `--static`. Configure the root `.env.example` as `.env.local` and pass `--env-file .env.local`; shell variables take precedence. The same root template includes Langfuse settings (see the [sample configuration guide](samples/README.md#model-selection-and-configuration)). `LG_PROVIDER` selects OpenAI (the default), Anthropic, Copilot, or Codex. For OpenAI and Anthropic, only that provider’s key enables automatic live mode; selecting Copilot or Codex enables live mode using its local login. `--live` explicitly requires real execution; provider errors never fall back to static text. `--static` and `--live` cannot be combined. For fixed prompts against a real model, use `--live --client static`.
 
 ### Run all local samples and export Excel
 
@@ -208,8 +221,8 @@ One command runs all local samples and generates **HTML and standalone Excel
 workbooks**, with a clickable index. **Real models are the default**, using
 `.env.local` for provider credentials and `LG_MODEL` (OpenAI defaults to
 `gpt-5.6-luna`). Shell settings take precedence; `--env-file PATH` selects
-another configuration. Langfuse samples are excluded. Requests and file approvals
-are scripted; the live quote sample asks clarification questions in the terminal.
+another configuration. Langfuse samples are excluded. The user agent generates
+requests and clarification answers; file approvals follow the explicit batch test policy.
 
 To restrict model selection, set `LG_AVAILABLE_MODELS=model-id,other-model-id`
 in `.env.local` (use exact deployment names for Azure). Unset or blank means
@@ -302,15 +315,82 @@ outputs; these commands do not run the agent:
 
 ```sh
 uv run lg-report render reports/simple_chat/run.json
-uv run lg-report normalize reports/simple_chat/spans.jsonl --demo
+uv run lg-report normalize reports/simple_chat/spans.jsonl --static
 uv run lg-report render reports/simple_chat/run.json
 ```
+
+### Adaptive user for live tests
+
+Live runs use **GPT-6 Luna at high effort** as the user agent by default,
+through the existing Codex adapter:
+
+```sh
+uv run python -m agent_runtime --sample simple_chat --demo --live --user-turns 3 --env-file .env.local --prices models.json --out reports/adaptive-chat
+```
+
+Set `LG_USER_MODEL` in your environment or sample configuration, or use
+`--user-model MODEL`, to choose a
+different model; `--user-provider` / `LG_USER_PROVIDER` selects any registered
+provider, including OpenAI, Anthropic, Copilot, or Codex. The user provider defaults
+to Codex independently of the model being tested, so changing `LG_MODEL` or
+`LG_PROVIDER` does not change the user persona's model. API user providers require
+their normal credentials. `LG_USER_EFFORT` defaults to `high`;
+`LG_USER_MAX_TOKENS` is an optional API-only output limit.
+
+Choose the user agent's adapter with `--user-provider codex`,
+`--user-provider copilot`, or `--user-provider openai` (also `anthropic`). Use
+`--user-model MODEL_CODE` for a model available through that provider. Codex and
+Copilot use their existing login; OpenAI and Anthropic require their normal API
+key. The assistant's provider and model remain independently configurable.
+
+
+The first authored request seeds the conversation verbatim, preserving structured
+inputs. A generic user-role prompt loads the sample's canned user conversation
+and clarification facts as guidance, without hardcoded sample facts or canned
+assistant answers. Follow-ups and clarification replies adapt to actual model
+output. `--user-turns` / `LG_USER_MAX_TURNS` bounds the conversation (default 3,
+including the seed); this is a safety cap, not proof of success.
+
+Each sample defines an optional nonempty `goal` at the start of its `SAMPLE`
+configuration, before the conversation:
+
+```python
+SAMPLE = {
+    "goal": "Explain the workflow steps and how tool observations inform an answer.",
+    "id": "simple_chat",
+    # Other discovery metadata follows.
+}
+```
+
+The goal defines when the user model can stop: it must explain which conditions
+were satisfied using the actual conversation. **With a goal, there is no minimum
+turn count**; one complete answer can suffice. Without a goal, the sample's
+number of authored user requests is the minimum and its conversation objectives
+must be covered. The maximum always wins; an unmet goal at that limit is recorded
+as `turn_limit`, not success. Increase `--user-turns` for longer scenarios.
+The user model returns a JSON completion decision with a reason; invalid decisions
+fail visibly. Full and comparison reports show the goal, stop status, and explanation
+when content capture is enabled. These are user-model assessments, not independent
+correctness verdicts.
+
+Structured approval and clarification lessons use one initial request, with adaptive clarifications within
+that turn. Clarifications are limited to ten answers per turn. Approval decisions retain the existing human or explicit
+scripted test policy. Static runs stay deterministic. Select `--client static` for fixed user prompts
+against a live assistant, or `--client console` / `--client angular` for human chat.
+`--demo` requires an unattended client; it does not select model behavior.
+
+For model comparisons, set the same `LG_USER_MODEL` and `LG_USER_PROVIDER` for all
+runs. Adaptive prompts may diverge because assistant answers differ. User-model
+calls are tagged in `run.json` and included in full-report totals. The comparison
+shows their estimated cost separately, keeping tested-assistant costs, context,
+and response columns separate from test-input generation. Failures remain visible;
+there is no fallback to canned input or another model.
 
 ### Compare models in one HTML report
 
 Open the saved [live model comparison](reports/model_comparison/report.html) to
-compare GPT-5.5, GPT-5.6-luna, and GPT-6-sol through Codex on the same two
-simple-chat prompts. The report uses the single-model cost/context diagram with all models plotted together on
+compare GPT-5.5, GPT-5.6-luna, and GPT-6-sol through Codex on the same initial
+simple-chat prompt, with GPT-6 Luna generating adaptive user follow-ups. The report uses the single-model cost/context diagram with all models plotted together on
 shared axes, then aligns responses side by side by recorded turn. Full-report
 links retain the execution details and original pricing evidence. Without turn
 metadata, alignment is explicitly by request order; unequal prompts remain visible.
@@ -320,9 +400,9 @@ directories. The first two commands invoke paid provider models and require acce
 to both models in your configured OpenAI project:
 
 ```sh
-LG_MODEL=gpt-5.5 uv run python -m agent_runtime --sample simple_chat --client static --live --env-file .env.local --prices models.json --out reports/model_comparison/gpt-5.5
-LG_MODEL=gpt-5.6-luna uv run python -m agent_runtime --sample simple_chat --client static --live --env-file .env.local --prices models.json --out reports/model_comparison/gpt-5.6-luna
-LG_PROVIDER=codex LG_MODEL=gpt-6-sol LG_MAX_TOKENS= LG_EFFORT=low uv run python -m agent_runtime --sample simple_chat --client static --live --env-file .env.local --prices models.json --out reports/model_comparison/codex-gpt-6-sol
+LG_MODEL=gpt-5.5 uv run python -m agent_runtime --sample simple_chat --demo --live --user-provider codex --env-file .env.local --prices models.json --out reports/model_comparison/gpt-5.5
+LG_MODEL=gpt-5.6-luna uv run python -m agent_runtime --sample simple_chat --demo --live --user-provider codex --env-file .env.local --prices models.json --out reports/model_comparison/gpt-5.6-luna
+LG_PROVIDER=codex LG_MODEL=gpt-6-sol LG_MAX_TOKENS= LG_EFFORT=low uv run python -m agent_runtime --sample simple_chat --demo --live --user-provider codex --env-file .env.local --prices models.json --out reports/model_comparison/codex-gpt-6-sol
 ```
 
 The third command uses your existing Codex login and installed CLI. See the
@@ -339,8 +419,9 @@ uv run lg-report compare reports/model_comparison/gpt-5.5/run.json reports/model
 The default output is `./comparison.html`; its parent directory must exist.
 Each input requires an adjacent `prices.json`. Comparison preserves each run's
 saved prices and FX; `--fx-file` is only supported for single-run rendering.
-Missing usage or pricing stays explicit. Mixed-model runs list every model and
-show whole-run totals. Repeated run or span IDs across recordings remain separate.
+Missing usage or pricing stays explicit. Mixed-assistant runs list their tested
+models and combined assistant totals; user-model input-generation costs are
+reported separately. Repeated run or span IDs across recordings remain separate.
 Elapsed time includes gaps between turns, so it is not a model-latency benchmark.
 Use matching prompts, workflows, tools, and settings when comparing models;
 the report does not automatically establish equivalent workloads or rank quality.
@@ -356,7 +437,7 @@ For a retained run created with `--out reports/first-chat`:
 
 ```sh
 uv run lg-report render reports/first-chat/run.json
-uv run lg-report normalize reports/first-chat/spans.jsonl --demo --title "Imported run"
+uv run lg-report normalize reports/first-chat/spans.jsonl --static --title "Imported run"
 ```
 
 Input filenames are optional; the defaults are `run.json` and `spans.jsonl` in
@@ -367,7 +448,7 @@ replace their output file.
 `render` reads the adjacent `prices.json`; `--prices models.json` explicitly
 selects another table. It reads the shared saved exchange rate without a network lookup. `normalize`
 accepts this application's OTel SDK JSONL format, not arbitrary OTLP collector
-JSON. Use `--demo` only for simulated traces; omit it for live traces.
+JSON. Use `--static` only for simulated traces; omit it for live traces.
 Normalization rebuilds execution data from spans; it does not rerun the agent
 or preserve all original run-level metadata such as the title and final output.
 `run.json` is the portable report boundary.

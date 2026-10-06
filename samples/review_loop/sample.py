@@ -15,6 +15,8 @@ import json
 
 # Discovery reads this metadata without constructing a model.
 SAMPLE = {
+    # The adaptive test user evaluates this goal before requesting another turn.
+    "goal": 'The final recommendation proposes a concrete latency fix grounded in the incident evidence, covers rollout, verification, freshness and invalidation risks, and rollback, respects the stated constraints, and distinguishes proposed improvement from unmeasured success.',
     "id": "review_loop",
     "name": "Review loop",
     "description": "An author revises a draft using a judge's feedback.",

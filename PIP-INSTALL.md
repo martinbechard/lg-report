@@ -59,12 +59,12 @@ the optional virtual environment, activate it again whenever you open a new term
 ## Start the browser interface
 
 ```sh
-python -m agent_runtime --sample simple_chat --client angular --demo --prices models.json
+python -m agent_runtime --sample simple_chat --client angular --static --prices models.json
 ```
 
 Open <http://127.0.0.1:8000/>. Uvicorn serves both the prebuilt Angular interface
 and the Python API. Stop it with Ctrl-C; use `--port 8001` if needed.
-Demo mode uses scripted model responses and requires no provider API key.
+Static mode uses fixed model responses and requires no provider API key.
 
 For real responses, copy `.env.example` to `.env.local` and set `LG_PROVIDER`,
 `LG_MODEL`, and the corresponding `OPENAI_API_KEY` or `ANTHROPIC_API_KEY`.
@@ -81,7 +81,7 @@ The interface allows selecting the other available samples.
 
 ```sh
 python -m agent_runtime --list
-python -m agent_runtime --sample simple_chat --demo --prices models.json
+python -m agent_runtime --sample simple_chat --static --prices models.json
 python scripts/run_samples.py --simulated
 ```
 
@@ -91,8 +91,11 @@ Rerunning replaces those outputs. No Node.js or Microsoft Excel installation is
 needed to generate them.
 
 For a live batch, run `python scripts/run_samples.py --env-file .env.local`.
-The quote sample asks for terminal input. Langfuse samples are excluded from
-the batch and require their own project credentials; see their sample READMEs.
+Live demos use the default Codex GPT-6 Luna user agent at high effort, including
+for quote clarification. This requires a Codex login, or configure
+`LG_USER_PROVIDER` and `LG_USER_MODEL` to use Copilot or an API-key provider.
+Langfuse samples are excluded from the batch and require their own project
+credentials; see their sample READMEs.
 
 Before running RAG samples or the complete batch, download the optional archives:
 

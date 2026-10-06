@@ -12,7 +12,7 @@ from .console_client import ConsoleClient
 
 
 class ConsoleApplication:
-    """Own terminal launches: one static run or an interactive sample-selection loop."""
+    """Own terminal launches: one automated run or an interactive sample-selection loop."""
 
     def __init__(self, catalog, args, *, read=input, write=print):
         self.catalog = catalog
@@ -43,7 +43,7 @@ class ConsoleApplication:
         # drive real models. Static mode supplies interruption answers as well;
         # structured interactive lessons keep their human-answer behavior.
         if (
-            args.client == "static"
+            args.client in {"static", "agent"}
             or self.catalog.get(selected).interaction
             or prompts is not None
         ):
@@ -52,9 +52,34 @@ class ConsoleApplication:
                 self.catalog,
                 selected,
                 prompts=prompts,
-                script_answers=args.client == "static",
+                script_answers=args.client in {"static", "agent"},
                 scenario=args.scenario,
                 decision=args.decision,
+            )
+        # Only unattended live tests replace scripted user input. Interactive
+        # console/web users and fixed-text runs keep their existing clients.
+        if getattr(args, "user_model", None) and args.client == "agent" and settings.live:
+            import os
+
+            from .model_user import ModelUserClient, build_user_model, user_scenario
+
+            values = {**self.catalog.configuration(selected, args.env_file), **os.environ,
+                      "LG_USER_MODEL": args.user_model, "LG_USER_PROVIDER": args.user_provider}
+            scenario_prompts = self.catalog.prompts(selected) if prompts is None else prompts
+            if not scenario_prompts:
+                raise ValueError("An adaptive user test requires an initial scenario request")
+            # Keep the original console client for presentation and explicit
+            # approval decisions; only user dialogue generation is replaced.
+            client = ModelUserClient(
+                client, build_user_model(values), initial_request=scenario_prompts[0],
+                scenario=user_scenario(self.catalog, selected, scenario_prompts),
+                goal=self.catalog.get(selected).goal,
+                minimum_turns=len(scenario_prompts),
+                # Structured lessons resume their initial request through
+                # clarification/approval; a new free-text request may violate
+                # their JSON input contract even after successful completion.
+                max_turns=1 if self.catalog.get(selected).interaction else args.user_turns,
+                cancel=args.scenario == "cancel",
             )
         execute_conversation(
             catalog=self.catalog,
@@ -68,12 +93,12 @@ class ConsoleApplication:
         )
 
     def run(self, sample_id):
-        """Run static input once; interactive input keeps the sample menu open.
+        """Run fixed-text or agent input once; human input keeps the sample menu open.
 
         Both modes use run_session for preparation, optional script setup, and
         execution. Only interactive mode needs catalog commands and switching.
         """
-        if self.args.client == "static":
+        if self.args.client in {"static", "agent"}:
             client = ConsoleClient(read=self.read, write=self.write)
             self.run_session(sample_id, client)
             return

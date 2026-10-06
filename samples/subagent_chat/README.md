@@ -14,7 +14,7 @@ From the repository root:
 
 ```sh
 uv sync --locked
-uv run python -m agent_runtime --sample subagent_chat --demo
+uv run python -m agent_runtime --sample subagent_chat --static
 ```
 
 The command prints the HTML path and creates `spans.jsonl`, `run.json`,
@@ -118,7 +118,7 @@ and simulation so you can compare the same workflow through two tracing systems.
 
 ## Interactive client
 
-Replace `--demo` with `--client console --live --env-file .env.local` in the launch command after configuring the repository
+Replace `--static` with `--client console --live --env-file .env.local` in the launch command after configuring the repository
 `.env.local`. The shared console accepts prompts and `/attach PATH` text files, `/send`,
 and `/quit`. Both clients use the same workflow and retained conversation history.
 See [component and sequence diagrams](../../docs/chat-composition.md).
