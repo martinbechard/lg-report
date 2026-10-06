@@ -18,6 +18,7 @@ from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, Tool
 from agent_runtime.harness.argument_parser import resolve_live_mode
 from agent_runtime.harness.codex_model import CodexChatModel
 from agent_runtime.harness.copilot_model import CopilotChatModel
+from agent_runtime.harness.gateway_model import text_result
 from agent_runtime.harness.model_config import configured_identity, configured_model
 from agent_runtime.harness.model_providers import (
     PROVIDERS,
@@ -25,7 +26,6 @@ from agent_runtime.harness.model_providers import (
     ProviderPolicy,
     close_model_providers,
 )
-from agent_runtime.harness.text_model import text_result
 
 
 @pytest.fixture(autouse=True)
@@ -93,8 +93,8 @@ def test_local_history_and_trace_contract(model_type):
     assert history == '[{"role": "user", "content": "Hi"}, {"role": "assistant", "content": "Hello"}]'
     assert model._identifying_params["reasoning_effort"] == "low"
     assert model._get_ls_params()["ls_provider"] == model.provider
-    with pytest.raises(ValueError, match="tool messages"):
-        model.prepare_history([ToolMessage("result", tool_call_id="1")], None, {})
+    _, tool_history = model.prepare_history([ToolMessage("result", tool_call_id="1")], None, {})
+    assert '"tool_call_id": "1"' in tool_history
     with pytest.raises(TypeError, match="text messages"):
         model.prepare_history([HumanMessage(content=[{"type": "text", "text": "Hi"}])], None, {})
 

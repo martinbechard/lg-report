@@ -1,9 +1,9 @@
-"""Adapt the signed-in Codex CLI to LangChain text request/response calls.
+"""Adapt the signed-in Codex CLI to LangChain requests and graph tool decisions.
 
 Each call uses an ephemeral CLI process and temporary working directory, so
 LangGraph owns history and no Codex session must be resumed or shared. Commands
 use argument vectors, prompts use stdin, and timeouts/cancellation reap the
-owned process group. TextOnlyChatModel shares history/tracing policy with Copilot.
+owned process group. GatewayChatModel shares history/tracing policy with Copilot.
 Saved usage is Codex's receipt; reporting applies model rates to estimate cost.
 AI attribution: Generated with AI assistance by Ellis Northstar.
 Copyright (c) 2026 Martin.Bechard@DevConsult.ca
@@ -21,7 +21,7 @@ from tempfile import TemporaryDirectory
 
 from langchain_core.outputs import ChatResult
 
-from .text_model import TextOnlyChatModel, text_result
+from .gateway_model import GatewayChatModel, gateway_response_schema, text_result
 
 
 def parse_result(stdout: str, returncode: int, model: str) -> ChatResult:
@@ -41,8 +41,8 @@ def parse_result(stdout: str, returncode: int, model: str) -> ChatResult:
     if len(completed) != 1:
         raise RuntimeError("Codex did not return exactly one completed turn")
     items = [event["item"] for event in events if event.get("type") == "item.completed"]
-    # Graph tools are suppressed at binding. If Codex nevertheless reports native
-    # tool work, do not represent this as a successful text-only model call.
+    # Graph tools are JSON decisions executed by LangGraph. Native CLI tool
+    # work would bypass that authority and invalidates the gateway response.
     if any(item.get("type") not in {"agent_message", "reasoning", "error"} for item in items):
         raise RuntimeError("Codex performed non-text work in request/response mode")
     answers = [item["text"] for item in items if item.get("type") == "agent_message"]
@@ -76,12 +76,12 @@ def stop_process(process):
             pass  # It exited between the returncode check and the kill.
 
 
-class CodexChatModel(TextOnlyChatModel):
-    """Run text-only calls through Codex, using its existing local authentication.
+class CodexChatModel(GatewayChatModel):
+    """Run model decisions through Codex using its existing local authentication.
 
-    This adapter deliberately does not implement tool workflows, streaming,
-    multimodal input, or output-token limits. Codex native harness overhead is
-    included in its usage and elapsed time; direct API runs are not identical
+    Graph tool calls use the shared JSON gateway protocol; native CLI tools stay
+    disabled. Streaming, multimodal input, and output-token limits are unsupported.
+    Codex native harness overhead is included in its usage and elapsed time; direct API runs are not identical
     workloads. There is no automatic retry or fallback to another model.
     """
 
@@ -104,7 +104,7 @@ class CodexChatModel(TextOnlyChatModel):
         with TemporaryDirectory(prefix="lg-report-codex-") as directory:
             instructions = Path(directory) / "instructions.txt"
             instructions.write_text(
-                instructions_text + " Do not call tools or inspect files.",
+                instructions_text + " Do not use native CLI tools or inspect local files. Application tool requests must be returned as JSON decisions.",
                 encoding="utf-8",
             )
             command = [executable, "exec", "--ignore-user-config", "--ephemeral", "--json",
@@ -112,6 +112,14 @@ class CodexChatModel(TextOnlyChatModel):
                        "--model", self.model_name, "-c", "project_doc_max_bytes=0",
                        "-c", 'web_search="disabled"', "-c", "approval_policy=\"never\"",
                        "-c", f"model_instructions_file={json.dumps(str(instructions))}"]
+            response_schema = gateway_response_schema(kwargs.get("tools", []))
+            if response_schema is not None:
+                # The CLI can constrain its final response shape. The shared
+                # validator still checks names and choices; the graph validates
+                # arguments before executing tools under its own permissions.
+                schema = Path(directory) / "response-schema.json"
+                schema.write_text(json.dumps(response_schema), encoding="utf-8")
+                command.extend(["--output-schema", str(schema)])
             # These are native CLI feature switches, not a second tool runtime.
             # Keeping host extensions off avoids invoking personal integrations.
             for feature in ("shell_tool", "apps", "plugins", "memories", "multi_agent",
@@ -131,7 +139,9 @@ class CodexChatModel(TextOnlyChatModel):
                                        stderr=subprocess.PIPE, start_new_session=os.name == "posix")
             try:
                 stdout, _ = process.communicate(prompt, timeout=self.request_timeout)
-                return parse_result(stdout.decode("utf-8"), process.returncode, self.model_name)
+                return self.gateway_result(
+                    parse_result(stdout.decode("utf-8"), process.returncode, self.model_name), kwargs
+                )
             except subprocess.TimeoutExpired as exc:
                 raise TimeoutError("Codex request timed out") from exc
             finally:
@@ -147,7 +157,9 @@ class CodexChatModel(TextOnlyChatModel):
             )
             try:
                 stdout, _ = await asyncio.wait_for(process.communicate(prompt), self.request_timeout)
-                return parse_result(stdout.decode("utf-8"), process.returncode, self.model_name)
+                return self.gateway_result(
+                    parse_result(stdout.decode("utf-8"), process.returncode, self.model_name), kwargs
+                )
             finally:
                 stop_process(process)
                 await process.communicate()

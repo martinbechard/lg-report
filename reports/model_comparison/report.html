@@ -11,7 +11,7 @@ body{margin:0;background:#f2f6f8;color:var(--ink);font:16px/1.55 system-ui,sans-
 h1{font-size:clamp(2rem,4vw,3.4rem);line-height:1.1;margin:8px 0 16px}h2{font-size:1.5rem;margin:0 0 8px}h3{font-size:1.08rem;margin:0;overflow-wrap:anywhere}
 a{color:#006d78}a:focus-visible,summary:focus-visible,[tabindex]:focus-visible{outline:3px solid #d07820;outline-offset:3px}
 .eyebrow{color:var(--accent);font-weight:750;letter-spacing:.13em;text-transform:uppercase;font-size:.78rem}.muted,small{color:var(--muted)}
-.panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:22px;margin:24px 0}.intro{max-width:95ch}.chart-grid{display:grid;grid-template-columns:repeat(3,minmax(340px,1fr));gap:20px}.scroll{overflow-x:auto}
+.panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:22px;margin:24px 0}.chart-grid{display:grid;grid-template-columns:repeat(3,minmax(340px,1fr));gap:20px}.scroll{overflow-x:auto}
 .model{padding:12px 0 16px;border-bottom:1px solid var(--line)}.model p{margin:4px 0}.totals{font-size:1.3rem;font-weight:700;font-variant-numeric:tabular-nums}.totals small{font-size:.8rem;font-weight:400}
 .legend{display:flex;gap:10px 22px;flex-wrap:wrap;font-size:.82rem;margin:16px 0}.swatch{display:inline-block;width:12px;height:12px;margin-right:6px}.line{width:20px;height:0;border-top:3px solid;vertical-align:middle}
 .chart{width:100%;display:block}svg text{font-family:system-ui,sans-serif;font-size:12px}svg .axis-label{font-size:14px}.warning{color:#864409;font-weight:600}.status{font-size:.82rem}
@@ -22,9 +22,7 @@ table{border-collapse:collapse;table-layout:fixed;width:100%;min-width:960px}th,
 @media print{main{padding:0}body{background:white}.scroll{overflow:visible}.chart-grid{grid-template-columns:repeat(3,1fr);gap:10px}table{min-width:0}th,td{padding:10px;font-size:10px}.answer{font-size:10px}.panel{break-inside:avoid}#chart-tip{display:none}}
 </style></head><body><main>
 <div class="eyebrow">LG Report / model comparison</div><h1>Three-model live comparison</h1>
-<p class="intro">Compare estimated cost, context growth, and what each model actually said. Read responses side by side; open a full report for the execution trace and pricing evidence.</p>
 <section class="panel" aria-labelledby="cost-heading"><h2 id="cost-heading">Cost &amp; context</h2>
-<p class="muted">All models share one graph. Cost stacks are grouped by request; each model has a solid cumulative-cost line and a dashed post-call context line.</p>
 <div class="legend"><span><i class="swatch" style="background:#2458a6"></i>Fresh input</span><span><i class="swatch" style="background:#658d35"></i>Output · non-reasoning</span><span><i class="swatch" style="background:#35a6a0"></i>Cache read</span><span><i class="swatch" style="background:#dc7952"></i>Cache-write premium</span></div>
 <div class="scroll"><div class="chart-grid">
 <article><header class="model"><div class="eyebrow" style="color:#2458a6"><i class="swatch line"></i>Model 1</div><h3>openai:gpt-5.5-2026-04-23</h3>
@@ -55,6 +53,7 @@ table{border-collapse:collapse;table-layout:fixed;width:100%;min-width:960px}th,
 
 </article></div></div>
 
+<div class="legend" aria-label="Line styles"><span><i class="swatch line"></i>Cumulative cost</span><span><i class="swatch line" style="border-top-style:dashed"></i>Context</span></div>
 <div class="legend" aria-label="Model series"><span style="color:#2458a6"><i class="swatch line"></i>M1 · openai:gpt-5.5-2026-04-23</span><span style="color:#9c3f75"><i class="swatch line"></i>M2 · openai:gpt-5.6-luna</span><span style="color:#17734b"><i class="swatch line"></i>M3 · codex:gpt-6-sol</span></div>
 <div class="scroll"><svg class="chart" id="comparison-cost-chart" viewBox="0 0 1000 405" style="min-width:760px" role="img" aria-label="All models on shared axes: grouped EUR request costs, solid cumulative cost lines, and dashed post-call context lines">
 <text x="12" y="25" class="axis-label">Estimated cost · EUR</text><text x="988" y="25" text-anchor="end" class="axis-label">Post-call context · tokens</text>
@@ -91,8 +90,8 @@ table{border-collapse:collapse;table-layout:fixed;width:100%;min-width:960px}th,
 <rect x="161.0" y="84.73066666666668" width="8" height="8" fill="white" stroke="#17734b" stroke-width="2" tabindex="0" data-tip="codex:gpt-6-sol · Request 1 · Main context | Post-call context: 13,193 tokens | Previous context: 0 tokens | Net input change: +13,107 tokens | Total input: 13,107 tokens | • System prompt: unreported | • Tool documentation: unreported | • Conversation: unreported | Input billing | • Fresh input: 13,107 tokens | • Cache read: 0 tokens | Cache write: 0 tokens | Output: 86 tokens | • Non-reasoning output: 86 tokens | • Reasoning: 0 tokens | • Post-call Context: 13,193 tokens"/><circle cx="887.0" cy="99.89822852024409" r="5" fill="#17734b" stroke="white" tabindex="0" data-tip="codex:gpt-6-sol · Request 2 | Cumulative cost: €0.02865700"/>
 <rect x="883.0" y="82.60266666666666" width="8" height="8" fill="white" stroke="#17734b" stroke-width="2" tabindex="0" data-tip="codex:gpt-6-sol · Request 2 · Main context | Post-call context: 13,307 tokens | Previous context: 0 tokens | Net input change: +13,239 tokens | Total input: 13,239 tokens | • System prompt: unreported | • Tool documentation: unreported | • Conversation: unreported | Input billing | • Fresh input: 1,207 tokens | • Cache read: 12,032 tokens | Cache write: 0 tokens | Output: 68 tokens | • Non-reasoning output: 68 tokens | • Reasoning: 0 tokens | • Post-call Context: 13,307 tokens"/>
 </g></svg></div>
-<small>Context includes input plus retained output, using the same rules as the single-model report. Request spacing shows order, not elapsed time. Hover or focus on a mark for values.</small></section>
-<h2 class="section-heading">Responses side by side</h2><p class="muted">Responses are aligned by recorded conversation turn. Different prompts are shown separately.</p>
+</section>
+<h2 class="section-heading">Responses side by side</h2>
 <section class="panel responses"><div class="scroll" role="region" aria-label="Responses side by side" tabindex="0"><table><thead><tr><th scope="col">openai:gpt-5.5-2026-04-23</th><th scope="col">openai:gpt-5.6-luna</th><th scope="col">codex:gpt-6-sol</th></tr></thead>
 <tbody><tr class="prompt"><th colspan="3"><span class="eyebrow">Turn 1</span><span class="prompt-text">Explain the main steps in an agent workflow.</span></th></tr><tr><td>
 
@@ -137,7 +136,7 @@ In short: **goal → context → plan → act → observe → refine → respond
 2. **Plan** the tasks and choose any needed tools.
 3. **Act** by gathering information or making changes.
 4. **Check** the results against the goal and correct mistakes.
-5. **Report** the outcome, including any limitations or next steps.</div></div></td></tr></tbody><tbody><tr class="prompt"><th colspan="3"><span class="eyebrow">Turn 2</span><span class="prompt-text">See the recorded prompt for each model below.</span></th></tr><tr><td>
+5. **Report** the outcome, including any limitations or next steps.</div></div></td></tr></tbody><tbody><tr class="prompt"><th colspan="3"><span class="eyebrow">Turn 2</span><span class="prompt-text">Different prompts</span></th></tr><tr><td>
 <p class="prompt-text"><strong>Prompt</strong><br>How does a tool observation help the agent choose its next action or form its final answer? Please give an example.</p>
 <div class="response"><div class="answer">A tool observation gives the agent **new evidence** from the outside world, such as search results, file contents, API responses, database records, or error messages. The agent uses that observation to decide whether to:
 
@@ -178,9 +177,8 @@ If the observation instead says the weather service is unavailable, the agent mi
 
 For example, an agent searching for a file might observe “file not found.” Instead of claiming it read the file, it would check another location or tell the user it couldn’t find it.</div></div></td></tr></tbody>
 </table></div></section>
-<details class="panel method"><summary>Comparison notes &amp; saved price snapshots</summary><p>These are recorded observations, not a quality ranking. Different histories, tools, reasoning settings, caching, and price snapshots can affect comparisons. Codex usage includes its harness context and CLI startup contributes to elapsed time. Costs are estimated model usage costs, not subscription charges. When a user-role model is present, graph costs and response columns cover only the tested assistant; user-model costs are shown separately and included in the full report. Adaptive user conversations can diverge across runs; elapsed time includes input generation. Detailed tools, compactions, and execution evidence are in each full report.</p>
+<details class="panel method"><summary>Cost details &amp; sources</summary><p>Costs are token-based estimates, not subscription charges. The chart shows assistant costs; user-agent costs are listed separately. Full reports include both.</p><p>Context includes input and retained output. Requests are spaced by order, not time. Elapsed time includes user-agent replies and provider startup. Codex token counts include its harness context. Prompts, histories, tools, and model settings can differ between runs.</p>
 <p><strong>openai:gpt-5.5-2026-04-23</strong> · Simple chat<br>Missing usage: <strong>0</strong> calls · Incomplete pricing: 0 calls.<br>Snapshot: 2026-10-05. 1 USD = 0.87974 EUR · 2026-09-24<br><a href="gpt-5.5/run.json">Saved run evidence</a></p><p><strong>openai:gpt-5.6-luna</strong> · Simple chat<br>Missing usage: <strong>0</strong> calls · Incomplete pricing: 0 calls.<br>Snapshot: 2026-10-05. 1 USD = 0.87974 EUR · 2026-09-24<br><a href="gpt-5.6-luna/run.json">Saved run evidence</a></p><p><strong>codex:gpt-6-sol</strong> · Simple chat<br>Missing usage: <strong>0</strong> calls · Incomplete pricing: 0 calls.<br>Snapshot: 2026-10-05. 1 USD = 0.87974 EUR · 2026-09-24<br><a href="codex-gpt-6-sol/run.json">Saved run evidence</a></p></details>
-<p class="muted"><small>Generated offline from saved run.json and prices.json bundles. No model was invoked.</small></p>
 </main><div id="chart-tip" role="tooltip" hidden></div>
 <script>
 // Text-only tooltips preserve captured content as data, with keyboard access.

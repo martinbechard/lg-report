@@ -15,7 +15,7 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 import pytest
-from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, ToolMessage
+from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 
 from agent_runtime.harness.argument_parser import resolve_live_mode
 from agent_runtime.harness.codex_model import CodexChatModel, parse_result
@@ -68,6 +68,7 @@ directory = Path(args[args.index("--cd") + 1])
 Path(os.environ["CODEX_TEST_CAPTURE"]).write_text(json.dumps({
     "args": args, "prompt": json.loads(sys.stdin.read()), "pid": os.getpid(),
     "instructions": (directory / "instructions.txt").read_text(),
+    "schema": json.loads((directory / "response-schema.json").read_text()) if "--output-schema" in args else None,
 }))
 if os.environ.get("CODEX_TEST_SLEEP"):
     time.sleep(30)
@@ -143,6 +144,24 @@ def test_async_process_and_report_capture(fake_cli, tmp_path):
     assert "An answer" in str(step.response)
 
 
+def test_tool_decision_uses_cli_schema_and_preserves_usage(fake_cli):
+    """The real subprocess boundary receives a schema and returns graph calls."""
+    model, capture = fake_cli
+    wire = events({"input_tokens": 100, "output_tokens": 20})
+    wire[3]["item"]["text"] = json.dumps({"content": "", "tool_calls": [
+        {"name": "read_file", "args": {"path": "/plan.md"}},
+    ]})
+    Path(os.environ["CODEX_TEST_EVENTS"]).write_text(jsonl(wire))
+    answer = model.bind_tools([{"name": "read_file", "description": "Read a virtual file",
+                               "parameters": {"type": "object", "properties": {"path": {"type": "string"}}}}]).invoke("Read the plan")
+    data = json.loads(capture.read_text())
+    assert data["schema"]["additionalProperties"] is False
+    assert data["schema"]["properties"]["tool_calls"]["items"]["anyOf"][0]["properties"]["args"]["properties"]["path"]["type"] == "string"
+    assert "features.shell_tool=false" in data["args"]
+    assert answer.tool_calls[0]["args"] == {"path": "/plan.md"}
+    assert answer.usage_metadata["total_tokens"] == 120
+
+
 @pytest.mark.parametrize("receipt", [None, {}, {"input_tokens": 100}])
 def test_missing_usage_is_unknown(receipt):
     """Partial receipts cannot become complete zero-cost usage records."""
@@ -168,19 +187,15 @@ def test_protocol_failures_do_not_become_answers():
 
 
 def test_unsupported_inputs_fail_before_process_creation(fake_cli):
-    """Do not silently reinterpret tool results, images, forced tools, or stops."""
+    """Reject unsupported images, stops, and required calls without schemas."""
     model, capture = fake_cli
-    for messages in ([ToolMessage(content="tool", tool_call_id="1")],
-                     [AIMessage(content="", tool_calls=[{"id": "1", "name": "x", "args": {}}])]):
-        with pytest.raises(ValueError, match="tool messages"):
-            model.invoke(messages)
     with pytest.raises(TypeError, match="text messages"):
         model.invoke([HumanMessage(content=[{"type": "text", "text": "image"}])])
     with pytest.raises(ValueError, match="stop"):
         model.invoke([HumanMessage("Hi")], stop=["stop"])
-    with pytest.raises(ValueError, match="graph tools"):
+    with pytest.raises(ValueError, match="requires bound tools"):
         model.bind_tools([], tool_choice="required")
-    assert model.bind_tools([]) is model
+    assert model.bind_tools([]).bound is model
     assert not capture.exists()
 
 

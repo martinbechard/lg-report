@@ -95,9 +95,12 @@ protocol and registry; workflows continue to call `build_model` unchanged.
 for the built-in constructors.
 
 OpenAI and Anthropic return their native LangChain models, preserving their tool,
-streaming, and multimodal interfaces. Codex and Copilot inherit `TextOnlyChatModel`
-for history validation, tracing identity, tool restrictions, and inclusive usage
-normalization. Each local adapter still owns its wire format, authentication,
+streaming, and multimodal interfaces. Codex and Copilot inherit `GatewayChatModel`
+for history validation, tracing identity, JSON tool-call translation, and inclusive
+usage normalization. Bound schemas and tool results travel as text; validated
+model decisions become LangChain tool calls executed by the graph. Native CLI
+tools stay disabled, and malformed decisions fail without silent fallback.
+Each local adapter still owns its wire format, authentication,
 and process/session cleanup. Missing usage remains unknown. Pricing stays in the
 shared reporting layer, so single-model and comparison reports use the same
 estimated-cost calculation and saved price snapshots.

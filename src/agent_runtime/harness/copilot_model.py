@@ -1,10 +1,10 @@
-"""Use Copilot's local SDK server as a tool-free request/response model.
+"""Use Copilot's local SDK server as a model gateway for LangGraph.
 
 One background event loop owns SDK connections across synchronous CLI and async
 web callers. Each invocation gets a fresh session: LangGraph remains the owner
 of conversation history. The server is reused while this process runs; shutdown
 stops only SDK-owned children. Local connection configuration is never a report.
-TextOnlyChatModel owns common input/tracing policy; text_result normalizes usage.
+GatewayChatModel owns common input/tracing policy; text_result normalizes usage.
 AI attribution: Generated with AI assistance by Avery Northstar.
 Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
@@ -19,7 +19,7 @@ from pathlib import Path
 
 from langchain_core.messages import BaseMessage
 
-from .text_model import TextOnlyChatModel, text_result
+from .gateway_model import GatewayChatModel, text_result
 
 
 class CopilotServer:
@@ -231,11 +231,11 @@ def close_copilot_servers():
         server.close()
 
 
-class CopilotChatModel(TextOnlyChatModel):
-    """Text-only adapter whose tool binding intentionally disables all tools.
+class CopilotChatModel(GatewayChatModel):
+    """Return model decisions while LangGraph executes bound application tools.
 
-    Graphs may bind their usual tools, but none reach Copilot. Workflows that
-    require tool calls are unsuitable for this request/response provider.
+    Shared JSON translation supports tool history without granting the Copilot
+    server native tools, file access, or ownership of the workflow loop.
     """
 
     provider = "copilot"
@@ -252,11 +252,13 @@ class CopilotChatModel(TextOnlyChatModel):
 
     def _generate(self, messages, stop=None, run_manager=None, **kwargs):
         """Bridge synchronous LangChain callers to the persistent SDK loop."""
-        return self._request(messages, stop, kwargs).result()
+        return self.gateway_result(self._request(messages, stop, kwargs).result(), kwargs)
 
     async def _agenerate(self, messages, stop=None, run_manager=None, **kwargs):
         """Await without blocking the web event loop; cancellation propagates."""
-        return await asyncio.wrap_future(self._request(messages, stop, kwargs))
+        return self.gateway_result(
+            await asyncio.wrap_future(self._request(messages, stop, kwargs)), kwargs
+        )
 
 
 def main():

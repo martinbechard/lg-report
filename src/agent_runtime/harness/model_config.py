@@ -95,7 +95,7 @@ def configured_model(model_name: str | None = None, *, symbolic_model_name: str 
 
     An explicit ``model_name`` overrides LG_MODEL when allowed by
     LG_AVAILABLE_MODELS; otherwise the allowed LG_MODEL is the fallback.
-    Copilot uses a tool-free SDK adapter and the local runtime login. It requires
+    Copilot uses the local runtime login and the shared graph-tool gateway protocol. It requires
     an explicit model ID and does not support an output-token override.
     Codex uses an ephemeral local CLI process per request and the existing Codex
     login; LG_CODEX_CLI optionally selects its executable. Neither local adapter

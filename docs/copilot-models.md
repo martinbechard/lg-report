@@ -85,13 +85,17 @@ disable configuration discovery, custom instructions, skills, file hooks, host G
 operations, and the session store; no plugin, skill, or MCP configuration is supplied.
 The supplied system message replaces Copilot's default instructions; conversation
 history is passed as role-labelled JSON text. This is a text history encoding,
-not a native multi-message model API. There is no streaming or automatic context
+not a native multi-message model API. There is no streaming or CLI-side automatic context
 compaction. The temporary session is disconnected and deleted after each request,
 including failures.
 
-Graph tool bindings are intentionally suppressed, including DeepAgents' default
-tools. A forced tool choice is rejected. The local graph still owns the workflow;
-tool-disabled Copilot never executes its built-in file, shell, or MCP tools.
+Graph tool bindings use the same `GatewayChatModel` JSON protocol as Codex.
+Schemas are included in the instructions; model decisions become LangChain tool
+calls, and tool results return in subsequent history. The adapter checks names,
+required/forced/disabled tool choices, and parallel-call constraints. Malformed
+responses fail visibly. LangGraph owns argument validation, execution, approvals,
+and compaction; Copilot's native file, shell, and MCP tools stay disabled.
+Plain requests without bound tools retain their ordinary text response format.
 
 Reported usage counts are captured when supplied. Missing counts remain unknown.
 Reports retain provider `copilot`. Missing model prices are retrieved from

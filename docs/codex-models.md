@@ -21,8 +21,8 @@ but an unavailable or disallowed model fails instead of falling back. Omit
 `LG_EFFORT` to retain the CLI default. `--static` still selects the scripted model.
 `LG_MAX_TOKENS` is unsupported and must be unset or blank.
 
-`CodexChatModel` and `CopilotChatModel` share `TextOnlyChatModel` for history,
-tracing, tool restrictions, and usage normalization. All providers, including
+`CodexChatModel` and `CopilotChatModel` share `GatewayChatModel` for history,
+tracing, JSON tool decisions, and usage normalization. All providers, including
 native API models, are constructed through the shared `ModelProvider` protocol;
 see the [provider boundary](chat-composition.md#provider-boundary).
 Each synchronous or asynchronous invocation starts `codex exec --json` with an
@@ -33,13 +33,26 @@ The requested model and effort flow into trace capture. CLI events identify the
 selected model through the explicit command argument, not an independently
 reported model identity.
 
-The adapter suppresses graph tool bindings. Native shell, apps, plugins, memory,
-browser, computer, image, skill-search, and hook features are disabled; user
-configuration and project instructions are excluded from the request. The CLI
-uses a read-only sandbox and denies approval requests. A native non-text work
-event invalidates the result. This is for `simple_chat` and other text workflows;
-tool-dependent samples, tool messages, multimodal content, stop sequences, and
-per-invocation overrides are unsupported. It does not stream responses. See the
+Bound graph tool schemas are sent to the model with a shared JSON response
+contract. The model returns either text or tool requests; the adapter converts
+those decisions into LangChain messages. LangGraph validates tool arguments,
+executes tools through its normal approval boundaries, and supplies the results
+on the next request. Tool names and choice constraints are checked by the adapter;
+malformed decisions fail visibly without guessing or falling back to plain text.
+For tools with fixed-property argument schemas, Codex also receives a JSON
+response schema through `--output-schema`, including the actual argument types.
+The model supplies parameters explicitly, including declared defaults. Tools
+with arbitrary-key objects or unresolved schema references use the prompted JSON
+protocol because a closed response schema cannot represent them faithfully.
+This supports tool-dependent workflows such as `context_budget`.
+
+Native shell, apps, plugins, memory, browser, computer, image, skill-search, and
+hook features remain disabled. User configuration and project instructions are
+excluded from the request. The CLI uses a read-only sandbox and denies approval
+requests. Native non-text work invalidates the result: the CLI is only an LLM
+gateway, never the workflow's tool executor. Multimodal content, stop sequences,
+and arbitrary per-invocation overrides remain unsupported. It does not stream
+responses. See the
 [Codex configuration reference](https://developers.openai.com/codex/config-reference/)
 for the native feature and instruction settings.
 
