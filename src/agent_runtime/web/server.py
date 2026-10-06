@@ -97,10 +97,10 @@ def create_app(
             for session in sessions.values():
                 await asyncio.to_thread(session.close)
             sessions.clear()
-            from agent_runtime.harness.copilot_model import close_copilot_servers
+            from agent_runtime.harness.model_providers import close_model_providers
 
-            # All browser sessions share the local Copilot runtime.
-            await asyncio.to_thread(close_copilot_servers)
+            # Shared provider runtimes outlive turns and close after all sessions.
+            await asyncio.to_thread(close_model_providers)
 
     app = FastAPI(title="Sample chat", lifespan=lifespan)
     app.add_middleware(

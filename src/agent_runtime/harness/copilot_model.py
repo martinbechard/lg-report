@@ -4,6 +4,7 @@ One background event loop owns SDK connections across synchronous CLI and async
 web callers. Each invocation gets a fresh session: LangGraph remains the owner
 of conversation history. The server is reused while this process runs; shutdown
 stops only SDK-owned children. Local connection configuration is never a report.
+TextOnlyChatModel owns common input/tracing policy; text_result normalizes usage.
 AI attribution: Generated with AI assistance by Avery Northstar.
 Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
@@ -16,9 +17,9 @@ import socket
 import threading
 from pathlib import Path
 
-from langchain_core.language_models import BaseChatModel
-from langchain_core.messages import AIMessage, BaseMessage
-from langchain_core.outputs import ChatGeneration, ChatResult
+from langchain_core.messages import BaseMessage
+
+from .text_model import TextOnlyChatModel, text_result
 
 
 class CopilotServer:
@@ -182,23 +183,7 @@ class CopilotServer:
                     if all(value is not None for value in counts):
                         receipt[target] = sum(counts)
                 metadata["usage"] = receipt
-            metered = None
-            receipt = metadata.get("usage", {})
-            if "input_tokens" in receipt and "output_tokens" in receipt:
-                metered = {"input_tokens": receipt["input_tokens"],
-                           "output_tokens": receipt["output_tokens"],
-                           "total_tokens": receipt["input_tokens"] + receipt["output_tokens"]}
-                details = {}
-                for source, target in [("cache_read_input_tokens", "cache_read"),
-                                       ("cache_creation_input_tokens", "cache_creation")]:
-                    if source in receipt:
-                        details[target] = receipt[source]
-                if details:
-                    metered["input_token_details"] = details
-            return ChatResult(generations=[ChatGeneration(message=AIMessage(
-                content=response.data.content, response_metadata=metadata,
-                usage_metadata=metered,
-            ))])
+            return text_result(response.data.content, metadata)
         finally:
             unsubscribe()
             # Delete temporary history even on timeout/provider failure. SDK
@@ -246,53 +231,22 @@ def close_copilot_servers():
         server.close()
 
 
-class CopilotChatModel(BaseChatModel):
+class CopilotChatModel(TextOnlyChatModel):
     """Text-only adapter whose tool binding intentionally disables all tools.
 
     Graphs may bind their usual tools, but none reach Copilot. Workflows that
     require tool calls are unsuitable for this request/response provider.
     """
 
-    model_name: str
+    provider = "copilot"
     config_path: str = ".cache/lg-report/copilot.json"
-    reasoning_effort: str | None = None
-    request_timeout: float = 120
-
-    @property
-    def _llm_type(self) -> str:
-        return "copilot"
-
-    def _get_ls_params(self, stop=None, **kwargs):
-        """Keep Copilot accounting separate from direct OpenAI/Anthropic billing."""
-        return {"ls_provider": "copilot", "ls_model_name": self.model_name,
-                "ls_model_type": "chat"}
-
-    def bind_tools(self, tools, *, tool_choice=None, **kwargs):
-        """Suppress graph tool definitions while rejecting forced tool execution."""
-        if tool_choice not in (None, "auto", "none"):
-            raise ValueError("Copilot request/response mode disables tools")
-        return self
 
     def _request(self, messages: list[BaseMessage], stop, kwargs):
         """Encode explicit role history; reject inputs the text SDK cannot honor."""
-        if stop or kwargs:
-            raise ValueError("Copilot adapter does not support stop or invocation overrides")
-        system, history = [], []
-        for message in messages:
-            if not isinstance(message.content, str):
-                raise TypeError("Copilot request/response supports text messages only")
-            if message.type == "system":
-                system.append(message.content)
-            elif message.type in {"human", "ai"} and not getattr(message, "tool_calls", None):
-                history.append({"role": "user" if message.type == "human" else "assistant",
-                                "content": message.content})
-            else:
-                raise ValueError("Copilot request/response does not accept tool messages")
-        instructions = "\n\n".join(system) or "Answer the user's request."
-        instructions += "\nThe prompt is JSON conversation history. Answer its final user turn."
+        instructions, history = self.prepare_history(messages, stop, kwargs)
         server = server_for(self.config_path)
         return server.submit(server.request(
-            self.model_name, instructions, json.dumps(history, ensure_ascii=False),
+            self.model_name, instructions, history,
             self.reasoning_effort, self.request_timeout,
         ))
 

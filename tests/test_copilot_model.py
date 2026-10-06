@@ -14,6 +14,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, ToolMessage
+from langchain_core.outputs import ChatGeneration, ChatResult
 
 from agent_runtime.harness import copilot_model
 from agent_runtime.harness.argument_parser import resolve_live_mode
@@ -190,7 +191,7 @@ def test_sync_async_history_and_binding(isolated, tmp_path):
     """Public invocations preserve role order and do not send bound graph tools."""
     model = copilot_model.CopilotChatModel(model_name="gpt-5.4", config_path=str(tmp_path / "c.json"))
     server = copilot_model.server_for(model.config_path)
-    result = copilot_model.ChatResult(generations=[copilot_model.ChatGeneration(message=AIMessage(content="ok"))])
+    result = ChatResult(generations=[ChatGeneration(message=AIMessage(content="ok"))])
     messages = [SystemMessage(content="system"), HumanMessage(content="one"), AIMessage(content="two"), HumanMessage(content="three")]
     with patch.object(server, "request", AsyncMock(return_value=result)) as request:
         assert model.bind_tools([{"name": "write_file"}]).invoke(messages).content == "ok"
@@ -199,7 +200,7 @@ def test_sync_async_history_and_binding(isolated, tmp_path):
         {"role": "user", "content": "one"}, {"role": "assistant", "content": "two"},
         {"role": "user", "content": "three"},
     ]
-    with pytest.raises(ValueError, match="disables tools"):
+    with pytest.raises(ValueError, match="disables graph tools"):
         model.bind_tools([], tool_choice="required")
     with pytest.raises(ValueError, match="tool messages"):
         model.invoke([ToolMessage(content="tool", tool_call_id="1")])
@@ -211,7 +212,7 @@ def test_simple_chat_graph_with_tool_free_adapter(isolated, tmp_path):
 
     model = copilot_model.CopilotChatModel(model_name="gpt-5.4", config_path=str(tmp_path / "graph.json"))
     server = copilot_model.server_for(model.config_path)
-    result = copilot_model.ChatResult(generations=[copilot_model.ChatGeneration(message=AIMessage(content="Hello"))])
+    result = ChatResult(generations=[ChatGeneration(message=AIMessage(content="Hello"))])
     with patch.object(server, "request", AsyncMock(return_value=result)):
         graph = build_agent({"model": model})
         response = graph.invoke({"messages": [HumanMessage(content="Hello")]})

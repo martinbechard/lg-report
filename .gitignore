@@ -34,6 +34,7 @@ wheels/
 !/reports/quote_request/
 !/reports/edit-with-patched-state/
 !/reports/edit-with-reloaded-state/
+!/reports/model_comparison/
 /reports/*/*
 !/reports/*/report.html
 !/reports/*/report.xlsx
@@ -43,6 +44,14 @@ wheels/
 !/reports/*/excel-data.json
 !/reports/*/context.json
 !/reports/*/edited-summary.txt
+!/reports/model_comparison/gpt-5.5/
+!/reports/model_comparison/gpt-5.6-luna/
+!/reports/model_comparison/codex-gpt-6.1-sol/
+/reports/model_comparison/*/*
+!/reports/model_comparison/*/report.html
+!/reports/model_comparison/*/run.json
+!/reports/model_comparison/*/prices.json
+!/reports/model_comparison/*/spans.jsonl
 !/reports/context_budget/workspace/
 !/reports/context_budget/workspace/plan.md
 !/reports/context_budget/workspace/slug.py

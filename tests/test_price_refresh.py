@@ -171,6 +171,77 @@ def new_openai_page():
     )
 
 
+def test_codex_saved_api_estimate_matches_all_report_projections(tmp_path, monkeypatch):
+    """Offline Codex estimates reuse exact tariffs and preserve cache subsets."""
+    from reporting.compare import comparison_entry
+    from reporting.excel_data import workbook_data
+    from reporting.pricing import Prices, Rate, load_prices, summarize
+    from reporting.render import render
+    from reporting.schema import Usage
+
+    def unexpected_fetch(*args):
+        """A supplied snapshot must not acquire newer tariffs from the network."""
+        pytest.fail("Offline pricing must not fetch")
+
+    monkeypatch.setattr(refresh, "fetch_text", unexpected_fetch)
+    prices = Prices(as_of="2026-10-05", note="Saved rates", models={
+        "openai:chosen": Rate(input="2", output="10", cache_read="0.1"),
+    })
+    run = used_models("codex:chosen")
+    run.steps[0].usage = Usage(input_tokens=100, output_tokens=20, cache_read=40, reasoning=5)
+    refresh.ensure_run_prices(run, prices)
+    assert prices.aliases == {"codex:chosen": "openai:chosen"}
+    saved = tmp_path / "prices.json"
+    saved.write_text(prices.model_dump_json())
+    restored = load_prices(saved)
+    expected = Decimal("0.000324")  # 60 fresh + 40 cached input; 20 inclusive output.
+    assert summarize(run, restored)["known_cost"] == expected
+    assert summarize(run, restored)["unpriced_calls"] == 0
+    assert comparison_entry(run, restored, "run.json")["summary"]["known_cost"] == expected
+    assert workbook_data(run, restored)["expected_usd"] == expected
+    render(run, restored, tmp_path / "report.html")
+    assert run.steps[0].provider == "codex"
+
+
+def test_codex_estimate_honors_overrides_and_unknown_models():
+    """Explicit Codex rates/aliases win and unknown IDs never borrow a neighbor."""
+    from reporting.pricing import Prices, Rate, cost
+
+    prices = Prices(as_of="2026-10-05", note="Custom rates", models={
+        "openai:chosen": Rate(input="2", output="10"),
+        "codex:chosen": Rate(input="1", output="1"),
+    }, aliases={"codex:mapped": "openai:chosen"})
+    run = used_models("codex:chosen", "codex:mapped", "codex:chosen-unknown")
+    refresh.ensure_run_prices(run, prices)
+    assert "codex:chosen" not in prices.aliases
+    assert prices.aliases["codex:mapped"] == "openai:chosen"
+    assert cost(run.steps[0], prices)[0] == Decimal("0.00012")
+    assert cost(run.steps[1], prices)[0] == Decimal("0.0004")
+    assert cost(run.steps[2], prices)[0] is None
+    run.steps[0].usage = None
+    assert cost(run.steps[0], prices)[0] is None
+
+
+def test_codex_automatic_discovery_fetches_exact_openai_basis(tmp_path, monkeypatch):
+    """New Codex models use the existing source parser and daily tariff cache."""
+    from reporting.pricing import summarize
+
+    urls = []
+
+    def fetch(url):
+        """Return the same official page shape used for direct API discovery."""
+        urls.append(url)
+        return new_openai_page()
+
+    monkeypatch.setattr(refresh, "fetch_text", fetch)
+    prices = refresh.get_prices(empty_catalog(tmp_path), cache_dir=tmp_path / "cache")
+    run = used_models("codex:gpt-new-test")
+    refresh.ensure_run_prices(run, prices)
+    assert urls == [refresh.source_url("openai:gpt-new-test")]
+    assert prices.aliases["codex:gpt-new-test"] == "openai:gpt-new-test"
+    assert summarize(run, prices)["unpriced_calls"] == 0
+
+
 def current_anthropic_page():
     """Exercise the current column order and linked name with adjacent prose."""
     return """<table><tr><th>Name</th><th>Input</th><th>Output</th>

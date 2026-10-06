@@ -1,5 +1,6 @@
 """Construct the configured provider model without invoking it.
 
+Provider construction and lifecycle are delegated through ModelProvider.
 Both local-report and Langfuse samples use this factory so changing the tracing
 backend does not also change provider settings. Simulation selection belongs to
 the caller: invalid live configuration must not become a successful offline run.
@@ -13,6 +14,8 @@ Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 import logging
 import os
 from threading import Lock
+
+from .model_providers import get_provider
 
 _logger = logging.getLogger(__name__)
 # Identity resolution happens for both reports and adapters, and can happen in
@@ -30,14 +33,12 @@ def configured_identity(
     provider (deployment names for Azure). Blank means unrestricted. This local
     declaration does not probe provider access or recover from network failures.
     Only an explicitly configured, allowed LG_MODEL can replace a rejected model
-    for API providers. Copilot always requires the exact requested model.
+    for API providers. Copilot and Codex always require the exact requested model.
     """
     values = {**(settings or {}), **os.environ}
     provider = values.get("LG_PROVIDER", "openai").lower()
-    if provider not in {"openai", "anthropic", "copilot"}:
-        raise ValueError("LG_PROVIDER must be openai, anthropic, or copilot")
-    default = {"openai": "gpt-5.6-luna", "anthropic": "claude-sonnet-5",
-               "copilot": ""}[provider]
+    policy = get_provider(provider).policy
+    default = policy.default_model
     fallback = (values.get("LG_MODEL") or "").strip()
     # Resolve the symbolic role once at construction, never on each invocation.
     # File settings support the same names as the shell; shell values win above.
@@ -52,8 +53,8 @@ def configured_identity(
                 f"symbolic model {symbolic_model_name!r}"
             )
     requested = model_name or fallback or default
-    if provider == "copilot" and (not requested or requested == "auto"):
-        raise ValueError("Copilot requires an explicit LG_MODEL code; auto is not supported")
+    if policy.exact_model and (not requested or requested == "auto"):
+        raise ValueError(f"{provider.title()} requires an explicit LG_MODEL code; auto is not supported")
     available = {
         name.strip()
         for name in (values.get("LG_AVAILABLE_MODELS") or "").split(",")
@@ -62,8 +63,8 @@ def configured_identity(
     if not available or requested in available:
         return provider, requested
 
-    if provider == "copilot":
-        raise ValueError(f"Copilot model {requested!r} is not in LG_AVAILABLE_MODELS")
+    if policy.exact_model:
+        raise ValueError(f"{provider.title()} model {requested!r} is not in LG_AVAILABLE_MODELS")
 
     # Never bypass the restriction with an unavailable default, and never pick
     # an arbitrary allowed model: LG_MODEL is the user's fallback decision.
@@ -96,7 +97,10 @@ def configured_model(model_name: str | None = None, *, symbolic_model_name: str 
     LG_AVAILABLE_MODELS; otherwise the allowed LG_MODEL is the fallback.
     Copilot uses a tool-free SDK adapter and the local runtime login. It requires
     an explicit model ID and does not support an output-token override.
-    Read ``LG_PROVIDER`` (``openai``/``anthropic``/``copilot``), ``LG_MODEL``, the matching API key, positive
+    Codex uses an ephemeral local CLI process per request and the existing Codex
+    login; LG_CODEX_CLI optionally selects its executable. Neither local adapter
+    supports LG_MAX_TOKENS. Both require an explicit model with no fallback.
+    Read ``LG_PROVIDER`` (``openai``/``anthropic``/``copilot``/``codex``), ``LG_MODEL``, the matching API key, positive
     LG_MAX_TOKENS, optional LG_EFFORT, and optional OPENAI_BASE_URL from the sample settings overlaid by the process environment.
     No sample writes its .env into global process state. Model access and supported effort values remain the
     provider's responsibility. Missing keys or invalid local settings raise
@@ -118,79 +122,6 @@ def configured_model(model_name: str | None = None, *, symbolic_model_name: str 
     provider, model_id = configured_identity(
         model_name, symbolic_model_name=symbolic_model_name, settings=values
     )
-    if provider == "copilot":
-        # Copilot authenticates through its local runtime, not a vendor API key.
-        # Require explicit model selection and leave startup until first use.
-        try:
-            import copilot  # noqa: F401 - validate the optional install locally
-        except ImportError as exc:
-            raise ValueError("Install Copilot support with uv sync --extra copilot") from exc
-        from .copilot_model import CopilotChatModel
-
-        if values.get("LG_MAX_TOKENS"):
-            raise ValueError("Copilot SDK does not expose LG_MAX_TOKENS; unset it for Copilot")
-        return CopilotChatModel(
-            model_name=model_id,
-            config_path=values.get("LG_COPILOT_CONFIG") or ".cache/lg-report/copilot.json",
-            reasoning_effort=values.get("LG_EFFORT") or None,
-        ), provider, model_id
-    # The validated provider determines which credential is required; an OpenAI
-    # key cannot authenticate an Anthropic request, or vice versa.
-    key_name = "OPENAI_API_KEY" if provider == "openai" else "ANTHROPIC_API_KEY"
-    # Missing, empty, and whitespace-only keys are all unusable. Fail locally
-    # before graph execution rather than discovering this after a paid run starts.
-    if not values.get(key_name, "").strip():
-        raise ValueError(f"Set {key_name} in the environment or .env")
-    # Tool arguments can contain complete replacement documents. Give every
-    # sample a 32K output allowance without requiring a copied environment file.
-    # Explicit settings still let callers match their model or workload limits.
-    max_tokens = int(values.get("LG_MAX_TOKENS", "32768"))
-    # A nonpositive output budget cannot produce an answer. int() above already
-    # rejects nonnumeric settings; this check rejects numeric but unusable values.
-    if max_tokens <= 0:
-        raise ValueError("LG_MAX_TOKENS must be positive")
-    # A nonempty effort value is passed through for SDK/provider validation.
-    # Missing or empty means omit the argument and preserve the provider default,
-    # rather than assuming all model generations share one effort vocabulary.
-    effort_args = (
-        {"reasoning_effort": values["LG_EFFORT"]} if values.get("LG_EFFORT") else {}
-    )
-    # Provider choice selects both the SDK and request shape: OpenAI uses its
-    # standard adapter; Anthropic also receives the explicit five-minute cache
-    # policy. The earlier allowlist guarantees the else branch means Anthropic.
-    # Disable SDK retries so a failed teaching run is visible instead of hiding
-    # additional attempts behind one apparent invocation in the report.
-    if provider == "openai":
-        from langchain_openai import ChatOpenAI
-
-        model_adapter = ChatOpenAI(
-            model=model_id,
-            # Luna's reasoning + function tools require Responses rather than
-            # Chat Completions. Keep the configured effort and real tool calls
-            # instead of silently disabling reasoning to make the call pass.
-            use_responses_api=True,
-            api_key=values[key_name],
-            # Sample .env values stay out of global process state, so pass the
-            # endpoint explicitly as we do the key. This also supports Azure's
-            # OpenAI v1 endpoint. None retains the SDK's normal default/fallback.
-            base_url=values.get("OPENAI_BASE_URL") or None,
-            max_tokens=max_tokens,
-            timeout=60,
-            max_retries=0,
-            **effort_args,
-        )
-    else:
-        from langchain_anthropic import ChatAnthropic
-
-        from agent_runtime.harness.cache_policy import CACHE_TTL
-
-        model_adapter = ChatAnthropic(
-            model_kwargs={"cache_control": {"type": "ephemeral", "ttl": CACHE_TTL}},
-            model_name=model_id,
-            api_key=values[key_name],
-            max_tokens=max_tokens,
-            timeout=60,
-            max_retries=0,
-            **effort_args,
-        )
-    return model_adapter, provider, model_id
+    # The protocol owns transport construction. Model selection and all callers
+    # remain independent of SDK classes and provider-specific option names.
+    return get_provider(provider).create_model(model_id, values), provider, model_id

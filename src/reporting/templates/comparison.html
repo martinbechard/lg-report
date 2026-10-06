@@ -1,0 +1,81 @@
+<!doctype html>
+<!-- Compare answers alongside the single-run chart's shared accounting projection.
+     All recorded content is escaped; charts use only saved prices and receipts.
+     AI attribution: Generated with AI assistance by Ellis Northstar.
+     Copyright (c) 2026 Martin.Bechard@DevConsult.ca -->
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ title }}</title>
+<style>
+:root{color-scheme:light;--ink:#163044;--muted:#526875;--line:#d5e0e6;--accent:#087d7d}*{box-sizing:border-box}
+body{margin:0;background:#f2f6f8;color:var(--ink);font:16px/1.55 system-ui,sans-serif}main{max-width:1500px;margin:auto;padding:32px 24px}
+h1{font-size:clamp(2rem,4vw,3.4rem);line-height:1.1;margin:8px 0 16px}h2{font-size:1.5rem;margin:0 0 8px}h3{font-size:1.08rem;margin:0;overflow-wrap:anywhere}
+a{color:#006d78}a:focus-visible,summary:focus-visible,[tabindex]:focus-visible{outline:3px solid #d07820;outline-offset:3px}
+.eyebrow{color:var(--accent);font-weight:750;letter-spacing:.13em;text-transform:uppercase;font-size:.78rem}.muted,small{color:var(--muted)}
+.panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:22px;margin:24px 0}.intro{max-width:95ch}.chart-grid{display:grid;grid-template-columns:repeat({{ entries|length }},minmax(340px,1fr));gap:20px}.scroll{overflow-x:auto}
+.model{padding:12px 0 16px;border-bottom:1px solid var(--line)}.model p{margin:4px 0}.totals{font-size:1.3rem;font-weight:700;font-variant-numeric:tabular-nums}.totals small{font-size:.8rem;font-weight:400}
+.legend{display:flex;gap:10px 22px;flex-wrap:wrap;font-size:.82rem;margin:16px 0}.swatch{display:inline-block;width:12px;height:12px;margin-right:6px}.line{width:20px;height:0;border-top:3px solid;vertical-align:middle}
+.chart{width:100%;display:block}svg text{font-family:system-ui,sans-serif;font-size:12px}svg .axis-label{font-size:14px}.warning{color:#864409;font-weight:600}.status{font-size:.82rem}
+table{border-collapse:collapse;table-layout:fixed;width:100%;min-width:{{ entries|length * 320 }}px}th,td{vertical-align:top;text-align:left;padding:18px 20px;border-right:1px solid var(--line)}th:last-child,td:last-child{border-right:0}thead{background:#edf5f5}th{font-size:.95rem;overflow-wrap:anywhere}
+.prompt th{border-top:1px solid var(--line);background:#f4f7f9;padding:18px 20px}.prompt .eyebrow{display:block;margin-bottom:4px}.prompt-text,.answer{white-space:pre-wrap;overflow-wrap:anywhere}.answer{font-size:.95rem;line-height:1.7}.response+.response{border-top:1px solid var(--line);margin-top:20px;padding-top:15px}.responses{padding:0;overflow:hidden}.section-heading{margin-top:32px}summary{cursor:pointer;font-weight:650}.method{font-size:.88rem}.method p{max-width:110ch}
+#chart-tip{position:fixed;z-index:10;max-width:340px;background:#163044;color:#fff;padding:12px 16px;border-radius:8px;font-size:13px;white-space:pre-line;pointer-events:none;box-shadow:0 4px 20px #0003}
+@media(max-width:650px){main{padding:24px 12px}.panel{padding:16px}.responses{padding:0}.chart-grid{grid-template-columns:1fr}.answer{font-size:.9rem}}
+@media print{main{padding:0}body{background:white}.scroll{overflow:visible}.chart-grid{grid-template-columns:repeat({{ entries|length }},1fr);gap:10px}table{min-width:0}th,td{padding:10px;font-size:10px}.answer{font-size:10px}.panel{break-inside:avoid}#chart-tip{display:none}}
+</style></head><body><main>
+<div class="eyebrow">LG Report / model comparison</div><h1>{{ title }}</h1>
+<p class="intro">Compare estimated cost, context growth, and what each model actually said. Read responses side by side; open a full report for the execution trace and pricing evidence.</p>
+<section class="panel" aria-labelledby="cost-heading"><h2 id="cost-heading">Cost &amp; context</h2>
+<p class="muted">All models share one graph. Cost stacks are grouped by request; each model has a solid cumulative-cost line and a dashed post-call context line.</p>
+<div class="legend">{% for item in legend %}<span><i class="swatch" style="background:{{ item.color }}"></i>{{ item.label }}</span>{% endfor %}</div>
+<div class="scroll"><div class="chart-grid">{% for entry in entries %}{% set s=entry.summary %}{% set chart=entry.chart %}
+<article><header class="model"><div class="eyebrow" style="color:{{ entry.color }}"><i class="swatch line"></i>Model {{ loop.index }}</div><h3>{{ entry.models|join(', ') or 'No recorded model calls' }}</h3>
+<p class="totals">{% if not s.model_calls %}Not available{% elif s.unpriced_calls %}<span class="warning">Incomplete</span> <small>Known subtotal: ${{ '%.6f'|format(s.known_cost) }}</small>{% else %}${{ '%.6f'|format(s.known_cost) }}{% endif %}{% if entry.prices.exchange and s.model_calls %} <small>€{{ '%.6f'|format(s.known_cost * entry.prices.exchange.rate) }}{% if s.unpriced_calls %} known{% endif %}</small>{% endif %}</p>
+<p class="status">{{ s.model_calls }} calls · {{ '%.2f'|format(s.duration_ms/1000) }} s elapsed · {{ entry.run.status }}{% if entry.run.demo %} · <strong>Simulated</strong>{% endif %}</p>
+{% if entry.report_href %}<a href="{{ entry.report_href }}">Full report ↗</a>{% else %}<a href="{{ entry.source_href }}">Run evidence ↗</a> <small>(HTML report not saved)</small>{% endif %}</header>
+{% if not s.model_calls %}<p>No recorded model calls.</p>{% elif not chart %}<p class="warning">Unknown FX — EUR chart unavailable for this model.</p>{% endif %}
+{% if chart and chart.partial %}<p class="warning">Known costs only; usage or pricing is incomplete.</p>{% endif %}{% if chart and chart.token_missing %}<p class="warning">Unknown context for some requests; gaps are not zero.</p>{% endif %}
+</article>{% endfor %}</div></div>
+{% if shared_chart %}{% set chart=shared_chart %}
+<div class="legend" aria-label="Model series">{% for entry in entries %}<span style="color:{{ entry.color }}"><i class="swatch line"></i>M{{ entry.series_number }} · {{ entry.models|join(', ') or entry.run.title }}</span>{% endfor %}</div>
+<div class="scroll"><svg class="chart" id="comparison-cost-chart" viewBox="0 0 {{ chart.comparison_width }} 405" style="min-width:760px" role="img" aria-label="All models on shared axes: grouped EUR request costs, solid cumulative cost lines, and dashed post-call context lines">
+<text x="12" y="25" class="axis-label">Estimated cost · EUR</text><text x="{{ chart.comparison_width - 12 }}" y="25" text-anchor="end" class="axis-label">Post-call context · tokens</text>
+{% for tick in chart.comparison_ticks %}<line x1="75" x2="{{ chart.comparison_width - 75 }}" y1="{{ tick.y }}" y2="{{ tick.y }}" stroke="#d5e0dc"/><text x="68" y="{{ tick.y + 4 }}" text-anchor="end">{{ '%.5f'|format(tick.cost) }}</text><text x="{{ chart.comparison_width - 68 }}" y="{{ tick.y + 4 }}">{{ '{:,}'.format(tick.tokens) }}</text>{% endfor %}
+{% for group in chart.request_groups %}<text x="{{ group.x }}" y="382" text-anchor="middle" class="axis-label">Request {{ group.number }}</text>{% endfor %}
+{% for entry in entries %}{% if entry.chart %}{% set chart=entry.chart %}{% set model_label=entry.models|join(', ') or entry.run.title %}
+<g data-model-series="{{ entry.series_number }}" aria-label="{{ model_label }}">
+{% for bar in chart.bars %}{% for segment in bar.segments if segment.eur %}<rect x="{{ bar.comparison_x - 9 }}" y="{{ segment.comparison_y }}" width="18" height="{{ segment.comparison_height }}" fill="{{ segment.color }}" tabindex="0" data-tip="{{ model_label }} · {{ bar.label }} · Turn {{ bar.turn }} | {{ segment.label }}: €{{ '%.8f'|format(segment.eur) }} | {{ bar.token_breakdown }}"><title>{{ model_label }} · {{ segment.label }}: €{{ '%.8f'|format(segment.eur) }}</title></rect>{% endfor %}
+<text x="{{ bar.comparison_x }}" y="355" text-anchor="middle" fill="{{ entry.color }}">M{{ entry.series_number }}</text>{% endfor %}
+<polyline class="cumulative-cost-line" points="{{ chart.comparison_cost_line }}" fill="none" stroke="{{ entry.color }}" stroke-width="2.5"/>
+{% for line in chart.comparison_context_lines %}<line class="context-line" x1="{{ line.start[0] }}" y1="{{ line.start[1] }}" x2="{{ line.end[0] }}" y2="{{ line.end[1] }}" stroke="{{ entry.color }}" stroke-width="2" stroke-dasharray="6 4"/>{% endfor %}
+{% for bar in chart.bars %}<circle cx="{{ bar.comparison_x }}" cy="{{ bar.comparison_cost_y }}" r="5" fill="{{ entry.color }}" stroke="white" tabindex="0" data-tip="{{ model_label }} · {{ bar.label }} | Cumulative cost: €{{ '%.8f'|format(bar.cumulative) }}{% if bar.cumulative_partial %} (known costs only){% endif %}"/>
+{% if bar.comparison_context_y is not none %}<rect x="{{ bar.comparison_x - 4 }}" y="{{ bar.comparison_context_y - 4 }}" width="8" height="8" fill="white" stroke="{{ entry.color }}" stroke-width="2" tabindex="0" data-tip="{{ model_label }} · {{ bar.label }} · {{ bar.history_label }} | Post-call context: {{ '{:,}'.format(bar.context_tokens) }} tokens | {{ bar.token_breakdown }}"/>{% endif %}{% endfor %}
+</g>{% endif %}{% endfor %}</svg></div>{% endif %}
+<small>Context includes input plus retained output, using the same rules as the single-model report. Request spacing shows order, not elapsed time. Hover or focus on a mark for values.</small></section>
+<h2 class="section-heading">Responses side by side</h2><p class="muted">{% if by_turn %}Responses are aligned by recorded conversation turn.{% else %}Turn metadata is missing: responses are aligned by request order, not assumed to be equivalent tasks.{% endif %} Different prompts are shown separately.</p>
+<section class="panel responses"><div class="scroll" role="region" aria-label="Responses side by side" tabindex="0"><table><thead><tr>{% for entry in entries %}<th scope="col">{{ entry.models|join(', ') or entry.run.title }}</th>{% endfor %}</tr></thead>
+{% for row in rows %}<tbody><tr class="prompt"><th colspan="{{ entries|length }}"><span class="eyebrow">{{ row.label }}</span><span class="prompt-text">{{ row.prompt or 'See the recorded prompt for each model below.' }}</span></th></tr><tr>{% for cell in row.cells %}<td>
+{% if not row.prompt and cell.calls %}<p class="prompt-text"><strong>Prompt</strong><br>{{ cell.prompt or 'Request content not captured.' }}</p>{% endif %}
+{% for call in cell.calls %}<div class="response">{% if cell.calls|length > 1 %}<p class="muted">Response {{ loop.index }} · {{ call.provider }}:{{ call.model }}</p>{% endif %}{% if call.error %}<p class="warning">{{ call.error }}</p>{% endif %}<div class="answer">{% if call.response %}{{ call.response|response_text }}{% else %}Response content not captured.{% endif %}</div></div>{% else %}<p class="muted">No recorded response for this {{ 'turn' if by_turn else 'request' }}.</p>{% endfor %}</td>{% endfor %}</tr></tbody>{% else %}<tbody><tr><td colspan="{{ entries|length }}">No model responses recorded.</td></tr></tbody>{% endfor %}
+</table></div></section>
+<details class="panel method"><summary>Comparison notes &amp; saved price snapshots</summary><p>These are recorded observations, not a quality ranking. Different histories, tools, reasoning settings, caching, and price snapshots can affect comparisons. Codex usage includes its harness context and CLI startup contributes to elapsed time. Costs are estimated model usage costs, not subscription charges. Detailed tools, compactions, and execution evidence are in each full report.</p>
+{% for entry in entries %}<p><strong>{{ entry.models|join(', ') or entry.run.title }}</strong> · {{ entry.run.title }}<br>Missing usage: <strong>{{ entry.summary.missing_usage }}</strong> calls · Incomplete pricing: {{ entry.summary.unpriced_calls }} calls.<br>Snapshot: {{ entry.prices.as_of }}. {% if entry.prices.exchange %}1 USD = {{ entry.prices.exchange.rate }} EUR · {{ entry.prices.exchange.date }}{% else %}Unknown FX{% endif %}<br><a href="{{ entry.source_href }}">Saved run evidence</a></p>{% endfor %}</details>
+<p class="muted"><small>Generated offline from saved run.json and prices.json bundles. No model was invoked.</small></p>
+</main><div id="chart-tip" role="tooltip" hidden></div>
+<script>
+// Text-only tooltips preserve captured content as data, with keyboard access.
+const tip = document.getElementById('chart-tip');
+document.querySelectorAll('[data-tip]').forEach(mark => {
+  mark.setAttribute('aria-label', mark.dataset.tip.replaceAll(' | ', ', '));
+  const show = () => {
+    tip.textContent = mark.dataset.tip.replaceAll(' | ', '\n');
+    tip.hidden = false;
+    const box = mark.getBoundingClientRect();
+    tip.style.left = Math.max(8, Math.min(box.right + 10, innerWidth - tip.offsetWidth - 8)) + 'px';
+    tip.style.top = Math.max(8, Math.min(box.top, innerHeight - tip.offsetHeight - 8)) + 'px';
+  };
+  mark.addEventListener('pointerenter', show);
+  mark.addEventListener('focus', show);
+  mark.addEventListener('pointerleave', () => { tip.hidden = true; });
+  mark.addEventListener('blur', () => { tip.hidden = true; });
+});
+document.addEventListener('keydown', event => { if (event.key === 'Escape') tip.hidden = true; });
+</script></body></html>

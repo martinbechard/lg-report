@@ -195,7 +195,7 @@ Langfuse project. It has separate setup instructions and adds Langfuse traces al
 The parent/subagent lesson also has matching [local-report](samples/subagent_chat/README.md)
 and [Langfuse](samples/subagent_chat_langfuse/README.md) applications.
 
-Start with the [sample catalog](samples/README.md). The launcher defaults to live, interactive execution when the selected provider has an API key; otherwise it uses scripted responses and the sample’s default client (usually fixed prompts; file approval still asks a human). Use `--demo` to force demo mode even when a key is configured. Configure the root `.env.example` as `.env.local` and pass `--env-file .env.local`; shell variables take precedence. The same root template includes Langfuse settings (see the [sample configuration guide](samples/README.md#model-selection-and-configuration)). `LG_PROVIDER` selects OpenAI (the default), Anthropic, or Copilot. For OpenAI and Anthropic, only that provider’s key enables automatic live mode; selecting Copilot enables live mode using its local login. `--live` explicitly requires real execution; provider errors never fall back to demo mode. `--demo` and `--live` cannot be combined. For fixed prompts against a real model, use `--live --client static`.
+Start with the [sample catalog](samples/README.md). The launcher defaults to live, interactive execution when the selected provider has an API key; otherwise it uses scripted responses and the sample’s default client (usually fixed prompts; file approval still asks a human). Use `--demo` to force demo mode even when a key is configured. Configure the root `.env.example` as `.env.local` and pass `--env-file .env.local`; shell variables take precedence. The same root template includes Langfuse settings (see the [sample configuration guide](samples/README.md#model-selection-and-configuration)). `LG_PROVIDER` selects OpenAI (the default), Anthropic, Copilot, or Codex. For OpenAI and Anthropic, only that provider’s key enables automatic live mode; selecting Copilot or Codex enables live mode using its local login. `--live` explicitly requires real execution; provider errors never fall back to demo mode. `--demo` and `--live` cannot be combined. For fixed prompts against a real model, use `--live --client static`.
 
 ### Run all local samples and export Excel
 
@@ -298,13 +298,59 @@ The samples capture message and tool content by default. `--metadata-only` omits
 ## Report commands
 
 The sample has already produced HTML. Use these commands only to rebuild saved
-outputs; neither command runs the agent:
+outputs; these commands do not run the agent:
 
 ```sh
 uv run lg-report render reports/simple_chat/run.json
 uv run lg-report normalize reports/simple_chat/spans.jsonl --demo
 uv run lg-report render reports/simple_chat/run.json
 ```
+
+### Compare models in one HTML report
+
+Open the saved [live model comparison](reports/model_comparison/report.html) to
+compare GPT-5.5, GPT-5.6-luna, and GPT-6.1-sol through Codex on the same two
+simple-chat prompts. The report uses the single-model cost/context diagram with all models plotted together on
+shared axes, then aligns responses side by side by recorded turn. Full-report
+links retain the execution details and original pricing evidence. Without turn
+metadata, alignment is explicitly by request order; unequal prompts remain visible.
+
+To create new comparable runs, reuse the existing launcher with separate output
+directories. The first two commands invoke paid provider models and require access
+to both models in your configured OpenAI project:
+
+```sh
+LG_MODEL=gpt-5.5 uv run python -m agent_runtime --sample simple_chat --client static --live --env-file .env.local --prices models.json --out reports/model_comparison/gpt-5.5
+LG_MODEL=gpt-5.6-luna uv run python -m agent_runtime --sample simple_chat --client static --live --env-file .env.local --prices models.json --out reports/model_comparison/gpt-5.6-luna
+LG_PROVIDER=codex LG_MODEL=gpt-6.1-sol LG_MAX_TOKENS= LG_EFFORT=low uv run python -m agent_runtime --sample simple_chat --client static --live --env-file .env.local --prices models.json --out reports/model_comparison/codex-gpt-6.1-sol
+```
+
+The third command uses your existing Codex login and installed CLI. See the
+[Codex adapter guide](docs/codex-models.md). Its harness and transport differ
+from the direct OpenAI calls. Estimated cost uses the same model's OpenAI API
+token rates; it does not attempt to allocate subscription charges.
+
+Combine two or more saved runs without invoking a model:
+
+```sh
+uv run lg-report compare reports/model_comparison/gpt-5.5/run.json reports/model_comparison/gpt-5.6-luna/run.json reports/model_comparison/codex-gpt-6.1-sol/run.json --out reports/model_comparison/report.html --title "Simple chat: three-model comparison"
+```
+
+The default output is `./comparison.html`; its parent directory must exist.
+Each input requires an adjacent `prices.json`. Comparison preserves each run's
+saved prices and FX; `--fx-file` is only supported for single-run rendering.
+Missing usage or pricing stays explicit. Mixed-model runs list every model and
+show whole-run totals. Repeated run or span IDs across recordings remain separate.
+Elapsed time includes gaps between turns, so it is not a model-latency benchmark.
+Use matching prompts, workflows, tools, and settings when comparing models;
+the report does not automatically establish equivalent workloads or rank quality.
+
+The architecture adds only a reporting projection and HTML template:
+`reporting.compare` consumes existing `Run`/`Prices` records and calls the shared
+`pricing.summarize` function for each run. Execution, capture, the `run.json`
+schema, single-run HTML, and Excel accounting keep their existing contracts.
+
+### Rebuild a retained run
 
 For a retained run created with `--out reports/first-chat`:
 
@@ -366,7 +412,7 @@ reports keep their original snapshot. To apply a calibrated catalog when
 re-rendering an existing run, supply it explicitly with `--prices models.json`.
 Capacity is the published total, not remaining room after input and output.
 
-`models.json` contains exact `provider:model` keys and USD rates per million tokens. Costs use `Decimal`. Cache categories partition input; reasoning partitions output and uses the output rate. The app's cache TTL is five minutes. Unknown models or unpriced categories produce an incomplete known subtotal. At sample startup, catalog prices are refreshed from official provider pages. Before a new report is saved, any OpenAI, Anthropic, or Copilot model observed in the trace but missing from the snapshot is looked up automatically, including models used by subagents. Discovery validates the exact model identity and published pricing columns; dated IDs require matching provider identity evidence. Successful lookups and source text are saved under `.cache/lg-report/prices` by date and reused that day (`LG_PRICES_CACHE` overrides the directory). Copilot uses GitHub's own published token prices, including long-context tiers, to estimate usage before plan allowances. Discovered rates are included in the run's `prices.json`; the shared `models.json` seed is not rewritten. Demo rates explicitly follow GPT-5.6 Luna. `--prices` or `LG_PRICES` supplies an authoritative file and disables price fetching. Failed lookups retain the last verified prices and dates, with a warning in the report. A missing model whose lookup fails remains explicitly unpriced; failed discoveries retry on a fresh launch. Unsupported providers or page formats require a supplied file. Saved reports keep their exact `prices.json` snapshot, and `render` does not reprice historical runs automatically. Estimates exclude embedding calls, tool fees, infrastructure, taxes, and discounts.
+`models.json` contains exact `provider:model` keys and USD rates per million tokens. Costs use `Decimal`. Cache categories partition input; reasoning partitions output and uses the output rate. The app's cache TTL is five minutes. Unknown models or unpriced categories produce an incomplete known subtotal. At sample startup, catalog prices are refreshed from official provider pages. Before a new report is saved, any OpenAI, Anthropic, or Copilot model observed in the trace but missing from the snapshot is looked up automatically, including models used by subagents. Discovery validates the exact model identity and published pricing columns; dated IDs require matching provider identity evidence. Successful lookups and source text are saved under `.cache/lg-report/prices` by date and reused that day (`LG_PRICES_CACHE` overrides the directory). Copilot uses GitHub's own published token prices, including long-context tiers, to estimate usage before plan allowances. Codex uses the same model's OpenAI API rates as an estimated usage cost; the exact `codex:<model>` to `openai:<model>` alias is saved with the report. Explicit Codex tariffs or aliases take precedence. Discovered rates are included in the run's `prices.json`; the shared `models.json` seed is not rewritten. Demo rates explicitly follow GPT-5.6 Luna. `--prices` or `LG_PRICES` supplies an authoritative file and disables price fetching. Failed lookups retain the last verified prices and dates, with a warning in the report. A missing model whose lookup fails remains explicitly unpriced; failed discoveries retry on a fresh launch. Unsupported providers or page formats require a supplied file. Saved reports keep their exact `prices.json` snapshot, and `render` does not reprice historical runs automatically. Estimates exclude embedding calls, tool fees, infrastructure, taxes, and discounts.
 
 The bundled catalog was verified on **2026-10-05** and includes 26 provider/model entries plus the existing demo tariff:
 

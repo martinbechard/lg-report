@@ -439,14 +439,24 @@ def get_prices(
 
 
 def ensure_run_prices(run: Run, prices: Prices) -> None:
-    """Fill missing observed model tariffs before saving an automatic run snapshot.
+    """Resolve estimated model costs before saving a run's pricing snapshot.
 
     This also catches models used by nested agents or resolved by a provider.
     Existing rates and explicit aliases remain authoritative. Failed identities
     are tried once per Prices lifetime so browser turns do not repeatedly block
     on an unavailable page; a fresh launch can retry. Loaded/supplied snapshots
-    have no lookup cache configured and remain strictly offline.
+    have no lookup cache configured and remain strictly offline. Codex usage is
+    estimated at the same model's OpenAI API tariff, not at subscription charges;
+    save that exact mapping as an alias so HTML and Excel share the same basis.
     """
+    for step in run.steps:
+        if step.kind == "model" and step.provider == "codex" and step.model:
+            key = f"codex:{step.model}"
+            # User-supplied Codex tariffs/aliases win. Only the provider prefix
+            # changes: unknown IDs must not borrow a similarly named tariff.
+            if key not in prices.models and key not in prices.aliases:
+                basis = f"openai:{step.model}"
+                prices.aliases[key] = prices.aliases.get(basis, basis)
     if prices._lookup_cache_dir is None:
         return
     keys = {
@@ -455,7 +465,7 @@ def ensure_run_prices(run: Run, prices: Prices) -> None:
         )
         for step in run.steps
         if step.kind == "model"
-        and step.provider in {"openai", "anthropic", "copilot"}
+        and step.provider in {"openai", "anthropic", "copilot", "codex"}
         and step.model
     }
     missing = keys - prices.models.keys() - prices.refresh_errors.keys()

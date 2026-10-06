@@ -2,6 +2,14 @@
 # Sample results
 
 Open [the report index](index.html) to view HTML or download Excel for every sample.
+The [model comparison](model_comparison/report.html) combines separate live
+GPT-5.5, GPT-5.6-luna, and Codex GPT-6.1-sol runs of the same two simple-chat user prompts.
+Codex uses its local CLI and account; its usage includes harness overhead.
+Its estimated cost uses the corresponding OpenAI API token rates, with the
+exact mapping retained in the saved pricing aliases. Its nested
+model folders retain `run.json`, `prices.json`, and `spans.jsonl`. These are single
+observations with captured answers, not quality rankings or latency benchmarks.
+Regenerate the HTML with the `lg-report compare` command documented in the root README.
 No model credentials, Python installation, or sample execution are needed to inspect
 these saved outputs. The index identifies completed and failed runs from the latest
 batch. The saved reports use real provider models with scripted user requests

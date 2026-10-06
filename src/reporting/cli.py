@@ -1,7 +1,8 @@
 """Rebuild reports from saved evidence without rerunning an agent or billing an LLM.
 
 Normalization and presentation are separate commands because run.json is also
-consumed by the Excel exporter. This CLI preserves saved model tariffs by default;
+consumed by the Excel exporter. Comparison composes independent saved bundles
+without changing their run schema or pricing snapshots. This CLI preserves saved model tariffs by default;
 starting a new sample is the path that refreshes provider prices automatically.
 AI attribution: Generated with AI assistance.
 
@@ -14,6 +15,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
+from reporting.compare import render_comparison
 from reporting.exchange import get_exchange_rate
 from reporting.normalize import normalize
 from reporting.pricing import load_prices
@@ -30,6 +32,7 @@ def main():
     ``normalize`` accepts this application's OTel SDK JSONL, not arbitrary OTLP.
     ``render`` reads a normalized run and adjacent pricing snapshot (or --prices),
     and reads a saved local FX reference unless supplied by file. It prints the output path;
+    ``compare`` reads two or more runs, retaining each adjacent pricing/FX snapshot.
     malformed input, filesystem failures, and other processing errors exit nonzero.
     ValueError/OSError messages are shown for diagnosis; unexpected exception
     payloads are redacted because they can contain provider request details.
@@ -60,6 +63,12 @@ def main():
     command_parser.add_argument(
         "--out", type=Path, help="Output HTML (default: report.html beside input)"
     )
+    command_parser = commands.add_parser(
+        "compare", help="Compare saved runs using each run's adjacent prices.json"
+    )
+    command_parser.add_argument("runs", type=Path, nargs="+", help="Two or more run.json files")
+    command_parser.add_argument("--title", default="Model comparison")
+    command_parser.add_argument("--out", type=Path, default=Path("comparison.html"))
     command_parser = commands.add_parser("normalize")
     command_parser.add_argument(
         "spans",
@@ -74,6 +83,8 @@ def main():
         "--out", type=Path, help="Output JSON (default: run.json beside input)"
     )
     args = parser.parse_args()
+    if args.command == "compare" and args.fx_file:
+        parser.error("compare uses each run's saved FX snapshot; --fx-file applies to render")
     # A supplied input keeps its derived output beside the same run's evidence.
     # With no arguments both commands operate in the working directory.
     if args.out is None:
@@ -84,6 +95,12 @@ def main():
         )
     load_dotenv(args.env_file, override=False)
     try:
+        # Comparison composes existing bundles rather than mutating one Run or
+        # replacing its historical pricing/FX with another run's snapshot.
+        if args.command == "compare":
+            render_comparison(args.runs, args.out, title=args.title)
+            print(args.out.resolve())
+            return
         exchange = None
         exchange_error = None
         # Normalization only restructures trace evidence and needs no exchange

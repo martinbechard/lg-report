@@ -61,6 +61,24 @@ requests arriving over HTTP and retains the graph, checkpoint, and pending
 interactions. Switching samples creates fresh models and conversation state,
 closes the old session's resources, and resets the browser prompter.
 
+### Provider boundary
+
+`model_config` resolves identity and delegates construction to `ModelProvider`
+(in `harness/model_providers.py`). The same registry supplies default models,
+credential detection, exact-selection rules, output-limit support, and shared
+runtime shutdown for terminal and web entry points. Add a provider through this
+protocol and registry; workflows continue to call `build_model` unchanged.
+`RegisteredProvider` supplies common credential, token-limit, and effort handling
+for the built-in constructors.
+
+OpenAI and Anthropic return their native LangChain models, preserving their tool,
+streaming, and multimodal interfaces. Codex and Copilot inherit `TextOnlyChatModel`
+for history validation, tracing identity, tool restrictions, and inclusive usage
+normalization. Each local adapter still owns its wire format, authentication,
+and process/session cleanup. Missing usage remains unknown. Pricing stays in the
+shared reporting layer, so single-model and comparison reports use the same
+estimated-cost calculation and saved price snapshots.
+
 ## Shared execution
 
 `SampleCatalog.create_run()` constructs workflows and models for both interfaces.

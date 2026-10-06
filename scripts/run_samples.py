@@ -154,6 +154,11 @@ def write_index(output, results, *, simulated=False):
         else "Real provider models; scripted requests and file approvals. Quote clarification uses terminal answers."
     )
     rows = []
+    # Comparison is generated separately from independent model runs. Keep it
+    # discoverable when present without implying this batch regenerated it.
+    if (output / "model_comparison/report.html").is_file():
+        rows.append('<li>Saved model comparison — '
+                    '<a href="model_comparison/report.html">HTML</a> (separate runs)</li>')
     for name, ok in results:
         links = (
             (

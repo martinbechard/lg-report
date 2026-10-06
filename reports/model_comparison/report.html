@@ -1,0 +1,193 @@
+<!doctype html>
+<!-- Compare answers alongside the single-run chart's shared accounting projection.
+     All recorded content is escaped; charts use only saved prices and receipts.
+     AI attribution: Generated with AI assistance by Ellis Northstar.
+     Copyright (c) 2026 Martin.Bechard@DevConsult.ca -->
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Three-model comparison</title>
+<style>
+:root{color-scheme:light;--ink:#163044;--muted:#526875;--line:#d5e0e6;--accent:#087d7d}*{box-sizing:border-box}
+body{margin:0;background:#f2f6f8;color:var(--ink);font:16px/1.55 system-ui,sans-serif}main{max-width:1500px;margin:auto;padding:32px 24px}
+h1{font-size:clamp(2rem,4vw,3.4rem);line-height:1.1;margin:8px 0 16px}h2{font-size:1.5rem;margin:0 0 8px}h3{font-size:1.08rem;margin:0;overflow-wrap:anywhere}
+a{color:#006d78}a:focus-visible,summary:focus-visible,[tabindex]:focus-visible{outline:3px solid #d07820;outline-offset:3px}
+.eyebrow{color:var(--accent);font-weight:750;letter-spacing:.13em;text-transform:uppercase;font-size:.78rem}.muted,small{color:var(--muted)}
+.panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:22px;margin:24px 0}.intro{max-width:95ch}.chart-grid{display:grid;grid-template-columns:repeat(3,minmax(340px,1fr));gap:20px}.scroll{overflow-x:auto}
+.model{padding:12px 0 16px;border-bottom:1px solid var(--line)}.model p{margin:4px 0}.totals{font-size:1.3rem;font-weight:700;font-variant-numeric:tabular-nums}.totals small{font-size:.8rem;font-weight:400}
+.legend{display:flex;gap:10px 22px;flex-wrap:wrap;font-size:.82rem;margin:16px 0}.swatch{display:inline-block;width:12px;height:12px;margin-right:6px}.line{width:20px;height:0;border-top:3px solid;vertical-align:middle}
+.chart{width:100%;display:block}svg text{font-family:system-ui,sans-serif;font-size:12px}svg .axis-label{font-size:14px}.warning{color:#864409;font-weight:600}.status{font-size:.82rem}
+table{border-collapse:collapse;table-layout:fixed;width:100%;min-width:960px}th,td{vertical-align:top;text-align:left;padding:18px 20px;border-right:1px solid var(--line)}th:last-child,td:last-child{border-right:0}thead{background:#edf5f5}th{font-size:.95rem;overflow-wrap:anywhere}
+.prompt th{border-top:1px solid var(--line);background:#f4f7f9;padding:18px 20px}.prompt .eyebrow{display:block;margin-bottom:4px}.prompt-text,.answer{white-space:pre-wrap;overflow-wrap:anywhere}.answer{font-size:.95rem;line-height:1.7}.response+.response{border-top:1px solid var(--line);margin-top:20px;padding-top:15px}.responses{padding:0;overflow:hidden}.section-heading{margin-top:32px}summary{cursor:pointer;font-weight:650}.method{font-size:.88rem}.method p{max-width:110ch}
+#chart-tip{position:fixed;z-index:10;max-width:340px;background:#163044;color:#fff;padding:12px 16px;border-radius:8px;font-size:13px;white-space:pre-line;pointer-events:none;box-shadow:0 4px 20px #0003}
+@media(max-width:650px){main{padding:24px 12px}.panel{padding:16px}.responses{padding:0}.chart-grid{grid-template-columns:1fr}.answer{font-size:.9rem}}
+@media print{main{padding:0}body{background:white}.scroll{overflow:visible}.chart-grid{grid-template-columns:repeat(3,1fr);gap:10px}table{min-width:0}th,td{padding:10px;font-size:10px}.answer{font-size:10px}.panel{break-inside:avoid}#chart-tip{display:none}}
+</style></head><body><main>
+<div class="eyebrow">LG Report / model comparison</div><h1>Three-model comparison</h1>
+<p class="intro">Compare estimated cost, context growth, and what each model actually said. Read responses side by side; open a full report for the execution trace and pricing evidence.</p>
+<section class="panel" aria-labelledby="cost-heading"><h2 id="cost-heading">Cost &amp; context</h2>
+<p class="muted">All models share one graph. Cost stacks are grouped by request; each model has a solid cumulative-cost line and a dashed post-call context line.</p>
+<div class="legend"><span><i class="swatch" style="background:#2458a6"></i>Fresh input</span><span><i class="swatch" style="background:#35a6a0"></i>Cache read</span><span><i class="swatch" style="background:#658d35"></i>Output · non-reasoning</span><span><i class="swatch" style="background:#dc7952"></i>Cache-write premium</span></div>
+<div class="scroll"><div class="chart-grid">
+<article><header class="model"><div class="eyebrow" style="color:#2458a6"><i class="swatch line"></i>Model 1</div><h3>openai:gpt-5.5-2026-04-23</h3>
+<p class="totals">$0.024883 <small>€0.021891</small></p>
+<p class="status">2 calls · 7.99 s elapsed · ok</p>
+<a href="gpt-5.5/report.html">Full report ↗</a></header>
+
+
+</article>
+<article><header class="model"><div class="eyebrow" style="color:#9c3f75"><i class="swatch line"></i>Model 2</div><h3>openai:gpt-5.6-luna</h3>
+<p class="totals">$0.000928 <small>€0.000817</small></p>
+<p class="status">2 calls · 5.01 s elapsed · ok</p>
+<a href="gpt-5.6-luna/report.html">Full report ↗</a></header>
+
+
+</article>
+<article><header class="model"><div class="eyebrow" style="color:#17734b"><i class="swatch line"></i>Model 3</div><h3>codex:gpt-6.1-sol</h3>
+<p class="totals">$0.054878 <small>€0.048278</small></p>
+<p class="status">2 calls · 16.61 s elapsed · ok</p>
+<a href="codex-gpt-6.1-sol/report.html">Full report ↗</a></header>
+
+
+</article></div></div>
+
+<div class="legend" aria-label="Model series"><span style="color:#2458a6"><i class="swatch line"></i>M1 · openai:gpt-5.5-2026-04-23</span><span style="color:#9c3f75"><i class="swatch line"></i>M2 · openai:gpt-5.6-luna</span><span style="color:#17734b"><i class="swatch line"></i>M3 · codex:gpt-6.1-sol</span></div>
+<div class="scroll"><svg class="chart" id="comparison-cost-chart" viewBox="0 0 1000 405" style="min-width:760px" role="img" aria-label="All models on shared axes: grouped EUR request costs, solid cumulative cost lines, and dashed post-call context lines">
+<text x="12" y="25" class="axis-label">Estimated cost · EUR</text><text x="988" y="25" text-anchor="end" class="axis-label">Post-call context · tokens</text>
+<line x1="75" x2="925" y1="335" y2="335" stroke="#d5e0dc"/><text x="68" y="339" text-anchor="end">0.00000</text><text x="932" y="339">0</text><line x1="75" x2="925" y1="265" y2="265" stroke="#d5e0dc"/><text x="68" y="269" text-anchor="end">0.01388</text><text x="932" y="269">3,750</text><line x1="75" x2="925" y1="195" y2="195" stroke="#d5e0dc"/><text x="68" y="199" text-anchor="end">0.02776</text><text x="932" y="199">7,500</text><line x1="75" x2="925" y1="125" y2="125" stroke="#d5e0dc"/><text x="68" y="129" text-anchor="end">0.04164</text><text x="932" y="129">11,250</text><line x1="75" x2="925" y1="55" y2="55" stroke="#d5e0dc"/><text x="68" y="59" text-anchor="end">0.05552</text><text x="932" y="59">15,000</text>
+<text x="139.0" y="382" text-anchor="middle" class="axis-label">Request 1</text><text x="861.0" y="382" text-anchor="middle" class="axis-label">Request 2</text>
+
+<g data-model-series="1" aria-label="openai:gpt-5.5-2026-04-23">
+<rect x="104.0" y="290.6549943986424" width="18" height="44.34500560135764" fill="#2458a6" tabindex="0" data-tip="openai:gpt-5.5-2026-04-23 · Request 1 · Turn 1 | Fresh input: €0.00879300 | Previous context: 0 tokens | Net input change: +1,999 tokens | Total input: 1,999 tokens | • System prompt: unreported | • Tool documentation: unreported | • Conversation: unreported | Input billing | • Fresh input: 1,999 tokens | • Cache read: 0 tokens | Cache write: 0 tokens | Output: 221 tokens | • Non-reasoning output: 221 tokens | • Reasoning: 0 tokens | • Post-call Context: 2,220 tokens"><title>openai:gpt-5.5-2026-04-23 · Fresh input: €0.00879300</title></rect><rect x="104.0" y="261.2395479617238" width="18" height="29.415446436918575" fill="#658d35" tabindex="0" data-tip="openai:gpt-5.5-2026-04-23 · Request 1 · Turn 1 | Output · non-reasoning: €0.00583268 | Previous context: 0 tokens | Net input change: +1,999 tokens | Total input: 1,999 tokens | • System prompt: unreported | • Tool documentation: unreported | • Conversation: unreported | Input billing | • Fresh input: 1,999 tokens | • Cache read: 0 tokens | Cache write: 0 tokens | Output: 221 tokens | • Non-reasoning output: 221 tokens | • Reasoning: 0 tokens | • Post-call Context: 2,220 tokens"><title>openai:gpt-5.5-2026-04-23 · Output · non-reasoning: €0.00583268</title></rect>
+<text x="113.0" y="355" text-anchor="middle" fill="#2458a6">M1</text><rect x="826.0" y="319.47148378141554" width="18" height="15.528516218584464" fill="#2458a6" tabindex="0" data-tip="openai:gpt-5.5-2026-04-23 · Request 2 · Turn 2 | Fresh input: €0.00307909 | Previous context: 0 tokens | Net input change: +2,236 tokens | Total input: 2,236 tokens | • System prompt: unreported | • Tool documentation: unreported | • Conversation: unreported | Input billing | • Fresh input: 700 tokens | • Cache read: 1,536 tokens | Cache write: 0 tokens | Output: 133 tokens | • Non-reasoning output: 133 tokens | • Reasoning: 0 tokens | • Post-call Context: 2,369 tokens"><title>openai:gpt-5.5-2026-04-23 · Fresh input: €0.00307909</title></rect><rect x="826.0" y="316.06408365116613" width="18" height="3.4074001302493913" fill="#35a6a0" tabindex="0" data-tip="openai:gpt-5.5-2026-04-23 · Request 2 · Turn 2 | Cache read: €0.00067564 | Previous context: 0 tokens | Net input change: +2,236 tokens | Total input: 2,236 tokens | • System prompt: unreported | • Tool documentation: unreported | • Conversation: unreported | Input billing | • Fresh input: 700 tokens | • Cache read: 1,536 tokens | Cache write: 0 tokens | Output: 133 tokens | • Non-reasoning output: 133 tokens | • Reasoning: 0 tokens | • Post-call Context: 2,369 tokens"><title>openai:gpt-5.5-2026-04-23 · Cache read: €0.00067564</title></rect><rect x="826.0" y="298.36157516197983" width="18" height="17.702508489186293" fill="#658d35" tabindex="0" data-tip="openai:gpt-5.5-2026-04-23 · Request 2 · Turn 2 | Output · non-reasoning: €0.00351016 | Previous context: 0 tokens | Net input change: +2,236 tokens | Total input: 2,236 tokens | • System prompt: unreported | • Tool documentation: unreported | • Conversation: unreported | Input billing | • Fresh input: 700 tokens | • Cache read: 1,536 tokens | Cache write: 0 tokens | Output: 133 tokens | • Non-reasoning output: 133 tokens | • Reasoning: 0 tokens | • Post-call Context: 2,369 tokens"><title>openai:gpt-5.5-2026-04-23 · Output · non-reasoning: €0.00351016</title></rect>
+<text x="835.0" y="355" text-anchor="middle" fill="#2458a6">M1</text>
+<polyline class="cumulative-cost-line" points="113.0,261.2395479617238 835.0,224.60112312370364" fill="none" stroke="#2458a6" stroke-width="2.5"/>
+
+<circle cx="113.0" cy="261.2395479617238" r="5" fill="#2458a6" stroke="white" tabindex="0" data-tip="openai:gpt-5.5-2026-04-23 · Request 1 | Cumulative cost: €0.01462568"/>
+<rect x="109.0" y="289.56" width="8" height="8" fill="white" stroke="#2458a6" stroke-width="2" tabindex="0" data-tip="openai:gpt-5.5-2026-04-23 · Request 1 · Main context | Post-call context: 2,220 tokens | Previous context: 0 tokens | Net input change: +1,999 tokens | Total input: 1,999 tokens | • System prompt: unreported | • Tool documentation: unreported | • Conversation: unreported | Input billing | • Fresh input: 1,999 tokens | • Cache read: 0 tokens | Cache write: 0 tokens | Output: 221 tokens | • Non-reasoning output: 221 tokens | • Reasoning: 0 tokens | • Post-call Context: 2,220 tokens"/><circle cx="835.0" cy="224.60112312370364" r="5" fill="#2458a6" stroke="white" tabindex="0" data-tip="openai:gpt-5.5-2026-04-23 · Request 2 | Cumulative cost: €0.02189057"/>
+<rect x="831.0" y="286.77866666666665" width="8" height="8" fill="white" stroke="#2458a6" stroke-width="2" tabindex="0" data-tip="openai:gpt-5.5-2026-04-23 · Request 2 · Main context | Post-call context: 2,369 tokens | Previous context: 0 tokens | Net input change: +2,236 tokens | Total input: 2,236 tokens | • System prompt: unreported | • Tool documentation: unreported | • Conversation: unreported | Input billing | • Fresh input: 700 tokens | • Cache read: 1,536 tokens | Cache write: 0 tokens | Output: 133 tokens | • Non-reasoning output: 133 tokens | • Reasoning: 0 tokens | • Post-call Context: 2,369 tokens"/>
+</g>
+<g data-model-series="2" aria-label="openai:gpt-5.6-luna">
+<rect x="130.0" y="333.2261997759457" width="18" height="1.7738002240543054" fill="#2458a6" tabindex="0" data-tip="openai:gpt-5.6-luna · Request 1 · Turn 1 | Fresh input: €0.00035172 | Previous context: 0 tokens | Net input change: +1,999 tokens | Total input: 1,999 tokens | • System prompt: unreported | • Tool documentation: unreported | • Conversation: unreported | Input billing | • Fresh input: 1,999 tokens | • Cache read: 0 tokens | Cache write: 1,996 tokens | Output: 159 tokens | • Non-reasoning output: 159 tokens | • Reasoning: 0 tokens | • Post-call Context: 2,158 tokens"><title>openai:gpt-5.6-luna · Fresh input: €0.00035172</title></rect><rect x="130.0" y="332.78341522777004" width="18" height="0.442784548175637" fill="#dc7952" tabindex="0" data-tip="openai:gpt-5.6-luna · Request 1 · Turn 1 | Cache-write premium: €0.00008780 | Previous context: 0 tokens | Net input change: +1,999 tokens | Total input: 1,999 tokens | • System prompt: unreported | • Tool documentation: unreported | • Conversation: unreported | Input billing | • Fresh input: 1,999 tokens | • Cache read: 0 tokens | Cache write: 1,996 tokens | Output: 159 tokens | • Non-reasoning output: 159 tokens | • Reasoning: 0 tokens | • Post-call Context: 2,158 tokens"><title>openai:gpt-5.6-luna · Cache-write premium: €0.00008780</title></rect><rect x="130.0" y="331.9368892579112" width="18" height="0.8465259698588331" fill="#658d35" tabindex="0" data-tip="openai:gpt-5.6-luna · Request 1 · Turn 1 | Output · non-reasoning: €0.00016785 | Previous context: 0 tokens | Net input change: +1,999 tokens | Total input: 1,999 tokens | • System prompt: unreported | • Tool documentation: unreported | • Conversation: unreported | Input billing | • Fresh input: 1,999 tokens | • Cache read: 0 tokens | Cache write: 1,996 tokens | Output: 159 tokens | • Non-reasoning output: 159 tokens | • Reasoning: 0 tokens | • Post-call Context: 2,158 tokens"><title>openai:gpt-5.6-luna · Output · non-reasoning: €0.00016785</title></rect>
+<text x="139.0" y="355" text-anchor="middle" fill="#9c3f75">M2</text><rect x="852.0" y="334.8420528064624" width="18" height="0.15794719353760198" fill="#2458a6" tabindex="0" data-tip="openai:gpt-5.6-luna · Request 2 · Turn 2 | Fresh input: €0.00003132 | Previous context: 0 tokens | Net input change: +2,174 tokens | Total input: 2,174 tokens | • System prompt: unreported | • Tool documentation: unreported | • Conversation: unreported | Input billing | • Fresh input: 178 tokens | • Cache read: 1,996 tokens | Cache write: 175 tokens | Output: 128 tokens | • Non-reasoning output: 128 tokens | • Reasoning: 0 tokens | • Post-call Context: 2,302 tokens"><title>openai:gpt-5.6-luna · Fresh input: €0.00003132</title></rect><rect x="852.0" y="334.66493898719216" width="18" height="0.1771138192702548" fill="#35a6a0" tabindex="0" data-tip="openai:gpt-5.6-luna · Request 2 · Turn 2 | Cache read: €0.00003512 | Previous context: 0 tokens | Net input change: +2,174 tokens | Total input: 2,174 tokens | • System prompt: unreported | • Tool documentation: unreported | • Conversation: unreported | Input billing | • Fresh input: 178 tokens | • Cache read: 1,996 tokens | Cache write: 175 tokens | Output: 128 tokens | • Non-reasoning output: 128 tokens | • Reasoning: 0 tokens | • Post-call Context: 2,302 tokens"><title>openai:gpt-5.6-luna · Cache read: €0.00003512</title></rect><rect x="852.0" y="334.6261176966457" width="18" height="0.03882129054646116" fill="#dc7952" tabindex="0" data-tip="openai:gpt-5.6-luna · Request 2 · Turn 2 | Cache-write premium: €0.00000770 | Previous context: 0 tokens | Net input change: +2,174 tokens | Total input: 2,174 tokens | • System prompt: unreported | • Tool documentation: unreported | • Conversation: unreported | Input billing | • Fresh input: 178 tokens | • Cache read: 1,996 tokens | Cache write: 175 tokens | Output: 128 tokens | • Non-reasoning output: 128 tokens | • Reasoning: 0 tokens | • Post-call Context: 2,302 tokens"><title>openai:gpt-5.6-luna · Cache-write premium: €0.00000770</title></rect><rect x="852.0" y="333.9446376705958" width="18" height="0.6814800260498782" fill="#658d35" tabindex="0" data-tip="openai:gpt-5.6-luna · Request 2 · Turn 2 | Output · non-reasoning: €0.00013513 | Previous context: 0 tokens | Net input change: +2,174 tokens | Total input: 2,174 tokens | • System prompt: unreported | • Tool documentation: unreported | • Conversation: unreported | Input billing | • Fresh input: 178 tokens | • Cache read: 1,996 tokens | Cache write: 175 tokens | Output: 128 tokens | • Non-reasoning output: 128 tokens | • Reasoning: 0 tokens | • Post-call Context: 2,302 tokens"><title>openai:gpt-5.6-luna · Output · non-reasoning: €0.00013513</title></rect>
+<text x="861.0" y="355" text-anchor="middle" fill="#9c3f75">M2</text>
+<polyline class="cumulative-cost-line" points="139.0,331.9368892579112 861.0,330.881526928507" fill="none" stroke="#9c3f75" stroke-width="2.5"/>
+
+<circle cx="139.0" cy="331.9368892579112" r="5" fill="#9c3f75" stroke="white" tabindex="0" data-tip="openai:gpt-5.6-luna · Request 1 | Cumulative cost: €0.00060737"/>
+<rect x="135.0" y="290.71733333333333" width="8" height="8" fill="white" stroke="#9c3f75" stroke-width="2" tabindex="0" data-tip="openai:gpt-5.6-luna · Request 1 · Main context | Post-call context: 2,158 tokens | Previous context: 0 tokens | Net input change: +1,999 tokens | Total input: 1,999 tokens | • System prompt: unreported | • Tool documentation: unreported | • Conversation: unreported | Input billing | • Fresh input: 1,999 tokens | • Cache read: 0 tokens | Cache write: 1,996 tokens | Output: 159 tokens | • Non-reasoning output: 159 tokens | • Reasoning: 0 tokens | • Post-call Context: 2,158 tokens"/><circle cx="861.0" cy="330.881526928507" r="5" fill="#9c3f75" stroke="white" tabindex="0" data-tip="openai:gpt-5.6-luna · Request 2 | Cumulative cost: €0.00081664"/>
+<rect x="857.0" y="288.02933333333334" width="8" height="8" fill="white" stroke="#9c3f75" stroke-width="2" tabindex="0" data-tip="openai:gpt-5.6-luna · Request 2 · Main context | Post-call context: 2,302 tokens | Previous context: 0 tokens | Net input change: +2,174 tokens | Total input: 2,174 tokens | • System prompt: unreported | • Tool documentation: unreported | • Conversation: unreported | Input billing | • Fresh input: 178 tokens | • Cache read: 1,996 tokens | Cache write: 175 tokens | Output: 128 tokens | • Non-reasoning output: 128 tokens | • Reasoning: 0 tokens | • Post-call Context: 2,302 tokens"/>
+</g>
+<g data-model-series="3" aria-label="codex:gpt-6.1-sol">
+<rect x="156.0" y="218.64260961468682" width="18" height="116.3573903853132" fill="#2458a6" tabindex="0" data-tip="codex:gpt-6.1-sol · Request 1 · Turn 1 | Fresh input: €0.02307206 | Previous context: 0 tokens | Net input change: +13,113 tokens | Total input: 13,113 tokens | • System prompt: unreported | • Tool documentation: unreported | • Conversation: unreported | Input billing | • Fresh input: 13,113 tokens | • Cache read: 0 tokens | Cache write: 0 tokens | Output: 132 tokens | • Non-reasoning output: 132 tokens | • Reasoning: 0 tokens | • Post-call Context: 13,245 tokens"><title>codex:gpt-6.1-sol · Fresh input: €0.02307206</title></rect><rect x="156.0" y="212.78614064082066" width="18" height="5.856468973866141" fill="#658d35" tabindex="0" data-tip="codex:gpt-6.1-sol · Request 1 · Turn 1 | Output · non-reasoning: €0.00116126 | Previous context: 0 tokens | Net input change: +13,113 tokens | Total input: 13,113 tokens | • System prompt: unreported | • Tool documentation: unreported | • Conversation: unreported | Input billing | • Fresh input: 13,113 tokens | • Cache read: 0 tokens | Cache write: 0 tokens | Output: 132 tokens | • Non-reasoning output: 132 tokens | • Reasoning: 0 tokens | • Post-call Context: 13,245 tokens"><title>codex:gpt-6.1-sol · Output · non-reasoning: €0.00116126</title></rect>
+<text x="165.0" y="355" text-anchor="middle" fill="#17734b">M3</text><rect x="878.0" y="217.19623924689864" width="18" height="117.80376075310134" fill="#2458a6" tabindex="0" data-tip="codex:gpt-6.1-sol · Request 2 · Turn 2 | Fresh input: €0.02335886 | Previous context: 0 tokens | Net input change: +13,276 tokens | Total input: 13,276 tokens | • System prompt: unreported | • Tool documentation: unreported | • Conversation: unreported | Input billing | • Fresh input: 13,276 tokens | • Cache read: 0 tokens | Cache write: 0 tokens | Output: 78 tokens | • Non-reasoning output: 78 tokens | • Reasoning: 0 tokens | • Post-call Context: 13,354 tokens"><title>codex:gpt-6.1-sol · Fresh input: €0.02335886</title></rect><rect x="878.0" y="213.73559848961412" width="18" height="3.460640757284538" fill="#658d35" tabindex="0" data-tip="codex:gpt-6.1-sol · Request 2 · Turn 2 | Output · non-reasoning: €0.00068620 | Previous context: 0 tokens | Net input change: +13,276 tokens | Total input: 13,276 tokens | • System prompt: unreported | • Tool documentation: unreported | • Conversation: unreported | Input billing | • Fresh input: 13,276 tokens | • Cache read: 0 tokens | Cache write: 0 tokens | Output: 78 tokens | • Non-reasoning output: 78 tokens | • Reasoning: 0 tokens | • Post-call Context: 13,354 tokens"><title>codex:gpt-6.1-sol · Output · non-reasoning: €0.00068620</title></rect>
+<text x="887.0" y="355" text-anchor="middle" fill="#17734b">M3</text>
+<polyline class="cumulative-cost-line" points="165.0,212.78614064082066 887.0,91.52173913043478" fill="none" stroke="#17734b" stroke-width="2.5"/>
+
+<circle cx="165.0" cy="212.78614064082066" r="5" fill="#17734b" stroke="white" tabindex="0" data-tip="codex:gpt-6.1-sol · Request 1 | Cumulative cost: €0.02423332"/>
+<rect x="161.0" y="83.75999999999999" width="8" height="8" fill="white" stroke="#17734b" stroke-width="2" tabindex="0" data-tip="codex:gpt-6.1-sol · Request 1 · Main context | Post-call context: 13,245 tokens | Previous context: 0 tokens | Net input change: +13,113 tokens | Total input: 13,113 tokens | • System prompt: unreported | • Tool documentation: unreported | • Conversation: unreported | Input billing | • Fresh input: 13,113 tokens | • Cache read: 0 tokens | Cache write: 0 tokens | Output: 132 tokens | • Non-reasoning output: 132 tokens | • Reasoning: 0 tokens | • Post-call Context: 13,245 tokens"/><circle cx="887.0" cy="91.52173913043478" r="5" fill="#17734b" stroke="white" tabindex="0" data-tip="codex:gpt-6.1-sol · Request 2 | Cumulative cost: €0.04827837"/>
+<rect x="883.0" y="81.72533333333334" width="8" height="8" fill="white" stroke="#17734b" stroke-width="2" tabindex="0" data-tip="codex:gpt-6.1-sol · Request 2 · Main context | Post-call context: 13,354 tokens | Previous context: 0 tokens | Net input change: +13,276 tokens | Total input: 13,276 tokens | • System prompt: unreported | • Tool documentation: unreported | • Conversation: unreported | Input billing | • Fresh input: 13,276 tokens | • Cache read: 0 tokens | Cache write: 0 tokens | Output: 78 tokens | • Non-reasoning output: 78 tokens | • Reasoning: 0 tokens | • Post-call Context: 13,354 tokens"/>
+</g></svg></div>
+<small>Context includes input plus retained output, using the same rules as the single-model report. Request spacing shows order, not elapsed time. Hover or focus on a mark for values.</small></section>
+<h2 class="section-heading">Responses side by side</h2><p class="muted">Responses are aligned by recorded conversation turn. Different prompts are shown separately.</p>
+<section class="panel responses"><div class="scroll" role="region" aria-label="Responses side by side" tabindex="0"><table><thead><tr><th scope="col">openai:gpt-5.5-2026-04-23</th><th scope="col">openai:gpt-5.6-luna</th><th scope="col">codex:gpt-6.1-sol</th></tr></thead>
+<tbody><tr class="prompt"><th colspan="3"><span class="eyebrow">Turn 1</span><span class="prompt-text">Explain the main steps in an agent workflow.</span></th></tr><tr><td>
+
+<div class="response"><div class="answer">The main steps in an agent workflow are:
+
+1. **Receive a goal or task**  
+   The agent gets an instruction from a user, system, or another process.
+
+2. **Understand the objective**  
+   It interprets what needs to be done, including constraints, context, and expected output.
+
+3. **Plan the approach**  
+   The agent breaks the task into smaller steps and decides what actions are needed.
+
+4. **Use tools or resources**  
+   If needed, it calls APIs, searches data, reads files, runs code, or interacts with external systems.
+
+5. **Observe results**  
+   The agent reviews the output from its actions or tools.
+
+6. **Reason and adjust**  
+   It evaluates whether the results are sufficient and may revise the plan if necessary.
+
+7. **Produce a final response or action**  
+   The agent completes the task by giving an answer, making a change, or triggering an action.
+
+8. **Optional feedback loop**  
+   The agent may learn from user feedback or repeat steps until the goal is satisfied.</div></div></td><td>
+
+<div class="response"><div class="answer">The main steps in an agent workflow are:
+
+1. **Receive the goal** – Interpret the user’s request and identify the desired outcome.
+2. **Plan** – Break the goal into smaller tasks and decide what actions or tools are needed.
+3. **Gather information** – Retrieve relevant data from sources such as files, APIs, databases, or the web.
+4. **Act** – Execute tasks, call tools, or interact with external systems.
+5. **Observe results** – Check the outputs, detect errors, and compare results with the goal.
+6. **Iterate** – Revise the plan or take additional actions if the goal has not been met.
+7. **Respond** – Present the final result clearly, including any limitations or follow-up needs.</div></div></td><td>
+
+<div class="response"><div class="answer">An agent workflow typically follows six steps:
+
+1. **Understand the goal:** Identify the desired outcome, requirements, and constraints.
+2. **Gather context:** Collect relevant information and clarify important gaps.
+3. **Plan:** Break the task into manageable steps and choose suitable tools.
+4. **Act:** Execute the steps, using tools or collaborating when authorized.
+5. **Verify and adapt:** Check results, correct errors, and revise the plan as needed.
+6. **Report:** Summarize the outcome, supporting evidence, and any remaining limitations.
+
+The agent may repeat the planning, action, and verification steps until the goal is met.</div></div></td></tr></tbody><tbody><tr class="prompt"><th colspan="3"><span class="eyebrow">Turn 2</span><span class="prompt-text">How does a tool observation help the agent answer?</span></th></tr><tr><td>
+
+<div class="response"><div class="answer">A tool observation gives the agent new information from an external source, such as search results, database output, file contents, or API responses.
+
+It helps the agent answer by:
+
+1. **Providing facts** the agent may not already know  
+2. **Verifying assumptions** before responding  
+3. **Updating the plan** based on real results  
+4. **Reducing hallucination** by grounding the answer in evidence  
+5. **Supporting the final response** with accurate, current, or task-specific information
+
+In short, a tool observation is the feedback the agent uses to decide what to do next or to produce a more accurate answer.</div></div></td><td>
+
+<div class="response"><div class="answer">A tool observation gives the agent information about what happened after it took an action. It helps the agent:
+
+- **Verify results** — confirm whether the action succeeded.
+- **Update its understanding** — incorporate new data into its reasoning.
+- **Detect errors** — identify failures, missing information, or unexpected outcomes.
+- **Choose the next step** — decide whether to continue, retry, use another tool, or answer.
+- **Support accuracy** — base the final response on observed facts rather than assumptions.
+
+For example, after searching a database, the returned records are the observation the agent uses to formulate its answer.</div></div></td><td>
+
+<div class="response"><div class="answer">A **tool observation** is the result returned by a tool, such as search results, file contents, or a test outcome.
+
+It gives the agent evidence to:
+- Confirm or correct its assumptions.
+- Decide what to do next.
+- Ground its answer in observed results rather than guesses.
+
+The agent still needs to interpret the result and account for errors or incomplete information.</div></div></td></tr></tbody>
+</table></div></section>
+<details class="panel method"><summary>Comparison notes &amp; saved price snapshots</summary><p>These are recorded observations, not a quality ranking. Different histories, tools, reasoning settings, caching, and price snapshots can affect comparisons. Codex usage includes its harness context and CLI startup contributes to elapsed time. Costs are estimated model usage costs, not subscription charges. Detailed tools, compactions, and execution evidence are in each full report.</p>
+<p><strong>openai:gpt-5.5-2026-04-23</strong> · Simple chat<br>Missing usage: <strong>0</strong> calls · Incomplete pricing: 0 calls.<br>Snapshot: 2026-10-05. 1 USD = 0.87974 EUR · 2026-09-24<br><a href="gpt-5.5/run.json">Saved run evidence</a></p><p><strong>openai:gpt-5.6-luna</strong> · Simple chat<br>Missing usage: <strong>0</strong> calls · Incomplete pricing: 0 calls.<br>Snapshot: 2026-10-05. 1 USD = 0.87974 EUR · 2026-09-24<br><a href="gpt-5.6-luna/run.json">Saved run evidence</a></p><p><strong>codex:gpt-6.1-sol</strong> · Simple chat<br>Missing usage: <strong>0</strong> calls · Incomplete pricing: 0 calls.<br>Snapshot: 2026-10-05. 1 USD = 0.87974 EUR · 2026-09-24<br><a href="codex-gpt-6.1-sol/run.json">Saved run evidence</a></p></details>
+<p class="muted"><small>Generated offline from saved run.json and prices.json bundles. No model was invoked.</small></p>
+</main><div id="chart-tip" role="tooltip" hidden></div>
+<script>
+// Text-only tooltips preserve captured content as data, with keyboard access.
+const tip = document.getElementById('chart-tip');
+document.querySelectorAll('[data-tip]').forEach(mark => {
+  mark.setAttribute('aria-label', mark.dataset.tip.replaceAll(' | ', ', '));
+  const show = () => {
+    tip.textContent = mark.dataset.tip.replaceAll(' | ', '\n');
+    tip.hidden = false;
+    const box = mark.getBoundingClientRect();
+    tip.style.left = Math.max(8, Math.min(box.right + 10, innerWidth - tip.offsetWidth - 8)) + 'px';
+    tip.style.top = Math.max(8, Math.min(box.top, innerHeight - tip.offsetHeight - 8)) + 'px';
+  };
+  mark.addEventListener('pointerenter', show);
+  mark.addEventListener('focus', show);
+  mark.addEventListener('pointerleave', () => { tip.hidden = true; });
+  mark.addEventListener('blur', () => { tip.hidden = true; });
+});
+document.addEventListener('keydown', event => { if (event.key === 'Escape') tip.hidden = true; });
+</script></body></html>
