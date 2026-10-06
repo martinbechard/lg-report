@@ -47,6 +47,7 @@ wheels/
 !/reports/model_comparison/gpt-5.5/
 !/reports/model_comparison/gpt-5.6-luna/
 !/reports/model_comparison/codex-gpt-6.1-sol/
+!/reports/model_comparison/codex-gpt-6-sol/
 /reports/model_comparison/*/*
 !/reports/model_comparison/*/report.html
 !/reports/model_comparison/*/run.json

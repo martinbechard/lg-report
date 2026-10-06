@@ -8,10 +8,10 @@ Codex CLI 0.159.2. Check `codex --version` and `codex login status` first; use
 The model must be available to that Codex account. There is no automatic fallback.
 
 ```sh
-LG_PROVIDER=codex LG_MODEL=gpt-6.1-sol LG_MAX_TOKENS= LG_EFFORT=low \
+LG_PROVIDER=codex LG_MODEL=gpt-6-sol LG_MAX_TOKENS= LG_EFFORT=low \
   uv run python -m agent_runtime --sample simple_chat --client static --live \
   --env-file .env.local --prices models.json \
-  --out reports/model_comparison/codex-gpt-6.1-sol
+  --out reports/model_comparison/codex-gpt-6-sol
 ```
 
 These settings can instead be saved in `.env.local`. `LG_CODEX_CLI` optionally

@@ -309,7 +309,7 @@ uv run lg-report render reports/simple_chat/run.json
 ### Compare models in one HTML report
 
 Open the saved [live model comparison](reports/model_comparison/report.html) to
-compare GPT-5.5, GPT-5.6-luna, and GPT-6.1-sol through Codex on the same two
+compare GPT-5.5, GPT-5.6-luna, and GPT-6-sol through Codex on the same two
 simple-chat prompts. The report uses the single-model cost/context diagram with all models plotted together on
 shared axes, then aligns responses side by side by recorded turn. Full-report
 links retain the execution details and original pricing evidence. Without turn
@@ -322,7 +322,7 @@ to both models in your configured OpenAI project:
 ```sh
 LG_MODEL=gpt-5.5 uv run python -m agent_runtime --sample simple_chat --client static --live --env-file .env.local --prices models.json --out reports/model_comparison/gpt-5.5
 LG_MODEL=gpt-5.6-luna uv run python -m agent_runtime --sample simple_chat --client static --live --env-file .env.local --prices models.json --out reports/model_comparison/gpt-5.6-luna
-LG_PROVIDER=codex LG_MODEL=gpt-6.1-sol LG_MAX_TOKENS= LG_EFFORT=low uv run python -m agent_runtime --sample simple_chat --client static --live --env-file .env.local --prices models.json --out reports/model_comparison/codex-gpt-6.1-sol
+LG_PROVIDER=codex LG_MODEL=gpt-6-sol LG_MAX_TOKENS= LG_EFFORT=low uv run python -m agent_runtime --sample simple_chat --client static --live --env-file .env.local --prices models.json --out reports/model_comparison/codex-gpt-6-sol
 ```
 
 The third command uses your existing Codex login and installed CLI. See the
@@ -333,7 +333,7 @@ token rates; it does not attempt to allocate subscription charges.
 Combine two or more saved runs without invoking a model:
 
 ```sh
-uv run lg-report compare reports/model_comparison/gpt-5.5/run.json reports/model_comparison/gpt-5.6-luna/run.json reports/model_comparison/codex-gpt-6.1-sol/run.json --out reports/model_comparison/report.html --title "Simple chat: three-model comparison"
+uv run lg-report compare reports/model_comparison/gpt-5.5/run.json reports/model_comparison/gpt-5.6-luna/run.json reports/model_comparison/codex-gpt-6-sol/run.json --out reports/model_comparison/report.html --title "Simple chat: three-model comparison"
 ```
 
 The default output is `./comparison.html`; its parent directory must exist.

@@ -3,7 +3,7 @@
 
 Open [the report index](index.html) to view HTML or download Excel for every sample.
 The [model comparison](model_comparison/report.html) combines separate live
-GPT-5.5, GPT-5.6-luna, and Codex GPT-6.1-sol runs of the same two simple-chat user prompts.
+GPT-5.5, GPT-5.6-luna, and Codex GPT-6-sol runs of the same two simple-chat user prompts.
 Codex uses its local CLI and account; its usage includes harness overhead.
 Its estimated cost uses the corresponding OpenAI API token rates, with the
 exact mapping retained in the saved pricing aliases. Its nested
