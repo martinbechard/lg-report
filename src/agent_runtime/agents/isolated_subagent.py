@@ -1,6 +1,6 @@
 """Define the isolated subagent's role and echo tool.
 
-DeepAgents compiles this specification under the parent's native task tool.
+Explicit delegation middleware compiles this specification as a LangGraph agent.
 Only the delegated assignment enters its context; its final answer returns.
 
 Design: docs/chat-composition.md.
@@ -28,7 +28,7 @@ def build_agent(parameters: dict | None = None) -> SubAgent:
     The specialist obtains its own model by default. Optional parameters allow
     other workflows to supply a model and additional middleware.
     Unlike standalone agents, this builder returns a DeepAgents specification:
-    DeepAgents compiles the child using its native middleware and supplied policy. Neither
+    SubAgentMiddleware compiles only its declared tools and supplied policy. Neither
     specification creation nor compilation executes a model or echo tool.
     """
     parameters = dict(parameters or {})

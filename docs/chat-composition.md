@@ -232,10 +232,14 @@ locally in a prepared working directory; this does not provide OS isolation.
 Workflows select the model, backend, middleware, and graph-boundary checkpointer
 and pass them to agent builders in a plain dictionary. Builders unpack it with
 `**parameters` into the native constructor and add their prompts and domain tools.
-DeepAgents agents retain the library defaults. Focused LangChain agents receive
-only their configured tools and middleware; backend instances are supplied through
-DeepAgents middleware such as `FilesystemMiddleware`. The author, judge, and quote
-roles use this standard LangChain agent loop, so supplied middleware runs there too.
+All agent builders use LangChain's standard `create_agent`, which compiles a
+LangGraph and registers only explicit tools and middleware. Simple chat registers
+no tools. Backend instances are supplied through selected DeepAgents middleware
+such as `FilesystemMiddleware` and `SubAgentMiddleware`; the convenience
+`create_deep_agent` factory is not used. Shell execution explicitly exposes
+`execute` plus `read_file`, which its middleware requires for retrieving evicted
+output. Delegation exposes only the named specialists. Supplied middleware still
+runs in the standard model/tool loop.
 
 The three reference experts share `agents/reference_expert.py`. Their distinct
 role definitions preserve prompts, domain tool isolation, and report identities.

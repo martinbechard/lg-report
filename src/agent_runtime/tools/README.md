@@ -12,14 +12,14 @@ Use `@tool(parse_docstring=True)`, typed parameters, and Google-style `Args`
 sections so each tool carries its own parameter descriptions into the model's
 schema. Describe purpose, input meaning, and existing limits concisely; keep
 agent workflow rules in the system prompt. Register these tool objects directly
-with `create_deep_agent(tools=[...])`.
+with `create_agent(tools=[...])`.
 
 With content capture enabled, reports save bound definitions per model request
 in `run.json` and show them in a collapsed **Tool definitions** section. Older
 recordings without definitions show an explicit not-captured message.
 
 Clients, provider configuration, conversation history, and reporting do not
-belong in tools. Simple chat uses no custom evidence tools; the dispatch workflow uses
+belong in tools. Simple chat registers no tools; the dispatch workflow uses
 DeepAgents' native task tool for delegation.
 
 `search_reference.py` supplies separate movie, sports, and history lookups. These
@@ -27,7 +27,7 @@ search small source-labelled local collections by phrase, return explicit misses
 and perform no network or model calls. They are teaching retrieval tools, not a
 complete vector RAG pipeline.
 
-`semantic_search_wikipedia.py` is also published by the [Wikipedia MCP server](../mcp_servers/README.md). The server reuses this tool function; Deep Agents discovers it through LangChain’s MCP adapter.
+`semantic_search_wikipedia.py` is also published by the [Wikipedia MCP server](../mcp_servers/README.md). The server reuses this tool function; the LangGraph agent discovers it through LangChain’s MCP adapter.
 
 The file editor uses DeepAgent's native `read_file`, `write_file`, and `edit_file`
 tools. `backends/file_access_backend.py` binds them to the configured source and target;

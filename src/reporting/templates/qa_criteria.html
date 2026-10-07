@@ -1,0 +1,17 @@
+{# Explain the saved scoring contract once; all judge-authored text is escaped.
+   AI attribution: Generated with AI assistance by Alex Northstar.
+   Copyright (c) 2026 Martin.Bechard@DevConsult.ca #}
+<details class="qa-criteria"><summary>Scoring criteria</summary>
+{% for key, label in [('goal_achievement', 'Goal achievement'), ('answer_quality', 'Answer quality')] %}
+<h3>{{ label }}</h3><ul>
+{% for criterion in rubric[key] %}<li><strong>{{ criterion.description }} · {{ criterion.points }} points</strong><br>
+{{ criterion.met_when }}{% if criterion.partial_when %}<br>Half credit: {{ criterion.partial_when }}{% endif %}
+</li>{% endfor %}</ul>
+{% endfor %}
+<h3>Speed</h3>
+<p>50 × rate / (rate + {{ rubric.speed.tokens_per_second }}) + 50 × {{ rubric.speed.seconds_per_turn }} / (seconds per turn + {{ rubric.speed.seconds_per_turn }}).</p>
+<p>{{ rubric.speed.rationale }}</p>
+<h3>Cost</h3>
+<p>100 × {{ rubric.cost.usd_at_half_score }} / (Agent cost in USD + {{ rubric.cost.usd_at_half_score }}).</p>
+<p>{{ rubric.cost.rationale }}</p>
+</details>

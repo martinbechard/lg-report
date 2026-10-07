@@ -277,3 +277,25 @@ def test_configure_sample_script_preserves_existing_client_and_answer_behavior()
     assert client.answer({"kind": "question"}) == "human choice"
     assert client.receive().prompt == "two"
     assert client.receive() is None
+
+
+@pytest.mark.parametrize("asynchronous", [False, True])
+def test_simple_chat_never_binds_implicit_tools(asynchronous):
+    """Tool-free chat must work with a model that rejects any tool registration."""
+    import asyncio
+
+    from langchain_core.messages import AIMessage
+
+    from agent_runtime.harness.simulated_model import ScriptedChatModel
+    from agent_runtime.workflows.simple_chat import build_workflow
+
+    class PlainChatModel(ScriptedChatModel):
+        """Fail at the model boundary if an agent factory adds hidden tools."""
+
+        def bind_tools(self, tools, **kwargs):
+            raise AssertionError("Simple chat must not bind tools")
+
+    graph = build_workflow(PlainChatModel(responses=[AIMessage(content="Plain answer")]))
+    payload = {"messages": [("user", "Explain the workflow")]}
+    result = asyncio.run(graph.ainvoke(payload)) if asynchronous else graph.invoke(payload)
+    assert result["messages"][-1].content == "Plain answer"

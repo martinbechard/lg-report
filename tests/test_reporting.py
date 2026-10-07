@@ -48,9 +48,9 @@ def read_run(directory):
     return Run.model_validate_json((directory / "run.json").read_text())
 
 
-# Run the production Deep Agent path with a scripted model to prove
+# Run the production LangGraph agent path with a scripted model to prove
 # normalized spans, privacy filtering, pricing, and HTML output agree.
-def test_real_deepagents_offline_pipeline(tmp_path, prices):
+def test_real_langgraph_offline_pipeline(tmp_path, prices):
     out = tmp_path / "run"
     execute_runnable(
         build_chat_agent({"model": SimulatedModel(conversation=CHAT_CONVERSATION)}),

@@ -2,7 +2,7 @@
 
 ## Getting started
 
-Run LangGraph / DeepAgents samples and inspect local reports of conversations,
+Run LangGraph samples and inspect local reports of conversations,
 token usage, and estimated model costs. Run the commands below from the repository root.
 
 Install Python 3.11+ and [uv](https://docs.astral.sh/uv/), then install the project dependencies:
@@ -36,7 +36,7 @@ LG_PROVIDER=openai
 LG_MODEL=YOUR-GPT-4.1-DEPLOYMENT-NAME
 OPENAI_API_KEY=YOUR-AZURE-RESOURCE-KEY
 OPENAI_BASE_URL=https://YOUR-RESOURCE.openai.azure.com/openai/v1/
-# Optional override; defaults to 32768 output tokens.
+# Optional output limit; omitted by default for OpenAI.
 # LG_MAX_TOKENS=32768
 LG_EFFORT=
 ```
@@ -386,35 +386,109 @@ shows their estimated cost separately, keeping tested-assistant costs, context,
 and response columns separate from test-input generation. Failures remain visible;
 there is no fallback to canned input or another model.
 
+### Optional QA judge
+
+Open the saved [QA example](reports/qa_evaluation/report.html) to inspect a live
+GPT-6 Luna execution assessed by Sol 6. Optional QA evaluates the completed
+execution with one independent judge:
+
+```bash
+uv run python -m agent_runtime --sample simple_chat --demo --live --qa --env-file .env.local
+uv run python scripts/run_samples.py --qa
+```
+
+QA is off by default. `--qa` or `LG_QA=true` enables it; `--no-qa` disables
+it. The default judge is Codex `gpt-6-sol` (Sol 6), high effort, using the
+existing Codex login. `--qa-model` / `LG_QA_MODEL` and `--qa-provider` /
+`LG_QA_PROVIDER` select one independent judge without changing the assistant
+or user model. `LG_QA_EFFORT` and the API-only `LG_QA_MAX_TOKENS` control its
+reasoning and output budget. Other providers need their usual credentials.
+
+The judge first creates a task-specific rubric from the goal, before seeing
+candidate results. Goal checks are binary; quality checks define full, half,
+and zero credit. Each dimension has 100 available points. During evaluation,
+the judge supplies criterion outcomes and evidence IDs; the application assigns
+the points. Fulfilling every goal check always earns 100 for goal achievement.
+The frozen rubric also defines numerical speed and cost anchors, so those
+scores are calculated from measurements rather than individual opinions.
+Weights remain goal 40%, quality 30%, speed 15%, and cost 15%.
+
+Comparison runs generate one `qa-rubric.json` and pass it to every evaluation.
+`LG_QA_RUBRIC` can supply the same saved criteria to separate launches; its goal
+must match. Standalone judges create criteria on first use and reuse them for
+subsequent turns with that goal. Expand **Scoring criteria** in the report to
+inspect the common checks and formulas. Unknown dimensions remain unscored;
+partial overall scores reweight available dimensions and display coverage.
+Speed and cost include only Agent model calls. Static, simulated, and
+metadata-only execution never constructs or calls the judge.
+
+Saved `run.json`, HTML, comparison reports, and Excel retain the assessment.
+Judge usage, elapsed time, and estimated cost are recorded separately from
+execution totals. A judge error is visible without changing the sample status;
+rendering saved reports never calls the judge again. Metadata-only runs skip QA
+without sending content. The judge receives all captured events and their complete content. If the
+serialized evidence exceeds 200,000 characters, QA skips the run without a model
+call or score; it never clips histories or answers to fit. Browser QA
+assesses each saved turn using its captured history and the selected sample goal.
+
 ### Compare models in one HTML report
 
 Open the saved [live model comparison](reports/model_comparison/report.html) to
-compare GPT-5.5, GPT-5.6-luna, and GPT-6-sol through Codex on the same initial
-simple-chat prompt, with GPT-6 Luna generating adaptive user follow-ups. The report uses the single-model cost/context diagram with all models plotted together on
+compare GPT-5.5 and GPT-5.6 Luna through both OpenAI and Codex, plus GPT-6 Sol
+through Codex, on the same initial simple-chat prompt, with GPT-6 Luna generating adaptive user follow-ups. The report uses the single-model cost/context diagram with all models plotted together on
 shared axes, then aligns responses side by side by recorded turn. Full-report
 links retain the execution details and original pricing evidence. Without turn
 metadata, alignment is explicitly by request order; unequal prompts remain visible.
 
-To create new comparable runs, reuse the existing launcher with separate output
-directories. The first two commands invoke paid provider models and require access
-to both models in your configured OpenAI project:
+Agent construction uses the standard LangGraph-backed `create_agent` with only
+explicit tools and middleware. Simple chat has no tools on either API or CLI
+routes. The shell and delegation lessons opt into the middleware they need.
+
+The QA comparison table aligns overall and constituent scores, coverage, judge
+identity, assessed goals, and reasons across the saved runs. Expand a score's
+Reason to inspect its evidence. Missing, failed, or skipped QA remains explicit.
+The execution measurements and cost chart cover Agent calls only. Judge cost
+is omitted from the comparison. The shared criteria appear once above the table;
+comparisons with differing saved criteria identify that mismatch explicitly.
+Regenerating HTML only reads saved assessments and never calls a judge.
+
+Supply the provider/model choices to one command. The runner applies medium
+Agent effort without an explicit OpenAI output cap, a Codex GPT-6 Luna user at
+high effort, and optional Sol 6 QA to every trial. It runs models sequentially
+and builds the comparison automatically:
 
 ```sh
-LG_MODEL=gpt-5.5 uv run python -m agent_runtime --sample simple_chat --demo --live --user-provider codex --env-file .env.local --prices models.json --out reports/model_comparison/gpt-5.5
-LG_MODEL=gpt-5.6-luna uv run python -m agent_runtime --sample simple_chat --demo --live --user-provider codex --env-file .env.local --prices models.json --out reports/model_comparison/gpt-5.6-luna
-LG_PROVIDER=codex LG_MODEL=gpt-6-sol LG_MAX_TOKENS= LG_EFFORT=low uv run python -m agent_runtime --sample simple_chat --demo --live --user-provider codex --env-file .env.local --prices models.json --out reports/model_comparison/codex-gpt-6-sol
+uv run python scripts/run_model_comparison.py --models openai:gpt-5.5 codex:gpt-5.5 openai:gpt-5.6-luna codex:gpt-5.6-luna codex:gpt-6-sol --qa --out outputs/five-model-comparison
 ```
 
-The third command uses your existing Codex login and installed CLI. See the
-[Codex adapter guide](docs/codex-models.md). Its harness and transport differ
-from the direct OpenAI calls. Estimated cost uses the same model's OpenAI API
-token rates; it does not attempt to allocate subscription charges.
+`--effort`, `--sample`, `--user-model`, `--user-provider`, `--user-turns`,
+`--qa-model`, and `--qa-provider` apply across the list. QA is optional and disabled
+unless `--qa` is supplied. OpenAI uses its API credentials; Codex uses the installed
+CLI and existing login. Set `LG_CODEX_MODEL_CATALOG=~/.codex/models_cache.json`
+for the minimal Codex profile used by the refreshed reports; see
+[Codex payload inspection](docs/codex-models.md#request-payload-inspection).
+The runner requires unused model folders for fresh runs
+and preserves previous measurements; choose a new `--out` for another trial.
+To reassess existing executions, copy the selected bundles to a new directory
+and use `--rescore --out DIRECTORY` with the same model list. This generates one
+new shared rubric and calls only the judge, preserving the Agent traces and
+measurements. `--saved-only` remains completely offline.
 
-Combine two or more saved runs without invoking a model:
+To rebuild the saved five-model example without making model calls:
 
 ```sh
-uv run lg-report compare reports/model_comparison/gpt-5.5/run.json reports/model_comparison/gpt-5.6-luna/run.json reports/model_comparison/codex-gpt-6-sol/run.json --out reports/model_comparison/report.html --title "Simple chat: three-model comparison"
+uv run python scripts/run_model_comparison.py --models openai:gpt-5.5 codex:gpt-5.5 openai:gpt-5.6-luna codex:gpt-5.6-luna codex:gpt-6-sol --saved-only --out reports/model_comparison --title "Simple chat: API and Codex comparison"
 ```
+
+The table includes Agent-only effective output rate and summed model-call
+time per turn. These exclude user-agent and QA calls but include transport and
+startup; they do not isolate pure decoding time. The recordings are single
+observations with adaptive follow-ups and different answer lengths, not a
+controlled provider-latency benchmark. Codex token usage includes harness context;
+its estimated cost uses the corresponding OpenAI API rates, not subscription fees.
+
+`lg-report compare RUN1 RUN2 ... --out comparison.html` remains available for
+combining arbitrary saved runs without launching models.
 
 The default output is `./comparison.html`; its parent directory must exist.
 Each input requires an adjacent `prices.json`. Comparison preserves each run's
@@ -586,3 +660,23 @@ runs and Langfuse databases/reports remain ignored.
 Compressed RAG assets and extraction details are in [data/rag](data/rag/README.md).
 
 The [shell script sample](samples/shell_script/README.md) demonstrates DeepAgent’s native `execute` tool with a local `ShellBackend` implementing `SandboxBackendProtocol`.
+
+New QA speed scores use `50*r/(r+R) + 50*T/(t+T)`, where `r` is reported
+Agent output tokens per model-call second and `t` is model seconds per turn.
+The judge selects the fixed half-credit anchors `R` and `T` from the task before
+seeing results. Cost uses `100*C/(cost+C)`, with `C` the rubric's total Agent USD
+cost at half credit. These task calibration choices are saved, shared and shown
+in the report. They are not user budgets or provider service guarantees.
+Missing measurements remain unscored. Legacy assessments retain their original
+scoring basis until explicitly reassessed.
+
+New OpenAI API runs stream responses to record client time to first output;
+turn time uses the complete model call. Codex runs save internal OTLP timing
+for time to first token only. Both use shared turn-time, first-token, and
+output-rate rows, with coverage labels for partial capture. API first-token
+timing is observed at the client; Codex supplies it internally and may include
+hidden reasoning. These first-token boundaries differ. Extra backend diagnostic metrics are not retained.
+The cost calculation recap after the graph reconciles token counts,
+per-million rates, cache discounts, assistant totals, and saved FX conversion.
+New QA resource assessments exclude simulated-user and judge calls. Shared FX
+is displayed once; differing saved FX rates remain attributable to their runs.

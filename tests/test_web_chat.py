@@ -40,7 +40,7 @@ from agent_runtime.web.server import create_app
 @pytest.fixture
 def retrieval_fixture(monkeypatch):
     """Exercise real retrieval and MCP tools without downloading a corpus."""
-    from deepagents import create_deep_agent
+    from langchain.agents import create_agent
     from langchain.mcp import MCPAdapter
     from test_mcp_rag_sample import Collection
 
@@ -54,7 +54,7 @@ def retrieval_fixture(monkeypatch):
     async def open_fixture(parameters):
         """Keep the same discovered MCP tool alive for either frontend."""
         async with MCPAdapter(build_server(Collection())) as adapter:
-            yield create_deep_agent(
+            yield create_agent(
                 **parameters, name="wikipedia_mcp_agent", tools=await adapter.list_tools()
             )
 
@@ -351,7 +351,7 @@ def test_angular_launcher_resolves_package_without_building_graph(
     from agent_runtime.harness import settings as launch_settings
     from agent_runtime.web import server
 
-    settings = SimpleNamespace(output=tmp_path, live=False)
+    settings = SimpleNamespace(output=tmp_path, live=False, qa=None)
     monkeypatch.setattr(launch_settings, "settings_for", lambda *a, **kw: settings)
     captured = {}
     monkeypatch.setattr(
@@ -473,11 +473,12 @@ def test_retained_context_includes_latest_answer_without_persisting_content(
     assert metadata["bytes"] > 0
     assert metadata["messages"][-1]["role"] == "ai"
     assert metadata["messages"][-1]["content"]
-    # Native DeepAgents includes framework tools; the tool lesson adds echo_tool.
+    # Only explicitly registered tools belong in the retained context.
     if sample == "simple_chat":
         assert "An agent observes" in metadata["messages"][-1]["content"]
-        assert "read_file" in json.dumps(metadata["tools"])
+        assert metadata["tools"] is None  # No tool binding occurred.
     else:
+        assert len(metadata["tools"]) == 1
         assert "echo_tool" in json.dumps(metadata["tools"])
     assert metadata["bytes"] == len(
         json.dumps(

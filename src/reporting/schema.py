@@ -103,6 +103,152 @@ class Step(Record):
         return (self.end_ns - self.start_ns) / 1_000_000
 
 
+class QAScore(Record):
+    """Keep an evidence-based score separate from a missing assessment."""
+
+    score: float | None = Field(ge=0, le=100, allow_inf_nan=False, strict=True)
+    reason: str = Field(min_length=1)
+
+
+class QAVerdict(Record):
+    """Require all four rubric dimensions; null means insufficient evidence."""
+
+    goal_achievement: QAScore
+    answer_quality: QAScore
+    speed: QAScore
+    cost: QAScore
+    summary: str = Field(min_length=1)
+
+
+class QACriterion(Record):
+    """Define an observable check and its share of a dimension's 100 points."""
+
+    id: str = Field(pattern=r"^[a-z][a-z0-9_]*$")
+    description: str = Field(min_length=1)
+    points: int = Field(gt=0, le=100, strict=True)
+    met_when: str = Field(min_length=1)
+    # Goal checks are binary. Quality checks may award half credit only under
+    # this predeclared condition, never through an improvised numerical score.
+    partial_when: str | None = None
+
+
+class QASpeedScale(Record):
+    """Fix throughput and latency half-credit anchors before viewing results."""
+
+    tokens_per_second: float = Field(gt=0, allow_inf_nan=False)
+    seconds_per_turn: float = Field(gt=0, allow_inf_nan=False)
+    rationale: str = Field(min_length=1)
+
+
+class QACostScale(Record):
+    """Fix the total Agent cost earning 50 points, independent of competitors."""
+
+    usd_at_half_score: float = Field(gt=0, allow_inf_nan=False)
+    rationale: str = Field(min_length=1)
+
+
+class QARubric(Record):
+    """Save one task-specific scoring contract shared by every evaluation.
+
+    Criteria are generated from the task before any result is judged. The
+    fingerprint compares the full contract, including the goal and all anchors.
+    """
+
+    goal: str = Field(min_length=1)
+    goal_achievement: list[QACriterion] = Field(min_length=1, max_length=12)
+    answer_quality: list[QACriterion] = Field(min_length=1, max_length=12)
+    speed: QASpeedScale
+    cost: QACostScale
+
+    @model_validator(mode="after")
+    def check_criteria(self):
+        """Reject ambiguous IDs, inconsistent totals, and partial goal credit."""
+        criteria = self.goal_achievement + self.answer_quality
+        if len({c.id for c in criteria}) != len(criteria):
+            raise ValueError("Rubric criterion IDs must be unique")
+        for dimension in (self.goal_achievement, self.answer_quality):
+            if sum(c.points for c in dimension) != 100:
+                raise ValueError("Each rubric dimension must total 100 points")
+        if any(c.partial_when is not None for c in self.goal_achievement):
+            raise ValueError("Goal criteria must be binary")
+        return self
+
+    @property
+    def fingerprint(self) -> str:
+        """Identify identical contracts without trusting a model-authored label."""
+        import hashlib
+        import json
+
+        return hashlib.sha256(json.dumps(self.model_dump(), sort_keys=True).encode()).hexdigest()
+
+
+class QACheck(Record):
+    """Record the judge's evidence decision; the application assigns points."""
+
+    criterion_id: str
+    outcome: Literal["met", "partial", "unmet", "unknown"]
+    evidence_ids: list[str]
+    reason: str = Field(min_length=1)
+
+
+class QAAssessment(Record):
+    """Allow evidence classifications, never arbitrary numeric scores."""
+
+    goal_achievement: list[QACheck]
+    answer_quality: list[QACheck]
+    summary: str = Field(min_length=1)
+
+
+# Fixed weights make scores comparable and prevent the judge changing arithmetic.
+QA_WEIGHTS = {"goal_achievement": 0.4, "answer_quality": 0.3, "speed": 0.15, "cost": 0.15}
+
+
+class QAEvaluation(Record):
+    """Persist independent QA and its overhead without changing workflow totals.
+
+    Score coverage is the assessed fraction of the fixed rubric. A partial
+    overall score uses only assessed dimensions and must display its coverage.
+    Judge steps contain metadata/usage only, never a second copy of the prompt.
+    """
+
+    status: Literal["completed", "error", "skipped"]
+    provider: str
+    model: str
+    rubric_version: Literal[1, 2] = 1
+    rubric: QARubric | None = None
+    assessment: QAAssessment | None = None
+    # Legacy saved judgments retain their original basis on load.
+    speed_method: Literal["judge-v1", "measured-v1", "shared-rubric-v2"] = "judge-v1"
+    # Older saved assessments included test-input generation in resource use.
+    # Retain that distinction rather than silently relabeling historical scores.
+    measurement_scope: Literal["execution", "assistant"] = "execution"
+    goal: str | None = None
+    execution_duration_ms: float | None = None
+    execution_cost_usd: str | None = None
+    verdict: QAVerdict | None = None
+    error: str | None = None
+    truncated: bool = False
+    judge_steps: list[Step] = Field(default_factory=list)
+    duration_ms: float = 0
+    cost_usd: str | None = None
+
+    coverage: float = 0
+    overall_score: float | None = None
+
+    @model_validator(mode="after")
+    def calculate_overall(self):
+        """Recompute derived values on load so stored arithmetic cannot drift."""
+        self.coverage = sum(weight for key, weight in QA_WEIGHTS.items()
+                            if self.verdict and getattr(self.verdict, key).score is not None)
+        self.overall_score = (
+            round(sum(getattr(self.verdict, key).score * weight
+                      for key, weight in QA_WEIGHTS.items()
+                      if getattr(self.verdict, key).score is not None) / self.coverage, 1)
+            if self.coverage else None
+        )
+        return self
+
+
 class Run(Record):
     """A serializable report input, including incomplete or failed executions.
 
@@ -118,6 +264,7 @@ class Run(Record):
     status: Literal["ok", "error", "interrupted", "incomplete"]
     steps: list[Step]
     output: str | None = None
+    qa: QAEvaluation | None = None
 
     # Pydantic invokes this on the parsed Run before reporting can traverse its
     # steps. It establishes structural ancestry only, not semantic correctness

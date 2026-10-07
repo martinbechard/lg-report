@@ -7,6 +7,7 @@ AI attribution: Generated with AI assistance by Ellis Northstar.
 Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
 
+import json
 import os
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -90,11 +91,14 @@ def test_local_history_and_trace_contract(model_type):
         SystemMessage("Follow these instructions"), HumanMessage("Hi"), AIMessage("Hello"),
     ], None, {})
     assert instructions.startswith("Follow these instructions")
-    assert history == '[{"role": "user", "content": "Hi"}, {"role": "assistant", "content": "Hello"}]'
+    # Compact serialization reduces prompt overhead without changing message roles.
+    assert json.loads(history) == [
+        {"role": "user", "content": "Hi"}, {"role": "assistant", "content": "Hello"},
+    ]
     assert model._identifying_params["reasoning_effort"] == "low"
     assert model._get_ls_params()["ls_provider"] == model.provider
     _, tool_history = model.prepare_history([ToolMessage("result", tool_call_id="1")], None, {})
-    assert '"tool_call_id": "1"' in tool_history
+    assert json.loads(tool_history)[0]["tool_call_id"] == "1"
     with pytest.raises(TypeError, match="text messages"):
         model.prepare_history([HumanMessage(content=[{"type": "text", "text": "Hi"}])], None, {})
 

@@ -9,7 +9,6 @@ AI attribution: Generated with AI assistance.
 Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
 
-from deepagents.backends import StateBackend
 from langchain_core.language_models import BaseChatModel
 from langgraph.graph.state import CompiledStateGraph
 
@@ -33,4 +32,4 @@ def build_workflow(model: BaseChatModel | None = None) -> CompiledStateGraph:
     # Select the tool-capable role without importing its tool or prompt.
     # The model inside that agent chooses when to request an echo; a workflow
     # that pre-called the tool would teach application-driven execution instead.
-    return build_agent({"model": model, "backend": StateBackend()})
+    return build_agent({"model": model})

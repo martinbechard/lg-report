@@ -14,6 +14,7 @@ Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 import json
 from pathlib import Path
 from threading import RLock
+from time import perf_counter_ns
 
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.tools import ToolException
@@ -109,6 +110,7 @@ class TraceCapture(BaseCallbackHandler):
         self.spans = {}
         self.active = set()
         self.contexts = {}
+        self.model_started = {}
         self.lock = RLock()
 
     def _start(self, kind, serialized, run_id, parent_run_id, **kwargs):
@@ -123,6 +125,8 @@ class TraceCapture(BaseCallbackHandler):
         the graph even when a tool or subagent runs on another worker thread.
         """
         with self.lock:
+            if kind == "model":
+                self.model_started[run_id] = perf_counter_ns()
             parent = self.spans.get(parent_run_id)
             # Use the callback parent only when it was captured by this recorder.
             # Otherwise start a root in an empty OTel context, avoiding accidental
@@ -260,6 +264,7 @@ class TraceCapture(BaseCallbackHandler):
                 span.set_status(Status(StatusCode.OK))
             span.end()
             self.active.remove(run_id)
+            self.model_started.pop(run_id, None)
 
     def on_chain_start(
         self, serialized, inputs, *, run_id, parent_run_id=None, **kwargs
@@ -382,6 +387,34 @@ class TraceCapture(BaseCallbackHandler):
         span and does not convert those strings into fabricated chat messages."""
         self._start("model", serialized, run_id, parent_run_id, **kwargs)
 
+    def on_llm_new_token(self, token, *, run_id, chunk=None, **kwargs):
+        """Measure first streamed output without mistaking headers for a token.
+
+        This client observation includes request/transport latency. Empty role,
+        item-start, and usage chunks do not establish first output. Text, tool
+        arguments, and exposed reasoning text do; hidden reasoning cannot be
+        timed from a public stream. Only elapsed time is saved, even when content
+        capture is disabled. Non-streaming requests leave this measurement absent.
+        """
+        arrived = perf_counter_ns()
+        message = getattr(chunk, "message", None)
+        blocks = getattr(message, "content", [])
+        tool_chunks = getattr(message, "tool_call_chunks", [])
+        has_output = bool(token) or any(call.get("args") for call in tool_chunks)
+        if isinstance(blocks, list):
+            has_output = has_output or any(
+                isinstance(block, dict) and (
+                    block.get("text") or block.get("thinking") or
+                    any(part.get("text") for part in block.get("summary", []) if isinstance(part, dict))
+                ) for block in blocks
+            )
+        if not has_output:
+            return
+        with self.lock:
+            started = self.model_started.get(run_id)
+            if started is not None and "client_ttft_ns" not in self.contexts[run_id]:
+                self._annotate(run_id, {"client_ttft_ns": max(0, arrived - started)})
+
     def on_tool_start(
         self, serialized, input_str, *, run_id, parent_run_id=None, **kwargs
     ):
@@ -445,6 +478,12 @@ class TraceCapture(BaseCallbackHandler):
             # Non-chat generations contain no message metadata to inspect.
             if message:
                 response_context.update(message.response_metadata.get("demo_meter", {}))
+                # Native timing contains no message content and survives metadata-
+                # only capture. JSON preserves the bounded receipt in Step.context.
+                if message.response_metadata.get("codex_telemetry") is not None:
+                    response_context["codex_telemetry"] = json.dumps(
+                        message.response_metadata["codex_telemetry"], allow_nan=False
+                    )
                 # Thinking is content too: require permission AND actual text.
                 # A reasoning-token count alone cannot supply text for display.
                 if self.capture_content and message.response_metadata.get(

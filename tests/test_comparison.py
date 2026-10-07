@@ -275,6 +275,9 @@ def test_report_links_are_relative_and_only_link_existing_html(tmp_path):
     assert 'href="a%20%231/report.html"' in html
     assert 'href="b/report.html"' not in html
     assert 'href="b/run.json"' in html
+    qa_section = html.split('id="qa-heading"')[1].split('</section>')[0]
+    assert 'href="a%20%231/report.html">View individual result' in qa_section
+    assert 'href="b/run.json">View run evidence' in qa_section
     assert "Recorded request and tools" not in html
     assert "Structured response evidence" not in html
     assert "Responses side by side" in html
@@ -329,3 +332,170 @@ def test_models_share_one_graph_with_distinct_series(tmp_path):
     assert graph.series == ["1", "2", "3"]
     assert len(set(graph.colors)) == 3
     assert graph.context_lines == 3
+
+
+def test_qa_comparison_aligns_scores_and_preserves_missing_assessments(tmp_path):
+    """Saved QA stays comparable and escaped without entering execution totals."""
+    from reporting.schema import QAEvaluation, QAScore, QAVerdict
+
+    paths = []
+    payload = '<script>alert("judge")</script>'
+    for name, cost_score in (("complete", 60.0), ("partial", None), ("unjudged", None)):
+        path, run, prices = bundle(tmp_path, name)
+        if name != "unjudged":
+            run.qa = QAEvaluation(
+                status="completed", provider="codex", model="gpt-6-sol",
+                goal="Explain caching", cost_usd="0.987654", duration_ms=3210,
+                execution_duration_ms=2000, execution_cost_usd="0.00035",
+                judge_steps=[run.steps[1].model_copy(update={"id": "judge"})],
+                verdict=QAVerdict(
+                    goal_achievement=QAScore(score=90, reason=payload),
+                    answer_quality=QAScore(score=80, reason="Grounded answer"),
+                    speed=QAScore(score=70, reason="Recorded timing"),
+                    cost=QAScore(score=cost_score, reason="Known cost" if cost_score else "Missing usage"),
+                    summary="Saved judgment"))
+        path.write_text(run.model_dump_json())
+        paths.append(path)
+        assert comparison_entry(run, prices, str(path))["summary"]["model_calls"] == 1
+    before = {path: path.read_bytes() for path in paths}
+    output = tmp_path / "comparison.html"
+    render_comparison(paths, output)
+    html = output.read_text()
+    assert 'aria-label="QA scores side by side"' in html
+    assert "79.5/100" in html and "82.9/100" in html
+    assert html.count("codex:gpt-6-sol") == 1
+    assert "Judge / status" not in html and "Rubric v" not in html
+    assert "100% rubric coverage" in html and "85% rubric coverage" in html
+    assert "Partial assessment" in html and "Not evaluated" in html
+    assert "Unscored" in html and "Missing usage" in html
+    assert "0.987654" not in html and "$0.000350" in html
+    assert "These are saved assessments" not in html
+    assert payload not in html and "&lt;script&gt;" in html
+    assert all(path.read_bytes() == before[path] for path in paths)
+
+
+def test_qa_comparison_displays_failures_and_static_skip(tmp_path):
+    """Failed, skipped, and absent QA must not be presented as numeric zeros."""
+    from reporting.schema import QAEvaluation
+
+    paths = []
+    for name, status in (("failed", "error"), ("static", "skipped"), ("old_static", None)):
+        path, run, _ = bundle(tmp_path, name)
+        run.demo = name != "failed"
+        if status:
+            run.qa = QAEvaluation(status=status, provider="codex", model="gpt-6-sol",
+                                  error="Provider unavailable" if status == "error" else "Static run skipped")
+        path.write_text(run.model_dump_json())
+        paths.append(path)
+    output = tmp_path / "comparison.html"
+    render_comparison(paths, output)
+    html = output.read_text()
+    assert "Provider unavailable" in html and "Static run skipped" in html
+    assert "Skipped: static execution" in html
+    assert "0.0/100" not in html
+
+
+def test_assistant_performance_excludes_test_agents_and_preserves_unknowns(tmp_path):
+    """A slow user model must not depress assistant-only throughput or turn time."""
+    from reporting.compare import assistant_performance
+
+    _, run, _ = bundle(tmp_path, "timing")
+    run.steps[1].context["report_turn"] = 1
+    run.steps.append(run.steps[1].model_copy(update={
+        "id": "user", "start_ns": 1_000_000_000, "end_ns": 50_000_000_000,
+        "context": {"model_role": "user", "report_turn": 1}}))
+    result = assistant_performance(run)
+    assert result["tokens_per_second"] == pytest.approx(20 / .9)
+    assert result["model_seconds_per_turn"] == pytest.approx(.9)
+    run.steps[1].usage = None
+    assert assistant_performance(run)["tokens_per_second"] is None
+    assert assistant_performance(run)["model_seconds_per_turn"] == pytest.approx(.9)
+    run.steps[1].context.clear()
+    assert assistant_performance(run)["model_seconds_per_turn"] is None
+    run.demo = True
+    assert all(value is None for value in assistant_performance(run).values())
+
+
+def test_cost_recap_preserves_formula_totals_and_placement(tmp_path):
+    """The visible recap reconciles disjoint categories and sits before responses."""
+    a, run, prices = bundle(tmp_path, "a")
+    b, _, _ = bundle(tmp_path, "b")
+    entry = comparison_entry(run, prices, "a/run.json")
+    rows = {row["key"]: row for row in entry["cost_recap"]}
+    assert rows["input"]["terms"] == [{"tokens": 50, "rate": Decimal(2)}]
+    assert rows["cache_read"]["terms"] == [{"tokens": 50, "rate": Decimal(1)}]
+    assert rows["output"]["tokens"] == rows["reasoning"]["tokens"] == 10
+    assert sum(row["usd"] for row in rows.values()) == entry["summary"]["known_cost"]
+    output = tmp_path / "comparison.html"
+    render_comparison([a, b], output)
+    html = output.read_text()
+    assert html.index('id="calculation-heading"') < html.index('<h2 class="section-heading">Responses')
+    assert '50 × $2 / 1M' in html
+    assert 'Agent total' in html
+    assert 'Assistant total' not in html
+    assert 'Execution total' not in html
+    assert 'Simulated user total' not in html
+    assert 'matches graph' not in html
+    assert 'not subscription charges' not in html
+    # One shared unknown FX value spans both models rather than repeating.
+    assert '<th scope="row">Exchange rate</th><td colspan="2">Unknown</td>' in html
+
+
+def test_cost_recap_retains_multiple_rates_and_unknowns(tmp_path):
+    """Tiered rates get separate terms; missing receipts never imply free usage."""
+    from reporting.compare import cost_recap
+    from reporting.pricing import LongContextRate
+    _, run, prices = bundle(tmp_path, "a")
+    prices.models['fixture:a'].long_context = LongContextRate(threshold=100, input=4, output=20, cache_read=2)
+    call = run.steps[1]
+    large = call.model_copy(update={"usage": Usage(input_tokens=200, output_tokens=20)})
+    rows = cost_recap([call, large], prices)
+    assert rows[0]["terms"] == [{"tokens": 50, "rate": Decimal(2)}, {"tokens": 200, "rate": Decimal(4)}]
+    unknown = call.model_copy(update={"usage": None})
+    rows = cost_recap([call, unknown], prices)
+    assert all(row["unknown"] and row["missing_usage"] for row in rows)
+    assert rows[0]["usd"] == Decimal('.0001')
+
+
+def test_fixed_speed_score_is_monotonic_and_independent_of_other_models(tmp_path):
+    """Faster equal-output runs score higher; unknown/failed runs stay unscored."""
+    from reporting.performance import speed_score
+    _, run, _ = bundle(tmp_path, "speed")
+    call = run.steps[1]
+    call.context["report_turn"] = 1
+    original = speed_score(run)
+    call.end_ns = call.start_ns + int(call.duration_ms * 500_000)
+    assert speed_score(run).score > original.score
+    call.usage = Usage(input_tokens=100, output_tokens=0)
+    assert speed_score(run).score < original.score
+    call.usage = None
+    assert speed_score(run).score is None
+    run.demo = True
+    assert speed_score(run).score is None
+
+
+def test_native_timing_comparison_labels_missing_peer(tmp_path):
+    """Native Codex metrics must render alongside an explicitly unmeasured API peer."""
+    import json
+    a, run, _ = bundle(tmp_path, "native")
+    b, _, _ = bundle(tmp_path, "api")
+    call = run.steps[1]
+    call.provider = "codex"
+    call.context["codex_telemetry"] = json.dumps({"status": "captured", "samples": [
+        {"name": "codex.turn.e2e_duration_ms", "count": 1, "sum_ms": 500},
+        {"name": "codex.turn.ttft.duration_ms", "count": 1, "sum_ms": 120},
+    ]})
+    a.write_text(run.model_dump_json())
+    output = tmp_path / "comparison.html"
+    render_comparison([a, b], output)
+    html = output.read_text()
+    native = html.split('id="native-timing-heading"')[1].split('</section>')[0]
+    assert '120.00 ms' in native and '900.00 ms' in native
+    assert '500.00 ms' not in native
+    assert 'Output rate' in native
+    assert 'Timing diagnostics' not in html
+    assert 'Backend inference' not in html
+    assert 'Time outside the turn' not in html
+    assert 'Unavailable' in native
+    assert 'Turn time' in native and 'Time to first token' in native
+    assert 'Codex turn time' not in native and 'Time outside the Codex turn' not in native

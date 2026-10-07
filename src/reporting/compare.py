@@ -9,14 +9,17 @@ Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
 
 import os
+import re
 from decimal import Decimal
 from importlib.resources import files
 from pathlib import Path
 from urllib.parse import quote
 
-from jinja2 import Environment, select_autoescape
+from jinja2 import DictLoader, Environment, select_autoescape
 
-from reporting.pricing import Prices, load_prices, summarize
+from reporting.native_timing import timing_rows
+from reporting.performance import assistant_performance
+from reporting.pricing import CATEGORIES, Prices, breakdown, load_prices, summarize
 from reporting.render import conversation_turns, cost_chart, user_test_outcome
 from reporting.schema import Run
 
@@ -36,6 +39,34 @@ def response_text(messages: list[dict]) -> str:
             text.extend(block["text"] for block in content
                         if isinstance(block, dict) and isinstance(block.get("text"), str))
     return "\n\n".join(text) or "No text response captured; see the full report for structured evidence."
+
+
+
+def cost_recap(calls: list, prices: Prices) -> list[dict]:
+    """Explain the same disjoint charges used by the chart, grouped by rate.
+
+    Derive each effective rate from the canonical unrounded charge and count,
+    so long-context tariffs and cache lifetime rules cannot drift here. Unknown
+    usage/rates remain explicit; zero buckets need no multiplication expression.
+    Different tariffs receive separate terms instead of a misleading average.
+    """
+    parts = [breakdown(call, prices) for call in calls]
+    rows = []
+    for index, (key, label) in enumerate(CATEGORIES):
+        buckets = [part[index] for part in parts]
+        terms = {}
+        for bucket in buckets:
+            count, amount = bucket["tokens"], bucket["usd"]
+            if count:
+                rate = amount * Decimal(1_000_000) / count if amount is not None else None
+                terms[rate] = terms.get(rate, 0) + count
+        rows.append({"key": key, "label": label,
+                     "terms": [{"tokens": count, "rate": rate} for rate, count in terms.items()],
+                     "unknown": not calls or any(b["usd"] is None for b in buckets),
+                     "missing_usage": any(b["tokens"] is None for b in buckets),
+                     "tokens": sum(b["tokens"] or 0 for b in buckets),
+                     "usd": sum((b["usd"] for b in buckets if b["usd"] is not None), Decimal(0))})
+    return rows
 
 
 def comparison_entry(run: Run, prices: Prices, source: str) -> dict:
@@ -70,6 +101,10 @@ def comparison_entry(run: Run, prices: Prices, source: str) -> dict:
         "prices": prices,
         "source": source,
         "summary": summary,
+        "performance": assistant_performance(run),
+        "cost_recap": cost_recap(models, prices),
+        "native_timing": timing_rows(models) if not run.demo else [],
+        "execution_summary": summarize(run, prices),
         "models": sorted({
             f"{step.provider or 'Unknown provider'}:{step.model or 'Unknown model'}"
             for step in models
@@ -207,8 +242,27 @@ def render_comparison(
         # when a bundle only contains JSON evidence.
         entry["report_href"] = quote(os.path.relpath(report.resolve(), destination.parent.resolve())) if report.is_file() else None
         entry["source_href"] = quote(entry["source"])
+        # Show one shared judge above the table. Preserve per-run identity only
+        # when provider, model, or recorded reasoning effort actually differs.
+        qa = run.qa
+        efforts = sorted({step.effort for step in qa.judge_steps if step.effort}) if qa else []
+        entry["qa_judge"] = (
+            f"{qa.provider}:{qa.model}" + (f" · {', '.join(efforts)} effort" if efforts else "")
+            if qa else None
+        )
         entries.append(entry)
-    env = Environment(autoescape=select_autoescape(default=True))
+    qa_judges = list(dict.fromkeys(entry["qa_judge"] for entry in entries if entry["qa_judge"]))
+    # Equality includes every check, weight and numerical anchor. A shared judge
+    # name alone cannot make independently invented criteria comparable.
+    rubrics = [entry["run"].qa.rubric if entry["run"].qa else None for entry in entries]
+    shared_rubric = (rubrics[0] if all(rubrics) and
+                     len({rubric.fingerprint for rubric in rubrics}) == 1 else None)
+    mixed_rubrics = any(rubrics) and shared_rubric is None
+    env = Environment(
+        autoescape=select_autoescape(default=True),
+        loader=DictLoader({name: files("reporting").joinpath(f"templates/{name}").read_text(encoding="utf-8")
+                           for name in ("comparison_qa.html", "qa_criteria.html")}),
+    )
     env.filters["response_text"] = response_text
     rows, by_turn = comparison_rows(entries)
     legend = comparison_charts(entries)
@@ -217,4 +271,10 @@ def render_comparison(
     template = env.from_string(
         files("reporting").joinpath("templates/comparison.html").read_text(encoding="utf-8")
     )
-    destination.write_text(template.render(title=title, entries=entries, rows=rows, by_turn=by_turn, legend=legend, shared_chart=shared_chart), encoding="utf-8")
+    html = template.render(title=title, entries=entries, rows=rows, by_turn=by_turn,
+                           legend=legend, shared_chart=shared_chart, qa_judges=qa_judges,
+                           shared_rubric=shared_rubric, mixed_rubrics=mixed_rubrics)
+    # Preserve captured trailing spaces in the rendered text while keeping the
+    # generated HTML free of source whitespace errors (common Markdown breaks).
+    html = re.sub(r" +(?=\n)", lambda match: "&#32;" * len(match[0]), html)
+    destination.write_text(html, encoding="utf-8")

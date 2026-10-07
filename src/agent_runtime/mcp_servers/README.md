@@ -39,7 +39,7 @@ An MCP host can launch it using this configuration (adjust the checkout path):
 }
 ```
 
-## Deep Agents integration
+## LangGraph integration
 
 Use the supplied async context with an already configured chat model:
 
@@ -48,19 +48,19 @@ from agent_runtime.agents.wikipedia_mcp_agent import open_agent
 
 
 async def answer(model, question):
-    async with open_agent(model) as agent:
+    async with open_agent({"model": model}) as agent:
         return await agent.ainvoke(
             {"messages": [{"role": "user", "content": question}]}
         )
 ```
 
 `open_agent` launches the server with the active Python interpreter, discovers its
-tools, and supplies them to `create_deep_agent`. It keeps the connection open
+tools, and supplies them to `create_agent`. It keeps the connection open
 until the context exits. Use `ainvoke`/`astream` for the asynchronous MCP tools.
 The optional `directory=Path(...)` parameter is application configuration.
 Existing synchronous RAG samples continue using their direct local tool.
 
-Deep Agents needs no special server or custom tool wrapper. Current LangChain
+The LangGraph agent needs no special server or custom tool wrapper. Current LangChain
 provides `MCPAdapter` in `langchain.mcp` through the `langchain[mcp]` extra. It
 converts MCP definitions into ordinary LangChain tools for the agent's `tools`
 parameter. This API is currently beta; the project lockfile records tested
@@ -70,13 +70,13 @@ versions. Older examples use the separate `langchain-mcp-adapters` package and
 To connect directly to another FastMCP server:
 
 ```python
-from deepagents import create_deep_agent
+from langchain.agents import create_agent
 from langchain.mcp import MCPAdapter
 
 
 async def answer_from_server(model, question, server_url):
     async with MCPAdapter(server_url) as adapter:
-        agent = create_deep_agent(model=model, tools=await adapter.list_tools())
+        agent = create_agent(model=model, tools=await adapter.list_tools())
         return await agent.ainvoke(
             {"messages": [{"role": "user", "content": question}]}
         )
@@ -92,8 +92,8 @@ This helper does not itself create an HTML report or change `run.json` accountin
 uv run pytest -q tests/test_wikipedia_mcp.py tests/test_rag.py
 ```
 
-Tests cover real MCP discovery, a tiny real Chroma collection, a scripted Deep
-Agent tool loop, a stdio subprocess, input limits, and missing-index startup.
+Tests cover real MCP discovery, a tiny real Chroma collection, a scripted LangGraph
+agent tool loop, a stdio subprocess, input limits, and missing-index startup.
 They need no API keys or downloads and do not assess live model answer quality.
 
 References checked September 18, 2026:

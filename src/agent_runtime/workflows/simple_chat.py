@@ -9,7 +9,6 @@ AI attribution: Generated with AI assistance.
 Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
 
-from deepagents.backends import StateBackend
 from langchain_core.language_models import BaseChatModel
 from langgraph.graph.state import CompiledStateGraph
 
@@ -33,4 +32,4 @@ def build_workflow(model: BaseChatModel | None = None) -> CompiledStateGraph:
     # This intentionally thin composition boundary chooses a participant, not
     # its behavior. The agent owns instructions/tools; the shared Conversation
     # supplies user turns and retains history only when execution begins.
-    return build_agent({"model": model, "backend": StateBackend()})
+    return build_agent({"model": model})

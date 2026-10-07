@@ -6,7 +6,7 @@
 Learn what delegation actually does to execution, context, and cost. The parent
 asks a specialist for a bounded piece of work; the specialist calls a real local
 tool and returns a summary. The parent then produces the user-facing answer.
-Both are real DeepAgents/LangGraph agents, even when the models are simulated.
+Both are real LangGraph agents, even when the models are simulated.
 
 ## Run
 
@@ -73,12 +73,12 @@ does not infer separate response streams for multiple agents sharing one object.
 The specialist dictionary explicitly supplies its own system prompt, model, and
 echo tool. The parent does not have that echo tool. Its generated `task`
 request selects `isolated-subagent` and supplies a self-contained assignment.
-DeepAgents performs the invocation and returns the specialist's final message as
+The explicit SubAgentMiddleware performs the invocation and returns the specialist's final message as
 the parent's tool result. The application never calls the specialist manually.
 
-`StateBackend` keeps framework file operations in memory. DeepAgents also exposes
-its standard built-in tools/default delegation capabilities; the scripted run
-uses only the named specialist and the echo tool.
+`SubAgentMiddleware` uses `StateBackend` for its runtime state. The parent
+receives only `task`, registered for the named specialist; the specialist receives
+only `echo_tool`. No general-purpose child or filesystem tools are added.
 
 ## Expected sequence
 

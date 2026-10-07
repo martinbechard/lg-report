@@ -402,6 +402,31 @@ def export_workbook(data, output):
     with xlsxwriter.Workbook(
         output, {"strings_to_formulas": False, "strings_to_urls": False}
     ) as workbook:
+        if data.get("qa"):
+            # QA is a saved assessment, never a formula or an extra execution
+            # charge. Its independent overhead must not enter workbook totals.
+            qa = data["qa"]
+            sheet = ReportSheet(workbook, "QA", ["Criterion", "Score / 100", "Reason"])
+            sheet.sheet.set_column("A:A", 30)
+            sheet.sheet.set_column("C:C", 100)
+            rows = [("Status", qa["status"], f"{qa['provider']}:{qa['model']}"),
+                    ("Overall", qa["overall_score"] if qa["overall_score"] is not None else "Unscored",
+                     f"Rubric coverage: {qa['coverage']:.0%}; available weights renormalized"),
+                    ("Judge overhead", f"{qa['duration_ms'] / 1000:.2f}s",
+                     f"{qa['cost_usd']} USD estimated" if qa['cost_usd'] is not None else "Cost unknown")]
+            if qa.get("verdict"):
+                rows.append(("Summary", "", qa["verdict"]["summary"]))
+                for key in ("goal_achievement", "answer_quality", "speed", "cost"):
+                    item = qa["verdict"][key]
+                    rows.append((key.replace("_", " ").title(), item["score"] if item["score"] is not None else "Unscored", item["reason"]))
+            if qa.get("error"):
+                rows.append(("Diagnostic", "", qa["error"]))
+            if qa.get("truncated"):
+                rows.append(("Evidence", "", "Judge input was truncated; see run.json for full evidence."))
+            for row, values in enumerate(rows, 2):
+                sheet.sheet.set_row(row - 1, 60)
+                for col, value in enumerate(values):
+                    sheet.value(row, col, value, sheet.content)
         turns = ReportSheet(
             workbook,
             "Turns",

@@ -9,8 +9,10 @@ AI attribution: Generated with AI assistance.
 Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
 
-from deepagents import create_deep_agent
-from deepagents.middleware.subagents import SubAgent
+from deepagents.backends import StateBackend
+from deepagents.middleware.subagents import SubAgent, SubAgentMiddleware
+from langchain.agents import create_agent
+from langchain.agents.middleware import HumanInTheLoopMiddleware
 from langgraph.graph.state import CompiledStateGraph
 
 # The parent delegates the echo demonstration instead of duplicating the child's tools.
@@ -26,7 +28,7 @@ def build_agent(
     """Prepare a parent that obtains the specialist's echo summary before answering the user.
 
     model handles the parent's decisions and final response. The specification
-    contains the specialist's own model, instructions, and tools; DeepAgents
+    contains the specialist's own model, instructions, and tools; middleware
     compiles it and registers its name with task. This function makes no model
     request. The workflow's caller supplies messages when invoking the graph.
     """
@@ -36,10 +38,27 @@ def build_agent(
     # invoking this parent graph ultimately returns state containing messages.
     # Delegation is a normal graph tool operation, so nested callbacks retain
     # parent/child trace relationships without a second manual invocation.
-    # DeepAgents compiles the specialist and preserves native delegation policy.
-    return create_deep_agent(
+    # Register only this specialist through the existing native task middleware.
+    # The general-purpose child and filesystem tools from the convenience
+    # factory are unrelated to this lesson and must not enter either prompt.
+    parameters = dict(parameters)
+    backend = parameters.pop("backend", None)
+    if backend is None:
+        backend = StateBackend()
+    # Preserve the existing approval contract when removing the convenience
+    # factory: children inherit the parent policy unless explicitly overridden.
+    # Copy the specification so composing this parent cannot alter another graph.
+    interrupt_on = parameters.pop("interrupt_on", None)
+    specialist_specification = dict(specialist_specification)
+    specialist_specification.setdefault("interrupt_on", interrupt_on)
+    middleware = [*parameters.pop("middleware", []), SubAgentMiddleware(
+        backend=backend, subagents=[specialist_specification],
+    )]
+    if interrupt_on:
+        middleware.append(HumanInTheLoopMiddleware(interrupt_on=interrupt_on))
+    return create_agent(
         **parameters,
         name="delegating_parent",
         system_prompt=PARENT_PROMPT,
-        subagents=[specialist_specification],
+        middleware=middleware,
     )

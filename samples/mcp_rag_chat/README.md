@@ -1,7 +1,7 @@
 <!-- Copyright (c) 2026 Martin.Bechard@DevConsult.ca; third-party source excerpts retain their original rights. -->
-# Deep Agents with Wikipedia MCP
+# LangGraph with Wikipedia MCP
 
-Run a Deep Agent that discovers `semantic_search_wikipedia` from a local FastMCP server,
+Run a LangGraph agent that discovers `semantic_search_wikipedia` from a local FastMCP server,
 searches the completed WikiText-103 Chroma index over stdio, and consumes the
 returned passages in a second model request. The standard recorder saves
 `run.json`, `spans.jsonl`, `prices.json`, and `report.html`.

@@ -94,7 +94,7 @@ def test_graph_executes_tools_and_returns_observation(gateway, asynchronous):
     history = json.loads(requests[1][1])
     assert history[-1]["tool_call_id"] == history[-2]["tool_calls"][0]["id"]
     assert history[-1]["content"] == "local observation"
-    assert '"name": "read_note"' in requests[0][0]
+    assert json.loads(requests[0][0].splitlines()[-1])["tools"][0]["name"] == "read_note"
     assert all(m.usage_metadata["total_tokens"] == 120 for m in result["messages"] if isinstance(m, AIMessage))
 
 

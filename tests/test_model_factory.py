@@ -93,7 +93,7 @@ def test_subagent_live_build_does_not_load_script(monkeypatch):
     """A live app builds both factory models without touching scripted content.
 
     Stub only the provider constructor: the actual app, workflow, specialist,
-    and DeepAgents compilation still run. No paid request is needed to verify
+    and LangGraph compilation still run. No paid request is needed to verify
     this construction boundary.
     """
     from langchain_core.messages import AIMessage

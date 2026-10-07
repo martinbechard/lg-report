@@ -4,7 +4,8 @@ save_report normalizes closed spans, resolves missing automatic model tariffs,
 and writes run.json, the pricing snapshot, and HTML. clear_report removes only
 generated artifacts before replacement.
 Console execution and streamed web runs share these functions; this module does
-not execute workflows or own capture lifetime. Empty evidence never proves success.
+not execute workflows or own capture lifetime. Optional QA assesses closed
+evidence before rendering; its overhead is separate from execution totals. Empty evidence never proves success.
 Architecture and ownership: docs/chat-composition.md.
 AI attribution: Generated with AI assistance.
 Copyright (c) 2026 Martin.Bechard@DevConsult.ca
@@ -47,7 +48,7 @@ def clear_report(directory: Path):
 
 
 def save_report(
-    directory, prices, *, title, demo=False, status="ok", output=None, run_id=None
+    directory, prices, *, title, demo=False, status="ok", output=None, run_id=None, qa=None
 ):
     """Export closed trace evidence using the same accounting for every interface.
 
@@ -73,6 +74,11 @@ def save_report(
     # snapshots, before every exporter receives the same saved accounting basis.
     # Explicit pricing files remain offline; failed lookups remain unpriced.
     ensure_run_prices(run, prices)
+    if qa is not None:
+        # Evaluate only the closed workflow evidence. Judge receipts stay in the
+        # QA record, so they cannot inflate the result's measured speed or cost.
+        run.qa = qa(run, prices)
+        (directory / "run.json").write_text(run.model_dump_json(indent=2), encoding="utf-8")
     (directory / "prices.json").write_text(
         prices.model_dump_json(indent=2), encoding="utf-8"
     )

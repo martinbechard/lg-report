@@ -70,6 +70,7 @@ def create_app(
     capture_content=False,
     prompt_overrides=None,
     sample_directory=None,
+    qa=None,
 ):
     """Build a local app; every chat retains its own factory/model instance.
 
@@ -158,6 +159,11 @@ def create_app(
             raise HTTPException(
                 503, "Cannot open this sample. Check the server configuration."
             ) from None
+        from dataclasses import replace
+
+        # A browser can select a different sample; judge its own goal rather
+        # than the sample used to start the server. Each completed turn is judged.
+        judge = replace(qa, goal=catalog.get(selection.sample).goal or catalog.get(selection.sample).description) if qa else None
         thread_id = str(uuid4())
         sessions[thread_id] = WebConversation(
             graph,
@@ -172,6 +178,7 @@ def create_app(
             ),
             prices=prices,
             capture_content=capture_content,
+            qa=judge,
         )
         return {"threadId": thread_id}
 
@@ -332,6 +339,7 @@ def start_workflow_api_listener(
         default_sample=sample_id,
         default_live=settings.live,
         capture_content=settings.capture_content,
+        qa=settings.qa,
         prompt_overrides={sample_id: prompts} if prompts is not None else None,
     )
     print(f"Angular chat: http://127.0.0.1:{port}")

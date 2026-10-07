@@ -78,10 +78,10 @@ class RegisteredProvider:
             if not self.policy.is_configured(settings):
                 raise ValueError(f"Set {key} in the environment or .env")
             options["api_key"] = settings[key]
-        if self.policy.supports_max_tokens:
-            # Replacement documents can be large; preserve the common 32K
-            # allowance while rejecting a budget that cannot produce an answer.
-            limit = int(settings.get("LG_MAX_TOKENS", "32768"))
+        if self.policy.supports_max_tokens and settings.get("LG_MAX_TOKENS"):
+            # Send a limit only when configured; omission leaves OpenAI's
+            # output allowance to the model instead of imposing a hidden cap.
+            limit = int(settings["LG_MAX_TOKENS"])
             if limit <= 0:
                 raise ValueError("LG_MAX_TOKENS must be positive")
             options["max_tokens"] = limit
@@ -107,7 +107,9 @@ def _openai(model, settings, options):
     """Keep native Responses tools/reasoning and explicit custom endpoints."""
     from langchain_openai import ChatOpenAI
 
-    return ChatOpenAI(model=model, use_responses_api=True,
+    # Streaming lets the recorder observe first output; invoke still returns the
+    # assembled message, including the final usage receipt used for accounting.
+    return ChatOpenAI(model=model, use_responses_api=True, streaming=True,
                       base_url=settings.get("OPENAI_BASE_URL") or None,
                       **_api_options(options))
 
@@ -118,6 +120,9 @@ def _anthropic(model, settings, options):
 
     from .cache_policy import CACHE_TTL
 
+    # Anthropic requires an output limit; preserve its existing 32K allowance
+    # without imposing that provider-specific requirement on OpenAI requests.
+    options = {"max_tokens": 32768, **options}
     return ChatAnthropic(model_name=model,
                          model_kwargs={"cache_control": {"type": "ephemeral", "ttl": CACHE_TTL}},
                          **_api_options(options))
@@ -128,6 +133,8 @@ def _codex(model, settings, options):
     from .codex_model import CodexChatModel
 
     return CodexChatModel(model_name=model, executable=settings.get("LG_CODEX_CLI") or "codex",
+                          capture_telemetry=settings.get("LG_CODEX_OTEL", "true").lower() != "false",
+                          model_catalog_file=settings.get("LG_CODEX_MODEL_CATALOG") or None,
                           **options)
 
 

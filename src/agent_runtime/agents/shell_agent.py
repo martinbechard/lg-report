@@ -1,4 +1,4 @@
-"""Define a DeepAgent that runs requested scripts through the native execute tool.
+"""Define a LangGraph agent that runs requested scripts through the native execute tool.
 
 ShellBackend supplies storage and command execution. The agent owns the prompt
 and tool decisions; sample wiring supplies a prepared workspace and the model.
@@ -9,7 +9,8 @@ AI attribution: Generated with AI assistance by Northstar.
 Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
 
-from deepagents import create_deep_agent
+from deepagents.middleware.filesystem import FilesystemMiddleware
+from langchain.agents import create_agent
 
 SYSTEM_PROMPT = """Run the shell script requested by the user using execute.
 Commands run in the prepared working directory. Use relative paths in shell
@@ -21,10 +22,17 @@ not success. Do not invent script results or rerun a failed script unless asked.
 
 def build_agent(parameters: dict):
     """Construct the model/tool loop without executing a script or model call."""
-    # Filesystem middleware registers execute; SandboxBackendProtocol supplies
-    # its implementation. No application tool duplicates the native schema.
-    return create_deep_agent(
+    # Explicit middleware retains the supported execute schema and backend.
+    # read_file is required by FilesystemMiddleware to retrieve evicted output;
+    # other filesystem tools and implicit delegation are not part of this role.
+    parameters = dict(parameters)
+    backend = parameters.pop("backend")
+    middleware = [*parameters.pop("middleware", []), FilesystemMiddleware(
+        backend=backend, tools=["read_file", "execute"],
+    )]
+    return create_agent(
         **parameters,
+        middleware=middleware,
         system_prompt=SYSTEM_PROMPT,
         name="shell_agent",
     )

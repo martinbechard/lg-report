@@ -56,8 +56,10 @@ class WebConversation:
         directory,
         prices=None,
         capture_content=False,
+        qa=None,
     ):
         """Retain the exact sample factory result without executing the graph."""
+        self.qa = qa
         self.workflow = workflow
         self.capture_content = capture_content
         configure_context_audit(workflow, capture_content=capture_content)
@@ -224,4 +226,5 @@ class WebConversation:
             demo=not self.live,
             status=status,
             run_id=run_id,
+            qa=self.qa,
         )

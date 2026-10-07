@@ -9,7 +9,7 @@ AI attribution: Generated with AI assistance.
 Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
 
-from deepagents import create_deep_agent
+from langchain.agents import create_agent
 from langgraph.graph.state import CompiledStateGraph
 
 from agent_runtime.tools.service_evidence import inspect_service, test_plan
@@ -26,8 +26,8 @@ def build_agent(parameters: dict) -> CompiledStateGraph:
 
     Both tools remain fictional fixtures even when parameters selects a live model.
     This lets learners examine a longer reasoning/tool trace without connecting
-    the agent to real infrastructure. DeepAgents adds its native tools alongside
-    the domain tools; callers attach recording when invoking the graph.
+    the agent to real infrastructure. Only the two domain tools are registered;
+    callers attach recording when invoking the graph.
     Tool or model errors propagate so an incomplete investigation cannot
     silently become a successful recommendation.
     """
@@ -40,7 +40,7 @@ def build_agent(parameters: dict) -> CompiledStateGraph:
     # decides when to call each through the normal LangGraph tool loop.
     # In offline mode the sequence is deterministic. A live model may choose a
     # different number/order of calls, and its reported token usage is retained.
-    return create_deep_agent(
+    return create_agent(
         **parameters,
         tools=[inspect_service, test_plan],
         system_prompt=SYSTEM_PROMPT,

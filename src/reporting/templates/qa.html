@@ -1,0 +1,19 @@
+{# Copyright (c) 2026 Martin.Bechard@DevConsult.ca
+   Show saved independent QA in both full and comparison reports. All model text
+   is autoescaped. Missing scores/costs remain explicit; no model runs on render.
+   AI attribution: Generated with AI assistance by Alex Northstar. #}
+<section class="turn" aria-label="QA evaluation">
+<h2>QA evaluation</h2>
+<p>{{ qa.provider }}:{{ qa.model }} · {{ qa.status }}</p>
+{% if qa.goal %}<p><strong>Goal:</strong> {{ qa.goal }}</p>{% endif %}
+{% if qa.rubric %}{% with rubric=qa.rubric %}{% include 'qa_criteria.html' %}{% endwith %}{% endif %}
+{% if qa.verdict %}
+<p><strong>Overall: {{ qa.overall_score if qa.overall_score is not none else 'Unscored' }}{% if qa.overall_score is not none %}/100{% endif %}</strong> · {{ '%.0f'|format(qa.coverage * 100) }}% rubric coverage{% if qa.coverage < 0.999 %} · Partial assessment{% endif %}</p>
+<p>{{ qa.verdict.summary|replace('Assistant', 'Agent')|replace('assistant', 'agent') }}</p>
+<dl>{% for key, label, weight in [('goal_achievement', 'Goal achievement', 40), ('answer_quality', 'Answer quality', 30), ('speed', 'Speed', 15), ('cost', 'Cost', 15)] %}
+<dt>{{ label }} · {{ qa.verdict[key].score if qa.verdict[key].score is not none else 'Unscored' }}{% if qa.verdict[key].score is not none %}/100{% endif %} · {{ weight }}% weight</dt><dd>{{ qa.verdict[key].reason|replace('Assistant', 'Agent')|replace('assistant', 'agent') }}</dd>
+{% endfor %}</dl>
+{% endif %}
+{% if qa.error %}<p class="notice">{{ qa.error }}</p>{% endif %}
+{% if qa.truncated %}<p class="notice">The judge received truncated evidence. See run.json for the full captured trace.</p>{% endif %}
+</section>

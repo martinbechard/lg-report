@@ -102,6 +102,7 @@ def execute_conversation(
                     include_output=settings.capture_content,
                     overwrite=settings.overwrite,
                     config=config,
+                    qa=settings.qa,
                 )
                 if trace:
                     trace.complete(result)

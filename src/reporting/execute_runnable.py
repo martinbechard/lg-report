@@ -33,6 +33,7 @@ def execute_runnable(
     include_output=False,
     config=None,
     overwrite=False,
+    qa=None,
 ):
     """Invoke a runnable synchronously and save its execution evidence locally.
 
@@ -51,6 +52,7 @@ def execute_runnable(
     are identity defaults when callback metadata is absent. include_output opts
     into saving message/tool content, which can contain sensitive information.
 
+    Optional qa evaluates the closed trace after execution with separate receipts.
     Return the invocation result unchanged after saving the report. Execution is
     not retried. Invocation exceptions propagate after the
     finally block attempts export, so failures remain inspectable; I/O or export
@@ -103,5 +105,5 @@ def execute_runnable(
         if include_output and isinstance(result, dict) and result.get("messages"):
             output = str(result["messages"][-1].content)
         save_report(
-            directory, prices, title=title, demo=demo, status=status, output=output
+            directory, prices, title=title, demo=demo, status=status, output=output, qa=qa
         )

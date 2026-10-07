@@ -28,7 +28,7 @@ SAMPLES = tuple(
 )
 
 
-def run_sample(name, directory, *, prices, fx_file, env, simulated=False):
+def run_sample(name, directory, *, prices, fx_file, env, simulated=False, qa=None, qa_model=None, qa_provider=None):
     """Produce one lesson's current HTML and Excel reports for the batch index.
 
     main calls this for each selected lesson so successful rows refer to this
@@ -76,6 +76,11 @@ def run_sample(name, directory, *, prices, fx_file, env, simulated=False):
         "static" if simulated else "agent",
     ]
     command.extend(["--demo", "--static" if simulated else "--live"])
+    if qa is not None:
+        command.append("--qa" if qa else "--no-qa")
+    for flag, value in (("--qa-model", qa_model), ("--qa-provider", qa_provider)):
+        if value:
+            command.extend([flag, value])
     if fx_file:
         command.extend(["--fx-file", str(fx_file)])
     if name == "file_approval":
@@ -144,7 +149,7 @@ def write_index(output, results, *, simulated=False):
     reports and every lesson's log; filesystem errors propagate to the caller.
     """
     mode = (
-        "Simulated models and scripted human answers; no paid model calls."
+        "Simulated models and scripted human answers; no paid model calls. QA is skipped."
         if simulated
         else "Real provider models; scripted requests and file approvals. Quote clarification uses terminal answers."
     )
@@ -154,6 +159,10 @@ def write_index(output, results, *, simulated=False):
     if (output / "model_comparison/report.html").is_file():
         rows.append('<li>Saved model comparison — '
                     '<a href="model_comparison/report.html">HTML</a> (separate runs)</li>')
+    if (output / "qa_evaluation/report.html").is_file():
+        rows.append('<li>Saved QA evaluation — '
+                    '<a href="qa_evaluation/report.html">HTML</a> · '
+                    '<a href="qa_evaluation/report.xlsx">Excel</a> (Sol 6 judge, separate run)</li>')
     for name, ok in results:
         links = (
             (
@@ -214,6 +223,10 @@ def main():
         default=ROOT / ".env.local",
         help="Shared model credentials/settings (default: repository .env.local; shell values win)",
     )
+    parser.add_argument("--qa", action=argparse.BooleanOptionalAction, default=None,
+                        help="Enable a QA judge for live samples; simulated runs skip QA")
+    parser.add_argument("--qa-model", help="Judge model (default: gpt-6-sol)")
+    parser.add_argument("--qa-provider", help="Judge provider (default: codex)")
     args = parser.parse_args()
     try:
         env = dict(os.environ)
@@ -284,6 +297,7 @@ def main():
                 fx_file=fx_file,
                 env=env,
                 simulated=args.simulated,
+                qa=args.qa, qa_model=args.qa_model, qa_provider=args.qa_provider,
             )
             ok = True
         except (OSError, RuntimeError, subprocess.CalledProcessError) as exc:

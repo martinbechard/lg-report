@@ -54,6 +54,13 @@ def argument_parser(
                         help="Model playing the user in live runs (default: gpt-6-luna)")
     parser.add_argument("--user-provider", help="Provider for the user model (default: codex)")
     parser.add_argument("--user-turns", type=int, help="Maximum user turns including the scenario seed (default: 3)")
+    qa = parser.add_mutually_exclusive_group()
+    qa.add_argument("--qa", action="store_true", default=None,
+                    help="Evaluate live execution with one independent Sol 6 judge; static runs skip QA")
+    qa.add_argument("--no-qa", action="store_false", dest="qa",
+                    help="Disable QA even when LG_QA is enabled")
+    parser.add_argument("--qa-model", help="Judge model (default: gpt-6-sol)")
+    parser.add_argument("--qa-provider", help="Judge provider (default: codex)")
     parser.add_argument("--out", type=Path)
     parser.add_argument(
         "--env-file",

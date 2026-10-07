@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- Compare answers alongside the single-run chart's shared accounting projection.
+<!-- Compare answers and saved QA scores alongside the shared accounting projection.
      All recorded content is escaped; charts use only saved prices and receipts.
      AI attribution: Generated with AI assistance by Ellis Northstar.
      Copyright (c) 2026 Martin.Bechard@DevConsult.ca -->
@@ -17,19 +17,20 @@ a{color:#006d78}a:focus-visible,summary:focus-visible,[tabindex]:focus-visible{o
 .chart{width:100%;display:block}svg text{font-family:system-ui,sans-serif;font-size:12px}svg .axis-label{font-size:14px}.warning{color:#864409;font-weight:600}.status{font-size:.82rem}
 table{border-collapse:collapse;table-layout:fixed;width:100%;min-width:{{ entries|length * 320 }}px}th,td{vertical-align:top;text-align:left;padding:18px 20px;border-right:1px solid var(--line)}th:last-child,td:last-child{border-right:0}thead{background:#edf5f5}th{font-size:.95rem;overflow-wrap:anywhere}
 .prompt th{border-top:1px solid var(--line);background:#f4f7f9;padding:18px 20px}.prompt .eyebrow{display:block;margin-bottom:4px}.prompt-text,.answer{white-space:pre-wrap;overflow-wrap:anywhere}.answer{font-size:.95rem;line-height:1.7}.response+.response{border-top:1px solid var(--line);margin-top:20px;padding-top:15px}.responses{padding:0;overflow:hidden}.section-heading{margin-top:32px}summary{cursor:pointer;font-weight:650}.method{font-size:.88rem}.method p{max-width:110ch}
+.qa-table{min-width:{{ 180 + entries|length * 260 }}px}.qa-table th:first-child{width:180px}.qa-table th,.qa-table td{border-bottom:1px solid var(--line);overflow-wrap:anywhere}.qa-table details{margin-top:8px}.qa-table details p{font-size:.9rem}.qa-overall{background:#edf5f5}.qa-overall strong{font-size:1.4rem}
 #chart-tip{position:fixed;z-index:10;max-width:340px;background:#163044;color:#fff;padding:12px 16px;border-radius:8px;font-size:13px;white-space:pre-line;pointer-events:none;box-shadow:0 4px 20px #0003}
 @media(max-width:650px){main{padding:24px 12px}.panel{padding:16px}.responses{padding:0}.chart-grid{grid-template-columns:1fr}.answer{font-size:.9rem}}
 @media print{main{padding:0}body{background:white}.scroll{overflow:visible}.chart-grid{grid-template-columns:repeat({{ entries|length }},1fr);gap:10px}table{min-width:0}th,td{padding:10px;font-size:10px}.answer{font-size:10px}.panel{break-inside:avoid}#chart-tip{display:none}}
 </style></head><body><main>
 <div class="eyebrow">LG Report / model comparison</div><h1>{{ title }}</h1>
+{% include "comparison_qa.html" %}
 <section class="panel" aria-labelledby="cost-heading"><h2 id="cost-heading">Cost &amp; context</h2>
 <div class="legend">{% for item in legend %}<span><i class="swatch" style="background:{{ item.color }}"></i>{{ item.label }}</span>{% endfor %}</div>
 <div class="scroll"><div class="chart-grid">{% for entry in entries %}{% set s=entry.summary %}{% set chart=entry.chart %}
 <article><header class="model"><div class="eyebrow" style="color:{{ entry.color }}"><i class="swatch line"></i>Model {{ loop.index }}</div><h3>{{ entry.models|join(', ') or 'No recorded model calls' }}</h3>
 <p class="totals">{% if not s.model_calls %}Not available{% elif s.unpriced_calls %}<span class="warning">Incomplete</span> <small>Known subtotal: ${{ '%.6f'|format(s.known_cost) }}</small>{% else %}${{ '%.6f'|format(s.known_cost) }}{% endif %}{% if entry.prices.exchange and s.model_calls %} <small>€{{ '%.6f'|format(s.known_cost * entry.prices.exchange.rate) }}{% if s.unpriced_calls %} known{% endif %}</small>{% endif %}</p>
-<p class="status">{{ s.model_calls }} calls · {{ '%.2f'|format(s.duration_ms/1000) }} s elapsed · {{ entry.run.status }}{% if entry.run.demo %} · <strong>Simulated</strong>{% endif %}</p>
-{% if entry.user_models %}<p class="status">User role: {{ entry.user_models|join(', ') }}<br>Input generation: {% if entry.user_summary.unpriced_calls %}<span class="warning">Incomplete; known subtotal </span>{% endif %}${{ '%.6f'|format(entry.user_summary.known_cost) }} · {{ entry.user_summary.model_calls }} calls (excluded from graph)</p>{% endif %}
-{% if entry.user_test %}<p class="status"><strong>{{ entry.user_test.label }}</strong> · {{ entry.user_test.turns }} user turns</p><details><summary>Goal &amp; why it stopped</summary><p><strong>Goal:</strong> {{ entry.user_test.goal }}</p><p><strong>Why it stopped:</strong> {{ entry.user_test.reason }}</p></details>{% elif entry.user_models %}<p class="status">Stop reason not recorded</p>{% endif %}
+<p class="status">{{ s.model_calls }} calls · {{ '%.2f'|format(entry.calls|sum(attribute='duration_ms')/1000) }} s model time · {{ entry.run.status }}{% if entry.run.demo %} · <strong>Simulated</strong>{% endif %}</p>
+{% if entry.user_test %}<p class="status"><strong>{{ entry.user_test.label }}</strong> · {{ entry.user_test.turns }} user turns</p><details><summary>Goal &amp; why it stopped</summary><p><strong>Goal:</strong> {{ entry.user_test.goal }}</p><p><strong>Why it stopped:</strong> {{ entry.user_test.reason|replace('Assistant', 'Agent')|replace('assistant', 'agent') }}</p></details>{% elif entry.user_models %}<p class="status">Stop reason not recorded</p>{% endif %}
 {% if entry.report_href %}<a href="{{ entry.report_href }}">Full report ↗</a>{% else %}<a href="{{ entry.source_href }}">Run evidence ↗</a> <small>(HTML report not saved)</small>{% endif %}</header>
 {% if not s.model_calls %}<p>No recorded model calls.</p>{% elif not chart %}<p class="warning">Unknown FX — EUR chart unavailable for this model.</p>{% endif %}
 {% if chart and chart.partial %}<p class="warning">Known costs only; usage or pricing is incomplete.</p>{% endif %}{% if chart and chart.token_missing %}<p class="warning">Unknown context for some requests; gaps are not zero.</p>{% endif %}
@@ -51,14 +52,46 @@ table{border-collapse:collapse;table-layout:fixed;width:100%;min-width:{{ entrie
 {% if bar.comparison_context_y is not none %}<rect x="{{ bar.comparison_x - 4 }}" y="{{ bar.comparison_context_y - 4 }}" width="8" height="8" fill="white" stroke="{{ entry.color }}" stroke-width="2" tabindex="0" data-tip="{{ model_label }} · {{ bar.label }} · {{ bar.history_label }} | Post-call context: {{ '{:,}'.format(bar.context_tokens) }} tokens | {{ bar.token_breakdown }}"/>{% endif %}{% endfor %}
 </g>{% endif %}{% endfor %}</svg></div>{% endif %}
 </section>
+{% if entries|map(attribute='native_timing')|sum(start=[])|selectattr('observed_ms', 'ne', none)|list %}
+<section class="panel" aria-labelledby="native-timing-heading"><h2 id="native-timing-heading">Execution timing</h2>
+<div class="scroll"><table class="qa-table"><thead><tr><th scope="col">Measurement</th>{% for entry in entries %}<th>{{ entry.models|join(', ') }}</th>{% endfor %}</tr></thead><tbody>
+{% for row in entries|selectattr('native_timing')|map(attribute='native_timing')|first %}{% set index=loop.index0 %}
+<tr><th scope="row">{{ row.label }}</th>{% for entry in entries %}<td>{% if entry.native_timing and entry.native_timing[index].observed_ms is not none %}{% set timing=entry.native_timing[index] %}{{ '%.2f ms'|format(timing.observed_ms) }}{% if timing.measured_calls < timing.total_calls %}<br><small>Partial · {{ timing.measured_calls }}/{{ timing.total_calls }} calls</small>{% endif %}{% else %}Unavailable{% endif %}</td>{% endfor %}</tr>
+{% endfor %}
+<tr><th scope="row">Output rate</th>{% for entry in entries %}<td>{{ '%.2f tokens/s'|format(entry.performance.tokens_per_second) if entry.performance.tokens_per_second is not none else 'Unavailable' }}</td>{% endfor %}</tr>
+</tbody></table></div>
+</section>{% endif %}
+<section class="panel" aria-labelledby="calculation-heading">
+<h2 id="calculation-heading">Cost calculation recap</h2>
+<p>Cost = tokens × USD rate per million ÷ 1,000,000.</p>
+<div class="scroll" role="region" aria-label="Cost calculation recap" tabindex="0"><table class="qa-table">
+<thead><tr><th scope="col">Calculation</th>{% for entry in entries %}<th scope="col">{{ entry.models|join(', ') or entry.run.title }}</th>{% endfor %}</tr></thead><tbody>
+<tr><th scope="row">Agent calls</th>{% for entry in entries %}<td>{{ entry.summary.model_calls }}</td>{% endfor %}</tr>
+<tr><th scope="row">Total input tokens<br><small>Includes cached input</small></th>{% for entry in entries %}<td>{{ '{:,}'.format(entry.summary.input_tokens) }}{% if entry.summary.missing_usage %} known · usage missing{% endif %}</td>{% endfor %}</tr>
+{% for row in entries[0].cost_recap %}{% set index=loop.index0 %}
+{% if row.key in ['input', 'cache_read', 'output'] or entries|map(attribute='cost_recap')|map(attribute=index)|selectattr('tokens')|list %}
+<tr><th scope="row">{{ row.label }}</th>{% for entry in entries %}{% set part=entry.cost_recap[index] %}<td>
+{% for term in part.terms %}<div>{{ '{:,}'.format(term.tokens) }} × {{ '$' + '{:f}'.format(term.rate.normalize()) if term.rate is not none else 'Unknown rate' }} / 1M</div>{% endfor %}
+{% if part.missing_usage %}<span class="warning">Usage missing</span><br>{% endif %}
+{% if part.unknown %}<span class="warning">Incomplete</span> · known subtotal {% endif %}<strong>${{ '%.8f'|format(part.usd) }}</strong>
+</td>{% endfor %}</tr>{% endif %}{% endfor %}
+{% for key, label in [('summary', 'Agent total')] %}
+<tr><th scope="row">{{ label }}</th>{% for entry in entries %}{% set total=entry[key] %}<td>{% if total.unpriced_calls %}<span class="warning">Incomplete · known subtotal</span><br>{% endif %}{% if not total.model_calls %}No model calls{% else %}<strong>${{ '%.8f'|format(total.known_cost) }}</strong>{% endif %}{% if entry.prices.exchange %}<br>€{{ '%.8f'|format(total.known_cost * entry.prices.exchange.rate) }}{% endif %}</td>{% endfor %}</tr>
+{% endfor %}
+{# A shared conversion rate is configuration, so display it once. Keep distinct
+   saved rates attributable when comparing recordings with different snapshots. #}
+{% set fx=namespace(values=[]) %}{% for entry in entries %}{% set value=entry.prices.exchange.rate if entry.prices.exchange else none %}{% if value not in fx.values %}{% set fx.values=fx.values+[value] %}{% endif %}{% endfor %}
+<tr><th scope="row">Exchange rate</th>{% if fx.values|length == 1 %}<td colspan="{{ entries|length }}">{% if fx.values[0] is not none %}1 USD = {{ fx.values[0] }} EUR{% else %}Unknown{% endif %}</td>{% else %}{% for entry in entries %}<td>{% if entry.prices.exchange %}1 USD = {{ entry.prices.exchange.rate }} EUR{% else %}Unknown{% endif %}</td>{% endfor %}{% endif %}</tr>
+</tbody></table></div>
+</section>
 <h2 class="section-heading">Responses side by side</h2>{% if not by_turn %}<p class="warning">Turn data unavailable; responses are grouped by request order.</p>{% endif %}
 <section class="panel responses"><div class="scroll" role="region" aria-label="Responses side by side" tabindex="0"><table><thead><tr>{% for entry in entries %}<th scope="col">{{ entry.models|join(', ') or entry.run.title }}</th>{% endfor %}</tr></thead>
 {% for row in rows %}<tbody><tr class="prompt"><th colspan="{{ entries|length }}"><span class="eyebrow">{{ row.label }}</span><span class="prompt-text">{{ row.prompt or 'Different prompts' }}</span></th></tr><tr>{% for cell in row.cells %}<td>
 {% if not row.prompt and cell.calls %}<p class="prompt-text"><strong>Prompt</strong><br>{{ cell.prompt or 'Request content not captured.' }}</p>{% endif %}
 {% for call in cell.calls %}<div class="response">{% if cell.calls|length > 1 %}<p class="muted">Response {{ loop.index }} · {{ call.provider }}:{{ call.model }}</p>{% endif %}{% if call.error %}<p class="warning">{{ call.error }}</p>{% endif %}<div class="answer">{% if call.response %}{{ call.response|response_text }}{% else %}Response content not captured.{% endif %}</div></div>{% else %}<p class="muted">No recorded response for this {{ 'turn' if by_turn else 'request' }}.</p>{% endfor %}</td>{% endfor %}</tr></tbody>{% else %}<tbody><tr><td colspan="{{ entries|length }}">No model responses recorded.</td></tr></tbody>{% endfor %}
 </table></div></section>
-<details class="panel method"><summary>Cost details &amp; sources</summary><p>Costs are token-based estimates, not subscription charges. The chart shows assistant costs; user-agent costs are listed separately. Full reports include both.</p><p>Context includes input and retained output. Requests are spaced by order, not time. Elapsed time includes user-agent replies and provider startup. Codex token counts include its harness context. Prompts, histories, tools, and model settings can differ between runs.</p>
-{% for entry in entries %}<p><strong>{{ entry.models|join(', ') or entry.run.title }}</strong> · {{ entry.run.title }}<br>Missing usage: <strong>{{ entry.summary.missing_usage }}</strong> calls · Incomplete pricing: {{ entry.summary.unpriced_calls }} calls.<br>Snapshot: {{ entry.prices.as_of }}. {% if entry.prices.exchange %}1 USD = {{ entry.prices.exchange.rate }} EUR · {{ entry.prices.exchange.date }}{% else %}Unknown FX{% endif %}<br><a href="{{ entry.source_href }}">Saved run evidence</a></p>{% endfor %}</details>
+<details class="panel method"><summary>Cost details &amp; sources</summary>
+{% for entry in entries %}<p><strong>{{ entry.models|join(', ') or entry.run.title }}</strong> · {{ entry.run.title }}<br>Missing usage: <strong>{{ entry.summary.missing_usage }}</strong> calls · Incomplete pricing: {{ entry.summary.unpriced_calls }} calls.<br>Snapshot: {{ entry.prices.as_of }}.<br><a href="{{ entry.source_href }}">Saved run evidence</a></p>{% endfor %}</details>
 </main><div id="chart-tip" role="tooltip" hidden></div>
 <script>
 // Text-only tooltips preserve captured content as data, with keyboard access.

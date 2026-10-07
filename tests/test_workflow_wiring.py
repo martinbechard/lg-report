@@ -62,6 +62,7 @@ def test_native_delegation_retains_parent_approval():
     """Passing native options through the dictionary must protect child tool calls."""
     from langchain_core.messages import AIMessage
     from langchain_core.tools import tool
+    from langgraph.types import Command
 
     from agent_runtime.agents.delegating_parent import build_agent
 
@@ -87,7 +88,8 @@ def test_native_delegation_retains_parent_approval():
                         },
                     }
                 ],
-            )
+            ),
+            AIMessage(content="Note recorded"),
         ]
     )
     child = ScriptedChatModel(
@@ -101,7 +103,8 @@ def test_native_delegation_retains_parent_approval():
                         "args": {"text": "Pending approval"},
                     }
                 ],
-            )
+            ),
+            AIMessage(content="Note recorded"),
         ]
     )
     graph = build_agent(
@@ -124,3 +127,11 @@ def test_native_delegation_retains_parent_approval():
     )
     assert result["__interrupt__"]
     assert writes == []
+    # Resume the same checkpoint to prove approval is neither bypassed nor
+    # lost by the explicit delegation middleware, and execute the write once.
+    resumed = graph.invoke(
+        Command(resume={"decisions": [{"type": "approve"}]}),
+        {"configurable": {"thread_id": "native-child-approval"}},
+    )
+    assert writes == ["Pending approval"]
+    assert resumed["messages"][-1].content == "Note recorded"

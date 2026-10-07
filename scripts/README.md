@@ -64,6 +64,7 @@ See the [project README](../README.md) and [pip installation instructions](../PI
 ```text
 scripts/
 ├── run_samples.py             # Run local samples and export reports
+├── run_model_comparison.py    # Run one sample against a provider:model list
 ├── download_rag.py            # Download and verify RAG archive pieces
 ├── calibrate_models.py        # Verify configured model metadata
 ├── update_exchange_rate.py    # Refresh the saved USD-to-EUR rate
@@ -196,3 +197,31 @@ python scripts/update_exchange_rate.py --help
 ```
 
 The diagram and packaging scripts have no help mode; invoking them performs their normal work.
+
+## Compare a model list
+
+[run_model_comparison.py](run_model_comparison.py) runs one sample with common
+settings across a list of models, then creates a single comparison report:
+
+```sh
+python scripts/run_model_comparison.py --models openai:gpt-5.5 codex:gpt-5.5 openai:gpt-5.6-luna codex:gpt-5.6-luna codex:gpt-6-sol --qa --out outputs/five-model-comparison
+```
+
+Set `LG_CODEX_MODEL_CATALOG=~/.codex/models_cache.json` in the environment file
+to use the minimal Codex gateway profile. This reuses exact model metadata while
+removing native tools and duplicate application schemas; see
+[Codex models](../docs/codex-models.md).
+
+Models run sequentially with medium Agent effort and no explicit OpenAI output
+limit, the same high-effort Codex
+GPT-6 Luna user, and optional high-effort Sol 6 QA. Use a new output directory for
+a fresh experiment. Add `--saved-only` to rebuild the selected existing bundles
+without model calls; `--models` still selects and orders the report columns.
+With `--qa`, the judge creates one shared `qa-rubric.json` before trials start.
+When rerunning a subset for an existing comparison, pass
+`--qa --qa-rubric PATH/qa-rubric.json` to retain its exact scoring criteria.
+The saved goal must match the sample; this skips the rubric-planning call.
+To change scoring without rerunning Agents, copy the selected bundles into a
+new directory and pass `--rescore --out DIRECTORY`. This calls the judge for one
+rubric and each saved execution; `--saved-only` continues to make no model calls.
+A failed child stops execution and retains its `run.log` and any captured evidence.

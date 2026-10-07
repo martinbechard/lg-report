@@ -3,13 +3,15 @@
 
 Open [the report index](index.html) to view HTML or download Excel for every sample.
 The [model comparison](model_comparison/report.html) combines separate live
-GPT-5.5, GPT-5.6-luna, and Codex GPT-6-sol runs starting from the same simple-chat request. GPT-6 Luna (Codex, high effort)
+GPT-5.5 and GPT-5.6 Luna runs through both OpenAI and Codex, plus Codex GPT-6 Sol, all starting from the same simple-chat request. GPT-6 Luna (Codex, high effort)
 plays the user in every run, adapting follow-ups to each assistant. Conversations
 may therefore end at different turns. The shared goal covers workflow steps and
 tool observations, with no minimum turn count. Each run records the user model's
 stop explanation and distinguishes goal completion from the safety cap.
-User-model costs are shown separately from
-the tested assistants in the comparison graph.
+The comparison shows only the tested assistants’ costs and timings.
+Its QA assessments share the saved `model_comparison/qa-rubric.json`: binary
+goal checks, anchored quality checks, and common speed/cost formulas. The
+report displays these criteria once above the comparison table.
 Codex uses its local CLI and account; its usage includes harness overhead.
 Its estimated cost uses the corresponding OpenAI API token rates, with the
 exact mapping retained in the saved pricing aliases. Its nested
@@ -70,3 +72,34 @@ The claims comparison now uses `edit-with-patched-state` (formerly
 `claims_context_managed`). Saved report folders and display titles use the new
 names. Raw traces and context audits retain the original execution, including
 historical mode labels; this rename did not rerun or simulate those live calls.
+
+## QA evaluation example
+
+`qa_evaluation/` records a live `simple_chat` execution through Codex GPT-6 Luna,
+with the authored fixed user prompts and one independent Codex GPT-6 Sol judge.
+The October 6, 2026 recording contains all four QA scores, reasons, overall score,
+and separate judge receipts in `run.json`. HTML and Excel display the saved
+assessment. Scores are subjective rubric judgments, not benchmark results.
+
+Reproduce with `LG_PROVIDER=codex LG_MODEL=gpt-6-luna uv run python -m agent_runtime
+--sample simple_chat --demo --live --client static --qa --prices models.json
+--out reports/qa_evaluation` (as one shell command). This makes real model calls
+and replaces that example; the regular batch keeps the saved example linked.
+
+All five columns in the saved comparison were rerun on October 6, 2026 after
+switching simple chat to a tool-free LangGraph agent. Both API and Codex requests
+omit the eight unused application tools. Codex uses the minimal catalog profile
+with no native tools, skills, or identity guidance. Every Agent uses medium
+reasoning effort; the Codex GPT-6 Luna user and Sol 6 judge use high effort.
+All five assessments use the same saved scoring criteria. Goal and quality
+scores are calculated from the judge's criterion checks; speed and cost use
+the shared numeric scales. The comparison shows turn time, time to first token, output rate,
+and a cost-calculation recap after the graph. Judge cost is omitted, and
+Agent performance measurements exclude both the judge and simulated user.
+Both direct API runs were refreshed with streaming first-output capture.
+Timing rows are shared across providers; the root README documents
+client versus internal timing boundaries. QA cost assessments cover Agent
+model calls only. The exchange rate is shown once when shared. Extra backend
+diagnostic metrics are omitted from the report and collector.
+The Codex payload investigation and remaining differences from the direct SDK
+are documented in [Codex models](../docs/codex-models.md#request-payload-inspection).

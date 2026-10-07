@@ -90,6 +90,17 @@ def test_standalone_application(name, calls, tools, turn_count, tmp_path):
         assert ('plan_update_step', 'working_step', 'work') in routes
     assert sum(s.kind == "model" for s in run.steps) == calls
     assert sum(s.kind == "tool" for s in run.steps) == tools
+    # Explicit tool catalogs are the regression boundary: successful answers
+    # alone would miss accidental filesystem or delegation prompt overhead.
+    expected_tools = {"simple_chat": set(), "tool_chat": {"echo_tool"},
+                      "thinking_agent": {"inspect_service", "test_plan"},
+                      "subagent_chat": {"task", "echo_tool"},
+                      "shell_script": {"read_file", "execute"}}
+    if name in expected_tools:
+        advertised = {tool.get("function", tool)["name"]
+                      for step in run.steps if step.kind == "model"
+                      for tool in (step.tool_definitions or [])}
+        assert advertised == expected_tools[name]
     assert all(s.context.get("description") for s in run.steps)
     # Every sample's outer conversation uses the same plain context name.
     # Separate child/peer histories retain their own names and line segments.

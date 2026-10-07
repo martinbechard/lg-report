@@ -1,6 +1,6 @@
 """Verify the MCP sample's reporting bridge without downloads or paid models.
 
-An in-process FastMCP fixture exercises protocol adaptation and real Deep Agent
+An in-process FastMCP fixture exercises protocol adaptation and real LangGraph agent
 routing. Separate server tests and the standalone smoke run cover stdio transport.
 
 AI attribution: Modified with AI assistance.
@@ -14,8 +14,8 @@ from functools import partial
 from pathlib import Path
 
 import pytest
-from deepagents import create_deep_agent
 from fixtures.mock_client import MockClient
+from langchain.agents import create_agent
 from langchain.mcp import MCPAdapter
 
 from agent_runtime.harness.conversation import Conversation, Request
@@ -60,13 +60,13 @@ def test_sample_records_mcp_evidence(tmp_path, monkeypatch):
     @asynccontextmanager
     async def open_fixture(parameters):
         # Keep an MCP session alive while the synchronous bridge uses its agent.
-        # `model` is the scripted model passed by the workflow. Yield a real Deep
-        # Agent configured with discovered tools; finally records context exit even
+        # `model` is the scripted model passed by the workflow. Yield a real LangGraph
+        # agent configured with discovered tools; finally records context exit even
         # when the caller raises. The transport is in-process, not stdio.
         async with MCPAdapter(build_server(Collection())) as adapter:
             lifecycle.append("opened")
             try:
-                yield create_deep_agent(
+                yield create_agent(
                     **parameters,
                     name="wikipedia_mcp_agent",
                     tools=await adapter.list_tools(),

@@ -206,12 +206,12 @@ def test_sync_async_history_and_binding(isolated, tmp_path):
 
 
 def test_simple_chat_graph_with_tool_free_adapter(isolated, tmp_path):
-    """DeepAgents can bind its built-ins yet receive a normal tool-free response."""
+    """The simple-chat graph sends a plain request with no gateway tool envelope."""
     from agent_runtime.agents.chat_agent import build_agent
 
     model = copilot_model.CopilotChatModel(model_name="gpt-5.4", config_path=str(tmp_path / "graph.json"))
     server = copilot_model.server_for(model.config_path)
-    result = ChatResult(generations=[ChatGeneration(message=AIMessage(content=json.dumps({"content": "Hello", "tool_calls": []})))])
+    result = ChatResult(generations=[ChatGeneration(message=AIMessage(content="Hello"))])
     with patch.object(server, "request", AsyncMock(return_value=result)):
         graph = build_agent({"model": model})
         response = graph.invoke({"messages": [HumanMessage(content="Hello")]})

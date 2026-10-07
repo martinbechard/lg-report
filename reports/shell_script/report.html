@@ -47,9 +47,11 @@ summary::-webkit-details-marker{display:none}
 /* The initial HTML is simplified even before JavaScript initializes. */
 #execution-tree.summary-view .full-detail, #execution-tree.summary-view .detail-only, #execution-tree .tree-row[hidden] { display:none; }
 </style></head><body><main>
-<header><h1>Shell script</h1><span>ok</span></header>
+<header><h1>Shell script</h1><span>ok</span><small>Offline demonstration · no provider billed</small></header>
 
-<div class="cards"><div class="card"><span>Estimated model cost</span><strong>0.000624 EUR</strong><strong>0.000709 USD</strong><small>all calls priced</small></div><div class="card"><span>Input tokens · including cache</span><strong>4,687</strong></div><div class="card"><span>Output tokens · including reasoning</span><strong>57</strong></div><div class="card"><span>Model calls / elapsed</span><strong>2 / 2.05s</strong></div></div>
+
+<div class="cards"><div class="card"><span>Estimated model cost</span><strong>0.000276 EUR</strong><strong>0.000314 USD</strong><small>all calls priced</small></div><div class="card"><span>Input tokens · including cache</span><strong>1,692</strong></div><div class="card"><span>Output tokens · including reasoning</span><strong>107</strong></div><div class="card"><span>Model calls / elapsed</span><strong>2 / 0.17s</strong></div></div>
+
 
 
 
@@ -61,7 +63,7 @@ summary::-webkit-details-marker{display:none}
 <section aria-labelledby="workflow-state-heading">
 <h2 id="workflow-state-heading">Workflow state diagram</h2>
 <p>Automatically generated from compiled LangGraph definitions saved with this run. Arrows show possible transitions. Nested boxes show child graphs; dashed links expand their call nodes. Two-headed task links show model-selected delegation and its return. The collaboration diagram below shows the recorded agent activity.</p>
-<div style="overflow-x:auto;margin:1rem 0"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 924 844" style="display:block;width:100%;min-width:1000px;max-width:924px" role="img" aria-label="Workflow state diagram with nested workflow boundaries"><title>Workflow states and nested graph calls</title><desc>Solid arrows are possible state transitions. Dashed links expand child workflow calls. Runtime middleware is separate from agent behavior and intercepts model invocations. These are declared routes, not a recorded sequence.</desc><defs><marker id="state-arrow-0" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#455568"/></marker></defs><rect x="12" y="12" width="900" height="820" rx="12" fill="#edf5fd" stroke="#8595a7"/><text x="30" y="40" font-size="17" font-weight="600">shell_agent</text><text x="30" y="64" font-size="12">Compiled graph; arrows show declared transitions</text><rect x="452" y="108" width="440" height="700" rx="12" fill="#edf7f0" stroke="#8595a7"/><text x="470" y="136" font-size="17" font-weight="600">general-purpose</text><text x="470" y="160" font-size="12">Compiled graph; arrows show declared transitions</text><path d="M 657 428 V 472" fill="none" stroke="#455568" stroke-width="1.5" data-source="PatchToolCallsMiddleware.before_agent" data-target="model" marker-end="url(#state-arrow-0)"/><path d="M 657 316 V 360" fill="none" stroke="#455568" stroke-width="1.5" data-source="__start__" data-target="PatchToolCallsMiddleware.before_agent" marker-end="url(#state-arrow-0)"/><path d="M 552 618 H 540 V 506 H 552" fill="none" stroke="#455568" stroke-width="1.5" data-source="tools" data-target="model" marker-end="url(#state-arrow-0)"/><path d="M 657 540 V 584" fill="none" stroke="#455568" stroke-width="1.5" data-source="model" data-target="tools" marker-end="url(#state-arrow-0)"/><path d="M 762 506 H 794 V 730 H 762" fill="none" stroke="#455568" stroke-width="1.5" data-source="model" data-target="__end__" marker-end="url(#state-arrow-0)"/><path d="M 762 484 H 816 V 506 H 762" fill="none" stroke="#455568" stroke-width="1.5" data-source="model" data-target="model" marker-end="url(#state-arrow-0)"/><path d="M 217 332 V 376" fill="none" stroke="#455568" stroke-width="1.5" data-source="PatchToolCallsMiddleware.before_agent" data-target="model" marker-end="url(#state-arrow-0)"/><path d="M 217 220 V 264" fill="none" stroke="#455568" stroke-width="1.5" data-source="__start__" data-target="PatchToolCallsMiddleware.before_agent" marker-end="url(#state-arrow-0)"/><path d="M 112 522 H 100 V 410 H 112" fill="none" stroke="#455568" stroke-width="1.5" data-source="tools" data-target="model" marker-end="url(#state-arrow-0)"/><path d="M 217 444 V 488" fill="none" stroke="#455568" stroke-width="1.5" data-source="model" data-target="tools" marker-end="url(#state-arrow-0)"/><path d="M 322 410 H 354 V 634 H 322" fill="none" stroke="#455568" stroke-width="1.5" data-source="model" data-target="__end__" marker-end="url(#state-arrow-0)"/><path d="M 322 388 H 376 V 410 H 322" fill="none" stroke="#455568" stroke-width="1.5" data-source="model" data-target="model" marker-end="url(#state-arrow-0)"/><path d="M 322 522 H 440 V 130 H 452" fill="none" stroke="#6c5993" stroke-dasharray="5 4" marker-start="url(#state-arrow-0)" marker-end="url(#state-arrow-0)"/><text x="330" y="512" font-size="10">task: call / return</text><g data-node-kind="process"><rect x="112" y="152" width="210" height="68" rx="22" fill="white" stroke="#455568"/></g><text x="217" y="190" text-anchor="middle" font-size="12">Start</text><g data-node-kind="process"><rect x="112" y="264" width="210" height="68" rx="2" fill="white" stroke="#455568"/></g><text x="217" y="279" text-anchor="middle" font-size="12">Patchtoolcallsmiddleware.bef</text><text x="217" y="293" text-anchor="middle" font-size="12">ore agent</text><g data-node-kind="model"><rect x="112" y="376" width="210" height="68" rx="12" fill="#e9efff" stroke="#455568"/><title>Choose a tool or return an answer</title><text x="217" y="419" text-anchor="middle" font-size="10">Choose a tool or return an answer</text></g><text x="217" y="398" text-anchor="middle" font-size="12">Model</text><g data-node-kind="tool"><path d="M 124 488 H 322 L 310 556 H 112 Z" fill="#e5f6ef" stroke="#34785c"/><title>Run tools; append results to history. Available: ls, read_file, write_file, edit_file, delete, glob, grep, execute, task</title><text x="217" y="531" text-anchor="middle" font-size="10">Run tools; append results to</text><text x="217" y="543" text-anchor="middle" font-size="10">history. Available: ls, read_file,</text></g><text x="217" y="510" text-anchor="middle" font-size="12">Tools</text><g data-node-kind="process"><rect x="112" y="600" width="210" height="68" rx="22" fill="white" stroke="#455568"/></g><text x="217" y="638" text-anchor="middle" font-size="12">End</text><g data-node-kind="process"><rect x="552" y="248" width="210" height="68" rx="22" fill="white" stroke="#455568"/></g><text x="657" y="286" text-anchor="middle" font-size="12">Start</text><g data-node-kind="process"><rect x="552" y="360" width="210" height="68" rx="2" fill="white" stroke="#455568"/></g><text x="657" y="375" text-anchor="middle" font-size="12">Patchtoolcallsmiddleware.bef</text><text x="657" y="389" text-anchor="middle" font-size="12">ore agent</text><g data-node-kind="model"><rect x="552" y="472" width="210" height="68" rx="12" fill="#e9efff" stroke="#455568"/><title>Choose a tool or return an answer</title><text x="657" y="515" text-anchor="middle" font-size="10">Choose a tool or return an answer</text></g><text x="657" y="494" text-anchor="middle" font-size="12">Model</text><g data-node-kind="tool"><path d="M 564 584 H 762 L 750 652 H 552 Z" fill="#e5f6ef" stroke="#34785c"/><title>Run tools; append results to history. Available: ls, read_file, write_file, edit_file, delete, glob, grep, execute</title><text x="657" y="627" text-anchor="middle" font-size="10">Run tools; append results to</text><text x="657" y="639" text-anchor="middle" font-size="10">history. Available: ls, read_file,</text></g><text x="657" y="606" text-anchor="middle" font-size="12">Tools</text><g data-node-kind="process"><rect x="552" y="696" width="210" height="68" rx="22" fill="white" stroke="#455568"/></g><text x="657" y="734" text-anchor="middle" font-size="12">End</text></svg></div>
+<div style="overflow-x:auto;margin:1rem 0"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 464 612" style="display:block;width:100%;min-width:1000px;max-width:464px" role="img" aria-label="Workflow state diagram with nested workflow boundaries"><title>Workflow states and nested graph calls</title><desc>Solid arrows are possible state transitions. Dashed links expand child workflow calls. Runtime middleware is separate from agent behavior and intercepts model invocations. These are declared routes, not a recorded sequence.</desc><defs><marker id="state-arrow-0" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#455568"/></marker></defs><rect x="12" y="12" width="440" height="588" rx="12" fill="#edf5fd" stroke="#8595a7"/><text x="30" y="40" font-size="17" font-weight="600">shell_agent</text><text x="30" y="64" font-size="12">Compiled graph; arrows show declared transitions</text><path d="M 217 220 V 264" fill="none" stroke="#455568" stroke-width="1.5" data-source="__start__" data-target="model" marker-end="url(#state-arrow-0)"/><path d="M 112 410 H 100 V 298 H 112" fill="none" stroke="#455568" stroke-width="1.5" data-source="tools" data-target="model" marker-end="url(#state-arrow-0)"/><path d="M 217 332 V 376" fill="none" stroke="#455568" stroke-width="1.5" data-source="model" data-target="tools" marker-end="url(#state-arrow-0)"/><path d="M 322 298 H 354 V 522 H 322" fill="none" stroke="#455568" stroke-width="1.5" data-source="model" data-target="__end__" marker-end="url(#state-arrow-0)"/><path d="M 322 276 H 376 V 298 H 322" fill="none" stroke="#455568" stroke-width="1.5" data-source="model" data-target="model" marker-end="url(#state-arrow-0)"/><g data-node-kind="process"><rect x="112" y="152" width="210" height="68" rx="22" fill="white" stroke="#455568"/></g><text x="217" y="190" text-anchor="middle" font-size="12">Start</text><g data-node-kind="model"><rect x="112" y="264" width="210" height="68" rx="12" fill="#e9efff" stroke="#455568"/><title>Choose a tool or return an answer</title><text x="217" y="307" text-anchor="middle" font-size="10">Choose a tool or return an answer</text></g><text x="217" y="286" text-anchor="middle" font-size="12">LLM call</text><g data-node-kind="tool"><path d="M 124 376 H 322 L 310 444 H 112 Z" fill="#e5f6ef" stroke="#34785c"/><title>Run tools; append results to history. Available: read_file, execute</title><text x="217" y="419" text-anchor="middle" font-size="10">Run tools; append results to</text><text x="217" y="431" text-anchor="middle" font-size="10">history. Available: read_file,</text></g><text x="217" y="398" text-anchor="middle" font-size="12">Tools</text><g data-node-kind="process"><rect x="112" y="488" width="210" height="68" rx="22" fill="white" stroke="#455568"/></g><text x="217" y="526" text-anchor="middle" font-size="12">End</text></svg></div>
 </section>
 
 
@@ -77,15 +79,15 @@ summary::-webkit-details-marker{display:none}
 </details>
 
 
-
+<p>Demo token counts are simulated; percentages use the capacity of the model named in the demo pricing basis.</p>
 <label><input type="checkbox" id="context-percent-toggle"> Show context out of 100%</label>
-<div style="display:flex;gap:18px;flex-wrap:wrap"><span><span style="display:inline-block;width:12px;height:12px;background:#2458a6;margin-right:6px"></span>Fresh input</span><span><span style="display:inline-block;width:12px;height:12px;background:#35a6a0;margin-right:6px"></span>Cache read</span><span><span style="display:inline-block;width:12px;height:12px;background:#dc7952;margin-right:6px"></span>Cache-write premium</span><span><span style="display:inline-block;width:12px;height:12px;background:#658d35;margin-right:6px"></span>Output · non-reasoning</span><span><span style="display:inline-block;width:12px;height:12px;background:#c25989;margin-right:6px"></span>Reasoning</span><span><span style="display:inline-block;width:20px;border-top:3px solid #912c42;margin-right:6px"></span>Cumulative total</span><span><span style="display:inline-block;width:20px;border-top:1.5px solid #17734b;margin-right:6px"></span><span id="context-legend">Post-call Context</span></span><span>◆ Tool result</span></div>
+<div style="display:flex;gap:18px;flex-wrap:wrap"><span><span style="display:inline-block;width:12px;height:12px;background:#2458a6;margin-right:6px"></span>Fresh input</span><span><span style="display:inline-block;width:12px;height:12px;background:#35a6a0;margin-right:6px"></span>Cache read</span><span><span style="display:inline-block;width:12px;height:12px;background:#658d35;margin-right:6px"></span>Output · non-reasoning</span><span><span style="display:inline-block;width:20px;border-top:3px solid #912c42;margin-right:6px"></span>Cumulative total</span><span><span style="display:inline-block;width:20px;border-top:1.5px solid #17734b;margin-right:6px"></span><span id="context-legend">Post-call Context</span></span><span>◆ Tool result</span></div>
 <div style="overflow-x:auto"><svg viewBox="0 0 680 440" style="width:100%;min-width:680px" role="img" id="request-cost-chart" aria-label="Stacked EUR costs and context tokens for each LLM request"><text x="8" y="16" font-size="12">EUR</text>
-<line x1="75" x2="615" y1="290" y2="290" stroke="#d5e0dc"/><text x="68" y="294" text-anchor="end" font-size="10">0.000000</text><line x1="75" x2="615" y1="225" y2="225" stroke="#d5e0dc"/><text x="68" y="229" text-anchor="end" font-size="10">0.000179</text><line x1="75" x2="615" y1="160" y2="160" stroke="#d5e0dc"/><text x="68" y="164" text-anchor="end" font-size="10">0.000359</text><line x1="75" x2="615" y1="95" y2="95" stroke="#d5e0dc"/><text x="68" y="99" text-anchor="end" font-size="10">0.000538</text><line x1="75" x2="615" y1="30" y2="30" stroke="#d5e0dc"/><text x="68" y="34" text-anchor="end" font-size="10">0.000718</text>
+<line x1="75" x2="615" y1="290" y2="290" stroke="#d5e0dc"/><text x="68" y="294" text-anchor="end" font-size="10">0.000000</text><line x1="75" x2="615" y1="225" y2="225" stroke="#d5e0dc"/><text x="68" y="229" text-anchor="end" font-size="10">0.000079</text><line x1="75" x2="615" y1="160" y2="160" stroke="#d5e0dc"/><text x="68" y="164" text-anchor="end" font-size="10">0.000159</text><line x1="75" x2="615" y1="95" y2="95" stroke="#d5e0dc"/><text x="68" y="99" text-anchor="end" font-size="10">0.000238</text><line x1="75" x2="615" y1="30" y2="30" stroke="#d5e0dc"/><text x="68" y="34" text-anchor="end" font-size="10">0.000317</text>
 
 <g data-context-mode="tokens">
 <text x="672" y="16" text-anchor="end" font-size="12" fill="#17734b">Context tokens</text>
-<text x="625" y="294.0" font-size="10" fill="#17734b">0</text><text x="625" y="229.0" font-size="10" fill="#17734b">675</text><text x="625" y="164.0" font-size="10" fill="#17734b">1,350</text><text x="625" y="99.0" font-size="10" fill="#17734b">2,025</text><text x="625" y="34.0" font-size="10" fill="#17734b">2,700</text>
+<text x="625" y="294.0" font-size="10" fill="#17734b">0</text><text x="625" y="229.12380952380954" font-size="10" fill="#17734b">262</text><text x="625" y="164.0" font-size="10" fill="#17734b">525</text><text x="625" y="98.87619047619046" font-size="10" fill="#17734b">788</text><text x="625" y="34.0" font-size="10" fill="#17734b">1,050</text>
 
 </g>
 <g data-context-mode="percent" style="display:none">
@@ -93,18 +95,18 @@ summary::-webkit-details-marker{display:none}
 <text x="625" y="294" font-size="10" fill="#17734b">0%</text><text x="625" y="229" font-size="10" fill="#17734b">25%</text><text x="625" y="164" font-size="10" fill="#17734b">50%</text><text x="625" y="99" font-size="10" fill="#17734b">75%</text><text x="625" y="34" font-size="10" fill="#17734b">100%</text>
 
 </g>
-<rect x="85" y="142.72661734667605" width="16" height="147.27338265332395" fill="#2458a6" tabindex="0" data-cost-tip="Request 1 · Turn 1 · shell_agent | Request execute. | Previous context: 0 tokens | Net input change: +2,310 tokens | Total input: 2,310 tokens | • System prompt: unreported | • Tool documentation: unreported | • Conversation: unreported | Input billing | • Fresh input: 2,310 tokens | • Cache read: 0 tokens | Cache write: 2,307 tokens | Output: 37 tokens | • Non-reasoning output: 28 tokens | • Reasoning: 9 tokens (added to context) | • Post-call Context: 2,347 tokens"></rect><rect x="85" y="105.95608771667406" width="16" height="36.77052963000199" fill="#dc7952" tabindex="0" data-cost-tip="Request 1 · Turn 1 · shell_agent | Request execute. | Previous context: 0 tokens | Net input change: +2,310 tokens | Total input: 2,310 tokens | • System prompt: unreported | • Tool documentation: unreported | • Conversation: unreported | Input billing | • Fresh input: 2,310 tokens | • Cache read: 0 tokens | Cache write: 2,307 tokens | Output: 37 tokens | • Non-reasoning output: 28 tokens | • Reasoning: 9 tokens (added to context) | • Post-call Context: 2,347 tokens"></rect><rect x="85" y="95.24529625097777" width="16" height="10.710791465696287" fill="#658d35" tabindex="0" data-cost-tip="Request 1 · Turn 1 · shell_agent | Request execute. | Previous context: 0 tokens | Net input change: +2,310 tokens | Total input: 2,310 tokens | • System prompt: unreported | • Tool documentation: unreported | • Conversation: unreported | Input billing | • Fresh input: 2,310 tokens | • Cache read: 0 tokens | Cache write: 2,307 tokens | Output: 37 tokens | • Non-reasoning output: 28 tokens | • Reasoning: 9 tokens (added to context) | • Post-call Context: 2,347 tokens"></rect><rect x="85" y="91.80254185128969" width="16" height="3.4427543996880923" fill="#c25989" tabindex="0" data-cost-tip="Request 1 · Turn 1 · shell_agent | Request execute. | Previous context: 0 tokens | Net input change: +2,310 tokens | Total input: 2,310 tokens | • System prompt: unreported | • Tool documentation: unreported | • Conversation: unreported | Input billing | • Fresh input: 2,310 tokens | • Cache read: 0 tokens | Cache write: 2,307 tokens | Output: 37 tokens | • Non-reasoning output: 28 tokens | • Reasoning: 9 tokens (added to context) | • Post-call Context: 2,347 tokens"></rect><text x="93.0" y="310" text-anchor="middle" font-size="11" tabindex="0" data-cost-tip="R1 · shell_agent | Request execute.">R1</text><text transform="translate(93.0, 322) rotate(-90)" text-anchor="end" dominant-baseline="middle" font-family="monospace" font-size="9" fill="#684296">shell_agent</text><rect x="109" y="285.53717022262657" width="16" height="4.462829777373454" fill="#2458a6" tabindex="0" data-cost-tip="Request 2 · Turn 1 · shell_agent | Recorded answer: Orders: 3 Total units: 9 Exit status: 0 | Previous context: 2,347 tokens (prior post-call) | Net input change: +30 tokens | Total input: 2,377 tokens | • System prompt: unreported | • Tool documentation: unreported | • Conversation: unreported | Input billing | • Fresh input: 70 tokens | • Cache read: 2,307 tokens | Cache write: 67 tokens | Output: 20 tokens | • Non-reasoning output: 20 tokens | • Reasoning: 0 tokens | • Post-call Context: 2,397 tokens"></rect><rect x="109" y="270.8289583706258" width="16" height="14.708211852000796" fill="#35a6a0" tabindex="0" data-cost-tip="Request 2 · Turn 1 · shell_agent | Recorded answer: Orders: 3 Total units: 9 Exit status: 0 | Previous context: 2,347 tokens (prior post-call) | Net input change: +30 tokens | Total input: 2,377 tokens | • System prompt: unreported | • Tool documentation: unreported | • Conversation: unreported | Input billing | • Fresh input: 70 tokens | • Cache read: 2,307 tokens | Cache write: 67 tokens | Output: 20 tokens | • Non-reasoning output: 20 tokens | • Reasoning: 0 tokens | • Post-call Context: 2,397 tokens"></rect><rect x="109" y="269.76106695961136" width="16" height="1.067891411014362" fill="#dc7952" tabindex="0" data-cost-tip="Request 2 · Turn 1 · shell_agent | Recorded answer: Orders: 3 Total units: 9 Exit status: 0 | Previous context: 2,347 tokens (prior post-call) | Net input change: +30 tokens | Total input: 2,377 tokens | • System prompt: unreported | • Tool documentation: unreported | • Conversation: unreported | Input billing | • Fresh input: 70 tokens | • Cache read: 2,307 tokens | Cache write: 67 tokens | Output: 20 tokens | • Non-reasoning output: 20 tokens | • Reasoning: 0 tokens | • Post-call Context: 2,397 tokens"></rect><rect x="109" y="262.1105016269712" width="16" height="7.6505653326402046" fill="#658d35" tabindex="0" data-cost-tip="Request 2 · Turn 1 · shell_agent | Recorded answer: Orders: 3 Total units: 9 Exit status: 0 | Previous context: 2,347 tokens (prior post-call) | Net input change: +30 tokens | Total input: 2,377 tokens | • System prompt: unreported | • Tool documentation: unreported | • Conversation: unreported | Input billing | • Fresh input: 70 tokens | • Cache read: 2,307 tokens | Cache write: 67 tokens | Output: 20 tokens | • Non-reasoning output: 20 tokens | • Reasoning: 0 tokens | • Post-call Context: 2,397 tokens"></rect><text x="117.0" y="310" text-anchor="middle" font-size="11" tabindex="0" data-cost-tip="R2 · shell_agent | Recorded answer: Orders: 3 Total units: 9 Exit status: 0">R2</text><text transform="translate(117.0, 322) rotate(-90)" text-anchor="end" dominant-baseline="middle" font-family="monospace" font-size="9" fill="#684296">shell_agent</text><line x1="85" x2="125" y1="400" y2="400" stroke="#617679"/><text x="105.0" y="419" text-anchor="middle" font-size="12">Turn 1</text><polyline points="93.0,91.80254185128967 117.0,63.913043478260875" fill="none" stroke="#912c42" stroke-width="3" pointer-events="none"/><circle cx="93.0" cy="91.80254185128967" r="5" fill="#912c42" stroke="white" stroke-width="2" tabindex="0" data-cost-tip="Request 1 · Turn 1 · shell_agent | Cumulative cost through this request: 0.00054698 EUR | Request execute. | Previous context: 0 tokens | Net input change: +2,310 tokens | Total input: 2,310 tokens | • System prompt: unreported | • Tool documentation: unreported | • Conversation: unreported | Input billing | • Fresh input: 2,310 tokens | • Cache read: 0 tokens | Cache write: 2,307 tokens | Output: 37 tokens | • Non-reasoning output: 28 tokens | • Reasoning: 9 tokens (added to context) | • Post-call Context: 2,347 tokens"/><circle cx="117.0" cy="63.913043478260875" r="5" fill="#912c42" stroke="white" stroke-width="2" tabindex="0" data-cost-tip="Request 2 · Turn 1 · shell_agent | Cumulative cost through this request: 0.00062395 EUR | Recorded answer: Orders: 3 Total units: 9 Exit status: 0 | Previous context: 2,347 tokens (prior post-call) | Net input change: +30 tokens | Total input: 2,377 tokens | • System prompt: unreported | • Tool documentation: unreported | • Conversation: unreported | Input billing | • Fresh input: 70 tokens | • Cache read: 2,307 tokens | Cache write: 67 tokens | Output: 20 tokens | • Non-reasoning output: 20 tokens | • Reasoning: 0 tokens | • Post-call Context: 2,397 tokens"/>
+<rect x="85" y="175.66612045039273" width="16" height="114.33387954960726" fill="#2458a6" tabindex="0" data-cost-tip="Request 1 · Turn 1 · shell_agent | Request execute. | Previous context: 0 tokens | Net input change: +793 tokens | Total input: 793 tokens | • System prompt: 99 tokens | • Tool documentation: 655 tokens | • Conversation: 39 tokens | Input billing | • Fresh input: 793 tokens | • Cache read: 0 tokens | Cache write: 0 tokens | Output: 58 tokens | • Non-reasoning output: 58 tokens | • Reasoning: 0 tokens | • Post-call Context: 851 tokens"></rect><rect x="85" y="125.49185805031289" width="16" height="50.17426240007985" fill="#658d35" tabindex="0" data-cost-tip="Request 1 · Turn 1 · shell_agent | Request execute. | Previous context: 0 tokens | Net input change: +793 tokens | Total input: 793 tokens | • System prompt: 99 tokens | • Tool documentation: 655 tokens | • Conversation: 39 tokens | Input billing | • Fresh input: 793 tokens | • Cache read: 0 tokens | Cache write: 0 tokens | Output: 58 tokens | • Non-reasoning output: 58 tokens | • Reasoning: 0 tokens | • Post-call Context: 851 tokens"></rect><text x="93.0" y="310" text-anchor="middle" font-size="11" tabindex="0" data-cost-tip="R1 · shell_agent | Request execute.">R1</text><text transform="translate(93.0, 322) rotate(-90)" text-anchor="end" dominant-baseline="middle" font-family="monospace" font-size="9" fill="#684296">shell_agent</text><rect x="109" y="283.0794120827476" width="16" height="6.920587917252394" fill="#2458a6" tabindex="0" data-cost-tip="Request 2 · Turn 1 · shell_agent | Recorded answer: Shell tool returned: Orders: 3 Total units: 9 [Command succeeded with exit code 0] | Previous context: 851 tokens (prior post-call) | Net input change: +48 tokens | Total input: 899 tokens | • System prompt: 99 tokens | • Tool documentation: 655 tokens | • Conversation: 145 tokens | Input billing | • Fresh input: 48 tokens | • Cache read: 851 tokens | Cache write: 0 tokens | Output: 49 tokens | • Non-reasoning output: 49 tokens | • Reasoning: 0 tokens | • Post-call Context: 948 tokens"></rect><rect x="109" y="270.8097864211189" width="16" height="12.269625661628723" fill="#35a6a0" tabindex="0" data-cost-tip="Request 2 · Turn 1 · shell_agent | Recorded answer: Shell tool returned: Orders: 3 Total units: 9 [Command succeeded with exit code 0] | Previous context: 851 tokens (prior post-call) | Net input change: +48 tokens | Total input: 899 tokens | • System prompt: 99 tokens | • Tool documentation: 655 tokens | • Conversation: 145 tokens | Input billing | • Fresh input: 48 tokens | • Cache read: 851 tokens | Cache write: 0 tokens | Output: 49 tokens | • Non-reasoning output: 49 tokens | • Reasoning: 0 tokens | • Post-call Context: 948 tokens"></rect><rect x="109" y="228.42118542794796" width="16" height="42.38860099317091" fill="#658d35" tabindex="0" data-cost-tip="Request 2 · Turn 1 · shell_agent | Recorded answer: Shell tool returned: Orders: 3 Total units: 9 [Command succeeded with exit code 0] | Previous context: 851 tokens (prior post-call) | Net input change: +48 tokens | Total input: 899 tokens | • System prompt: 99 tokens | • Tool documentation: 655 tokens | • Conversation: 145 tokens | Input billing | • Fresh input: 48 tokens | • Cache read: 851 tokens | Cache write: 0 tokens | Output: 49 tokens | • Non-reasoning output: 49 tokens | • Reasoning: 0 tokens | • Post-call Context: 948 tokens"></rect><text x="117.0" y="310" text-anchor="middle" font-size="11" tabindex="0" data-cost-tip="R2 · shell_agent | Recorded answer: Shell tool returned: Orders: 3 Total units: 9 [Command succeeded with exit code 0]">R2</text><text transform="translate(117.0, 322) rotate(-90)" text-anchor="end" dominant-baseline="middle" font-family="monospace" font-size="9" fill="#684296">shell_agent</text><line x1="85" x2="125" y1="400" y2="400" stroke="#617679"/><text x="105.0" y="419" text-anchor="middle" font-size="12">Turn 1</text><polyline points="93.0,125.49185805031291 117.0,63.913043478260875" fill="none" stroke="#912c42" stroke-width="3" pointer-events="none"/><circle cx="93.0" cy="125.49185805031291" r="5" fill="#912c42" stroke="white" stroke-width="2" tabindex="0" data-cost-tip="Request 1 · Turn 1 · shell_agent | Cumulative cost through this request: 0.00020076 EUR | Request execute. | Previous context: 0 tokens | Net input change: +793 tokens | Total input: 793 tokens | • System prompt: 99 tokens | • Tool documentation: 655 tokens | • Conversation: 39 tokens | Input billing | • Fresh input: 793 tokens | • Cache read: 0 tokens | Cache write: 0 tokens | Output: 58 tokens | • Non-reasoning output: 58 tokens | • Reasoning: 0 tokens | • Post-call Context: 851 tokens"/><circle cx="117.0" cy="63.913043478260875" r="5" fill="#912c42" stroke="white" stroke-width="2" tabindex="0" data-cost-tip="Request 2 · Turn 1 · shell_agent | Cumulative cost through this request: 0.00027590 EUR | Recorded answer: Shell tool returned: Orders: 3 Total units: 9 [Command succeeded with exit code 0] | Previous context: 851 tokens (prior post-call) | Net input change: +48 tokens | Total input: 899 tokens | • System prompt: 99 tokens | • Tool documentation: 655 tokens | • Conversation: 145 tokens | Input billing | • Fresh input: 48 tokens | • Cache read: 851 tokens | Cache write: 0 tokens | Output: 49 tokens | • Non-reasoning output: 49 tokens | • Reasoning: 0 tokens | • Post-call Context: 948 tokens"/>
 
 <g data-context-mode="percent" style="display:none">
-<polyline class="context-line" points="93.0,289.4188380952381 105.0,289.41165714285717 117.0,289.40645714285716" fill="none" stroke="#17734b" stroke-width="1.5" pointer-events="none"/>
-<circle cx="93.0" cy="289.4188380952381" r="3" fill="#17734b" stroke="white" stroke-width="1" tabindex="0" data-cost-tip="Request 1 · Turn 1 · Main context | Post-call Context: 0.224% of capacity | Capacity: 1,050,000 tokens | Model: openai:gpt-5.6-luna | Capacity verified 2026-09-20: https://developers.openai.com/api/docs/models/gpt-5.6-luna.md | Request execute. | Previous context: 0 tokens | Net input change: +2,310 tokens | Total input: 2,310 tokens | • System prompt: unreported | • Tool documentation: unreported | • Conversation: unreported | Input billing | • Fresh input: 2,310 tokens | • Cache read: 0 tokens | Cache write: 2,307 tokens | Output: 37 tokens | • Non-reasoning output: 28 tokens | • Reasoning: 9 tokens (added to context) | • Post-call Context: 2,347 tokens"/><circle cx="117.0" cy="289.40645714285716" r="3" fill="#17734b" stroke="white" stroke-width="1" tabindex="0" data-cost-tip="Request 2 · Turn 1 · Main context | Post-call Context: 0.228% of capacity | Capacity: 1,050,000 tokens | Model: openai:gpt-5.6-luna | Capacity verified 2026-09-20: https://developers.openai.com/api/docs/models/gpt-5.6-luna.md | Recorded answer: Orders: 3 Total units: 9 Exit status: 0 | Previous context: 2,347 tokens (prior post-call) | Net input change: +30 tokens | Total input: 2,377 tokens | • System prompt: unreported | • Tool documentation: unreported | • Conversation: unreported | Input billing | • Fresh input: 70 tokens | • Cache read: 2,307 tokens | Cache write: 67 tokens | Output: 20 tokens | • Non-reasoning output: 20 tokens | • Reasoning: 0 tokens | • Post-call Context: 2,397 tokens"/>
-<path class="tool-context-point" d="M 105.0 285.41165714285717 l 4 4 l -4 4 l -4 -4 Z" fill="#17734b" stroke="white" stroke-width="1" tabindex="0" data-cost-tip="Tool result · execute · Main context | Context: 2,376 tokens"/>
+<polyline class="context-line" points="93.0,289.7892761904762 105.0,289.78308571428573 117.0,289.76525714285714" fill="none" stroke="#17734b" stroke-width="1.5" pointer-events="none"/>
+<circle cx="93.0" cy="289.7892761904762" r="3" fill="#17734b" stroke="white" stroke-width="1" tabindex="0" data-cost-tip="Request 1 · Turn 1 · Main context | Illustrative Post-call Context: 0.081% of capacity | Capacity: 1,050,000 tokens | Model: openai:gpt-5.6-luna | Capacity verified 2026-09-20: https://developers.openai.com/api/docs/models/gpt-5.6-luna.md | Request execute. | Previous context: 0 tokens | Net input change: +793 tokens | Total input: 793 tokens | • System prompt: 99 tokens | • Tool documentation: 655 tokens | • Conversation: 39 tokens | Input billing | • Fresh input: 793 tokens | • Cache read: 0 tokens | Cache write: 0 tokens | Output: 58 tokens | • Non-reasoning output: 58 tokens | • Reasoning: 0 tokens | • Post-call Context: 851 tokens"/><circle cx="117.0" cy="289.76525714285714" r="3" fill="#17734b" stroke="white" stroke-width="1" tabindex="0" data-cost-tip="Request 2 · Turn 1 · Main context | Illustrative Post-call Context: 0.090% of capacity | Capacity: 1,050,000 tokens | Model: openai:gpt-5.6-luna | Capacity verified 2026-09-20: https://developers.openai.com/api/docs/models/gpt-5.6-luna.md | Recorded answer: Shell tool returned: Orders: 3 Total units: 9 [Command succeeded with exit code 0] | Previous context: 851 tokens (prior post-call) | Net input change: +48 tokens | Total input: 899 tokens | • System prompt: 99 tokens | • Tool documentation: 655 tokens | • Conversation: 145 tokens | Input billing | • Fresh input: 48 tokens | • Cache read: 851 tokens | Cache write: 0 tokens | Output: 49 tokens | • Non-reasoning output: 49 tokens | • Reasoning: 0 tokens | • Post-call Context: 948 tokens"/>
+<path class="tool-context-point" d="M 105.0 285.78308571428573 l 4 4 l -4 4 l -4 -4 Z" fill="#17734b" stroke="white" stroke-width="1" tabindex="0" data-cost-tip="Tool result · execute · Main context | Context: 876 tokens"/>
 </g>
 <g data-context-mode="tokens">
-<polyline class="context-token-line" points="93.0,63.99259259259259 105.0,61.19999999999999 117.0,59.17777777777778" fill="none" stroke="#17734b" stroke-width="1.5" pointer-events="none"/>
-<circle cx="93.0" cy="63.99259259259259" r="3" fill="#17734b" stroke="white" stroke-width="1" tabindex="0" data-cost-tip="Request 1 · Turn 1 · Main context | Request execute. | Previous context: 0 tokens | Net input change: +2,310 tokens | Total input: 2,310 tokens | • System prompt: unreported | • Tool documentation: unreported | • Conversation: unreported | Input billing | • Fresh input: 2,310 tokens | • Cache read: 0 tokens | Cache write: 2,307 tokens | Output: 37 tokens | • Non-reasoning output: 28 tokens | • Reasoning: 9 tokens (added to context) | • Post-call Context: 2,347 tokens"/><circle cx="117.0" cy="59.17777777777778" r="3" fill="#17734b" stroke="white" stroke-width="1" tabindex="0" data-cost-tip="Request 2 · Turn 1 · Main context | Recorded answer: Orders: 3 Total units: 9 Exit status: 0 | Previous context: 2,347 tokens (prior post-call) | Net input change: +30 tokens | Total input: 2,377 tokens | • System prompt: unreported | • Tool documentation: unreported | • Conversation: unreported | Input billing | • Fresh input: 70 tokens | • Cache read: 2,307 tokens | Cache write: 67 tokens | Output: 20 tokens | • Non-reasoning output: 20 tokens | • Reasoning: 0 tokens | • Post-call Context: 2,397 tokens"/>
+<polyline class="context-token-line" points="93.0,79.2761904761905 105.0,73.08571428571429 117.0,55.25714285714287" fill="none" stroke="#17734b" stroke-width="1.5" pointer-events="none"/>
+<circle cx="93.0" cy="79.2761904761905" r="3" fill="#17734b" stroke="white" stroke-width="1" tabindex="0" data-cost-tip="Request 1 · Turn 1 · Main context | Request execute. | Previous context: 0 tokens | Net input change: +793 tokens | Total input: 793 tokens | • System prompt: 99 tokens | • Tool documentation: 655 tokens | • Conversation: 39 tokens | Input billing | • Fresh input: 793 tokens | • Cache read: 0 tokens | Cache write: 0 tokens | Output: 58 tokens | • Non-reasoning output: 58 tokens | • Reasoning: 0 tokens | • Post-call Context: 851 tokens"/><circle cx="117.0" cy="55.25714285714287" r="3" fill="#17734b" stroke="white" stroke-width="1" tabindex="0" data-cost-tip="Request 2 · Turn 1 · Main context | Recorded answer: Shell tool returned: Orders: 3 Total units: 9 [Command succeeded with exit code 0] | Previous context: 851 tokens (prior post-call) | Net input change: +48 tokens | Total input: 899 tokens | • System prompt: 99 tokens | • Tool documentation: 655 tokens | • Conversation: 145 tokens | Input billing | • Fresh input: 48 tokens | • Cache read: 851 tokens | Cache write: 0 tokens | Output: 49 tokens | • Non-reasoning output: 49 tokens | • Reasoning: 0 tokens | • Post-call Context: 948 tokens"/>
 
-<path class="tool-context-point" d="M 105.0 57.19999999999999 l 4 4 l -4 4 l -4 -4 Z" fill="#17734b" stroke="white" stroke-width="1" tabindex="0" data-cost-tip="Tool result · execute · Main context | Context: 2,376 tokens"/>
+<path class="tool-context-point" d="M 105.0 69.08571428571429 l 4 4 l -4 4 l -4 -4 Z" fill="#17734b" stroke="white" stroke-width="1" tabindex="0" data-cost-tip="Tool result · execute · Main context | Context: 876 tokens"/>
 </g>
 
 
@@ -117,12 +119,12 @@ summary::-webkit-details-marker{display:none}
 
 <div class="toolbar"><button type="button" data-disclosure-target="agent-activity-list" data-expand="true">Expand all agents</button><button type="button" data-disclosure-target="agent-activity-list" data-expand="false">Collapse all agents</button></div>
 <div id="agent-activity-list">
-<details open class="agent-activity" id="agent-01a0d587-42ef-7a82-aea6-fa40a1fdab08">
+<details open class="agent-activity" id="agent-01a1143f-93d5-79a1-85dd-05eee1ff9487">
 <summary><strong>shell_agent</strong> · Turn 1 · ok</summary>
 <div>Top-level agent · Turn 1</div>
-<div>Started +0.00s · Duration 2.05s · Status: ok · 2 model call(s)</div>
-<div class="cost-line">Own model cost <div class="euro">0.000624 EUR</div><div class="dollar">0.000709 USD</div></div>
-<ul class="agent-requests"><li><a href="#request-01a0d587-42f8-7413-8109-860b31181b3c">R1</a> · Request execute.</li><li><a href="#request-01a0d587-4750-7b32-ad48-53449c4e54b6">R2</a> · Recorded answer: Orders: 3 Total units: 9 Exit status: 0</li></ul>
+<div>Started +0.00s · Duration 0.17s · Status: ok · 2 model call(s)</div>
+<div class="cost-line">Own model cost <div class="euro">0.000276 EUR</div><div class="dollar">0.000314 USD</div></div>
+<ul class="agent-requests"><li><a href="#request-01a1143f-93da-7e33-b991-06e60a74ba5a">R1</a> · Request execute.</li><li><a href="#request-01a1143f-947a-7761-809b-b8500c708224">R2</a> · Recorded answer: Shell tool returned: Orders: 3 Total units: 9 [Command succeeded with exit code 0]</li></ul>
 
 </details>
 </div>
@@ -134,12 +136,12 @@ summary::-webkit-details-marker{display:none}
 
 <h4>Turn 1</h4>
 <div style="overflow-x:auto">
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 459" style="display:block;width:380px;max-width:none" role="group" aria-label="Agent collaboration for turn 1">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 491" style="display:block;width:380px;max-width:none" role="group" aria-label="Agent collaboration for turn 1">
 <defs><marker id="collaboration-arrow-1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#684296"></path></marker></defs>
 
 
-<line x1="220" x2="220" y1="81" y2="449" stroke="#c7b8db" stroke-dasharray="4 4"></line>
-<a href="#agent-01a0d587-42ef-7a82-aea6-fa40a1fdab08" aria-label="Activity details for shell_agent">
+<line x1="220" x2="220" y1="81" y2="481" stroke="#c7b8db" stroke-dasharray="4 4"></line>
+<a href="#agent-01a1143f-93d5-79a1-85dd-05eee1ff9487" aria-label="Activity details for shell_agent">
 <rect x="95" y="4" width="250" height="73" rx="8" fill="#f6f1fb" stroke="#8462a7"></rect>
 <text x="220" y="26" text-anchor="middle" font-size="13" font-weight="600" fill="#684296">shell_agent</text>
 <text x="220" y="47" text-anchor="middle" font-size="11">1 invocation(s)</text>
@@ -147,8 +149,8 @@ summary::-webkit-details-marker{display:none}
 </a>
 
 
-<a href="#agent-01a0d587-42ef-7a82-aea6-fa40a1fdab08" aria-label="Invocation details for shell_agent">
-<rect class="agent-activation" x="214" y="111" width="12" height="280" fill="#e5d7f2" stroke="#8462a7"><title>shell_agent · ok · 2045.87 ms</title></rect>
+<a href="#agent-01a1143f-93d5-79a1-85dd-05eee1ff9487" aria-label="Invocation details for shell_agent">
+<rect class="agent-activation" x="214" y="111" width="12" height="312" fill="#e5d7f2" stroke="#8462a7"><title>shell_agent · ok · 165.62 ms</title></rect>
 </a>
 
 
@@ -161,7 +163,7 @@ summary::-webkit-details-marker{display:none}
 </g>
 
 
-<text x="8" y="173" font-size="10" fill="#617679">+7.40 ms</text>
+<text x="8" y="173" font-size="10" fill="#617679">+3.45 ms</text>
 
 <g tabindex="0" data-cost-tip="R1 · shell_agent | Request execute." aria-label="R1 · shell_agent | Request execute.">
 
@@ -170,7 +172,7 @@ summary::-webkit-details-marker{display:none}
 </g>
 
 
-<text x="8" y="247" font-size="10" fill="#617679">+1090.12 ms</text>
+<text x="8" y="247" font-size="10" fill="#617679">+132.33 ms</text>
 
 <g >
 
@@ -179,21 +181,21 @@ summary::-webkit-details-marker{display:none}
 </g>
 
 
-<text x="8" y="305" font-size="10" fill="#617679">+1119.73 ms</text>
+<text x="8" y="305" font-size="10" fill="#617679">+162.78 ms</text>
 
-<g tabindex="0" data-cost-tip="R2 · shell_agent | Recorded answer: Orders: 3 Total units: 9 Exit status: 0" aria-label="R2 · shell_agent | Recorded answer: Orders: 3 Total units: 9 Exit status: 0">
+<g tabindex="0" data-cost-tip="R2 · shell_agent | Recorded answer: Shell tool returned: Orders: 3 Total units: 9 [Command succeeded with exit code 0]" aria-label="R2 · shell_agent | Recorded answer: Shell tool returned: Orders: 3 Total units: 9 [Command succeeded with exit code 0]">
 
-<rect x="100" y="287" width="240" height="60" rx="5" fill="#f5f8fd" stroke="#8096b4"></rect>
-<text x="220" y="305" text-anchor="middle" font-size="11">R2 · LLM · ok</text><text x="220" y="321" text-anchor="middle" font-size="11">Recorded answer: Orders: 3</text><text x="220" y="337" text-anchor="middle" font-size="11">Total units: 9 Exit status: 0</text>
+<rect x="100" y="287" width="240" height="92" rx="5" fill="#f5f8fd" stroke="#8096b4"></rect>
+<text x="220" y="305" text-anchor="middle" font-size="11">R2 · LLM · ok</text><text x="220" y="321" text-anchor="middle" font-size="11">Recorded answer: Shell tool</text><text x="220" y="337" text-anchor="middle" font-size="11">returned: Orders: 3 Total</text><text x="220" y="353" text-anchor="middle" font-size="11">units: 9 [Command succeeded</text><text x="220" y="369" text-anchor="middle" font-size="11">with exit code 0]</text>
 </g>
 
 
-<text x="8" y="395" font-size="10" fill="#617679">+2045.87 ms</text>
+<text x="8" y="427" font-size="10" fill="#617679">+165.62 ms</text>
 
 <g >
 
-<rect x="100" y="377" width="240" height="28" rx="5" fill="#f5f8fd" stroke="#8096b4"></rect>
-<text x="220" y="395" text-anchor="middle" font-size="11">Finished · ok</text>
+<rect x="100" y="409" width="240" height="28" rx="5" fill="#f5f8fd" stroke="#8096b4"></rect>
+<text x="220" y="427" text-anchor="middle" font-size="11">Finished · ok</text>
 </g>
 
 
@@ -207,32 +209,14 @@ summary::-webkit-details-marker{display:none}
 <div class="toolbar"><button type="button" data-disclosure-target="conversation-list" data-expand="true">Expand all conversation</button><button type="button" data-disclosure-target="conversation-list" data-expand="false">Collapse all conversation</button></div>
 
 
-<div id="conversation-list"><details open class="turn"><summary class="turn-heading"><strong>Turn 1</strong><span class="turn-cost">Turn cost <div class="euro">0.000624 EUR</div><div class="dollar">0.000709 USD</div></span></summary>
-<div class="conversation-thread"><details open class="conversation-agent" aria-label="Agent shell_agent"><summary class="agent-label">Agent · shell_agent · ok</summary><details id="request-01a0d587-42f8-7413-8109-860b31181b3c" open class="event llm-event "><summary class="event-heading"><strong tabindex="0" data-cost-tip="R1 | Request execute.">R1 · LLM request · 2310 tokens</strong> · gpt-5.6-luna<span class="status">· ok</span><span class="span-id">01a0d587-42f8-7413-8109-860b31181b3c</span></summary><div class="agent-label">Agent · <a href="#agent-01a0d587-42ef-7a82-aea6-fa40a1fdab08">shell_agent</a></div>
+<div id="conversation-list"><details open class="turn"><summary class="turn-heading"><strong>Turn 1</strong><span class="turn-cost">Turn cost <div class="euro">0.000276 EUR</div><div class="dollar">0.000314 USD</div></span></summary>
+<div class="conversation-thread"><details open class="conversation-agent" aria-label="Agent shell_agent"><summary class="agent-label">Agent · shell_agent · ok</summary><details id="request-01a1143f-93da-7e33-b991-06e60a74ba5a" open class="event llm-event "><summary class="event-heading"><strong tabindex="0" data-cost-tip="R1 | Request execute.">R1 · LLM request · 793 tokens</strong> · scripted-chat<span class="status">· ok</span><span class="span-id">01a1143f-93da-7e33-b991-06e60a74ba5a</span></summary><div class="agent-label">Agent · <a href="#agent-01a1143f-93d5-79a1-85dd-05eee1ff9487">shell_agent</a></div>
 <p class="request-comment">Request execute.</p>
 
-<div class="request-costs" aria-label="Input token costs"><div class="cost-line"><strong>Input at standard rate · 3 tokens</strong><div class="euro">0.000001 EUR</div><div class="dollar">0.000001 USD</div></div><div class="cost-line"><strong>Cache write · 2307 tokens</strong><div class="euro">0.000507 EUR</div><div class="dollar">0.000577 USD</div></div></div>
+<div class="request-costs" aria-label="Input token costs"><div class="cost-line"><strong>Input at standard rate · 793 tokens</strong><div class="euro">0.000140 EUR</div><div class="dollar">0.000159 USD</div></div></div>
 <div class="input-detail">
 
-<details class="tool-definitions"><summary class="prompt-label">Tool definitions · tokens unreported</summary>
-
-<h5>ls</h5>
-<p>Lists all files in a directory.
-
-This is useful for exploring the filesystem and finding the right file to read or edit.
-You should almost ALWAYS use this tool before using the read_file or edit_file tools.</p>
-<pre>{
-  "properties": {
-    "path": {
-      "description": "Absolute path to the directory to list. Must be absolute, not relative.",
-      "type": "string"
-    }
-  },
-  "required": [
-    "path"
-  ],
-  "type": "object"
-}</pre>
+<details class="tool-definitions"><summary class="prompt-label">Tool definitions · 655 tokens</summary>
 
 <h5>read_file</h5>
 <p>Reads a file from the filesystem. Assume any path the user provides is valid; reading a missing file returns an error.
@@ -269,187 +253,6 @@ Usage:
   "type": "object"
 }</pre>
 
-<h5>write_file</h5>
-<p>Writes content to a file. Creates the file if it does not exist; replaces it entirely if it does.
-
-Usage:
-- Use this tool when you intend to create a new file or replace the whole file. You do not need to read the file first.
-- Prefer to edit existing files (with the edit_file tool) over creating new ones when possible.</p>
-<pre>{
-  "properties": {
-    "content": {
-      "description": "The text content to write to the file. This parameter is required.",
-      "type": "string"
-    },
-    "file_path": {
-      "description": "Absolute path where the file should be written. Must be absolute, not relative.",
-      "type": "string"
-    }
-  },
-  "required": [
-    "file_path",
-    "content"
-  ],
-  "type": "object"
-}</pre>
-
-<h5>edit_file</h5>
-<p>Performs exact string replacements in files.
-
-Usage:
-- You must read the file before editing; this tool errors otherwise.
-- Preserve the exact source indentation from the read output, and never include the read status header in old_string or new_string.
-- Prefer editing an existing file over creating a new one.
-- Only use emojis if the user explicitly requests it.</p>
-<pre>{
-  "properties": {
-    "file_path": {
-      "description": "Absolute path to the file to edit. Must be absolute, not relative.",
-      "type": "string"
-    },
-    "new_string": {
-      "description": "The text to replace old_string with. Must be different from old_string.",
-      "type": "string"
-    },
-    "old_string": {
-      "description": "The exact text to find and replace. Must be unique in the file unless replace_all is True.",
-      "type": "string"
-    },
-    "replace_all": {
-      "default": false,
-      "description": "If True, replace all occurrences of old_string. If False (default), old_string must be unique.",
-      "type": "boolean"
-    }
-  },
-  "required": [
-    "file_path",
-    "old_string",
-    "new_string"
-  ],
-  "type": "object"
-}</pre>
-
-<h5>delete</h5>
-<p>Deletes a file or directory from the filesystem.
-
-Usage:
-- Permanently removes the file or directory at the given absolute path.
-- Deleting a directory removes it and everything inside it, recursively. Prefer
-  deleting a directory in one call over deleting each file individually.
-- This cannot be undone, so only delete paths you are sure are no longer needed.</p>
-<pre>{
-  "properties": {
-    "file_path": {
-      "description": "Absolute path to the file to delete. Must be absolute, not relative.",
-      "type": "string"
-    }
-  },
-  "required": [
-    "file_path"
-  ],
-  "type": "object"
-}</pre>
-
-<h5>glob</h5>
-<p>Find files matching a glob pattern, returning absolute paths.
-
-Supports `*` (any characters within a path segment), `**` (any directories), `?` (single character), `[abc]` (one character from a set), and `{a,b}` (alternatives), e.g. `*.py`, `src/**/*.py`, `*.{yml,yaml}`.
-
-A pattern without `/` matches the file name at any depth under the search root (`*.py` matches `src/app/main.py`). A pattern containing `/` matches the search-root-relative path (`src/**/*.py`). A leading `/` anchors to the search root (`/*.py` matches only top-level Python files).
-
-Leading-dot names are only matched when the pattern segment itself starts with `.` (use `.env`, or `.github/**/*.yml`). Because `**` will not descend into dot-directories, the bare form `*.yml` is *broader* than `**/*.yml` and is usually what you want.</p>
-<pre>{
-  "properties": {
-    "path": {
-      "anyOf": [
-        {
-          "type": "string"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "default": null,
-      "description": "Base directory to search from. Defaults to the backend\u0027s default root."
-    },
-    "pattern": {
-      "description": "Glob pattern to match files (e.g., \u0027*.py\u0027, \u0027**/*.py\u0027, \u0027/subdir/**/*.md\u0027). A pattern without \u0027/\u0027 matches the file name at any depth; a pattern containing \u0027/\u0027 matches the search-root-relative path; a leading \u0027/\u0027 anchors to the search root (\u0027/*.py\u0027 matches only top-level files). Leading-dot names are excluded unless the pattern segment starts with \u0027.\u0027, so prefer the bare form \u0027*.py\u0027 over \u0027**/*.py\u0027 -- \u0027**\u0027 will not descend into dot-directories like \u0027.github\u0027.",
-      "type": "string"
-    }
-  },
-  "required": [
-    "pattern"
-  ],
-  "type": "object"
-}</pre>
-
-<h5>grep</h5>
-<p>Search for a LITERAL text pattern across files (NOT regex).
-
-The pattern is matched verbatim: regex metacharacters are ordinary characters, not operators. To match any of several strings, run a separate grep for each; `grep(pattern=&#34;foo|bar&#34;)` searches for the literal text &#34;foo|bar&#34;, and `.*` or `\.` match those characters literally.
-- If you genuinely need regex, use the execute tool with `rg &#39;&lt;regex&gt;&#39;` instead.
-
-Returns matching files or content per `output_mode`. Offloaded large tool results live under the artifacts root (`/large_tool_results/` by default); grep that directory to search them when you do not know the exact path.</p>
-<pre>{
-  "properties": {
-    "glob": {
-      "anyOf": [
-        {
-          "type": "string"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "default": null,
-      "description": "Glob pattern (NOT regex) limiting which files are searched (e.g. \u0027*.py\u0027, \u0027*.ts\u0027). A pattern without \u0027/\u0027 matches the file name at any depth; a pattern containing \u0027/\u0027 matches the search-root-relative path (e.g. \u0027src/**/*.py\u0027). This is an in-tool file filter, not a call to the separate glob tool. Brace expansion (e.g. \u0027*.{ts,tsx}\u0027) is not supported on all backends; run a separate search per extension for reliable results."
-    },
-    "max_count": {
-      "anyOf": [
-        {
-          "exclusiveMinimum": 0,
-          "type": "integer"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "default": null,
-      "description": "Optional cap on the total number of matches returned across all files. Leave unset to use the configured default. When the cap is hit, results are truncated and a note says so; narrow the pattern or path to see the rest."
-    },
-    "output_mode": {
-      "default": "files_with_matches",
-      "description": "Shape of the returned text. \u0027files_with_matches\u0027 (default): newline-separated matching file paths. \u0027content\u0027: matching lines grouped by file under a \u0027\u003cpath\u003e:\u0027 header, each line indented and formatted \u0027\u003cline_number\u003e: \u003cline text\u003e\u0027 (only the matched line, no surrounding context). \u0027count\u0027: one \u0027\u003cpath\u003e: \u003cmatch_count\u003e\u0027 line per file.",
-      "enum": [
-        "files_with_matches",
-        "content",
-        "count"
-      ],
-      "type": "string"
-    },
-    "path": {
-      "anyOf": [
-        {
-          "type": "string"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "default": null,
-      "description": "Directory to search in. Defaults to current working directory."
-    },
-    "pattern": {
-      "description": "Text pattern to search for (literal string, not regex).",
-      "type": "string"
-    }
-  },
-  "required": [
-    "pattern"
-  ],
-  "type": "object"
-}</pre>
-
 <h5>execute</h5>
 <p>Executes a shell command in an isolated sandbox and returns combined stdout/stderr with the exit code (truncated if very large).
 
@@ -457,9 +260,7 @@ Usage:
 - Quote paths containing spaces (e.g. cd &#34;/path/with spaces&#34;).
 - Chain commands with &#39;;&#39; or &#39;&amp;&amp;&#39; (use &#39;&amp;&amp;&#39; when a command depends on the previous); do not use newlines except inside quoted strings.
 - Use absolute paths and avoid `cd` so the working directory stays stable; use the optional timeout to override the default.
-- You MUST avoid using search commands like find and grep. Instead use the grep, glob tools to search. Use read_file rather than cat/head/tail.
-    - execute(command=&#34;find . -name &#39;*.py&#39;&#34;)  # Use glob tool instead
-    - execute(command=&#34;grep -r &#39;pattern&#39; .&#34;)  # Use grep tool instead
+- Use read_file rather than cat/head/tail.
 
 Only available on backends implementing SandboxBackendProtocol; otherwise it returns an error.</p>
 <pre>{
@@ -486,100 +287,41 @@ Only available on backends implementing SandboxBackendProtocol; otherwise it ret
   ],
   "type": "object"
 }</pre>
-
-<h5>task</h5>
-<p>Launch an ephemeral subagent to handle a complex, multi-step task.
-
-Available agent types and the tools they have access to:
-- general-purpose: General-purpose agent for researching complex questions, searching for files and content, and executing multi-step tasks. When you are searching for a keyword or file and are not confident that you will find the right match in the first few tries use this agent to perform the search for you. This agent has access to all tools as the main agent.
-
-Specify subagent_type to select the agent. Usage notes:
-- Launch multiple agents concurrently when their tasks are independent, using a single message with multiple tool calls.
-- Each invocation is stateless by default: the agent sees only the prompt you give it and returns a single final report. Put full detail in the prompt and state exactly what it should return — unless an agent type below says it inherits your conversation instead.
-- The agent&#39;s report is not shown to the user; relay a summary yourself.
-- Tell the agent whether to create content, analyze, or only research, since it can&#39;t necessarily see the user&#39;s intent unless it inherits your conversation, as noted per agent type below.
-- If an agent&#39;s description says to use it proactively, do so without waiting to be asked.
-- When only general-purpose is available, use it for any complex, context-heavy task; it has the same capabilities as the main agent.</p>
-<pre>{
-  "properties": {
-    "description": {
-      "description": "A detailed description of the task for the subagent to perform autonomously. Include all necessary context and specify the expected output format.",
-      "type": "string"
-    },
-    "subagent_type": {
-      "description": "The type of subagent to use. Must be one of the available agent types listed in the tool description.",
-      "type": "string"
-    }
-  },
-  "required": [
-    "description",
-    "subagent_type"
-  ],
-  "type": "object"
-}</pre>
 </details>
 
-<div class="request-setup"><div class="prompt-label">System prompt · tokens unreported</div><pre>Run the shell script requested by the user using execute.
+<div class="request-setup"><div class="prompt-label">System prompt · 99 tokens</div><pre>Run the shell script requested by the user using execute.
 Commands run in the prepared working directory. Use relative paths in shell
 commands; filesystem tools use virtual paths rooted in that same directory.
 Report the actual command output and exit status. A nonzero exit or timeout is
 not success. Do not invent script results or rerun a failed script unless asked.
 </pre></div>
-<div class="prompt-label">User prompt · tokens unreported</div><pre>Run sh ./summarize.sh and report the order totals and exit status.</pre>
+<div class="prompt-label">User prompt · 39 tokens</div><pre>Run sh ./summarize.sh and report the order totals and exit status.</pre>
 
 </div>
+<div class="prompt-label">Cache write · 793 tokens</div><div class="prompt-label">Context: Added: 793 tokens · Total: 793 tokens</div>
 
 
 
-
-<h5 class="llm-response-heading">LLM response · 37 tokens</h5><div class="reasoning-section"><div class="cost-line"><strong>Reasoning · 9 tokens</strong><div class="euro">0.000010 EUR</div><div class="dollar">0.000011 USD</div></div></div><div class="response-costs" aria-label="Output token costs"><div class="cost-line"><strong>Output · including tool calls · 28 tokens</strong><div class="euro">0.000030 EUR</div><div class="dollar">0.000034 USD</div></div></div><pre>[
-  {
-    "arguments": "{\"command\":\"sh ./summarize.sh\",\"timeout\":120}",
-    "call_id": "call_UhZPcsWNlrqTM86fvtiZZuIF",
-    "id": "fc_0305eb8a54a04ee3006ab5a3a77a9887d2898254c46a853836",
-    "index": 1,
-    "name": "execute",
-    "type": "function_call"
-  }
-]</pre><pre>{
+<h5 class="llm-response-heading">LLM response · 58 tokens</h5><div class="response-costs" aria-label="Output token costs"><div class="cost-line"><strong>Output · including tool calls · 58 tokens</strong><div class="euro">0.000061 EUR</div><div class="dollar">0.000070 USD</div></div></div><pre>{
   "args": {
-    "command": "sh ./summarize.sh",
-    "timeout": 120
+    "command": "sh ./summarize.sh"
   },
-  "id": "call_UhZPcsWNlrqTM86fvtiZZuIF",
+  "id": "shell-call-2",
   "name": "execute",
   "type": "tool_call"
-}</pre><div class="cost-line"><strong>Call cost</strong><div class="euro">0.000547 EUR</div><div class="dollar">0.000622 USD</div></div><h5>Tool call: execute</h5><div class="status">Status: ok</div></details><details  open class="event tool-event "><summary class="event-heading"><strong >Tool · execute</strong><span class="status">· ok</span><span class="span-id">01a0d587-4733-7281-936a-e7b34c0438ff</span></summary><div class="agent-label">Agent · <a href="#agent-01a0d587-42ef-7a82-aea6-fa40a1fdab08">shell_agent</a></div><h5>Tool arguments</h5><pre>{&#39;command&#39;: &#39;sh ./summarize.sh&#39;, &#39;timeout&#39;: 120}</pre>
+}</pre><div class="prompt-label">Cache write · 58 tokens</div><div class="prompt-label">Context: Added: 58 tokens · Total: 851 tokens</div><div class="cost-line"><strong>Call cost</strong><div class="euro">0.000201 EUR</div><div class="dollar">0.000228 USD</div></div><h5>Tool call: execute</h5><div class="status">Status: ok</div></details><details  open class="event tool-event "><summary class="event-heading"><strong >Tool · execute</strong><span class="status">· ok</span><span class="span-id">01a1143f-945b-7492-bd69-502bf356d2ed</span></summary><div class="agent-label">Agent · <a href="#agent-01a1143f-93d5-79a1-85dd-05eee1ff9487">shell_agent</a></div><h5>Tool arguments</h5><pre>{&#39;command&#39;: &#39;sh ./summarize.sh&#39;}</pre>
 
 
 <h5 class="">Tool result</h5><pre>Orders: 3
 Total units: 9
 
-[Command succeeded with exit code 0]</pre><div class="status">Status: ok</div></details><details id="request-01a0d587-4750-7b32-ad48-53449c4e54b6" open class="event llm-event "><summary class="event-heading"><strong tabindex="0" data-cost-tip="R2 | Recorded answer: Orders: 3 Total units: 9 Exit status: 0">R2 · LLM request · 2377 tokens</strong> · gpt-5.6-luna<span class="status">· ok</span><span class="span-id">01a0d587-4750-7b32-ad48-53449c4e54b6</span></summary><div class="agent-label">Agent · <a href="#agent-01a0d587-42ef-7a82-aea6-fa40a1fdab08">shell_agent</a></div>
-<p class="request-comment">Recorded answer: Orders: 3 Total units: 9 Exit status: 0</p>
-<div class="cost-line"><strong>Conversation history · cache read · 2307 tokens</strong><div class="euro">0.000041 EUR</div><div class="dollar">0.000046 USD</div></div>
-<div class="request-costs" aria-label="Input token costs"><div class="cost-line"><strong>Input at standard rate · 3 tokens</strong><div class="euro">0.000001 EUR</div><div class="dollar">0.000001 USD</div></div><div class="cost-line"><strong>Cache write · 67 tokens</strong><div class="euro">0.000015 EUR</div><div class="dollar">0.000017 USD</div></div></div>
+[Command succeeded with exit code 0]</pre><div class="status">Status: ok</div></details><details id="request-01a1143f-947a-7761-809b-b8500c708224" open class="event llm-event "><summary class="event-heading"><strong tabindex="0" data-cost-tip="R2 | Recorded answer: Shell tool returned: Orders: 3 Total units: 9 [Command succeeded with exit code 0]">R2 · LLM request · 899 tokens</strong> · scripted-chat<span class="status">· ok</span><span class="span-id">01a1143f-947a-7761-809b-b8500c708224</span></summary><div class="agent-label">Agent · <a href="#agent-01a1143f-93d5-79a1-85dd-05eee1ff9487">shell_agent</a></div>
+<p class="request-comment">Recorded answer: Shell tool returned: Orders: 3 Total units: 9 [Command succeeded with exit code 0]</p>
+<div class="cost-line"><strong>Conversation history · cache read · 851 tokens</strong><div class="euro">0.000015 EUR</div><div class="dollar">0.000017 USD</div></div>
+<div class="request-costs" aria-label="Input token costs"><div class="cost-line"><strong>Input at standard rate · 48 tokens</strong><div class="euro">0.000008 EUR</div><div class="dollar">0.000010 USD</div></div></div>
 <div class="input-detail">
 
-<details class="tool-definitions"><summary class="prompt-label">Tool definitions · tokens unreported</summary>
-
-<h5>ls</h5>
-<p>Lists all files in a directory.
-
-This is useful for exploring the filesystem and finding the right file to read or edit.
-You should almost ALWAYS use this tool before using the read_file or edit_file tools.</p>
-<pre>{
-  "properties": {
-    "path": {
-      "description": "Absolute path to the directory to list. Must be absolute, not relative.",
-      "type": "string"
-    }
-  },
-  "required": [
-    "path"
-  ],
-  "type": "object"
-}</pre>
+<details class="tool-definitions"><summary class="prompt-label">Tool definitions · 655 tokens</summary>
 
 <h5>read_file</h5>
 <p>Reads a file from the filesystem. Assume any path the user provides is valid; reading a missing file returns an error.
@@ -616,187 +358,6 @@ Usage:
   "type": "object"
 }</pre>
 
-<h5>write_file</h5>
-<p>Writes content to a file. Creates the file if it does not exist; replaces it entirely if it does.
-
-Usage:
-- Use this tool when you intend to create a new file or replace the whole file. You do not need to read the file first.
-- Prefer to edit existing files (with the edit_file tool) over creating new ones when possible.</p>
-<pre>{
-  "properties": {
-    "content": {
-      "description": "The text content to write to the file. This parameter is required.",
-      "type": "string"
-    },
-    "file_path": {
-      "description": "Absolute path where the file should be written. Must be absolute, not relative.",
-      "type": "string"
-    }
-  },
-  "required": [
-    "file_path",
-    "content"
-  ],
-  "type": "object"
-}</pre>
-
-<h5>edit_file</h5>
-<p>Performs exact string replacements in files.
-
-Usage:
-- You must read the file before editing; this tool errors otherwise.
-- Preserve the exact source indentation from the read output, and never include the read status header in old_string or new_string.
-- Prefer editing an existing file over creating a new one.
-- Only use emojis if the user explicitly requests it.</p>
-<pre>{
-  "properties": {
-    "file_path": {
-      "description": "Absolute path to the file to edit. Must be absolute, not relative.",
-      "type": "string"
-    },
-    "new_string": {
-      "description": "The text to replace old_string with. Must be different from old_string.",
-      "type": "string"
-    },
-    "old_string": {
-      "description": "The exact text to find and replace. Must be unique in the file unless replace_all is True.",
-      "type": "string"
-    },
-    "replace_all": {
-      "default": false,
-      "description": "If True, replace all occurrences of old_string. If False (default), old_string must be unique.",
-      "type": "boolean"
-    }
-  },
-  "required": [
-    "file_path",
-    "old_string",
-    "new_string"
-  ],
-  "type": "object"
-}</pre>
-
-<h5>delete</h5>
-<p>Deletes a file or directory from the filesystem.
-
-Usage:
-- Permanently removes the file or directory at the given absolute path.
-- Deleting a directory removes it and everything inside it, recursively. Prefer
-  deleting a directory in one call over deleting each file individually.
-- This cannot be undone, so only delete paths you are sure are no longer needed.</p>
-<pre>{
-  "properties": {
-    "file_path": {
-      "description": "Absolute path to the file to delete. Must be absolute, not relative.",
-      "type": "string"
-    }
-  },
-  "required": [
-    "file_path"
-  ],
-  "type": "object"
-}</pre>
-
-<h5>glob</h5>
-<p>Find files matching a glob pattern, returning absolute paths.
-
-Supports `*` (any characters within a path segment), `**` (any directories), `?` (single character), `[abc]` (one character from a set), and `{a,b}` (alternatives), e.g. `*.py`, `src/**/*.py`, `*.{yml,yaml}`.
-
-A pattern without `/` matches the file name at any depth under the search root (`*.py` matches `src/app/main.py`). A pattern containing `/` matches the search-root-relative path (`src/**/*.py`). A leading `/` anchors to the search root (`/*.py` matches only top-level Python files).
-
-Leading-dot names are only matched when the pattern segment itself starts with `.` (use `.env`, or `.github/**/*.yml`). Because `**` will not descend into dot-directories, the bare form `*.yml` is *broader* than `**/*.yml` and is usually what you want.</p>
-<pre>{
-  "properties": {
-    "path": {
-      "anyOf": [
-        {
-          "type": "string"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "default": null,
-      "description": "Base directory to search from. Defaults to the backend\u0027s default root."
-    },
-    "pattern": {
-      "description": "Glob pattern to match files (e.g., \u0027*.py\u0027, \u0027**/*.py\u0027, \u0027/subdir/**/*.md\u0027). A pattern without \u0027/\u0027 matches the file name at any depth; a pattern containing \u0027/\u0027 matches the search-root-relative path; a leading \u0027/\u0027 anchors to the search root (\u0027/*.py\u0027 matches only top-level files). Leading-dot names are excluded unless the pattern segment starts with \u0027.\u0027, so prefer the bare form \u0027*.py\u0027 over \u0027**/*.py\u0027 -- \u0027**\u0027 will not descend into dot-directories like \u0027.github\u0027.",
-      "type": "string"
-    }
-  },
-  "required": [
-    "pattern"
-  ],
-  "type": "object"
-}</pre>
-
-<h5>grep</h5>
-<p>Search for a LITERAL text pattern across files (NOT regex).
-
-The pattern is matched verbatim: regex metacharacters are ordinary characters, not operators. To match any of several strings, run a separate grep for each; `grep(pattern=&#34;foo|bar&#34;)` searches for the literal text &#34;foo|bar&#34;, and `.*` or `\.` match those characters literally.
-- If you genuinely need regex, use the execute tool with `rg &#39;&lt;regex&gt;&#39;` instead.
-
-Returns matching files or content per `output_mode`. Offloaded large tool results live under the artifacts root (`/large_tool_results/` by default); grep that directory to search them when you do not know the exact path.</p>
-<pre>{
-  "properties": {
-    "glob": {
-      "anyOf": [
-        {
-          "type": "string"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "default": null,
-      "description": "Glob pattern (NOT regex) limiting which files are searched (e.g. \u0027*.py\u0027, \u0027*.ts\u0027). A pattern without \u0027/\u0027 matches the file name at any depth; a pattern containing \u0027/\u0027 matches the search-root-relative path (e.g. \u0027src/**/*.py\u0027). This is an in-tool file filter, not a call to the separate glob tool. Brace expansion (e.g. \u0027*.{ts,tsx}\u0027) is not supported on all backends; run a separate search per extension for reliable results."
-    },
-    "max_count": {
-      "anyOf": [
-        {
-          "exclusiveMinimum": 0,
-          "type": "integer"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "default": null,
-      "description": "Optional cap on the total number of matches returned across all files. Leave unset to use the configured default. When the cap is hit, results are truncated and a note says so; narrow the pattern or path to see the rest."
-    },
-    "output_mode": {
-      "default": "files_with_matches",
-      "description": "Shape of the returned text. \u0027files_with_matches\u0027 (default): newline-separated matching file paths. \u0027content\u0027: matching lines grouped by file under a \u0027\u003cpath\u003e:\u0027 header, each line indented and formatted \u0027\u003cline_number\u003e: \u003cline text\u003e\u0027 (only the matched line, no surrounding context). \u0027count\u0027: one \u0027\u003cpath\u003e: \u003cmatch_count\u003e\u0027 line per file.",
-      "enum": [
-        "files_with_matches",
-        "content",
-        "count"
-      ],
-      "type": "string"
-    },
-    "path": {
-      "anyOf": [
-        {
-          "type": "string"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "default": null,
-      "description": "Directory to search in. Defaults to current working directory."
-    },
-    "pattern": {
-      "description": "Text pattern to search for (literal string, not regex).",
-      "type": "string"
-    }
-  },
-  "required": [
-    "pattern"
-  ],
-  "type": "object"
-}</pre>
-
 <h5>execute</h5>
 <p>Executes a shell command in an isolated sandbox and returns combined stdout/stderr with the exit code (truncated if very large).
 
@@ -804,9 +365,7 @@ Usage:
 - Quote paths containing spaces (e.g. cd &#34;/path/with spaces&#34;).
 - Chain commands with &#39;;&#39; or &#39;&amp;&amp;&#39; (use &#39;&amp;&amp;&#39; when a command depends on the previous); do not use newlines except inside quoted strings.
 - Use absolute paths and avoid `cd` so the working directory stays stable; use the optional timeout to override the default.
-- You MUST avoid using search commands like find and grep. Instead use the grep, glob tools to search. Use read_file rather than cat/head/tail.
-    - execute(command=&#34;find . -name &#39;*.py&#39;&#34;)  # Use glob tool instead
-    - execute(command=&#34;grep -r &#39;pattern&#39; .&#34;)  # Use grep tool instead
+- Use read_file rather than cat/head/tail.
 
 Only available on backends implementing SandboxBackendProtocol; otherwise it returns an error.</p>
 <pre>{
@@ -833,84 +392,48 @@ Only available on backends implementing SandboxBackendProtocol; otherwise it ret
   ],
   "type": "object"
 }</pre>
-
-<h5>task</h5>
-<p>Launch an ephemeral subagent to handle a complex, multi-step task.
-
-Available agent types and the tools they have access to:
-- general-purpose: General-purpose agent for researching complex questions, searching for files and content, and executing multi-step tasks. When you are searching for a keyword or file and are not confident that you will find the right match in the first few tries use this agent to perform the search for you. This agent has access to all tools as the main agent.
-
-Specify subagent_type to select the agent. Usage notes:
-- Launch multiple agents concurrently when their tasks are independent, using a single message with multiple tool calls.
-- Each invocation is stateless by default: the agent sees only the prompt you give it and returns a single final report. Put full detail in the prompt and state exactly what it should return — unless an agent type below says it inherits your conversation instead.
-- The agent&#39;s report is not shown to the user; relay a summary yourself.
-- Tell the agent whether to create content, analyze, or only research, since it can&#39;t necessarily see the user&#39;s intent unless it inherits your conversation, as noted per agent type below.
-- If an agent&#39;s description says to use it proactively, do so without waiting to be asked.
-- When only general-purpose is available, use it for any complex, context-heavy task; it has the same capabilities as the main agent.</p>
-<pre>{
-  "properties": {
-    "description": {
-      "description": "A detailed description of the task for the subagent to perform autonomously. Include all necessary context and specify the expected output format.",
-      "type": "string"
-    },
-    "subagent_type": {
-      "description": "The type of subagent to use. Must be one of the available agent types listed in the tool description.",
-      "type": "string"
-    }
-  },
-  "required": [
-    "description",
-    "subagent_type"
-  ],
-  "type": "object"
-}</pre>
 </details>
 
 
 
-<div class="prompt-label">Tool result · tokens unreported</div><pre>Orders: 3
+<div class="prompt-label">Tool result · 48 tokens</div><pre>Orders: 3
 Total units: 9
 
 [Command succeeded with exit code 0]</pre>
 </div>
+<div class="prompt-label">Cache write · 48 tokens</div><div class="prompt-label">Context: Added: 48 tokens · Total: 899 tokens</div>
 
 
 
+<h5 class="llm-response-heading">LLM response · 49 tokens</h5><div class="response-costs" aria-label="Output token costs"><div class="cost-line"><strong>Output · non-reasoning · 49 tokens</strong><div class="euro">0.000052 EUR</div><div class="dollar">0.000059 USD</div></div></div><pre>Shell tool returned:
+Orders: 3
+Total units: 9
 
-<h5 class="llm-response-heading">LLM response · 20 tokens</h5><div class="response-costs" aria-label="Output token costs"><div class="cost-line"><strong>Output · non-reasoning · 20 tokens</strong><div class="euro">0.000021 EUR</div><div class="dollar">0.000024 USD</div></div></div><pre>[
-  {
-    "id": "msg_0305eb8a54a04ee3006ab5a3a8587487d29bf4cf5a0efbfa68",
-    "index": 0,
-    "phase": "final_answer",
-    "text": "Orders: 3  \nTotal units: 9  \n\nExit status: 0",
-    "type": "text"
-  }
-]</pre><div class="cost-line"><strong>Call cost</strong><div class="euro">0.000077 EUR</div><div class="dollar">0.000087 USD</div></div><div class="status">Status: ok</div></details></details></div></details></div>
+[Command succeeded with exit code 0]</pre><div class="prompt-label">Cache write · 49 tokens</div><div class="prompt-label">Context: Added: 49 tokens · Total: 948 tokens</div><div class="cost-line"><strong>Call cost</strong><div class="euro">0.000075 EUR</div><div class="dollar">0.000085 USD</div></div><div class="status">Status: ok</div></details></details></div></details></div>
 
 
 <h2>Execution tree</h2><p>Workflow steps, agents, model calls, and tools are shown by default. Enable all details to include internal adapters, routing callbacks, span IDs, and graph-step counters. Each billed token category has its own column with EUR and USD cost underneath. These table categories are disjoint: input at the standard rate excludes cache reads and writes; output excludes reasoning.</p>
-<div class="toolbar"><label><input id="show-execution-details" type="checkbox" aria-controls="execution-tree"> Show all execution details</label><button id="expand-all" type="button">Expand all</button><button id="collapse-all" type="button">Collapse all</button><span>8 spans · parent rows show subtree totals; do not add parent and child rows together.</span></div>
+<div class="toolbar"><label><input id="show-execution-details" type="checkbox" aria-controls="execution-tree"> Show all execution details</label><button id="expand-all" type="button">Expand all</button><button id="collapse-all" type="button">Collapse all</button><span>7 spans · parent rows show subtree totals; do not add parent and child rows together.</span></div>
 
 
 <div class="table-wrap"><table id="execution-tree" class="summary-view" aria-label="Expandable execution trace and token costs"><thead><tr><th>Operation</th><th class="full-detail">Span ID</th><th>Description</th><th>Elapsed</th><th>Input at standard rate</th><th>Cache read</th><th>Cache write</th><th>Output · non-reasoning</th><th>Reasoning</th><th>Total cost<br>EUR / USD</th></tr></thead><tbody>
-<tr style="" class="tree-row  " data-index="0" data-detail-only="false" data-summary-parent="" data-depth="0" data-summary-depth="0" data-summary-children="true" data-parent=""><td><div class="tree-indent" style="padding-left:0px"><div class="kind">agent <span class="status ">· ok</span></div><div class="step-name"><button type="button" class="toggle" aria-expanded="true" aria-label="Toggle children of shell_agent">−</button>shell_agent</div><div class="subtree">Includes descendant model costs</div></div></td><td class="span-id full-detail">01a0d587-42ef-7a82-aea6-fa40a1fdab08</td><td class="description-cell">Execute the shell_agent workflow operation and pass its result to the next graph step.</td><td>2045.87 ms</td><td><div class="tokens">6 <small>tokens</small></div><div class="euro">0.000001 EUR</div><div class="dollar">0.000001 USD</div></td><td><div class="tokens">2,307 <small>tokens</small></div><div class="euro">0.000041 EUR</div><div class="dollar">0.000046 USD</div></td><td><div class="tokens">2,374 <small>tokens</small></div><div class="euro">0.000522 EUR</div><div class="dollar">0.000593 USD</div></td><td><div class="tokens">48 <small>tokens</small></div><div class="euro">0.000051 EUR</div><div class="dollar">0.000058 USD</div></td><td><div class="tokens">9 <small>tokens</small></div><div class="euro">0.000010 EUR</div><div class="dollar">0.000011 USD</div></td><td><div class="euro">0.000624 EUR</div><div class="dollar">0.000709 USD</div></td></tr><tr style="" class="tree-row  " data-index="1" data-detail-only="false" data-summary-parent="0" data-depth="1" data-summary-depth="1" data-summary-children="false" data-parent="0"><td><div class="tree-indent" style="padding-left:21px"><div class="kind">workflow <span class="status ">· ok</span></div><div class="step-name">PatchToolCallsMiddleware.before_agent</div></div></td><td class="span-id full-detail">01a0d587-42f2-7a62-b6bb-a43ef2a73202</td><td class="description-cell">Check message history and repair missing tool responses before the agent starts.<div class="context full-detail">Graph step 1</div></td><td>0.39 ms</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr style="" class="tree-row detail-only " data-index="2" data-detail-only="true" data-summary-parent="0" data-depth="1" data-summary-depth="1" data-summary-children="false" data-parent="0"><td><div class="tree-indent" style="padding-left:21px"><div class="kind">workflow <span class="status ">· ok</span></div><div class="step-name"><button type="button" class="toggle" aria-expanded="true" aria-label="Toggle children of model">−</button>model</div><div class="subtree">Includes descendant model costs</div></div></td><td class="span-id full-detail">01a0d587-42f3-7e71-b2d4-6e6610c51eb3</td><td class="description-cell">Prepare the current conversation, run model middleware, and invoke the chat model.<div class="context full-detail">Graph step 2</div></td><td>1085.97 ms</td><td><div class="tokens">3 <small>tokens</small></div><div class="euro">0.000001 EUR</div><div class="dollar">0.000001 USD</div></td><td><div class="tokens">0 <small>tokens</small></div><div class="euro">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="tokens">2,307 <small>tokens</small></div><div class="euro">0.000507 EUR</div><div class="dollar">0.000577 USD</div></td><td><div class="tokens">28 <small>tokens</small></div><div class="euro">0.000030 EUR</div><div class="dollar">0.000034 USD</div></td><td><div class="tokens">9 <small>tokens</small></div><div class="euro">0.000010 EUR</div><div class="dollar">0.000011 USD</div></td><td><div class="euro">0.000547 EUR</div><div class="dollar">0.000622 USD</div></td></tr><tr style="" class="tree-row  " data-index="3" data-detail-only="false" data-summary-parent="0" data-depth="2" data-summary-depth="1" data-summary-children="false" data-parent="2"><td><div class="tree-indent" style="padding-left:21px"><div class="kind">model <span class="status ">· ok</span></div><div class="step-name">gpt-5.6-luna</div><div class="context">openai</div></div></td><td class="span-id full-detail">01a0d587-42f8-7413-8109-860b31181b3c</td><td class="description-cell">Generate the next assistant message or tool request from the current conversation.<div class="context full-detail">Graph step 2</div><div class="context">Requested: execute</div></td><td>1079.33 ms</td><td><div class="tokens">3 <small>tokens</small></div><div class="euro">0.000001 EUR</div><div class="dollar">0.000001 USD</div></td><td><div class="tokens">0 <small>tokens</small></div><div class="euro">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="tokens">2,307 <small>tokens</small></div><div class="euro">0.000507 EUR</div><div class="dollar">0.000577 USD</div></td><td><div class="tokens">28 <small>tokens</small></div><div class="euro">0.000030 EUR</div><div class="dollar">0.000034 USD</div></td><td><div class="tokens">9 <small>tokens</small></div><div class="euro">0.000010 EUR</div><div class="dollar">0.000011 USD</div></td><td><div class="euro">0.000547 EUR</div><div class="dollar">0.000622 USD</div></td></tr><tr style="" class="tree-row detail-only " data-index="4" data-detail-only="true" data-summary-parent="0" data-depth="1" data-summary-depth="1" data-summary-children="false" data-parent="0"><td><div class="tree-indent" style="padding-left:21px"><div class="kind">workflow <span class="status ">· ok</span></div><div class="step-name"><button type="button" class="toggle" aria-expanded="true" aria-label="Toggle children of tools">−</button>tools</div><div class="subtree">Includes descendant model costs</div></div></td><td class="span-id full-detail">01a0d587-4732-7661-be25-1701b031358e</td><td class="description-cell">Execute tool calls requested by the preceding model response and return their observations.<div class="context full-detail">Graph step 3</div></td><td>27.42 ms</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr style="" class="tree-row  " data-index="5" data-detail-only="false" data-summary-parent="0" data-depth="2" data-summary-depth="1" data-summary-children="false" data-parent="4"><td><div class="tree-indent" style="padding-left:21px"><div class="kind">tool <span class="status ">· ok</span></div><div class="step-name">execute</div></div></td><td class="span-id full-detail">01a0d587-4733-7281-936a-e7b34c0438ff</td><td class="description-cell">Executes a shell command in an isolated sandbox and returns combined stdout/stderr with the exit code (truncated if very large).
+<tr style="" class="tree-row  " data-index="0" data-detail-only="false" data-summary-parent="" data-depth="0" data-summary-depth="0" data-summary-children="true" data-parent=""><td><div class="tree-indent" style="padding-left:0px"><div class="kind">agent <span class="status ">· ok</span></div><div class="step-name"><button type="button" class="toggle" aria-expanded="true" aria-label="Toggle children of shell_agent">−</button>shell_agent</div><div class="subtree">Includes descendant model costs</div></div></td><td class="span-id full-detail">01a1143f-93d5-79a1-85dd-05eee1ff9487</td><td class="description-cell">Execute the shell_agent workflow operation and pass its result to the next graph step.</td><td>165.62 ms</td><td><div class="tokens">841 <small>tokens</small></div><div class="euro">0.000148 EUR</div><div class="dollar">0.000168 USD</div></td><td><div class="tokens">851 <small>tokens</small></div><div class="euro">0.000015 EUR</div><div class="dollar">0.000017 USD</div></td><td><div class="tokens">0 <small>tokens</small></div><div class="euro">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="tokens">107 <small>tokens</small></div><div class="euro">0.000113 EUR</div><div class="dollar">0.000128 USD</div></td><td><div class="tokens">0 <small>tokens</small></div><div class="euro">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="euro">0.000276 EUR</div><div class="dollar">0.000314 USD</div></td></tr><tr style="" class="tree-row detail-only " data-index="1" data-detail-only="true" data-summary-parent="0" data-depth="1" data-summary-depth="1" data-summary-children="false" data-parent="0"><td><div class="tree-indent" style="padding-left:21px"><div class="kind">workflow <span class="status ">· ok</span></div><div class="step-name"><button type="button" class="toggle" aria-expanded="true" aria-label="Toggle children of model">−</button>model</div><div class="subtree">Includes descendant model costs</div></div></td><td class="span-id full-detail">01a1143f-93d8-7e51-92df-a4ba793b45d3</td><td class="description-cell">Prepare the current conversation, run model middleware, and invoke the chat model.<div class="context full-detail">Graph step 1</div></td><td>129.66 ms</td><td><div class="tokens">793 <small>tokens</small></div><div class="euro">0.000140 EUR</div><div class="dollar">0.000159 USD</div></td><td><div class="tokens">0 <small>tokens</small></div><div class="euro">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="tokens">0 <small>tokens</small></div><div class="euro">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="tokens">58 <small>tokens</small></div><div class="euro">0.000061 EUR</div><div class="dollar">0.000070 USD</div></td><td><div class="tokens">0 <small>tokens</small></div><div class="euro">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="euro">0.000201 EUR</div><div class="dollar">0.000228 USD</div></td></tr><tr style="" class="tree-row  " data-index="2" data-detail-only="false" data-summary-parent="0" data-depth="2" data-summary-depth="1" data-summary-children="false" data-parent="1"><td><div class="tree-indent" style="padding-left:21px"><div class="kind">model <span class="status ">· ok</span></div><div class="step-name">scripted-chat</div><div class="context">demo</div></div></td><td class="span-id full-detail">01a1143f-93da-7e33-b991-06e60a74ba5a</td><td class="description-cell">Run a local script through DeepAgent’s native execute tool.<div class="context full-detail">Graph step 1</div><div class="context">Requested: execute</div></td><td>126.79 ms</td><td><div class="tokens">793 <small>tokens</small></div><div class="euro">0.000140 EUR</div><div class="dollar">0.000159 USD</div></td><td><div class="tokens">0 <small>tokens</small></div><div class="euro">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="tokens">0 <small>tokens</small></div><div class="euro">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="tokens">58 <small>tokens</small></div><div class="euro">0.000061 EUR</div><div class="dollar">0.000070 USD</div></td><td><div class="tokens">0 <small>tokens</small></div><div class="euro">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="euro">0.000201 EUR</div><div class="dollar">0.000228 USD</div></td></tr><tr style="" class="tree-row detail-only " data-index="3" data-detail-only="true" data-summary-parent="0" data-depth="1" data-summary-depth="1" data-summary-children="false" data-parent="0"><td><div class="tree-indent" style="padding-left:21px"><div class="kind">workflow <span class="status ">· ok</span></div><div class="step-name"><button type="button" class="toggle" aria-expanded="true" aria-label="Toggle children of tools">−</button>tools</div><div class="subtree">Includes descendant model costs</div></div></td><td class="span-id full-detail">01a1143f-945b-7492-bd69-5015b7bea39e</td><td class="description-cell">Execute tool calls requested by the preceding model response and return their observations.<div class="context full-detail">Graph step 2</div></td><td>29.22 ms</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr style="" class="tree-row  " data-index="4" data-detail-only="false" data-summary-parent="0" data-depth="2" data-summary-depth="1" data-summary-children="false" data-parent="3"><td><div class="tree-indent" style="padding-left:21px"><div class="kind">tool <span class="status ">· ok</span></div><div class="step-name">execute</div></div></td><td class="span-id full-detail">01a1143f-945b-7492-bd69-502bf356d2ed</td><td class="description-cell">Executes a shell command in an isolated sandbox and returns combined stdout/stderr with the exit code (truncated if very large).
 
 Usage:
 - Quote paths containing spaces (e.g. cd &#34;/path/with spaces&#34;).
 - Chain commands with &#39;;&#39; or &#39;&amp;&amp;&#39; (use &#39;&amp;&amp;&#39; when a command depends on the previous); do not use newlines except inside quoted strings.
 - Use absolute paths and avoid `cd` so the working directory stays stable; use the optional timeout to override the default.
-- You MUST avoid using search commands like find and grep. Instead use the grep, glob tools to search. Use read_file rather than cat/head/tail.
-    - execute(command=&#34;find . -name &#39;*.py&#39;&#34;)  # Use glob tool instead
-    - execute(command=&#34;grep -r &#39;pattern&#39; .&#34;)  # Use grep tool instead
+- Use read_file rather than cat/head/tail.
 
-Only available on backends implementing SandboxBackendProtocol; otherwise it returns an error.<div class="context full-detail">Graph step 3</div></td><td>25.30 ms</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr style="" class="tree-row detail-only " data-index="6" data-detail-only="true" data-summary-parent="0" data-depth="1" data-summary-depth="1" data-summary-children="false" data-parent="0"><td><div class="tree-indent" style="padding-left:21px"><div class="kind">workflow <span class="status ">· ok</span></div><div class="step-name"><button type="button" class="toggle" aria-expanded="true" aria-label="Toggle children of model">−</button>model</div><div class="subtree">Includes descendant model costs</div></div></td><td class="span-id full-detail">01a0d587-474e-7bb2-9895-90f97a30614a</td><td class="description-cell">Prepare the current conversation, run model middleware, and invoke the chat model.<div class="context full-detail">Graph step 4</div></td><td>926.07 ms</td><td><div class="tokens">3 <small>tokens</small></div><div class="euro">0.000001 EUR</div><div class="dollar">0.000001 USD</div></td><td><div class="tokens">2,307 <small>tokens</small></div><div class="euro">0.000041 EUR</div><div class="dollar">0.000046 USD</div></td><td><div class="tokens">67 <small>tokens</small></div><div class="euro">0.000015 EUR</div><div class="dollar">0.000017 USD</div></td><td><div class="tokens">20 <small>tokens</small></div><div class="euro">0.000021 EUR</div><div class="dollar">0.000024 USD</div></td><td><div class="tokens">0 <small>tokens</small></div><div class="euro">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="euro">0.000077 EUR</div><div class="dollar">0.000087 USD</div></td></tr><tr style="" class="tree-row  " data-index="7" data-detail-only="false" data-summary-parent="0" data-depth="2" data-summary-depth="1" data-summary-children="false" data-parent="6"><td><div class="tree-indent" style="padding-left:21px"><div class="kind">model <span class="status ">· ok</span></div><div class="step-name">gpt-5.6-luna</div><div class="context">openai</div></div></td><td class="span-id full-detail">01a0d587-4750-7b32-ad48-53449c4e54b6</td><td class="description-cell">Generate the next assistant message or tool request from the current conversation.<div class="context full-detail">Graph step 4</div></td><td>922.20 ms</td><td><div class="tokens">3 <small>tokens</small></div><div class="euro">0.000001 EUR</div><div class="dollar">0.000001 USD</div></td><td><div class="tokens">2,307 <small>tokens</small></div><div class="euro">0.000041 EUR</div><div class="dollar">0.000046 USD</div></td><td><div class="tokens">67 <small>tokens</small></div><div class="euro">0.000015 EUR</div><div class="dollar">0.000017 USD</div></td><td><div class="tokens">20 <small>tokens</small></div><div class="euro">0.000021 EUR</div><div class="dollar">0.000024 USD</div></td><td><div class="tokens">0 <small>tokens</small></div><div class="euro">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="euro">0.000077 EUR</div><div class="dollar">0.000087 USD</div></td></tr>
+Only available on backends implementing SandboxBackendProtocol; otherwise it returns an error.<div class="context full-detail">Graph step 2</div></td><td>27.39 ms</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr style="" class="tree-row detail-only " data-index="5" data-detail-only="true" data-summary-parent="0" data-depth="1" data-summary-depth="1" data-summary-children="false" data-parent="0"><td><div class="tree-indent" style="padding-left:21px"><div class="kind">workflow <span class="status ">· ok</span></div><div class="step-name"><button type="button" class="toggle" aria-expanded="true" aria-label="Toggle children of model">−</button>model</div><div class="subtree">Includes descendant model costs</div></div></td><td class="span-id full-detail">01a1143f-9479-7923-9b51-8ebcab66ae69</td><td class="description-cell">Prepare the current conversation, run model middleware, and invoke the chat model.<div class="context full-detail">Graph step 3</div></td><td>3.17 ms</td><td><div class="tokens">48 <small>tokens</small></div><div class="euro">0.000008 EUR</div><div class="dollar">0.000010 USD</div></td><td><div class="tokens">851 <small>tokens</small></div><div class="euro">0.000015 EUR</div><div class="dollar">0.000017 USD</div></td><td><div class="tokens">0 <small>tokens</small></div><div class="euro">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="tokens">49 <small>tokens</small></div><div class="euro">0.000052 EUR</div><div class="dollar">0.000059 USD</div></td><td><div class="tokens">0 <small>tokens</small></div><div class="euro">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="euro">0.000075 EUR</div><div class="dollar">0.000085 USD</div></td></tr><tr style="" class="tree-row  " data-index="6" data-detail-only="false" data-summary-parent="0" data-depth="2" data-summary-depth="1" data-summary-children="false" data-parent="5"><td><div class="tree-indent" style="padding-left:21px"><div class="kind">model <span class="status ">· ok</span></div><div class="step-name">scripted-chat</div><div class="context">demo</div></div></td><td class="span-id full-detail">01a1143f-947a-7761-809b-b8500c708224</td><td class="description-cell">Run a local script through DeepAgent’s native execute tool.<div class="context full-detail">Graph step 3</div></td><td>1.83 ms</td><td><div class="tokens">48 <small>tokens</small></div><div class="euro">0.000008 EUR</div><div class="dollar">0.000010 USD</div></td><td><div class="tokens">851 <small>tokens</small></div><div class="euro">0.000015 EUR</div><div class="dollar">0.000017 USD</div></td><td><div class="tokens">0 <small>tokens</small></div><div class="euro">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="tokens">49 <small>tokens</small></div><div class="euro">0.000052 EUR</div><div class="dollar">0.000059 USD</div></td><td><div class="tokens">0 <small>tokens</small></div><div class="euro">0.000000 EUR</div><div class="dollar">0.000000 USD</div></td><td><div class="euro">0.000075 EUR</div><div class="dollar">0.000085 USD</div></td></tr>
 </tbody></table></div>
 <h2>Token price references</h2>
 
 <p>1 USD = 0.87974 EUR · Rate reference date <strong>2026-09-24</strong> · fetched 2026-09-24T22:21:31.719587+00:00 · source https://api.frankfurter.dev/v2/rate/usd/eur?providers=ecb. Recorded daily reference; publication can precede retrieval on weekends, holidays, or before the daily update.</p>
 <p>USD per million tokens · verification dates apply to every rate in the row. Dates record price verification, not when this HTML was generated. These are saved reference prices; an earlier date alone does not mean retrieval failed.</p>
-<div class="table-wrap"><table aria-label="Token price references and dates"><thead><tr><th>Model / verification date</th><th>Input</th><th>Cache read</th><th>Cache write</th><th>Output / reasoning</th></tr></thead><tbody><tr><td>openai:gpt-5.5<strong class="rate-date">Verified 2026-09-18</strong><div class="context">https://developers.openai.com/api/docs/models/gpt-5.5.md</div></td><td><div class="dollar">5 USD / 1M tokens</div><div class="euro">4.398700 EUR / 1M tokens</div></td><td><div class="dollar">0.5 USD / 1M tokens</div><div class="euro">0.439870 EUR / 1M tokens</div></td><td>Unknown</td><td><div class="dollar">30 USD / 1M tokens</div><div class="euro">26.392200 EUR / 1M tokens</div></td></tr><tr><td>openai:gpt-5.6-luna<strong class="rate-date">Verified 2026-09-18</strong><div class="context">https://developers.openai.com/api/docs/models/gpt-5.6-luna.md</div></td><td><div class="dollar">0.2 USD / 1M tokens</div><div class="euro">0.175948 EUR / 1M tokens</div></td><td><div class="dollar">0.02 USD / 1M tokens</div><div class="euro">0.017595 EUR / 1M tokens</div></td><td><div class="dollar">0.250 USD / 1M tokens</div><div class="euro">0.219935 EUR / 1M tokens</div></td><td><div class="dollar">1.2 USD / 1M tokens</div><div class="euro">1.055688 EUR / 1M tokens</div></td></tr><tr><td>openai:gpt-5.6-sol<strong class="rate-date">Verified 2026-09-18</strong><div class="context">https://developers.openai.com/api/docs/models/gpt-5.6-sol.md</div></td><td><div class="dollar">4 USD / 1M tokens</div><div class="euro">3.518960 EUR / 1M tokens</div></td><td><div class="dollar">0.4 USD / 1M tokens</div><div class="euro">0.351896 EUR / 1M tokens</div></td><td><div class="dollar">5.00 USD / 1M tokens</div><div class="euro">4.398700 EUR / 1M tokens</div></td><td><div class="dollar">20 USD / 1M tokens</div><div class="euro">17.594800 EUR / 1M tokens</div></td></tr><tr><td>anthropic:claude-sonnet-5<strong class="rate-date">Verified 2026-09-18</strong><div class="context">https://platform.claude.com/docs/en/about-claude/pricing</div></td><td><div class="dollar">2 USD / 1M tokens</div><div class="euro">1.759480 EUR / 1M tokens</div></td><td><div class="dollar">0.20 USD / 1M tokens</div><div class="euro">0.175948 EUR / 1M tokens</div></td><td><div class="dollar">2.50 USD / 1M tokens</div><div class="euro">2.199350 EUR / 1M tokens</div></td><td><div class="dollar">10 USD / 1M tokens</div><div class="euro">8.797400 EUR / 1M tokens</div></td></tr><tr><td>anthropic:claude-opus-4-8<strong class="rate-date">Verified 2026-09-18</strong><div class="context">https://platform.claude.com/docs/en/about-claude/pricing</div></td><td><div class="dollar">5 USD / 1M tokens</div><div class="euro">4.398700 EUR / 1M tokens</div></td><td><div class="dollar">0.50 USD / 1M tokens</div><div class="euro">0.439870 EUR / 1M tokens</div></td><td><div class="dollar">6.25 USD / 1M tokens</div><div class="euro">5.498375 EUR / 1M tokens</div></td><td><div class="dollar">25 USD / 1M tokens</div><div class="euro">21.993500 EUR / 1M tokens</div></td></tr><tr><td>anthropic:claude-fable-5-1<strong class="rate-date">Verified 2026-09-18</strong><div class="context">https://platform.claude.com/docs/en/about-claude/pricing</div></td><td><div class="dollar">10 USD / 1M tokens</div><div class="euro">8.797400 EUR / 1M tokens</div></td><td><div class="dollar">0.25 USD / 1M tokens</div><div class="euro">0.219935 EUR / 1M tokens</div></td><td><div class="dollar">12.50 USD / 1M tokens</div><div class="euro">10.996750 EUR / 1M tokens</div></td><td><div class="dollar">50 USD / 1M tokens</div><div class="euro">43.987000 EUR / 1M tokens</div></td></tr><tr><td>demo:scripted-chat<strong class="rate-date">Verified 2026-09-18</strong><div class="context">Illustrative demo rates based on openai:gpt-5.6-luna; no provider billing</div></td><td><div class="dollar">0.2 USD / 1M tokens</div><div class="euro">0.175948 EUR / 1M tokens</div></td><td><div class="dollar">0.02 USD / 1M tokens</div><div class="euro">0.017595 EUR / 1M tokens</div></td><td><div class="dollar">0.250 USD / 1M tokens</div><div class="euro">0.219935 EUR / 1M tokens</div></td><td><div class="dollar">1.2 USD / 1M tokens</div><div class="euro">1.055688 EUR / 1M tokens</div></td></tr></tbody></table></div>
-<details><summary>Complete pricing and exchange-rate data</summary><p>Standard online token rates. Verify rates and model access before use. Cache writes with unspecified lifetime use the 5-minute rate unless an explicit cache_write rate is configured. No batch, regional, long-context, tool, or negotiated pricing adjustments are applied.</p><pre>{
+<div class="table-wrap"><table aria-label="Token price references and dates"><thead><tr><th>Model / verification date</th><th>Input</th><th>Cache read</th><th>Cache write</th><th>Output / reasoning</th></tr></thead><tbody><tr><td>openai:gpt-5.5<strong class="rate-date">Verified 2026-10-05</strong><div class="context">https://developers.openai.com/api/docs/models/gpt-5.5.md</div></td><td><div class="dollar">5 USD / 1M tokens</div><div class="euro">4.398700 EUR / 1M tokens</div></td><td><div class="dollar">0.5 USD / 1M tokens</div><div class="euro">0.439870 EUR / 1M tokens</div></td><td>Unknown</td><td><div class="dollar">30 USD / 1M tokens</div><div class="euro">26.392200 EUR / 1M tokens</div></td></tr><tr><td>openai:gpt-5.6-luna<strong class="rate-date">Verified 2026-10-05</strong><div class="context">https://developers.openai.com/api/docs/models/gpt-5.6-luna.md</div></td><td><div class="dollar">0.2 USD / 1M tokens</div><div class="euro">0.175948 EUR / 1M tokens</div></td><td><div class="dollar">0.02 USD / 1M tokens</div><div class="euro">0.017595 EUR / 1M tokens</div></td><td><div class="dollar">0.250 USD / 1M tokens</div><div class="euro">0.219935 EUR / 1M tokens</div></td><td><div class="dollar">1.2 USD / 1M tokens</div><div class="euro">1.055688 EUR / 1M tokens</div></td></tr><tr><td>openai:gpt-5.6-sol<strong class="rate-date">Verified 2026-10-05</strong><div class="context">https://developers.openai.com/api/docs/models/gpt-5.6-sol.md</div></td><td><div class="dollar">4 USD / 1M tokens</div><div class="euro">3.518960 EUR / 1M tokens</div></td><td><div class="dollar">0.4 USD / 1M tokens</div><div class="euro">0.351896 EUR / 1M tokens</div></td><td><div class="dollar">5.00 USD / 1M tokens</div><div class="euro">4.398700 EUR / 1M tokens</div></td><td><div class="dollar">20 USD / 1M tokens</div><div class="euro">17.594800 EUR / 1M tokens</div></td></tr><tr><td>anthropic:claude-sonnet-5<strong class="rate-date">Verified 2026-10-05</strong><div class="context">https://platform.claude.com/docs/en/about-claude/pricing</div></td><td><div class="dollar">2 USD / 1M tokens</div><div class="euro">1.759480 EUR / 1M tokens</div></td><td><div class="dollar">0.20 USD / 1M tokens</div><div class="euro">0.175948 EUR / 1M tokens</div></td><td><div class="dollar">2.50 USD / 1M tokens</div><div class="euro">2.199350 EUR / 1M tokens</div></td><td><div class="dollar">10 USD / 1M tokens</div><div class="euro">8.797400 EUR / 1M tokens</div></td></tr><tr><td>anthropic:claude-opus-4-8<strong class="rate-date">Verified 2026-10-05</strong><div class="context">https://platform.claude.com/docs/en/about-claude/pricing</div></td><td><div class="dollar">5 USD / 1M tokens</div><div class="euro">4.398700 EUR / 1M tokens</div></td><td><div class="dollar">0.50 USD / 1M tokens</div><div class="euro">0.439870 EUR / 1M tokens</div></td><td><div class="dollar">6.25 USD / 1M tokens</div><div class="euro">5.498375 EUR / 1M tokens</div></td><td><div class="dollar">25 USD / 1M tokens</div><div class="euro">21.993500 EUR / 1M tokens</div></td></tr><tr><td>anthropic:claude-fable-5-1<strong class="rate-date">Verified 2026-10-05</strong><div class="context">https://platform.claude.com/docs/en/about-claude/pricing</div></td><td><div class="dollar">10 USD / 1M tokens</div><div class="euro">8.797400 EUR / 1M tokens</div></td><td><div class="dollar">0.25 USD / 1M tokens</div><div class="euro">0.219935 EUR / 1M tokens</div></td><td><div class="dollar">12.50 USD / 1M tokens</div><div class="euro">10.996750 EUR / 1M tokens</div></td><td><div class="dollar">50 USD / 1M tokens</div><div class="euro">43.987000 EUR / 1M tokens</div></td></tr><tr><td>demo:scripted-chat<strong class="rate-date">Verified 2026-10-05</strong><div class="context">Illustrative demo rates based on openai:gpt-5.6-luna; no provider billing</div></td><td><div class="dollar">0.2 USD / 1M tokens</div><div class="euro">0.175948 EUR / 1M tokens</div></td><td><div class="dollar">0.02 USD / 1M tokens</div><div class="euro">0.017595 EUR / 1M tokens</div></td><td><div class="dollar">0.250 USD / 1M tokens</div><div class="euro">0.219935 EUR / 1M tokens</div></td><td><div class="dollar">1.2 USD / 1M tokens</div><div class="euro">1.055688 EUR / 1M tokens</div></td></tr><tr><td>anthropic:claude-haiku-4-5<strong class="rate-date">Verified 2026-10-05</strong><div class="context">https://platform.claude.com/docs/en/about-claude/pricing</div></td><td><div class="dollar">1 USD / 1M tokens</div><div class="euro">0.879740 EUR / 1M tokens</div></td><td><div class="dollar">0.10 USD / 1M tokens</div><div class="euro">0.087974 EUR / 1M tokens</div></td><td><div class="dollar">1.25 USD / 1M tokens</div><div class="euro">1.099675 EUR / 1M tokens</div></td><td><div class="dollar">5 USD / 1M tokens</div><div class="euro">4.398700 EUR / 1M tokens</div></td></tr><tr><td>anthropic:claude-haiku-4-5-20251001<strong class="rate-date">Verified 2026-10-05</strong><div class="context">https://platform.claude.com/docs/en/about-claude/pricing</div></td><td><div class="dollar">1 USD / 1M tokens</div><div class="euro">0.879740 EUR / 1M tokens</div></td><td><div class="dollar">0.10 USD / 1M tokens</div><div class="euro">0.087974 EUR / 1M tokens</div></td><td><div class="dollar">1.25 USD / 1M tokens</div><div class="euro">1.099675 EUR / 1M tokens</div></td><td><div class="dollar">5 USD / 1M tokens</div><div class="euro">4.398700 EUR / 1M tokens</div></td></tr><tr><td>anthropic:claude-opus-5-5<strong class="rate-date">Verified 2026-10-05</strong><div class="context">https://platform.claude.com/docs/en/about-claude/pricing</div></td><td><div class="dollar">4 USD / 1M tokens</div><div class="euro">3.518960 EUR / 1M tokens</div></td><td><div class="dollar">0.20 USD / 1M tokens</div><div class="euro">0.175948 EUR / 1M tokens</div></td><td><div class="dollar">5 USD / 1M tokens</div><div class="euro">4.398700 EUR / 1M tokens</div></td><td><div class="dollar">20 USD / 1M tokens</div><div class="euro">17.594800 EUR / 1M tokens</div></td></tr><tr><td>anthropic:claude-sonnet-4-6<strong class="rate-date">Verified 2026-10-05</strong><div class="context">https://platform.claude.com/docs/en/about-claude/pricing</div></td><td><div class="dollar">3 USD / 1M tokens</div><div class="euro">2.639220 EUR / 1M tokens</div></td><td><div class="dollar">0.30 USD / 1M tokens</div><div class="euro">0.263922 EUR / 1M tokens</div></td><td><div class="dollar">3.75 USD / 1M tokens</div><div class="euro">3.299025 EUR / 1M tokens</div></td><td><div class="dollar">15 USD / 1M tokens</div><div class="euro">13.196100 EUR / 1M tokens</div></td></tr><tr><td>anthropic:claude-sonnet-5-5<strong class="rate-date">Verified 2026-10-05</strong><div class="context">https://platform.claude.com/docs/en/about-claude/pricing</div></td><td><div class="dollar">2 USD / 1M tokens</div><div class="euro">1.759480 EUR / 1M tokens</div></td><td><div class="dollar">0.20 USD / 1M tokens</div><div class="euro">0.175948 EUR / 1M tokens</div></td><td><div class="dollar">2.50 USD / 1M tokens</div><div class="euro">2.199350 EUR / 1M tokens</div></td><td><div class="dollar">10 USD / 1M tokens</div><div class="euro">8.797400 EUR / 1M tokens</div></td></tr><tr><td>copilot:claude-haiku-4.5<strong class="rate-date">Verified 2026-10-05</strong><div class="context">https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing</div></td><td><div class="dollar">1.00 USD / 1M tokens</div><div class="euro">0.879740 EUR / 1M tokens</div></td><td><div class="dollar">0.10 USD / 1M tokens</div><div class="euro">0.087974 EUR / 1M tokens</div></td><td><div class="dollar">1.25 USD / 1M tokens</div><div class="euro">1.099675 EUR / 1M tokens</div></td><td><div class="dollar">5.00 USD / 1M tokens</div><div class="euro">4.398700 EUR / 1M tokens</div></td></tr><tr><td>copilot:claude-opus-5.5<strong class="rate-date">Verified 2026-10-05</strong><div class="context">https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing</div></td><td><div class="dollar">4.00 USD / 1M tokens</div><div class="euro">3.518960 EUR / 1M tokens</div></td><td><div class="dollar">0.20 USD / 1M tokens</div><div class="euro">0.175948 EUR / 1M tokens</div></td><td><div class="dollar">5.00 USD / 1M tokens</div><div class="euro">4.398700 EUR / 1M tokens</div></td><td><div class="dollar">20.00 USD / 1M tokens</div><div class="euro">17.594800 EUR / 1M tokens</div></td></tr><tr><td>copilot:claude-sonnet-4.6<strong class="rate-date">Verified 2026-10-05</strong><div class="context">https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing</div></td><td><div class="dollar">3.00 USD / 1M tokens</div><div class="euro">2.639220 EUR / 1M tokens</div></td><td><div class="dollar">0.30 USD / 1M tokens</div><div class="euro">0.263922 EUR / 1M tokens</div></td><td><div class="dollar">3.75 USD / 1M tokens</div><div class="euro">3.299025 EUR / 1M tokens</div></td><td><div class="dollar">15.00 USD / 1M tokens</div><div class="euro">13.196100 EUR / 1M tokens</div></td></tr><tr><td>copilot:claude-sonnet-5.5<strong class="rate-date">Verified 2026-10-05</strong><div class="context">https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing</div></td><td><div class="dollar">2.00 USD / 1M tokens</div><div class="euro">1.759480 EUR / 1M tokens</div></td><td><div class="dollar">0.20 USD / 1M tokens</div><div class="euro">0.175948 EUR / 1M tokens</div></td><td><div class="dollar">2.50 USD / 1M tokens</div><div class="euro">2.199350 EUR / 1M tokens</div></td><td><div class="dollar">10.00 USD / 1M tokens</div><div class="euro">8.797400 EUR / 1M tokens</div></td></tr><tr><td>copilot:gemini-3.8-flash<strong class="rate-date">Verified 2026-10-05</strong><div class="context">https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing</div></td><td><div class="dollar">0.75 USD / 1M tokens</div><div class="euro">0.659805 EUR / 1M tokens</div></td><td><div class="dollar">0.075 USD / 1M tokens</div><div class="euro">0.065980 EUR / 1M tokens</div></td><td>Unknown</td><td><div class="dollar">3.75 USD / 1M tokens</div><div class="euro">3.299025 EUR / 1M tokens</div></td></tr><tr><td>copilot:gpt-5.3-codex<strong class="rate-date">Verified 2026-10-05</strong><div class="context">https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing</div></td><td><div class="dollar">1.75 USD / 1M tokens</div><div class="euro">1.539545 EUR / 1M tokens</div></td><td><div class="dollar">0.175 USD / 1M tokens</div><div class="euro">0.153954 EUR / 1M tokens</div></td><td>Unknown</td><td><div class="dollar">14.00 USD / 1M tokens</div><div class="euro">12.316360 EUR / 1M tokens</div></td></tr><tr><td>copilot:gpt-5.4<div class="context">Default: up to 272,000 input tokens</div><strong class="rate-date">Verified 2026-10-05</strong><div class="context">https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing</div></td><td><div class="dollar">2.50 USD / 1M tokens</div><div class="euro">2.199350 EUR / 1M tokens</div></td><td><div class="dollar">0.25 USD / 1M tokens</div><div class="euro">0.219935 EUR / 1M tokens</div></td><td>Unknown</td><td><div class="dollar">15.00 USD / 1M tokens</div><div class="euro">13.196100 EUR / 1M tokens</div></td></tr><tr><td>copilot:gpt-5.4<div class="context">Long context: above 272,000 input tokens</div><strong class="rate-date">Verified 2026-10-05</strong><div class="context">https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing</div></td><td><div class="dollar">5.00 USD / 1M tokens</div><div class="euro">4.398700 EUR / 1M tokens</div></td><td><div class="dollar">0.50 USD / 1M tokens</div><div class="euro">0.439870 EUR / 1M tokens</div></td><td>Unknown</td><td><div class="dollar">22.50 USD / 1M tokens</div><div class="euro">19.794150 EUR / 1M tokens</div></td></tr><tr><td>copilot:gpt-6-astra<div class="context">Default: up to 272,000 input tokens</div><strong class="rate-date">Verified 2026-10-05</strong><div class="context">https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing</div></td><td><div class="dollar">10.00 USD / 1M tokens</div><div class="euro">8.797400 EUR / 1M tokens</div></td><td><div class="dollar">1.00 USD / 1M tokens</div><div class="euro">0.879740 EUR / 1M tokens</div></td><td><div class="dollar">12.50 USD / 1M tokens</div><div class="euro">10.996750 EUR / 1M tokens</div></td><td><div class="dollar">50.00 USD / 1M tokens</div><div class="euro">43.987000 EUR / 1M tokens</div></td></tr><tr><td>copilot:gpt-6-astra<div class="context">Long context: above 272,000 input tokens</div><strong class="rate-date">Verified 2026-10-05</strong><div class="context">https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing</div></td><td><div class="dollar">20.00 USD / 1M tokens</div><div class="euro">17.594800 EUR / 1M tokens</div></td><td><div class="dollar">2.00 USD / 1M tokens</div><div class="euro">1.759480 EUR / 1M tokens</div></td><td><div class="dollar">25.00 USD / 1M tokens</div><div class="euro">21.993500 EUR / 1M tokens</div></td><td><div class="dollar">75.00 USD / 1M tokens</div><div class="euro">65.980500 EUR / 1M tokens</div></td></tr><tr><td>copilot:gpt-6-luna<div class="context">Default: up to 272,000 input tokens</div><strong class="rate-date">Verified 2026-10-05</strong><div class="context">https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing</div></td><td><div class="dollar">0.10 USD / 1M tokens</div><div class="euro">0.087974 EUR / 1M tokens</div></td><td><div class="dollar">0.01 USD / 1M tokens</div><div class="euro">0.008797 EUR / 1M tokens</div></td><td><div class="dollar">0.125 USD / 1M tokens</div><div class="euro">0.109967 EUR / 1M tokens</div></td><td><div class="dollar">0.50 USD / 1M tokens</div><div class="euro">0.439870 EUR / 1M tokens</div></td></tr><tr><td>copilot:gpt-6-luna<div class="context">Long context: above 272,000 input tokens</div><strong class="rate-date">Verified 2026-10-05</strong><div class="context">https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing</div></td><td><div class="dollar">0.20 USD / 1M tokens</div><div class="euro">0.175948 EUR / 1M tokens</div></td><td><div class="dollar">0.02 USD / 1M tokens</div><div class="euro">0.017595 EUR / 1M tokens</div></td><td><div class="dollar">0.25 USD / 1M tokens</div><div class="euro">0.219935 EUR / 1M tokens</div></td><td><div class="dollar">0.75 USD / 1M tokens</div><div class="euro">0.659805 EUR / 1M tokens</div></td></tr><tr><td>copilot:gpt-6-sol<div class="context">Default: up to 272,000 input tokens</div><strong class="rate-date">Verified 2026-10-05</strong><div class="context">https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing</div></td><td><div class="dollar">2.00 USD / 1M tokens</div><div class="euro">1.759480 EUR / 1M tokens</div></td><td><div class="dollar">0.20 USD / 1M tokens</div><div class="euro">0.175948 EUR / 1M tokens</div></td><td><div class="dollar">2.50 USD / 1M tokens</div><div class="euro">2.199350 EUR / 1M tokens</div></td><td><div class="dollar">10.00 USD / 1M tokens</div><div class="euro">8.797400 EUR / 1M tokens</div></td></tr><tr><td>copilot:gpt-6-sol<div class="context">Long context: above 272,000 input tokens</div><strong class="rate-date">Verified 2026-10-05</strong><div class="context">https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing</div></td><td><div class="dollar">4.00 USD / 1M tokens</div><div class="euro">3.518960 EUR / 1M tokens</div></td><td><div class="dollar">0.40 USD / 1M tokens</div><div class="euro">0.351896 EUR / 1M tokens</div></td><td><div class="dollar">5.00 USD / 1M tokens</div><div class="euro">4.398700 EUR / 1M tokens</div></td><td><div class="dollar">15.00 USD / 1M tokens</div><div class="euro">13.196100 EUR / 1M tokens</div></td></tr><tr><td>copilot:gpt-6.1-sol<div class="context">Default: up to 272,000 input tokens</div><strong class="rate-date">Verified 2026-10-05</strong><div class="context">https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing</div></td><td><div class="dollar">2.00 USD / 1M tokens</div><div class="euro">1.759480 EUR / 1M tokens</div></td><td><div class="dollar">0.10 USD / 1M tokens</div><div class="euro">0.087974 EUR / 1M tokens</div></td><td><div class="dollar">2.50 USD / 1M tokens</div><div class="euro">2.199350 EUR / 1M tokens</div></td><td><div class="dollar">10.00 USD / 1M tokens</div><div class="euro">8.797400 EUR / 1M tokens</div></td></tr><tr><td>copilot:gpt-6.1-sol<div class="context">Long context: above 272,000 input tokens</div><strong class="rate-date">Verified 2026-10-05</strong><div class="context">https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing</div></td><td><div class="dollar">4.00 USD / 1M tokens</div><div class="euro">3.518960 EUR / 1M tokens</div></td><td><div class="dollar">0.20 USD / 1M tokens</div><div class="euro">0.175948 EUR / 1M tokens</div></td><td><div class="dollar">5.00 USD / 1M tokens</div><div class="euro">4.398700 EUR / 1M tokens</div></td><td><div class="dollar">15.00 USD / 1M tokens</div><div class="euro">13.196100 EUR / 1M tokens</div></td></tr><tr><td>openai:gpt-6-astra<strong class="rate-date">Verified 2026-10-05</strong><div class="context">https://developers.openai.com/api/docs/models/gpt-6-astra.md</div></td><td><div class="dollar">10 USD / 1M tokens</div><div class="euro">8.797400 EUR / 1M tokens</div></td><td><div class="dollar">1 USD / 1M tokens</div><div class="euro">0.879740 EUR / 1M tokens</div></td><td><div class="dollar">12.50 USD / 1M tokens</div><div class="euro">10.996750 EUR / 1M tokens</div></td><td><div class="dollar">50 USD / 1M tokens</div><div class="euro">43.987000 EUR / 1M tokens</div></td></tr><tr><td>openai:gpt-6-luna<strong class="rate-date">Verified 2026-10-05</strong><div class="context">https://developers.openai.com/api/docs/models/gpt-6-luna.md</div></td><td><div class="dollar">0.1 USD / 1M tokens</div><div class="euro">0.087974 EUR / 1M tokens</div></td><td><div class="dollar">0.01 USD / 1M tokens</div><div class="euro">0.008797 EUR / 1M tokens</div></td><td><div class="dollar">0.125 USD / 1M tokens</div><div class="euro">0.109967 EUR / 1M tokens</div></td><td><div class="dollar">0.5 USD / 1M tokens</div><div class="euro">0.439870 EUR / 1M tokens</div></td></tr><tr><td>openai:gpt-6-sol<strong class="rate-date">Verified 2026-10-05</strong><div class="context">https://developers.openai.com/api/docs/models/gpt-6-sol.md</div></td><td><div class="dollar">2 USD / 1M tokens</div><div class="euro">1.759480 EUR / 1M tokens</div></td><td><div class="dollar">0.2 USD / 1M tokens</div><div class="euro">0.175948 EUR / 1M tokens</div></td><td><div class="dollar">2.50 USD / 1M tokens</div><div class="euro">2.199350 EUR / 1M tokens</div></td><td><div class="dollar">10 USD / 1M tokens</div><div class="euro">8.797400 EUR / 1M tokens</div></td></tr><tr><td>openai:gpt-6.1-sol<strong class="rate-date">Verified 2026-10-05</strong><div class="context">https://developers.openai.com/api/docs/models/gpt-6.1-sol.md</div></td><td><div class="dollar">2 USD / 1M tokens</div><div class="euro">1.759480 EUR / 1M tokens</div></td><td><div class="dollar">0.1 USD / 1M tokens</div><div class="euro">0.087974 EUR / 1M tokens</div></td><td><div class="dollar">2.50 USD / 1M tokens</div><div class="euro">2.199350 EUR / 1M tokens</div></td><td><div class="dollar">10 USD / 1M tokens</div><div class="euro">8.797400 EUR / 1M tokens</div></td></tr></tbody></table></div>
+
+<details><summary>Complete pricing and exchange-rate data</summary><p>Published online token rates verified 2026-10-05. Copilot uses GitHub rates, including saved long-context tiers, before plan allowances; these are usage estimates, not subscription invoices. Cache writes with unspecified lifetime use the 5-minute rate unless an explicit cache_write rate is configured. Direct OpenAI and Anthropic entries use standard rates; no batch, regional, tool, negotiated, or unrecorded context-tier adjustments are applied. Model availability and context capacity require separate verification.</p><pre>{
   &#34;calibrations&#34;: {
     &#34;openai:gpt-5.5&#34;: {
       &#34;checked_at&#34;: &#34;2026-09-23T04:25:31.720508Z&#34;,
@@ -966,98 +489,410 @@ Only available on backends implementing SandboxBackendProtocol; otherwise it ret
     &#34;quote&#34;: &#34;EUR&#34;
   },
   &#34;exchange_error&#34;: null,
-  &#34;as_of&#34;: &#34;2026-09-18&#34;,
-  &#34;note&#34;: &#34;Standard online token rates. Verify rates and model access before use. Cache writes with unspecified lifetime use the 5-minute rate unless an explicit cache_write rate is configured. No batch, regional, long-context, tool, or negotiated pricing adjustments are applied.&#34;,
+  &#34;as_of&#34;: &#34;2026-10-05&#34;,
+  &#34;note&#34;: &#34;Published online token rates verified 2026-10-05. Copilot uses GitHub rates, including saved long-context tiers, before plan allowances; these are usage estimates, not subscription invoices. Cache writes with unspecified lifetime use the 5-minute rate unless an explicit cache_write rate is configured. Direct OpenAI and Anthropic entries use standard rates; no batch, regional, tool, negotiated, or unrecorded context-tier adjustments are applied. Model availability and context capacity require separate verification.&#34;,
   &#34;sources&#34;: [
     &#34;https://developers.openai.com/api/docs/models/gpt-5.5.md&#34;,
     &#34;https://developers.openai.com/api/docs/models/gpt-5.6-luna.md&#34;,
     &#34;https://developers.openai.com/api/docs/models/gpt-5.6-sol.md&#34;,
+    &#34;https://developers.openai.com/api/docs/models/gpt-6-astra.md&#34;,
+    &#34;https://developers.openai.com/api/docs/models/gpt-6-luna.md&#34;,
+    &#34;https://developers.openai.com/api/docs/models/gpt-6-sol.md&#34;,
+    &#34;https://developers.openai.com/api/docs/models/gpt-6.1-sol.md&#34;,
+    &#34;https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing&#34;,
     &#34;https://platform.claude.com/docs/en/about-claude/pricing&#34;
   ],
   &#34;models&#34;: {
     &#34;openai:gpt-5.5&#34;: {
-      &#34;fetched_at&#34;: &#34;2026-09-18T16:57:21.647481Z&#34;,
-      &#34;based_on&#34;: null,
-      &#34;as_of&#34;: &#34;2026-09-18&#34;,
-      &#34;source&#34;: &#34;https://developers.openai.com/api/docs/models/gpt-5.5.md&#34;,
       &#34;input&#34;: &#34;5&#34;,
       &#34;output&#34;: &#34;30&#34;,
       &#34;cache_read&#34;: &#34;0.5&#34;,
       &#34;cache_write&#34;: null,
       &#34;cache_write_5m&#34;: null,
-      &#34;cache_write_1h&#34;: null
+      &#34;cache_write_1h&#34;: null,
+      &#34;fetched_at&#34;: &#34;2026-10-05T20:04:51.790154Z&#34;,
+      &#34;based_on&#34;: null,
+      &#34;as_of&#34;: &#34;2026-10-05&#34;,
+      &#34;source&#34;: &#34;https://developers.openai.com/api/docs/models/gpt-5.5.md&#34;,
+      &#34;long_context&#34;: null
     },
     &#34;openai:gpt-5.6-luna&#34;: {
-      &#34;fetched_at&#34;: &#34;2026-09-18T16:57:21.648610Z&#34;,
-      &#34;based_on&#34;: null,
-      &#34;as_of&#34;: &#34;2026-09-18&#34;,
-      &#34;source&#34;: &#34;https://developers.openai.com/api/docs/models/gpt-5.6-luna.md&#34;,
       &#34;input&#34;: &#34;0.2&#34;,
       &#34;output&#34;: &#34;1.2&#34;,
       &#34;cache_read&#34;: &#34;0.02&#34;,
       &#34;cache_write&#34;: &#34;0.250&#34;,
       &#34;cache_write_5m&#34;: null,
-      &#34;cache_write_1h&#34;: null
+      &#34;cache_write_1h&#34;: null,
+      &#34;fetched_at&#34;: &#34;2026-10-05T20:04:51.923457Z&#34;,
+      &#34;based_on&#34;: null,
+      &#34;as_of&#34;: &#34;2026-10-05&#34;,
+      &#34;source&#34;: &#34;https://developers.openai.com/api/docs/models/gpt-5.6-luna.md&#34;,
+      &#34;long_context&#34;: null
     },
     &#34;openai:gpt-5.6-sol&#34;: {
-      &#34;fetched_at&#34;: &#34;2026-09-18T16:57:21.648975Z&#34;,
-      &#34;based_on&#34;: null,
-      &#34;as_of&#34;: &#34;2026-09-18&#34;,
-      &#34;source&#34;: &#34;https://developers.openai.com/api/docs/models/gpt-5.6-sol.md&#34;,
       &#34;input&#34;: &#34;4&#34;,
       &#34;output&#34;: &#34;20&#34;,
       &#34;cache_read&#34;: &#34;0.4&#34;,
       &#34;cache_write&#34;: &#34;5.00&#34;,
       &#34;cache_write_5m&#34;: null,
-      &#34;cache_write_1h&#34;: null
+      &#34;cache_write_1h&#34;: null,
+      &#34;fetched_at&#34;: &#34;2026-10-05T20:04:52.140115Z&#34;,
+      &#34;based_on&#34;: null,
+      &#34;as_of&#34;: &#34;2026-10-05&#34;,
+      &#34;source&#34;: &#34;https://developers.openai.com/api/docs/models/gpt-5.6-sol.md&#34;,
+      &#34;long_context&#34;: null
     },
     &#34;anthropic:claude-sonnet-5&#34;: {
-      &#34;fetched_at&#34;: &#34;2026-09-18T16:57:21.663815Z&#34;,
-      &#34;based_on&#34;: null,
-      &#34;as_of&#34;: &#34;2026-09-18&#34;,
-      &#34;source&#34;: &#34;https://platform.claude.com/docs/en/about-claude/pricing&#34;,
       &#34;input&#34;: &#34;2&#34;,
       &#34;output&#34;: &#34;10&#34;,
       &#34;cache_read&#34;: &#34;0.20&#34;,
       &#34;cache_write&#34;: null,
       &#34;cache_write_5m&#34;: &#34;2.50&#34;,
-      &#34;cache_write_1h&#34;: &#34;4&#34;
+      &#34;cache_write_1h&#34;: &#34;4&#34;,
+      &#34;fetched_at&#34;: &#34;2026-10-05T20:04:51.673227Z&#34;,
+      &#34;based_on&#34;: null,
+      &#34;as_of&#34;: &#34;2026-10-05&#34;,
+      &#34;source&#34;: &#34;https://platform.claude.com/docs/en/about-claude/pricing&#34;,
+      &#34;long_context&#34;: null
     },
     &#34;anthropic:claude-opus-4-8&#34;: {
-      &#34;fetched_at&#34;: &#34;2026-09-18T16:57:21.674755Z&#34;,
-      &#34;based_on&#34;: null,
-      &#34;as_of&#34;: &#34;2026-09-18&#34;,
-      &#34;source&#34;: &#34;https://platform.claude.com/docs/en/about-claude/pricing&#34;,
       &#34;input&#34;: &#34;5&#34;,
       &#34;output&#34;: &#34;25&#34;,
       &#34;cache_read&#34;: &#34;0.50&#34;,
       &#34;cache_write&#34;: null,
       &#34;cache_write_5m&#34;: &#34;6.25&#34;,
-      &#34;cache_write_1h&#34;: &#34;10&#34;
+      &#34;cache_write_1h&#34;: &#34;10&#34;,
+      &#34;fetched_at&#34;: &#34;2026-10-05T20:04:51.650907Z&#34;,
+      &#34;based_on&#34;: null,
+      &#34;as_of&#34;: &#34;2026-10-05&#34;,
+      &#34;source&#34;: &#34;https://platform.claude.com/docs/en/about-claude/pricing&#34;,
+      &#34;long_context&#34;: null
     },
     &#34;anthropic:claude-fable-5-1&#34;: {
-      &#34;fetched_at&#34;: &#34;2026-09-18T16:57:21.686328Z&#34;,
-      &#34;based_on&#34;: null,
-      &#34;as_of&#34;: &#34;2026-09-18&#34;,
-      &#34;source&#34;: &#34;https://platform.claude.com/docs/en/about-claude/pricing&#34;,
       &#34;input&#34;: &#34;10&#34;,
       &#34;output&#34;: &#34;50&#34;,
       &#34;cache_read&#34;: &#34;0.25&#34;,
       &#34;cache_write&#34;: null,
       &#34;cache_write_5m&#34;: &#34;12.50&#34;,
-      &#34;cache_write_1h&#34;: &#34;20&#34;
+      &#34;cache_write_1h&#34;: &#34;20&#34;,
+      &#34;fetched_at&#34;: &#34;2026-10-05T20:04:51.623268Z&#34;,
+      &#34;based_on&#34;: null,
+      &#34;as_of&#34;: &#34;2026-10-05&#34;,
+      &#34;source&#34;: &#34;https://platform.claude.com/docs/en/about-claude/pricing&#34;,
+      &#34;long_context&#34;: null
     },
     &#34;demo:scripted-chat&#34;: {
-      &#34;fetched_at&#34;: &#34;2026-09-18T16:57:21.648610Z&#34;,
-      &#34;based_on&#34;: &#34;openai:gpt-5.6-luna&#34;,
-      &#34;as_of&#34;: &#34;2026-09-18&#34;,
-      &#34;source&#34;: &#34;Illustrative demo rates based on openai:gpt-5.6-luna; no provider billing&#34;,
       &#34;input&#34;: &#34;0.2&#34;,
       &#34;output&#34;: &#34;1.2&#34;,
       &#34;cache_read&#34;: &#34;0.02&#34;,
       &#34;cache_write&#34;: &#34;0.250&#34;,
       &#34;cache_write_5m&#34;: null,
-      &#34;cache_write_1h&#34;: null
+      &#34;cache_write_1h&#34;: null,
+      &#34;fetched_at&#34;: &#34;2026-10-05T20:04:51.923457Z&#34;,
+      &#34;based_on&#34;: &#34;openai:gpt-5.6-luna&#34;,
+      &#34;as_of&#34;: &#34;2026-10-05&#34;,
+      &#34;source&#34;: &#34;Illustrative demo rates based on openai:gpt-5.6-luna; no provider billing&#34;,
+      &#34;long_context&#34;: null
+    },
+    &#34;anthropic:claude-haiku-4-5&#34;: {
+      &#34;input&#34;: &#34;1&#34;,
+      &#34;output&#34;: &#34;5&#34;,
+      &#34;cache_read&#34;: &#34;0.10&#34;,
+      &#34;cache_write&#34;: null,
+      &#34;cache_write_5m&#34;: &#34;1.25&#34;,
+      &#34;cache_write_1h&#34;: &#34;2&#34;,
+      &#34;fetched_at&#34;: &#34;2026-10-05T20:04:52.648298Z&#34;,
+      &#34;based_on&#34;: null,
+      &#34;as_of&#34;: &#34;2026-10-05&#34;,
+      &#34;source&#34;: &#34;https://platform.claude.com/docs/en/about-claude/pricing&#34;,
+      &#34;long_context&#34;: null
+    },
+    &#34;anthropic:claude-haiku-4-5-20251001&#34;: {
+      &#34;input&#34;: &#34;1&#34;,
+      &#34;output&#34;: &#34;5&#34;,
+      &#34;cache_read&#34;: &#34;0.10&#34;,
+      &#34;cache_write&#34;: null,
+      &#34;cache_write_5m&#34;: &#34;1.25&#34;,
+      &#34;cache_write_1h&#34;: &#34;2&#34;,
+      &#34;fetched_at&#34;: &#34;2026-10-05T20:04:53.344352Z&#34;,
+      &#34;based_on&#34;: null,
+      &#34;as_of&#34;: &#34;2026-10-05&#34;,
+      &#34;source&#34;: &#34;https://platform.claude.com/docs/en/about-claude/pricing&#34;,
+      &#34;long_context&#34;: null
+    },
+    &#34;anthropic:claude-opus-5-5&#34;: {
+      &#34;input&#34;: &#34;4&#34;,
+      &#34;output&#34;: &#34;20&#34;,
+      &#34;cache_read&#34;: &#34;0.20&#34;,
+      &#34;cache_write&#34;: null,
+      &#34;cache_write_5m&#34;: &#34;5&#34;,
+      &#34;cache_write_1h&#34;: &#34;8&#34;,
+      &#34;fetched_at&#34;: &#34;2026-10-05T20:04:53.363937Z&#34;,
+      &#34;based_on&#34;: null,
+      &#34;as_of&#34;: &#34;2026-10-05&#34;,
+      &#34;source&#34;: &#34;https://platform.claude.com/docs/en/about-claude/pricing&#34;,
+      &#34;long_context&#34;: null
+    },
+    &#34;anthropic:claude-sonnet-4-6&#34;: {
+      &#34;input&#34;: &#34;3&#34;,
+      &#34;output&#34;: &#34;15&#34;,
+      &#34;cache_read&#34;: &#34;0.30&#34;,
+      &#34;cache_write&#34;: null,
+      &#34;cache_write_5m&#34;: &#34;3.75&#34;,
+      &#34;cache_write_1h&#34;: &#34;6&#34;,
+      &#34;fetched_at&#34;: &#34;2026-10-05T20:04:53.382497Z&#34;,
+      &#34;based_on&#34;: null,
+      &#34;as_of&#34;: &#34;2026-10-05&#34;,
+      &#34;source&#34;: &#34;https://platform.claude.com/docs/en/about-claude/pricing&#34;,
+      &#34;long_context&#34;: null
+    },
+    &#34;anthropic:claude-sonnet-5-5&#34;: {
+      &#34;input&#34;: &#34;2&#34;,
+      &#34;output&#34;: &#34;10&#34;,
+      &#34;cache_read&#34;: &#34;0.20&#34;,
+      &#34;cache_write&#34;: null,
+      &#34;cache_write_5m&#34;: &#34;2.50&#34;,
+      &#34;cache_write_1h&#34;: &#34;4&#34;,
+      &#34;fetched_at&#34;: &#34;2026-10-05T20:04:53.397570Z&#34;,
+      &#34;based_on&#34;: null,
+      &#34;as_of&#34;: &#34;2026-10-05&#34;,
+      &#34;source&#34;: &#34;https://platform.claude.com/docs/en/about-claude/pricing&#34;,
+      &#34;long_context&#34;: null
+    },
+    &#34;copilot:claude-haiku-4.5&#34;: {
+      &#34;input&#34;: &#34;1.00&#34;,
+      &#34;output&#34;: &#34;5.00&#34;,
+      &#34;cache_read&#34;: &#34;0.10&#34;,
+      &#34;cache_write&#34;: &#34;1.25&#34;,
+      &#34;cache_write_5m&#34;: null,
+      &#34;cache_write_1h&#34;: null,
+      &#34;fetched_at&#34;: &#34;2026-10-05T20:06:07.426410Z&#34;,
+      &#34;based_on&#34;: null,
+      &#34;as_of&#34;: &#34;2026-10-05&#34;,
+      &#34;source&#34;: &#34;https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing&#34;,
+      &#34;long_context&#34;: null
+    },
+    &#34;copilot:claude-opus-5.5&#34;: {
+      &#34;input&#34;: &#34;4.00&#34;,
+      &#34;output&#34;: &#34;20.00&#34;,
+      &#34;cache_read&#34;: &#34;0.20&#34;,
+      &#34;cache_write&#34;: &#34;5.00&#34;,
+      &#34;cache_write_5m&#34;: null,
+      &#34;cache_write_1h&#34;: null,
+      &#34;fetched_at&#34;: &#34;2026-10-05T20:06:07.458825Z&#34;,
+      &#34;based_on&#34;: null,
+      &#34;as_of&#34;: &#34;2026-10-05&#34;,
+      &#34;source&#34;: &#34;https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing&#34;,
+      &#34;long_context&#34;: null
+    },
+    &#34;copilot:claude-sonnet-4.6&#34;: {
+      &#34;input&#34;: &#34;3.00&#34;,
+      &#34;output&#34;: &#34;15.00&#34;,
+      &#34;cache_read&#34;: &#34;0.30&#34;,
+      &#34;cache_write&#34;: &#34;3.75&#34;,
+      &#34;cache_write_5m&#34;: null,
+      &#34;cache_write_1h&#34;: null,
+      &#34;fetched_at&#34;: &#34;2026-10-05T20:06:07.483149Z&#34;,
+      &#34;based_on&#34;: null,
+      &#34;as_of&#34;: &#34;2026-10-05&#34;,
+      &#34;source&#34;: &#34;https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing&#34;,
+      &#34;long_context&#34;: null
+    },
+    &#34;copilot:claude-sonnet-5.5&#34;: {
+      &#34;input&#34;: &#34;2.00&#34;,
+      &#34;output&#34;: &#34;10.00&#34;,
+      &#34;cache_read&#34;: &#34;0.20&#34;,
+      &#34;cache_write&#34;: &#34;2.50&#34;,
+      &#34;cache_write_5m&#34;: null,
+      &#34;cache_write_1h&#34;: null,
+      &#34;fetched_at&#34;: &#34;2026-10-05T20:06:07.505337Z&#34;,
+      &#34;based_on&#34;: null,
+      &#34;as_of&#34;: &#34;2026-10-05&#34;,
+      &#34;source&#34;: &#34;https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing&#34;,
+      &#34;long_context&#34;: null
+    },
+    &#34;copilot:gemini-3.8-flash&#34;: {
+      &#34;input&#34;: &#34;0.75&#34;,
+      &#34;output&#34;: &#34;3.75&#34;,
+      &#34;cache_read&#34;: &#34;0.075&#34;,
+      &#34;cache_write&#34;: null,
+      &#34;cache_write_5m&#34;: null,
+      &#34;cache_write_1h&#34;: null,
+      &#34;fetched_at&#34;: &#34;2026-10-05T20:06:07.526797Z&#34;,
+      &#34;based_on&#34;: null,
+      &#34;as_of&#34;: &#34;2026-10-05&#34;,
+      &#34;source&#34;: &#34;https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing&#34;,
+      &#34;long_context&#34;: null
+    },
+    &#34;copilot:gpt-5.3-codex&#34;: {
+      &#34;input&#34;: &#34;1.75&#34;,
+      &#34;output&#34;: &#34;14.00&#34;,
+      &#34;cache_read&#34;: &#34;0.175&#34;,
+      &#34;cache_write&#34;: null,
+      &#34;cache_write_5m&#34;: null,
+      &#34;cache_write_1h&#34;: null,
+      &#34;fetched_at&#34;: &#34;2026-10-05T20:06:07.548968Z&#34;,
+      &#34;based_on&#34;: null,
+      &#34;as_of&#34;: &#34;2026-10-05&#34;,
+      &#34;source&#34;: &#34;https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing&#34;,
+      &#34;long_context&#34;: null
+    },
+    &#34;copilot:gpt-5.4&#34;: {
+      &#34;input&#34;: &#34;2.50&#34;,
+      &#34;output&#34;: &#34;15.00&#34;,
+      &#34;cache_read&#34;: &#34;0.25&#34;,
+      &#34;cache_write&#34;: null,
+      &#34;cache_write_5m&#34;: null,
+      &#34;cache_write_1h&#34;: null,
+      &#34;fetched_at&#34;: &#34;2026-10-05T20:06:07.571728Z&#34;,
+      &#34;based_on&#34;: null,
+      &#34;as_of&#34;: &#34;2026-10-05&#34;,
+      &#34;source&#34;: &#34;https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing&#34;,
+      &#34;long_context&#34;: {
+        &#34;input&#34;: &#34;5.00&#34;,
+        &#34;output&#34;: &#34;22.50&#34;,
+        &#34;cache_read&#34;: &#34;0.50&#34;,
+        &#34;cache_write&#34;: null,
+        &#34;cache_write_5m&#34;: null,
+        &#34;cache_write_1h&#34;: null,
+        &#34;threshold&#34;: 272000
+      }
+    },
+    &#34;copilot:gpt-6-astra&#34;: {
+      &#34;input&#34;: &#34;10.00&#34;,
+      &#34;output&#34;: &#34;50.00&#34;,
+      &#34;cache_read&#34;: &#34;1.00&#34;,
+      &#34;cache_write&#34;: &#34;12.50&#34;,
+      &#34;cache_write_5m&#34;: null,
+      &#34;cache_write_1h&#34;: null,
+      &#34;fetched_at&#34;: &#34;2026-10-05T20:06:07.593790Z&#34;,
+      &#34;based_on&#34;: null,
+      &#34;as_of&#34;: &#34;2026-10-05&#34;,
+      &#34;source&#34;: &#34;https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing&#34;,
+      &#34;long_context&#34;: {
+        &#34;input&#34;: &#34;20.00&#34;,
+        &#34;output&#34;: &#34;75.00&#34;,
+        &#34;cache_read&#34;: &#34;2.00&#34;,
+        &#34;cache_write&#34;: &#34;25.00&#34;,
+        &#34;cache_write_5m&#34;: null,
+        &#34;cache_write_1h&#34;: null,
+        &#34;threshold&#34;: 272000
+      }
+    },
+    &#34;copilot:gpt-6-luna&#34;: {
+      &#34;input&#34;: &#34;0.10&#34;,
+      &#34;output&#34;: &#34;0.50&#34;,
+      &#34;cache_read&#34;: &#34;0.01&#34;,
+      &#34;cache_write&#34;: &#34;0.125&#34;,
+      &#34;cache_write_5m&#34;: null,
+      &#34;cache_write_1h&#34;: null,
+      &#34;fetched_at&#34;: &#34;2026-10-05T20:06:07.615194Z&#34;,
+      &#34;based_on&#34;: null,
+      &#34;as_of&#34;: &#34;2026-10-05&#34;,
+      &#34;source&#34;: &#34;https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing&#34;,
+      &#34;long_context&#34;: {
+        &#34;input&#34;: &#34;0.20&#34;,
+        &#34;output&#34;: &#34;0.75&#34;,
+        &#34;cache_read&#34;: &#34;0.02&#34;,
+        &#34;cache_write&#34;: &#34;0.25&#34;,
+        &#34;cache_write_5m&#34;: null,
+        &#34;cache_write_1h&#34;: null,
+        &#34;threshold&#34;: 272000
+      }
+    },
+    &#34;copilot:gpt-6-sol&#34;: {
+      &#34;input&#34;: &#34;2.00&#34;,
+      &#34;output&#34;: &#34;10.00&#34;,
+      &#34;cache_read&#34;: &#34;0.20&#34;,
+      &#34;cache_write&#34;: &#34;2.50&#34;,
+      &#34;cache_write_5m&#34;: null,
+      &#34;cache_write_1h&#34;: null,
+      &#34;fetched_at&#34;: &#34;2026-10-05T20:06:07.636062Z&#34;,
+      &#34;based_on&#34;: null,
+      &#34;as_of&#34;: &#34;2026-10-05&#34;,
+      &#34;source&#34;: &#34;https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing&#34;,
+      &#34;long_context&#34;: {
+        &#34;input&#34;: &#34;4.00&#34;,
+        &#34;output&#34;: &#34;15.00&#34;,
+        &#34;cache_read&#34;: &#34;0.40&#34;,
+        &#34;cache_write&#34;: &#34;5.00&#34;,
+        &#34;cache_write_5m&#34;: null,
+        &#34;cache_write_1h&#34;: null,
+        &#34;threshold&#34;: 272000
+      }
+    },
+    &#34;copilot:gpt-6.1-sol&#34;: {
+      &#34;input&#34;: &#34;2.00&#34;,
+      &#34;output&#34;: &#34;10.00&#34;,
+      &#34;cache_read&#34;: &#34;0.10&#34;,
+      &#34;cache_write&#34;: &#34;2.50&#34;,
+      &#34;cache_write_5m&#34;: null,
+      &#34;cache_write_1h&#34;: null,
+      &#34;fetched_at&#34;: &#34;2026-10-05T20:06:07.656991Z&#34;,
+      &#34;based_on&#34;: null,
+      &#34;as_of&#34;: &#34;2026-10-05&#34;,
+      &#34;source&#34;: &#34;https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing&#34;,
+      &#34;long_context&#34;: {
+        &#34;input&#34;: &#34;4.00&#34;,
+        &#34;output&#34;: &#34;15.00&#34;,
+        &#34;cache_read&#34;: &#34;0.20&#34;,
+        &#34;cache_write&#34;: &#34;5.00&#34;,
+        &#34;cache_write_5m&#34;: null,
+        &#34;cache_write_1h&#34;: null,
+        &#34;threshold&#34;: 272000
+      }
+    },
+    &#34;openai:gpt-6-astra&#34;: {
+      &#34;input&#34;: &#34;10&#34;,
+      &#34;output&#34;: &#34;50&#34;,
+      &#34;cache_read&#34;: &#34;1&#34;,
+      &#34;cache_write&#34;: &#34;12.50&#34;,
+      &#34;cache_write_5m&#34;: null,
+      &#34;cache_write_1h&#34;: null,
+      &#34;fetched_at&#34;: &#34;2026-10-05T20:04:54.141799Z&#34;,
+      &#34;based_on&#34;: null,
+      &#34;as_of&#34;: &#34;2026-10-05&#34;,
+      &#34;source&#34;: &#34;https://developers.openai.com/api/docs/models/gpt-6-astra.md&#34;,
+      &#34;long_context&#34;: null
+    },
+    &#34;openai:gpt-6-luna&#34;: {
+      &#34;input&#34;: &#34;0.1&#34;,
+      &#34;output&#34;: &#34;0.5&#34;,
+      &#34;cache_read&#34;: &#34;0.01&#34;,
+      &#34;cache_write&#34;: &#34;0.125&#34;,
+      &#34;cache_write_5m&#34;: null,
+      &#34;cache_write_1h&#34;: null,
+      &#34;fetched_at&#34;: &#34;2026-10-05T20:04:54.278866Z&#34;,
+      &#34;based_on&#34;: null,
+      &#34;as_of&#34;: &#34;2026-10-05&#34;,
+      &#34;source&#34;: &#34;https://developers.openai.com/api/docs/models/gpt-6-luna.md&#34;,
+      &#34;long_context&#34;: null
+    },
+    &#34;openai:gpt-6-sol&#34;: {
+      &#34;input&#34;: &#34;2&#34;,
+      &#34;output&#34;: &#34;10&#34;,
+      &#34;cache_read&#34;: &#34;0.2&#34;,
+      &#34;cache_write&#34;: &#34;2.50&#34;,
+      &#34;cache_write_5m&#34;: null,
+      &#34;cache_write_1h&#34;: null,
+      &#34;fetched_at&#34;: &#34;2026-10-05T20:04:54.423085Z&#34;,
+      &#34;based_on&#34;: null,
+      &#34;as_of&#34;: &#34;2026-10-05&#34;,
+      &#34;source&#34;: &#34;https://developers.openai.com/api/docs/models/gpt-6-sol.md&#34;,
+      &#34;long_context&#34;: null
+    },
+    &#34;openai:gpt-6.1-sol&#34;: {
+      &#34;input&#34;: &#34;2&#34;,
+      &#34;output&#34;: &#34;10&#34;,
+      &#34;cache_read&#34;: &#34;0.1&#34;,
+      &#34;cache_write&#34;: &#34;2.50&#34;,
+      &#34;cache_write_5m&#34;: null,
+      &#34;cache_write_1h&#34;: null,
+      &#34;fetched_at&#34;: &#34;2026-10-05T20:04:54.567575Z&#34;,
+      &#34;based_on&#34;: null,
+      &#34;as_of&#34;: &#34;2026-10-05&#34;,
+      &#34;source&#34;: &#34;https://developers.openai.com/api/docs/models/gpt-6.1-sol.md&#34;,
+      &#34;long_context&#34;: null
     }
   },
   &#34;aliases&#34;: {
@@ -1065,7 +900,7 @@ Only available on backends implementing SandboxBackendProtocol; otherwise it ret
     &#34;openai:gpt-5.6&#34;: &#34;openai:gpt-5.6-sol&#34;
   }
 }</pre></details>
-<footer><div>Run 01a0d587-42ef-7a82-aea6-fa40a1fdab08</div><p>Turn costs sum model calls once. Tool fees are outside this model-token estimate.</p>Only model calls contribute token charges. Reasoning is priced at the output-token rate. Missing usage or prices are never assumed free. Context is framework metadata or application-authored annotations, not inferred private reasoning. Token estimates exclude tool fees, infrastructure, taxes, and discounts. Schema 1.</footer>
+<footer><div>Run 01a1143f-93d5-79a1-85dd-05eee1ff9487</div><p>Offline demonstration: actual graph execution with scripted responses. Token counts use message and tool-definition JSON words and punctuation. The simulation retains completed conversation history, including responses, for subsequent cache reads.</p><p>Turn costs sum model calls once. Tool fees are outside this model-token estimate.</p>Only model calls contribute token charges. Reasoning is priced at the output-token rate. Missing usage or prices are never assumed free. Context is framework metadata or application-authored annotations, not inferred private reasoning. Token estimates exclude tool fees, infrastructure, taxes, and discounts. Schema 1.</footer>
 <div id="cost-tooltip" role="tooltip" hidden style="position:fixed;z-index:20;pointer-events:none;background:#173b70;color:white;padding:10px 14px;border-radius:6px;box-shadow:0 3px 12px #0003;font-size:13px;max-width:min(420px,calc(100vw - 16px))"></div>
 </main><script>
 const costTip = document.getElementById('cost-tooltip');

@@ -14,7 +14,7 @@ from importlib.resources import files
 from math import ceil, floor, log10
 from pathlib import Path
 
-from jinja2 import Environment, select_autoescape
+from jinja2 import DictLoader, Environment, select_autoescape
 from langchain_core.messages import ToolMessage
 from langchain_core.messages.utils import count_tokens_approximately
 
@@ -28,6 +28,7 @@ from reporting.context import (
     context_change,
     context_utilization,
 )
+from reporting.native_timing import timing_rows
 from reporting.pricing import CATEGORIES, Prices, breakdown, rate_for_step, summarize
 from reporting.schema import Run
 from reporting.workflow_diagram import workflow_diagrams
@@ -547,7 +548,7 @@ def conversation_turns(run: Run, prices: Prices) -> list[dict]:
             # in the new tail so old tool messages are not described as additions.
             if previous:
                 for role, label in [
-                    ("ai", "Assistant / tool-call input"),
+                    ("ai", "Agent / tool-call input"),
                     ("tool", "Tool-result input"),
                 ]:
                     messages = [m for m in tail if m.get("role") == role]
@@ -1169,7 +1170,12 @@ def render(run: Run, prices: Prices, destination: Path):
     # any other base currency instead of producing mislabeled amounts.
     if prices.currency != "USD":
         raise ValueError("EUR conversion currently requires a USD pricing table")
-    env = Environment(autoescape=select_autoescape(default=True))
+    env = Environment(
+        autoescape=select_autoescape(default=True),
+        loader=DictLoader({name: files("reporting").joinpath(f"templates/{name}").read_text(encoding="utf-8")
+                           for name in ("qa.html", "qa_criteria.html")}),
+    )
+    env.filters["native_timing"] = lambda step: [row for row in timing_rows([step]) if row["ms"] is not None]
     template = env.from_string(
         files("reporting").joinpath("templates/report.html").read_text()
     )

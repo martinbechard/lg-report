@@ -69,6 +69,7 @@ Path(os.environ["CODEX_TEST_CAPTURE"]).write_text(json.dumps({
     "args": args, "prompt": json.loads(sys.stdin.read()), "pid": os.getpid(),
     "instructions": (directory / "instructions.txt").read_text(),
     "schema": json.loads((directory / "response-schema.json").read_text()) if "--output-schema" in args else None,
+    "catalog": json.loads((directory / "model-catalog.json").read_text()) if (directory / "model-catalog.json").exists() else None,
 }))
 if os.environ.get("CODEX_TEST_SLEEP"):
     time.sleep(30)
@@ -90,9 +91,10 @@ def test_explicit_model_required(model):
 def test_factory_live_selection_and_restrictions():
     """Construction remains lazy and login selection needs no vendor API key."""
     settings = {"LG_PROVIDER": "codex", "LG_MODEL": "chosen", "LG_CODEX_CLI": "custom-codex",
-                "LG_EFFORT": "low"}
+                "LG_EFFORT": "low", "LG_CODEX_MODEL_CATALOG": "/not-read-at-construction.json"}
     model, provider, code = configured_model(settings=settings)
     assert isinstance(model, CodexChatModel)
+    assert model.model_catalog_file == "/not-read-at-construction.json"
     assert (provider, code, model.executable, model.reasoning_effort) == (
         "codex", "chosen", "custom-codex", "low"
     )
@@ -117,6 +119,13 @@ def test_sync_process_captures_usage_and_isolates_history(fake_cli):
     assert "Be concise" in data["instructions"]
     assert "--ignore-user-config" in data["args"] and "--ephemeral" in data["args"]
     assert "features.shell_tool=false" in data["args"]
+    assert "skills.include_instructions=false" in data["args"]
+    assert "features.goals=false" in data["args"]
+    assert "agents.enabled=false" in data["args"]
+    assert "features.multi_agent_v2=false" in data["args"]
+    assert "features.sleep_tool=false" in data["args"]
+    assert "tools.experimental_request_user_input.enabled=false" in data["args"]
+    assert "include_environment_context=false" in data["args"]
     assert data["args"][data["args"].index("--sandbox") + 1] == "read-only"
     assert not Path(data["args"][data["args"].index("--cd") + 1]).exists()
     assert answer.content == "An answer"
@@ -160,6 +169,64 @@ def test_tool_decision_uses_cli_schema_and_preserves_usage(fake_cli):
     assert "features.shell_tool=false" in data["args"]
     assert answer.tool_calls[0]["args"] == {"path": "/plan.md"}
     assert answer.usage_metadata["total_tokens"] == 120
+
+
+def test_open_tool_schema_is_sent_once_in_prompt(fake_cli):
+    """Removing duplication must preserve arbitrary-key tools and their defaults."""
+    model, _capture = fake_cli
+    tools = [{"type": "function", "function": {"name": "store", "description": "Store arbitrary keys",
+              "parameters": {"type": "object", "additionalProperties": {"type": "string"}}}}]
+    with model.request([HumanMessage("Store the supplied object")], None,
+                       {"tools": tools, "tool_choice": "required", "parallel_tool_calls": False}) as (command, _prompt):
+        directory = Path(command[command.index('--cd') + 1])
+        instructions = (directory / 'instructions.txt').read_text()
+        assert '--output-schema' not in command
+        assert 'Store arbitrary keys' in instructions
+        assert '"additionalProperties":{"type":"string"}' in instructions
+        assert '"tool_choice":"required"' in instructions
+        assert '"parallel_tool_calls":false' in instructions
+
+
+def test_catalog_removes_native_tools_without_changing_model_settings(fake_cli, tmp_path):
+    """A private metadata copy changes tools only and preserves the account cache."""
+    model, capture = fake_cli
+    selected = {"slug": "chosen", "tool_mode": "code_mode_only", "shell_type": "unified_exec",
+                "apply_patch_tool_type": "freeform", "experimental_supported_tools": ["clock"],
+                "use_responses_lite": True, "context_window": 200000,
+                "supported_reasoning_levels": [{"effort": "medium", "description": "Medium"}]}
+    original = json.dumps({"identity": "not-for-cli", "models": [selected, {"slug": "unrelated"}]})
+    source = tmp_path / 'models.json'
+    source.write_text(original)
+    model.model_catalog_file = str(source)
+    wire = events({"input_tokens": 100, "output_tokens": 20})
+    wire[3]['item']['text'] = '{"content":"Done","tool_calls":[]}'
+    Path(os.environ['CODEX_TEST_EVENTS']).write_text(jsonl(wire))
+    model.bind_tools([{"name": "read", "description": "Read the virtual file",
+                       "parameters": {"type": "object", "properties": {"path": {"type": "string"}}}}]).invoke('Answer the question')
+    data = json.loads(capture.read_text())
+    expected = {**selected, "tool_mode": "direct", "shell_type": "disabled",
+                "apply_patch_tool_type": None, "experimental_supported_tools": []}
+    assert data['catalog'] == {"models": [expected]}
+    assert data['schema'] is None
+    assert data['instructions'].count('Read the virtual file') == 1
+    assert '"parameters"' in data['instructions']
+    assert source.read_text() == original
+    assert 'include_permissions_instructions=false' in data['args']
+    assert data['args'][data['args'].index('--sandbox') + 1] == 'read-only'
+    assert 'approval_policy="never"' in data['args']
+    assert not Path(data['args'][data['args'].index('--cd') + 1]).exists()
+
+
+@pytest.mark.parametrize('entries', [[], [{"slug": "other"}], [{"slug": "chosen"}, {"slug": "chosen"}]])
+def test_catalog_requires_exact_model_metadata(fake_cli, tmp_path, entries):
+    """Missing/ambiguous entries fail before spawning rather than guessing defaults."""
+    model, capture = fake_cli
+    source = tmp_path / 'models.json'
+    source.write_text(json.dumps({"models": entries}))
+    model.model_catalog_file = str(source)
+    with pytest.raises(ValueError, match='exactly one entry'):
+        model.invoke('Answer the question')
+    assert not capture.exists()
 
 
 @pytest.mark.parametrize("receipt", [None, {}, {"input_tokens": 100}])

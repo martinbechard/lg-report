@@ -14,7 +14,7 @@ The reusable code lives under `src/agent_runtime/`:
 
 - **`workflows/simple_chat.py`** composes the single-agent workflow.
 - **`agents/chat_agent.py`** defines the named agent, its system instructions,
-  and its DeepAgents graph. It imports no client or test case.
+  and its LangGraph. It imports no client or test case.
 - **`harness/conversation.py`** defines requests, text attachments, the client
   interface, and the session loop that retains history and turn metadata.
 - **`harness/console_client.py`** accepts human prompts and text files.
@@ -48,9 +48,9 @@ with two predefined user turns and two prerecorded responses, without provider
 charges. Model-price refreshes may still access the network; use `--prices models.json`
 to avoid them. FX always reads the saved shared `exchange-rate.json`.
 
-The graph includes DeepAgents' built-in tool definitions, which consume
-context even though its instructions ask it to answer without tools. StateBackend
-keeps built-in file operations in graph state rather than the local filesystem.
+The standard LangGraph-backed agent has no registered tools or filesystem
+backend. Both API and CLI models receive the conversation without application
+tool definitions; CLI gateways also omit the JSON tool-decision instructions.
 
 ## Console chat
 

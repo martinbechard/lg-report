@@ -9,7 +9,7 @@ AI attribution: Generated with AI assistance.
 Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
 
-from deepagents import create_deep_agent
+from langchain.agents import create_agent
 from langgraph.graph.state import CompiledStateGraph
 
 from agent_runtime.tools.echo_tool import echo_tool
@@ -37,7 +37,7 @@ def build_agent(parameters: dict) -> CompiledStateGraph:
     # Register the actual function, not a fabricated tool-result string. This is
     # what makes the resulting trace a runnable tool-use example rather than a
     # preassembled report. LangGraph owns the model/tool/model routing.
-    return create_deep_agent(
+    return create_agent(
         **parameters,
         tools=[echo_tool],
         name="reference_chat_agent",

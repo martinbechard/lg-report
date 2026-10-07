@@ -67,6 +67,7 @@ def workbook_data(run, prices):
     ]
     return {
         "run": {"id": run.id, "title": run.title, "demo": run.demo},
+        "qa": run.qa.model_dump(mode="json") if run.qa else None,
         "events": events,
         "tree": tree,
         "prices": prices.model_dump(mode="json"),

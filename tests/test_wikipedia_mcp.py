@@ -1,4 +1,4 @@
-"""Verify MCP discovery, retrieval contracts, and Deep Agent tool execution.
+"""Verify MCP discovery, retrieval contracts, and LangGraph tool execution.
 
 A tiny real Chroma collection uses deterministic embeddings without downloads.
 A child Python server verifies stdio independently of the in-process MCP tests.
@@ -16,9 +16,8 @@ from pathlib import Path
 
 import chromadb
 import pytest
-from deepagents import create_deep_agent
-from deepagents.backends import StateBackend
 from fastmcp.client.transports import StdioTransport
+from langchain.agents import create_agent
 from langchain.mcp import MCPAdapter
 from langchain_core.messages import AIMessage
 from test_rag import TestEmbedding
@@ -43,7 +42,7 @@ def collection(tmp_path):
 
 
 # Cover tool discovery, input limits, retrieval payload shape, and
-# Deep Agent tool routing in one protocol-level offline scenario.
+# LangGraph tool routing in one protocol-level offline scenario.
 def test_mcp_contract_and_deep_agent(collection):
     async def exercise():
         # Run async discovery, retrieval, and agent execution in one adapter lifetime.
@@ -76,11 +75,11 @@ def test_mcp_contract_and_deep_agent(collection):
                     AIMessage(content="Ravens adapt to urban environments."),
                 ]], agent_name="test-agent"
             )
-            agent = create_deep_agent(model=model, tools=tools, backend=StateBackend())
+            agent = create_agent(model=model, tools=tools)
             final = await agent.ainvoke(
                 {"messages": [{"role": "user", "content": "Where do ravens live?"}]}
             )
-            # Deep Agent ainvoke returns graph state. Its ToolMessage is the
+            # LangGraph ainvoke returns graph state. Its ToolMessage is the
             # executed MCP search result; AIMessage.tool_calls was only the
             # preceding proposal to search, and the last message is the answer.
             observation = next(m for m in final["messages"] if m.type == "tool")

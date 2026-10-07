@@ -131,12 +131,13 @@ def test_openai_endpoint_from_env_file(tmp_path, file_url, shell_url, expected):
 @pytest.mark.parametrize("provider", ["openai", "anthropic"])
 @pytest.mark.parametrize(
     ("file_limit", "shell_limit", "expected"),
-    [(None, None, 32768), ("8192", None, 8192), ("8192", "16384", 16384)],
+    [(None, None, None), ("", None, None), ("8192", "", None),
+     ("8192", None, 8192), ("8192", "16384", 16384)],
 )
 def test_output_limit_default_and_overrides(
     isolated_models, monkeypatch, provider, file_limit, shell_limit, expected
 ):
-    """Both SDK adapters get 32K by default while explicit limits keep precedence.
+    """OpenAI omits unconfigured limits; Anthropic retains its required allowance.
 
     Construct real adapters with dummy keys but never invoke them: this checks
     the provider boundary without network calls or billable model generation.
@@ -151,7 +152,18 @@ def test_output_limit_default_and_overrides(
     if shell_limit is not None:
         monkeypatch.setenv("LG_MAX_TOKENS", shell_limit)
     adapter, _, _ = configured_model(settings=settings)
+    if provider == "anthropic" and expected is None:
+        expected = 32768
     assert adapter.max_tokens == expected
+    if provider == "openai":
+        # Inspect the serialized request as well as the SDK field: a library
+        # default must not silently reintroduce a cap or drop reasoning effort.
+        payload = adapter._get_request_payload("Hello", reasoning_effort="medium")
+        assert payload["reasoning"]["effort"] == "medium"
+        if expected is None:
+            assert "max_output_tokens" not in payload
+        else:
+            assert payload["max_output_tokens"] == expected
 
 
 @pytest.mark.parametrize("mapping", [None, "", "  "])

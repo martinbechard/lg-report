@@ -18,6 +18,7 @@ from reporting.price_refresh import get_prices
 from reporting.pricing import Prices
 
 from .argument_parser import argument_parser, resolve_live_mode
+from .qa_judge import QAJudge
 
 
 @dataclass(frozen=True)
@@ -38,6 +39,7 @@ class Settings:
     prices: Prices
     capture_content: bool
     overwrite: bool = False
+    qa: QAJudge | None = None
 
 
 def settings_for(app_file: str, description: str, *, args=None) -> Settings:
@@ -102,7 +104,17 @@ def settings_for(app_file: str, description: str, *, args=None) -> Settings:
     output = args.out or Path("reports") / name
     print(f"Report directory: {output.resolve()}")
     print("Replaces the previous generated report bundle in this directory.")
-    return Settings(args.live, output, prices, not args.metadata_only, True)
+    # QA is opt-in and uses its own provider/model and usage receipt. The judge
+    # skips static runs before constructing a provider or making a paid call.
+    enabled = getattr(args, "qa", None)
+    if enabled is None:
+        enabled = str(values.get("LG_QA") or "").lower() in {"1", "true", "yes"}
+    qa_values = dict(values)
+    for flag, key in (("qa_model", "LG_QA_MODEL"), ("qa_provider", "LG_QA_PROVIDER")):
+        if getattr(args, flag, None):
+            qa_values[key] = getattr(args, flag)
+    judge = QAJudge(qa_values, capture_content=not args.metadata_only) if enabled else None
+    return Settings(args.live, output, prices, not args.metadata_only, True, judge)
 
 
 def prepare_sample(catalog, sample_id, args):
@@ -128,6 +140,10 @@ def prepare_sample(catalog, sample_id, args):
     settings = settings_for(
         str(sample.directory / "sample.py"), sample.description, args=settings_args
     )
+    if settings.qa is not None:
+        from dataclasses import replace
+
+        settings = replace(settings, qa=replace(settings.qa, goal=sample.goal or sample.description))
     prompts = None
     if args.request is not None:
         prompts = [args.request]

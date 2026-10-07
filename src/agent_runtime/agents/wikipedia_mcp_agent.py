@@ -1,4 +1,4 @@
-"""Connect a Deep Agent to the local Wikipedia MCP subprocess.
+"""Connect a LangGraph agent to the local Wikipedia MCP subprocess.
 
 The async context owns tool discovery and the subprocess connection. Keep agent
 invocations inside it so shutdown is deterministic. The server owns the index;
@@ -13,8 +13,8 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from deepagents import create_deep_agent
 from fastmcp.client.transports import StdioTransport
+from langchain.agents import create_agent
 from langchain.mcp import MCPAdapter
 from langgraph.graph.state import CompiledStateGraph
 
@@ -49,7 +49,7 @@ async def open_agent(
         # At runtime those adapters send the model's search arguments over MCP;
         # the server executes retrieval and its result becomes a ToolMessage.
         # agent.ainvoke returns graph state with messages, not the MCP response.
-        yield create_deep_agent(
+        yield create_agent(
             **parameters,
             tools=await adapter.list_tools(),
             name="wikipedia_mcp_agent",

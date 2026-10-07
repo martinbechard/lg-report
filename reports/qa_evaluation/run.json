@@ -1,0 +1,876 @@
+{
+  "schema_version": 1,
+  "id": "01a111d2-3092-7143-bc76-e25a40051556",
+  "title": "Simple chat",
+  "demo": false,
+  "status": "ok",
+  "steps": [
+    {
+      "id": "01a111d2-3092-7143-bc76-e25a40051556",
+      "parent_id": null,
+      "name": "chat_agent",
+      "kind": "workflow",
+      "start_ns": 1791300350100187000,
+      "end_ns": 1791300363045039000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "report_workflow_definition": "{\"annotations\": {\"model\": {\"kind\": \"model\", \"comment\": \"Choose a tool or return an answer\"}, \"tools\": {\"kind\": \"tool\", \"comment\": \"Run tools; append results to history. Available: ls, read_file, write_file, edit_file, delete, glob, grep, execute, task\"}, \"PatchToolCallsMiddleware.before_agent\": {\"kind\": \"process\", \"comment\": \"\"}}, \"title\": \"chat_agent\", \"context\": \"Compiled graph; arrows show declared transitions\", \"nodes\": [\"__start__\", \"PatchToolCallsMiddleware.before_agent\", \"model\", \"tools\", \"__end__\"], \"edges\": [{\"source\": \"PatchToolCallsMiddleware.before_agent\", \"target\": \"model\", \"label\": \"\"}, {\"source\": \"__start__\", \"target\": \"PatchToolCallsMiddleware.before_agent\", \"label\": \"\"}, {\"source\": \"tools\", \"target\": \"model\", \"label\": \"model\"}, {\"source\": \"model\", \"target\": \"tools\", \"label\": \"tools\"}, {\"source\": \"model\", \"target\": \"__end__\", \"label\": \"__end__\"}, {\"source\": \"model\", \"target\": \"model\", \"label\": \"model\"}], \"children\": {}, \"delegations\": [{\"source\": \"tools\", \"tool\": \"task\", \"name\": \"general-purpose\", \"graph\": {\"annotations\": {\"model\": {\"kind\": \"model\", \"comment\": \"Choose a tool or return an answer\"}, \"tools\": {\"kind\": \"tool\", \"comment\": \"Run tools; append results to history. Available: ls, read_file, write_file, edit_file, delete, glob, grep, execute\"}, \"PatchToolCallsMiddleware.before_agent\": {\"kind\": \"process\", \"comment\": \"\"}}, \"title\": \"general-purpose\", \"context\": \"Compiled graph; arrows show declared transitions\", \"nodes\": [\"__start__\", \"PatchToolCallsMiddleware.before_agent\", \"model\", \"tools\", \"__end__\"], \"edges\": [{\"source\": \"PatchToolCallsMiddleware.before_agent\", \"target\": \"model\", \"label\": \"\"}, {\"source\": \"__start__\", \"target\": \"PatchToolCallsMiddleware.before_agent\", \"label\": \"\"}, {\"source\": \"tools\", \"target\": \"model\", \"label\": \"model\"}, {\"source\": \"model\", \"target\": \"tools\", \"label\": \"tools\"}, {\"source\": \"model\", \"target\": \"__end__\", \"label\": \"__end__\"}, {\"source\": \"model\", \"target\": \"model\", \"label\": \"model\"}], \"children\": {}, \"delegations\": []}}]}",
+        "report_turn": 1,
+        "thread_id": "6472d62b-d6a6-4a0c-98c6-1696546ecd3f",
+        "cache_ttl": "5m",
+        "description": "Coordinate a direct chat response: prepare messages and invoke the model."
+      }
+    },
+    {
+      "id": "01a111d2-3095-7c23-a055-b3c987d2ee8f",
+      "parent_id": "01a111d2-3092-7143-bc76-e25a40051556",
+      "name": "PatchToolCallsMiddleware.before_agent",
+      "kind": "workflow",
+      "start_ns": 1791300350102077000,
+      "end_ns": 1791300350102543000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "PatchToolCallsMiddleware.before_agent",
+        "langgraph_step": 1,
+        "report_turn": 1,
+        "thread_id": "6472d62b-d6a6-4a0c-98c6-1696546ecd3f",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:1"
+        ],
+        "description": "Check message history and repair missing tool responses before the agent starts."
+      }
+    },
+    {
+      "id": "01a111d2-3097-70a1-b4ac-80479f2dcb83",
+      "parent_id": "01a111d2-3092-7143-bc76-e25a40051556",
+      "name": "model",
+      "kind": "workflow",
+      "start_ns": 1791300350103225000,
+      "end_ns": 1791300363043866000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "model",
+        "langgraph_step": 2,
+        "report_turn": 1,
+        "thread_id": "6472d62b-d6a6-4a0c-98c6-1696546ecd3f",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:2"
+        ],
+        "description": "Prepare the current conversation, run model middleware, and invoke the chat model."
+      }
+    },
+    {
+      "id": "01a111d2-309c-7bc0-aaf3-f0a734a28bec",
+      "parent_id": "01a111d2-3097-70a1-b4ac-80479f2dcb83",
+      "name": "CodexChatModel",
+      "kind": "model",
+      "start_ns": 1791300350108539000,
+      "end_ns": 1791300363042124000,
+      "status": "ok",
+      "provider": "codex",
+      "model": "gpt-6-luna",
+      "effort": null,
+      "usage": {
+        "input_tokens": 16752,
+        "output_tokens": 142,
+        "cache_read": 0,
+        "cache_write": 0,
+        "cache_write_5m": 0,
+        "cache_write_1h": 0,
+        "reasoning": 0
+      },
+      "error": null,
+      "request": [
+        {
+          "role": "system",
+          "content": "Answer the user's chat question directly and concisely. Do not use tools for this simple chat exercise.",
+          "tool_calls": [],
+          "tool_call_id": null
+        },
+        {
+          "role": "human",
+          "content": "Explain the main steps in an agent workflow.",
+          "tool_calls": [],
+          "tool_call_id": null
+        }
+      ],
+      "response": [
+        {
+          "role": "ai",
+          "content": "An agent workflow typically follows these steps:\n\n1. **Understand the task** and identify the goal, constraints, and expected result.\n2. **Gather context** by inspecting relevant files, data, or instructions.\n3. **Plan the work**, breaking it into manageable steps and deciding whether tools or collaborators are needed.\n4. **Take action** by making changes, answering questions, or using tools as appropriate.\n5. **Verify the result** against the requirements, using tests or checks when relevant.\n6. **Report back** with a concise summary of what was done and any limitations.",
+          "tool_calls": [],
+          "tool_call_id": null
+        }
+      ],
+      "tool_definitions": [
+        {
+          "type": "function",
+          "function": {
+            "name": "ls",
+            "description": "Lists all files in a directory.\n\nThis is useful for exploring the filesystem and finding the right file to read or edit.\nYou should almost ALWAYS use this tool before using the read_file or edit_file tools.",
+            "parameters": {
+              "properties": {
+                "path": {
+                  "description": "Absolute path to the directory to list. Must be absolute, not relative.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "path"
+              ],
+              "type": "object"
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "read_file",
+            "description": "Reads a file from the filesystem. Assume any path the user provides is valid; reading a missing file returns an error.\n\nUsage:\n- By default, it reads up to 100 lines starting from the beginning of the file. Use `offset`/`limit` to page through large files instead of reading them whole.\n- A status header, `@@ field | field | ... @@`, sits above the file content, and every line after it is verbatim file content. When content is truncated, there may be an explanation before the header. Never include the header when editing.\n- Speculatively batch multiple `read_file` calls in one response when several files may be useful.\n- An empty file returns a system-reminder warning in place of contents.\n- Large tool results may be offloaded to a file; the tool message gives the path. Read that path here, paging with `offset`/`limit`.\n- Images (`.png`, `.jpg`, etc.), audio, video, and PDFs return multimodal content blocks (https://docs.langchain.com/oss/python/langchain/messages#multimodal).\n- For images and PDFs, pagination via `offset`/`limit` is text-only - supply `file_path` only\n- Always read a file before editing it.",
+            "parameters": {
+              "properties": {
+                "file_path": {
+                  "description": "Absolute path to the file to read. Must be absolute, not relative.",
+                  "type": "string"
+                },
+                "offset": {
+                  "default": 0,
+                  "description": "Line number to start reading from (0-indexed). Use for pagination of large files.",
+                  "type": "integer"
+                },
+                "limit": {
+                  "default": 100,
+                  "description": "Maximum number of lines to read. Use for pagination of large files.",
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "file_path"
+              ],
+              "type": "object"
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "write_file",
+            "description": "Writes content to a file. Creates the file if it does not exist; replaces it entirely if it does.\n\nUsage:\n- Use this tool when you intend to create a new file or replace the whole file. You do not need to read the file first.\n- Prefer to edit existing files (with the edit_file tool) over creating new ones when possible.",
+            "parameters": {
+              "properties": {
+                "file_path": {
+                  "description": "Absolute path where the file should be written. Must be absolute, not relative.",
+                  "type": "string"
+                },
+                "content": {
+                  "description": "The text content to write to the file. This parameter is required.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "file_path",
+                "content"
+              ],
+              "type": "object"
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "edit_file",
+            "description": "Performs exact string replacements in files.\n\nUsage:\n- You must read the file before editing; this tool errors otherwise.\n- Preserve the exact source indentation from the read output, and never include the read status header in old_string or new_string.\n- Prefer editing an existing file over creating a new one.\n- Only use emojis if the user explicitly requests it.",
+            "parameters": {
+              "properties": {
+                "file_path": {
+                  "description": "Absolute path to the file to edit. Must be absolute, not relative.",
+                  "type": "string"
+                },
+                "old_string": {
+                  "description": "The exact text to find and replace. Must be unique in the file unless replace_all is True.",
+                  "type": "string"
+                },
+                "new_string": {
+                  "description": "The text to replace old_string with. Must be different from old_string.",
+                  "type": "string"
+                },
+                "replace_all": {
+                  "default": false,
+                  "description": "If True, replace all occurrences of old_string. If False (default), old_string must be unique.",
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "file_path",
+                "old_string",
+                "new_string"
+              ],
+              "type": "object"
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "delete",
+            "description": "Deletes a file or directory from the filesystem.\n\nUsage:\n- Permanently removes the file or directory at the given absolute path.\n- Deleting a directory removes it and everything inside it, recursively. Prefer\n  deleting a directory in one call over deleting each file individually.\n- This cannot be undone, so only delete paths you are sure are no longer needed.",
+            "parameters": {
+              "properties": {
+                "file_path": {
+                  "description": "Absolute path to the file to delete. Must be absolute, not relative.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "file_path"
+              ],
+              "type": "object"
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "glob",
+            "description": "Find files matching a glob pattern, returning absolute paths.\n\nSupports `*` (any characters within a path segment), `**` (any directories), `?` (single character), `[abc]` (one character from a set), and `{a,b}` (alternatives), e.g. `*.py`, `src/**/*.py`, `*.{yml,yaml}`.\n\nA pattern without `/` matches the file name at any depth under the search root (`*.py` matches `src/app/main.py`). A pattern containing `/` matches the search-root-relative path (`src/**/*.py`). A leading `/` anchors to the search root (`/*.py` matches only top-level Python files).\n\nLeading-dot names are only matched when the pattern segment itself starts with `.` (use `.env`, or `.github/**/*.yml`). Because `**` will not descend into dot-directories, the bare form `*.yml` is *broader* than `**/*.yml` and is usually what you want.",
+            "parameters": {
+              "properties": {
+                "pattern": {
+                  "description": "Glob pattern to match files (e.g., '*.py', '**/*.py', '/subdir/**/*.md'). A pattern without '/' matches the file name at any depth; a pattern containing '/' matches the search-root-relative path; a leading '/' anchors to the search root ('/*.py' matches only top-level files). Leading-dot names are excluded unless the pattern segment starts with '.', so prefer the bare form '*.py' over '**/*.py' -- '**' will not descend into dot-directories like '.github'.",
+                  "type": "string"
+                },
+                "path": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "Base directory to search from. Defaults to the backend's default root."
+                }
+              },
+              "required": [
+                "pattern"
+              ],
+              "type": "object"
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "grep",
+            "description": "Search for a LITERAL text pattern across files (NOT regex).\n\nThe pattern is matched verbatim: regex metacharacters are ordinary characters, not operators. To match any of several strings, run a separate grep for each; `grep(pattern=\"foo|bar\")` searches for the literal text \"foo|bar\", and `.*` or `\\.` match those characters literally.\n\nReturns matching files or content per `output_mode`. Offloaded large tool results live under the artifacts root (`/large_tool_results/` by default); grep that directory to search them when you do not know the exact path.",
+            "parameters": {
+              "properties": {
+                "pattern": {
+                  "description": "Text pattern to search for (literal string, not regex).",
+                  "type": "string"
+                },
+                "path": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "Directory to search in. Defaults to current working directory."
+                },
+                "glob": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "Glob pattern (NOT regex) limiting which files are searched (e.g. '*.py', '*.ts'). A pattern without '/' matches the file name at any depth; a pattern containing '/' matches the search-root-relative path (e.g. 'src/**/*.py'). This is an in-tool file filter, not a call to the separate glob tool. Brace expansion (e.g. '*.{ts,tsx}') is not supported on all backends; run a separate search per extension for reliable results."
+                },
+                "output_mode": {
+                  "default": "files_with_matches",
+                  "description": "Shape of the returned text. 'files_with_matches' (default): newline-separated matching file paths. 'content': matching lines grouped by file under a '<path>:' header, each line indented and formatted '<line_number>: <line text>' (only the matched line, no surrounding context). 'count': one '<path>: <match_count>' line per file.",
+                  "enum": [
+                    "files_with_matches",
+                    "content",
+                    "count"
+                  ],
+                  "type": "string"
+                },
+                "max_count": {
+                  "anyOf": [
+                    {
+                      "exclusiveMinimum": 0,
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "Optional cap on the total number of matches returned across all files. Leave unset to use the configured default. When the cap is hit, results are truncated and a note says so; narrow the pattern or path to see the rest."
+                }
+              },
+              "required": [
+                "pattern"
+              ],
+              "type": "object"
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "task",
+            "description": "Launch an ephemeral subagent to handle a complex, multi-step task.\n\nAvailable agent types and the tools they have access to:\n- general-purpose: General-purpose agent for researching complex questions, searching for files and content, and executing multi-step tasks. When you are searching for a keyword or file and are not confident that you will find the right match in the first few tries use this agent to perform the search for you. This agent has access to all tools as the main agent.\n\nSpecify subagent_type to select the agent. Usage notes:\n- Launch multiple agents concurrently when their tasks are independent, using a single message with multiple tool calls.\n- Each invocation is stateless by default: the agent sees only the prompt you give it and returns a single final report. Put full detail in the prompt and state exactly what it should return — unless an agent type below says it inherits your conversation instead.\n- The agent's report is not shown to the user; relay a summary yourself.\n- Tell the agent whether to create content, analyze, or only research, since it can't necessarily see the user's intent unless it inherits your conversation, as noted per agent type below.\n- If an agent's description says to use it proactively, do so without waiting to be asked.\n- When only general-purpose is available, use it for any complex, context-heavy task; it has the same capabilities as the main agent.",
+            "parameters": {
+              "properties": {
+                "description": {
+                  "description": "A detailed description of the task for the subagent to perform autonomously. Include all necessary context and specify the expected output format.",
+                  "type": "string"
+                },
+                "subagent_type": {
+                  "description": "The type of subagent to use. Must be one of the available agent types listed in the tool description.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "description",
+                "subagent_type"
+              ],
+              "type": "object"
+            }
+          }
+        }
+      ],
+      "context": {
+        "langgraph_node": "model",
+        "langgraph_step": 2,
+        "report_turn": 1,
+        "thread_id": "6472d62b-d6a6-4a0c-98c6-1696546ecd3f",
+        "cache_ttl": "5m",
+        "tags": [
+          "seq:step:1"
+        ],
+        "description": "A direct conversation with a Deep Agent.",
+        "input_message_bytes": 281,
+        "message_count": 2,
+        "message_roles": [
+          "system",
+          "human"
+        ],
+        "usage_basis": "Codex CLI turn receipt; model identity is the explicit CLI selection"
+      }
+    },
+    {
+      "id": "01a111d2-633c-7272-a8d1-d8e9b41ed4cf",
+      "parent_id": null,
+      "name": "chat_agent",
+      "kind": "workflow",
+      "start_ns": 1791300363069211000,
+      "end_ns": 1791300367984417000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "report_workflow_definition": "{\"annotations\": {\"model\": {\"kind\": \"model\", \"comment\": \"Choose a tool or return an answer\"}, \"tools\": {\"kind\": \"tool\", \"comment\": \"Run tools; append results to history. Available: ls, read_file, write_file, edit_file, delete, glob, grep, execute, task\"}, \"PatchToolCallsMiddleware.before_agent\": {\"kind\": \"process\", \"comment\": \"\"}}, \"title\": \"chat_agent\", \"context\": \"Compiled graph; arrows show declared transitions\", \"nodes\": [\"__start__\", \"PatchToolCallsMiddleware.before_agent\", \"model\", \"tools\", \"__end__\"], \"edges\": [{\"source\": \"PatchToolCallsMiddleware.before_agent\", \"target\": \"model\", \"label\": \"\"}, {\"source\": \"__start__\", \"target\": \"PatchToolCallsMiddleware.before_agent\", \"label\": \"\"}, {\"source\": \"tools\", \"target\": \"model\", \"label\": \"model\"}, {\"source\": \"model\", \"target\": \"tools\", \"label\": \"tools\"}, {\"source\": \"model\", \"target\": \"__end__\", \"label\": \"__end__\"}, {\"source\": \"model\", \"target\": \"model\", \"label\": \"model\"}], \"children\": {}, \"delegations\": [{\"source\": \"tools\", \"tool\": \"task\", \"name\": \"general-purpose\", \"graph\": {\"annotations\": {\"model\": {\"kind\": \"model\", \"comment\": \"Choose a tool or return an answer\"}, \"tools\": {\"kind\": \"tool\", \"comment\": \"Run tools; append results to history. Available: ls, read_file, write_file, edit_file, delete, glob, grep, execute\"}, \"PatchToolCallsMiddleware.before_agent\": {\"kind\": \"process\", \"comment\": \"\"}}, \"title\": \"general-purpose\", \"context\": \"Compiled graph; arrows show declared transitions\", \"nodes\": [\"__start__\", \"PatchToolCallsMiddleware.before_agent\", \"model\", \"tools\", \"__end__\"], \"edges\": [{\"source\": \"PatchToolCallsMiddleware.before_agent\", \"target\": \"model\", \"label\": \"\"}, {\"source\": \"__start__\", \"target\": \"PatchToolCallsMiddleware.before_agent\", \"label\": \"\"}, {\"source\": \"tools\", \"target\": \"model\", \"label\": \"model\"}, {\"source\": \"model\", \"target\": \"tools\", \"label\": \"tools\"}, {\"source\": \"model\", \"target\": \"__end__\", \"label\": \"__end__\"}, {\"source\": \"model\", \"target\": \"model\", \"label\": \"model\"}], \"children\": {}, \"delegations\": []}}]}",
+        "report_turn": 2,
+        "thread_id": "6472d62b-d6a6-4a0c-98c6-1696546ecd3f",
+        "cache_ttl": "5m",
+        "description": "Coordinate a direct chat response: prepare messages and invoke the model."
+      }
+    },
+    {
+      "id": "01a111d2-633e-7ad3-a616-1bd2e2d64124",
+      "parent_id": "01a111d2-633c-7272-a8d1-d8e9b41ed4cf",
+      "name": "PatchToolCallsMiddleware.before_agent",
+      "kind": "workflow",
+      "start_ns": 1791300363070481000,
+      "end_ns": 1791300363070907000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "PatchToolCallsMiddleware.before_agent",
+        "langgraph_step": 5,
+        "report_turn": 2,
+        "thread_id": "6472d62b-d6a6-4a0c-98c6-1696546ecd3f",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:5"
+        ],
+        "description": "Check message history and repair missing tool responses before the agent starts."
+      }
+    },
+    {
+      "id": "01a111d2-633f-7ab0-a0fa-5605af284d17",
+      "parent_id": "01a111d2-633c-7272-a8d1-d8e9b41ed4cf",
+      "name": "model",
+      "kind": "workflow",
+      "start_ns": 1791300363071650000,
+      "end_ns": 1791300367983402000,
+      "status": "ok",
+      "provider": null,
+      "model": null,
+      "effort": null,
+      "usage": null,
+      "error": null,
+      "request": [],
+      "response": [],
+      "tool_definitions": null,
+      "context": {
+        "langgraph_node": "model",
+        "langgraph_step": 6,
+        "report_turn": 2,
+        "thread_id": "6472d62b-d6a6-4a0c-98c6-1696546ecd3f",
+        "cache_ttl": "5m",
+        "tags": [
+          "graph:step:6"
+        ],
+        "description": "Prepare the current conversation, run model middleware, and invoke the chat model."
+      }
+    },
+    {
+      "id": "01a111d2-6342-7351-99ec-1f3a828fd569",
+      "parent_id": "01a111d2-633f-7ab0-a0fa-5605af284d17",
+      "name": "CodexChatModel",
+      "kind": "model",
+      "start_ns": 1791300363074470000,
+      "end_ns": 1791300367981567000,
+      "status": "ok",
+      "provider": "codex",
+      "model": "gpt-6-luna",
+      "effort": null,
+      "usage": {
+        "input_tokens": 16905,
+        "output_tokens": 53,
+        "cache_read": 0,
+        "cache_write": 0,
+        "cache_write_5m": 0,
+        "cache_write_1h": 0,
+        "reasoning": 0
+      },
+      "error": null,
+      "request": [
+        {
+          "role": "system",
+          "content": "Answer the user's chat question directly and concisely. Do not use tools for this simple chat exercise.",
+          "tool_calls": [],
+          "tool_call_id": null
+        },
+        {
+          "role": "human",
+          "content": "Explain the main steps in an agent workflow.",
+          "tool_calls": [],
+          "tool_call_id": null
+        },
+        {
+          "role": "ai",
+          "content": "An agent workflow typically follows these steps:\n\n1. **Understand the task** and identify the goal, constraints, and expected result.\n2. **Gather context** by inspecting relevant files, data, or instructions.\n3. **Plan the work**, breaking it into manageable steps and deciding whether tools or collaborators are needed.\n4. **Take action** by making changes, answering questions, or using tools as appropriate.\n5. **Verify the result** against the requirements, using tests or checks when relevant.\n6. **Report back** with a concise summary of what was done and any limitations.",
+          "tool_calls": [],
+          "tool_call_id": null
+        },
+        {
+          "role": "human",
+          "content": "How does a tool observation help the agent answer?",
+          "tool_calls": [],
+          "tool_call_id": null
+        }
+      ],
+      "response": [
+        {
+          "role": "ai",
+          "content": "A tool observation gives the agent new information—such as file contents or test results—so it can ground its answer in evidence, check assumptions, and decide what to do next.",
+          "tool_calls": [],
+          "tool_call_id": null
+        }
+      ],
+      "tool_definitions": [
+        {
+          "type": "function",
+          "function": {
+            "name": "ls",
+            "description": "Lists all files in a directory.\n\nThis is useful for exploring the filesystem and finding the right file to read or edit.\nYou should almost ALWAYS use this tool before using the read_file or edit_file tools.",
+            "parameters": {
+              "properties": {
+                "path": {
+                  "description": "Absolute path to the directory to list. Must be absolute, not relative.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "path"
+              ],
+              "type": "object"
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "read_file",
+            "description": "Reads a file from the filesystem. Assume any path the user provides is valid; reading a missing file returns an error.\n\nUsage:\n- By default, it reads up to 100 lines starting from the beginning of the file. Use `offset`/`limit` to page through large files instead of reading them whole.\n- A status header, `@@ field | field | ... @@`, sits above the file content, and every line after it is verbatim file content. When content is truncated, there may be an explanation before the header. Never include the header when editing.\n- Speculatively batch multiple `read_file` calls in one response when several files may be useful.\n- An empty file returns a system-reminder warning in place of contents.\n- Large tool results may be offloaded to a file; the tool message gives the path. Read that path here, paging with `offset`/`limit`.\n- Images (`.png`, `.jpg`, etc.), audio, video, and PDFs return multimodal content blocks (https://docs.langchain.com/oss/python/langchain/messages#multimodal).\n- For images and PDFs, pagination via `offset`/`limit` is text-only - supply `file_path` only\n- Always read a file before editing it.",
+            "parameters": {
+              "properties": {
+                "file_path": {
+                  "description": "Absolute path to the file to read. Must be absolute, not relative.",
+                  "type": "string"
+                },
+                "offset": {
+                  "default": 0,
+                  "description": "Line number to start reading from (0-indexed). Use for pagination of large files.",
+                  "type": "integer"
+                },
+                "limit": {
+                  "default": 100,
+                  "description": "Maximum number of lines to read. Use for pagination of large files.",
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "file_path"
+              ],
+              "type": "object"
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "write_file",
+            "description": "Writes content to a file. Creates the file if it does not exist; replaces it entirely if it does.\n\nUsage:\n- Use this tool when you intend to create a new file or replace the whole file. You do not need to read the file first.\n- Prefer to edit existing files (with the edit_file tool) over creating new ones when possible.",
+            "parameters": {
+              "properties": {
+                "file_path": {
+                  "description": "Absolute path where the file should be written. Must be absolute, not relative.",
+                  "type": "string"
+                },
+                "content": {
+                  "description": "The text content to write to the file. This parameter is required.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "file_path",
+                "content"
+              ],
+              "type": "object"
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "edit_file",
+            "description": "Performs exact string replacements in files.\n\nUsage:\n- You must read the file before editing; this tool errors otherwise.\n- Preserve the exact source indentation from the read output, and never include the read status header in old_string or new_string.\n- Prefer editing an existing file over creating a new one.\n- Only use emojis if the user explicitly requests it.",
+            "parameters": {
+              "properties": {
+                "file_path": {
+                  "description": "Absolute path to the file to edit. Must be absolute, not relative.",
+                  "type": "string"
+                },
+                "old_string": {
+                  "description": "The exact text to find and replace. Must be unique in the file unless replace_all is True.",
+                  "type": "string"
+                },
+                "new_string": {
+                  "description": "The text to replace old_string with. Must be different from old_string.",
+                  "type": "string"
+                },
+                "replace_all": {
+                  "default": false,
+                  "description": "If True, replace all occurrences of old_string. If False (default), old_string must be unique.",
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "file_path",
+                "old_string",
+                "new_string"
+              ],
+              "type": "object"
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "delete",
+            "description": "Deletes a file or directory from the filesystem.\n\nUsage:\n- Permanently removes the file or directory at the given absolute path.\n- Deleting a directory removes it and everything inside it, recursively. Prefer\n  deleting a directory in one call over deleting each file individually.\n- This cannot be undone, so only delete paths you are sure are no longer needed.",
+            "parameters": {
+              "properties": {
+                "file_path": {
+                  "description": "Absolute path to the file to delete. Must be absolute, not relative.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "file_path"
+              ],
+              "type": "object"
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "glob",
+            "description": "Find files matching a glob pattern, returning absolute paths.\n\nSupports `*` (any characters within a path segment), `**` (any directories), `?` (single character), `[abc]` (one character from a set), and `{a,b}` (alternatives), e.g. `*.py`, `src/**/*.py`, `*.{yml,yaml}`.\n\nA pattern without `/` matches the file name at any depth under the search root (`*.py` matches `src/app/main.py`). A pattern containing `/` matches the search-root-relative path (`src/**/*.py`). A leading `/` anchors to the search root (`/*.py` matches only top-level Python files).\n\nLeading-dot names are only matched when the pattern segment itself starts with `.` (use `.env`, or `.github/**/*.yml`). Because `**` will not descend into dot-directories, the bare form `*.yml` is *broader* than `**/*.yml` and is usually what you want.",
+            "parameters": {
+              "properties": {
+                "pattern": {
+                  "description": "Glob pattern to match files (e.g., '*.py', '**/*.py', '/subdir/**/*.md'). A pattern without '/' matches the file name at any depth; a pattern containing '/' matches the search-root-relative path; a leading '/' anchors to the search root ('/*.py' matches only top-level files). Leading-dot names are excluded unless the pattern segment starts with '.', so prefer the bare form '*.py' over '**/*.py' -- '**' will not descend into dot-directories like '.github'.",
+                  "type": "string"
+                },
+                "path": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "Base directory to search from. Defaults to the backend's default root."
+                }
+              },
+              "required": [
+                "pattern"
+              ],
+              "type": "object"
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "grep",
+            "description": "Search for a LITERAL text pattern across files (NOT regex).\n\nThe pattern is matched verbatim: regex metacharacters are ordinary characters, not operators. To match any of several strings, run a separate grep for each; `grep(pattern=\"foo|bar\")` searches for the literal text \"foo|bar\", and `.*` or `\\.` match those characters literally.\n\nReturns matching files or content per `output_mode`. Offloaded large tool results live under the artifacts root (`/large_tool_results/` by default); grep that directory to search them when you do not know the exact path.",
+            "parameters": {
+              "properties": {
+                "pattern": {
+                  "description": "Text pattern to search for (literal string, not regex).",
+                  "type": "string"
+                },
+                "path": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "Directory to search in. Defaults to current working directory."
+                },
+                "glob": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "Glob pattern (NOT regex) limiting which files are searched (e.g. '*.py', '*.ts'). A pattern without '/' matches the file name at any depth; a pattern containing '/' matches the search-root-relative path (e.g. 'src/**/*.py'). This is an in-tool file filter, not a call to the separate glob tool. Brace expansion (e.g. '*.{ts,tsx}') is not supported on all backends; run a separate search per extension for reliable results."
+                },
+                "output_mode": {
+                  "default": "files_with_matches",
+                  "description": "Shape of the returned text. 'files_with_matches' (default): newline-separated matching file paths. 'content': matching lines grouped by file under a '<path>:' header, each line indented and formatted '<line_number>: <line text>' (only the matched line, no surrounding context). 'count': one '<path>: <match_count>' line per file.",
+                  "enum": [
+                    "files_with_matches",
+                    "content",
+                    "count"
+                  ],
+                  "type": "string"
+                },
+                "max_count": {
+                  "anyOf": [
+                    {
+                      "exclusiveMinimum": 0,
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "Optional cap on the total number of matches returned across all files. Leave unset to use the configured default. When the cap is hit, results are truncated and a note says so; narrow the pattern or path to see the rest."
+                }
+              },
+              "required": [
+                "pattern"
+              ],
+              "type": "object"
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "task",
+            "description": "Launch an ephemeral subagent to handle a complex, multi-step task.\n\nAvailable agent types and the tools they have access to:\n- general-purpose: General-purpose agent for researching complex questions, searching for files and content, and executing multi-step tasks. When you are searching for a keyword or file and are not confident that you will find the right match in the first few tries use this agent to perform the search for you. This agent has access to all tools as the main agent.\n\nSpecify subagent_type to select the agent. Usage notes:\n- Launch multiple agents concurrently when their tasks are independent, using a single message with multiple tool calls.\n- Each invocation is stateless by default: the agent sees only the prompt you give it and returns a single final report. Put full detail in the prompt and state exactly what it should return — unless an agent type below says it inherits your conversation instead.\n- The agent's report is not shown to the user; relay a summary yourself.\n- Tell the agent whether to create content, analyze, or only research, since it can't necessarily see the user's intent unless it inherits your conversation, as noted per agent type below.\n- If an agent's description says to use it proactively, do so without waiting to be asked.\n- When only general-purpose is available, use it for any complex, context-heavy task; it has the same capabilities as the main agent.",
+            "parameters": {
+              "properties": {
+                "description": {
+                  "description": "A detailed description of the task for the subagent to perform autonomously. Include all necessary context and specify the expected output format.",
+                  "type": "string"
+                },
+                "subagent_type": {
+                  "description": "The type of subagent to use. Must be one of the available agent types listed in the tool description.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "description",
+                "subagent_type"
+              ],
+              "type": "object"
+            }
+          }
+        }
+      ],
+      "context": {
+        "langgraph_node": "model",
+        "langgraph_step": 6,
+        "report_turn": 2,
+        "thread_id": "6472d62b-d6a6-4a0c-98c6-1696546ecd3f",
+        "cache_ttl": "5m",
+        "tags": [
+          "seq:step:1"
+        ],
+        "description": "A direct conversation with a Deep Agent.",
+        "input_message_bytes": 1045,
+        "message_count": 4,
+        "message_roles": [
+          "system",
+          "human",
+          "ai",
+          "human"
+        ],
+        "usage_basis": "Codex CLI turn receipt; model identity is the explicit CLI selection"
+      }
+    }
+  ],
+  "output": "A tool observation gives the agent new information—such as file contents or test results—so it can ground its answer in evidence, check assumptions, and decide what to do next.",
+  "qa": {
+    "status": "completed",
+    "provider": "codex",
+    "model": "gpt-6-sol",
+    "rubric_version": 1,
+    "goal": "The user understands the main steps of an agent workflow AND how a tool observation supplies evidence for the next action or final answer. Both topics must be explained clearly, with an example of using a tool observation.",
+    "execution_duration_ms": 17884.23,
+    "execution_cost_usd": "0.0034632",
+    "verdict": {
+      "goal_achievement": {
+        "score": 65.0,
+        "reason": "The first CodexChatModel response (01a111d2-309c-7bc0-aaf3-f0a734a28bec) clearly explains the workflow steps, and the second (01a111d2-6342-7351-99ec-1f3a828fd569) explains how observations inform an answer or next action. The stated goal also requires an example of using a tool observation; naming file contents and test results does not show a specific observation leading to a decision."
+      },
+      "answer_quality": {
+        "score": 72.0,
+        "reason": "Both answers are clear, relevant, and appropriately concise. The observation answer is accurate but lacks a concrete evidence-to-action example. No tool was used, so the record does not support a claim that an actual observation was evaluated. The event record is not truncated."
+      },
+      "speed": {
+        "score": 80.0,
+        "reason": "The recorded 17,884 ms covers two model calls and appears reasonable for two short chat answers. It includes workflow overhead; without an SLA or comparison baseline, a stronger speed judgment is not supported."
+      },
+      "cost": {
+        "score": 82.0,
+        "reason": "The estimated cost is $0.0034632 for two model calls, with no missing usage or unpriced calls. That is modest for the useful answers, though the missing concrete example reduces value. This is an estimate, not a subscription charge."
+      },
+      "summary": "The execution answered both questions clearly but only partially met the stated goal because it did not demonstrate how a specific tool observation supports a next action or final answer."
+    },
+    "error": null,
+    "truncated": false,
+    "judge_steps": [
+      {
+        "id": "01a111d2-7679-7960-bc0d-1297ed2b98ec",
+        "parent_id": null,
+        "name": "CodexChatModel",
+        "kind": "model",
+        "start_ns": 1791300367993958000,
+        "end_ns": 1791300381461742000,
+        "status": "ok",
+        "provider": "codex",
+        "model": "gpt-6-sol",
+        "effort": "high",
+        "usage": {
+          "input_tokens": 14976,
+          "output_tokens": 510,
+          "cache_read": 0,
+          "cache_write": 0,
+          "cache_write_5m": 0,
+          "cache_write_1h": 0,
+          "reasoning": 141
+        },
+        "error": null,
+        "request": [],
+        "response": [],
+        "tool_definitions": null,
+        "context": {
+          "model_role": "qa",
+          "description": "Generate the next assistant message or tool request from the current conversation.",
+          "input_message_bytes": 7578,
+          "message_count": 2,
+          "message_roles": [
+            "system",
+            "human"
+          ],
+          "usage_basis": "Codex CLI turn receipt; model identity is the explicit CLI selection"
+        }
+      }
+    ],
+    "duration_ms": 13470.942291998654,
+    "cost_usd": "0.035052",
+    "coverage": 1.0,
+    "overall_score": 71.9
+  }
+}

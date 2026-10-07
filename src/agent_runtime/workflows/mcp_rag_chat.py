@@ -1,4 +1,4 @@
-"""Bridge the synchronous sample recorder to the asynchronous MCP Deep Agent.
+"""Bridge the synchronous sample recorder to the asynchronous MCP LangGraph agent.
 
 Each turn owns an event loop and MCP connection, both closed before returning.
 Conversation supplies the full history on subsequent turns. This example has no
@@ -11,7 +11,6 @@ Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 
 import asyncio
 
-from deepagents.backends import StateBackend
 from langchain_core.language_models import BaseChatModel
 
 from agent_runtime.agents.wikipedia_mcp_agent import open_agent
@@ -37,7 +36,7 @@ class MCPRagWorkflow:
         """
         # Retain only the model dependency. Transport commands, discovery, tool
         # registration, and role instructions stay behind open_agent's interface.
-        self.parameters = {"model": model, "backend": StateBackend()}
+        self.parameters = {"model": model}
 
     def invoke(self, inputs, config=None):
         """Answer a conversation turn using the MCP-backed Wikipedia agent.

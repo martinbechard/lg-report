@@ -16,7 +16,7 @@ SAMPLE = {
     "goal": 'The user understands the main steps of an agent workflow AND how a tool observation supplies evidence for the next action or final answer. Both topics must be explained clearly, with an example of using a tool observation.',
     "id": "simple_chat",
     "name": "Simple chat",
-    "description": "A direct conversation with a Deep Agent.",
+    "description": "A direct conversation with a tool-free LangGraph agent.",
 }
 
 CONVERSATION = [
@@ -24,7 +24,7 @@ CONVERSATION = [
     {
         "role": "chat_agent",
         "content": "An agent observes its input, selects an action, uses the result, and responds. This report was "
-        "captured from a real DeepAgents graph using an offline model.",
+        "captured from a real LangGraph graph using an offline model.",
         "response_metadata": {"model_name": "scripted-chat"},
     },
     {"role": "client", "content": "How does a tool observation help the agent answer?"},
