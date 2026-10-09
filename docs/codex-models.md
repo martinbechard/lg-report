@@ -46,17 +46,28 @@ those decisions into LangChain messages. LangGraph validates tool arguments,
 executes tools through its normal approval boundaries, and supplies the results
 on the next request. Tool names and choice constraints are checked by the adapter;
 malformed decisions fail visibly without guessing or falling back to plain text.
-Without the minimal profile, tools with fixed-property argument schemas also receive a JSON
-response schema through `--output-schema`, including the actual argument types.
-The model supplies parameters explicitly, including declared defaults. Tools
-with arbitrary-key objects or unresolved schema references use the prompted JSON
-protocol because a closed response schema cannot represent them faithfully.
-The minimal profile sends each complete application tool schema once, in compact
-prompt JSON, and omits `--output-schema`. The same local decision validator and
-graph argument validation still apply. Live tests with all three models verified
-a tool call, default arguments, use of a unique returned observation, and a final
-answer without repeating the completed call. This supports tool-dependent
-workflows such as `context_budget`.
+The adapter follows the [Codex SDK finalResponse contract](https://github.com/openai/codex/blob/main/sdk/typescript/src/thread.ts):
+only the last completed agent message becomes the response. Earlier commentary
+is not concatenated into JSON or executed as an application tool decision; the
+turn receipt still includes all generated work.
+Tools with fixed-property argument schemas receive a JSON response schema
+through `--output-schema`, including with the minimal profile. The schema
+constrains the gateway envelope and actual argument types; full protocol and
+history instructions remain in the prompt to explain execution ownership and
+completed tool observations. The model supplies parameters explicitly, including
+declared defaults. Tools with arbitrary-key objects or unresolved schema
+references retain the prompted JSON protocol because a closed response schema
+cannot represent them faithfully.
+
+The minimal profile removes native CLI tools; it does not disable application
+output validation. Prompt-only complex Luna runs produced task JSON and stray
+commentary instead of the gateway envelope. Schema enforcement corrected the
+reproduced request, but another live response still escaped and concatenated
+multiple decisions. The context-budget workflow therefore permits two bounded
+format corrections, with explicit feedback that rejected operations did not run.
+Transport failures are not retried. If a response is invalid, its completed token receipt
+and timing remain in the failed model span; response content follows the same
+opt-in capture policy as successful calls. Invalid decisions never execute tools.
 
 Native shell, apps, plugins, memory, browser, computer, image, skill-search, and
 hook features remain disabled. The adapter skips user config and project
@@ -221,3 +232,10 @@ remaining first-turn difference is 49–53 input tokens, with no application or
 native tool definitions. Codex still receives JSON-encoded conversation history
 and brief instructions explaining that encoding and prohibiting native actions.
 The report's cost recap shows the saved counts and rates for every charge.
+
+A Codex call has a 120-second wall-clock deadline by default. Set
+`LG_CODEX_TIMEOUT_SECONDS=300` for longer reasoning calls; this does not impose
+an output-token limit. Timeout and process errors retain any completed-turn
+usage receipt already received. Calls without a receipt remain unpriced. An
+explicit provider capacity rejection is recorded as `CodexCapacityError`; it
+is not retried silently or replaced with a different model.

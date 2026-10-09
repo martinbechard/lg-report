@@ -172,3 +172,91 @@ def test_reports_show_one_shared_contract_and_detect_mismatch(tmp_path):
     paths[-1].write_text(run.model_dump_json())
     render_comparison(paths, destination)
     assert "different scoring criteria" in destination.read_text()
+
+
+@pytest.mark.parametrize("source", ["sample", "environment", "object"])
+def test_sample_rubric_precedence(monkeypatch, tmp_path, source):
+    """Explicit inputs override a sample contract without invoking the planner."""
+    from test_qa_judge import fixture_prices, fixture_run, install_judge
+
+    install_judge(monkeypatch)
+    planner = Mock(side_effect=AssertionError("Saved criteria must not be regenerated"))
+    monkeypatch.setattr("agent_runtime.harness.qa_judge.plan_rubric", planner)
+    selected = rubric_definition()
+    sample_path = tmp_path / "qa-rubric.json"
+    sample_path.write_text(selected.model_dump_json())
+    values = {}
+    supplied = None
+    if source != "sample":
+        # A broken lower-priority file must not interfere with an override.
+        sample_path.write_text("invalid JSON")
+        if source == "environment":
+            explicit = tmp_path / "explicit.json"
+            explicit.write_text(selected.model_dump_json())
+            values["LG_QA_RUBRIC"] = str(explicit)
+        else:
+            supplied = selected
+            values["LG_QA_RUBRIC"] = str(tmp_path / "missing.json")
+    result = QAJudge(values, goal=selected.goal, rubric=supplied,
+                     sample_rubric_path=sample_path)(fixture_run(), fixture_prices())
+    assert result.status == "completed"
+    assert result.rubric.fingerprint == selected.fingerprint
+    planner.assert_not_called()
+
+
+@pytest.mark.parametrize("contents", ["not JSON", rubric_definition("Old goal").model_dump_json()])
+def test_invalid_sample_rubric_does_not_generate_replacement(monkeypatch, tmp_path, contents):
+    """Malformed criteria or goal drift fail visibly without changing the contract."""
+    from test_qa_judge import fixture_prices, fixture_run, install_judge
+
+    install_judge(monkeypatch)
+    planner = Mock(side_effect=AssertionError("Must not replace invalid saved criteria"))
+    monkeypatch.setattr("agent_runtime.harness.qa_judge.plan_rubric", planner)
+    path = tmp_path / "qa-rubric.json"
+    path.write_text(contents)
+    result = QAJudge({}, goal="Explain caching", sample_rubric_path=path)(fixture_run(), fixture_prices())
+    assert result.status == "error"
+    assert result.error
+    planner.assert_not_called()
+
+
+def test_all_sample_rubrics_match_declared_goals():
+    """Every shipped lesson has a valid frozen contract for its current goal."""
+    from agent_runtime.harness.qa_judge import load_rubric
+    from agent_runtime.harness.sample_catalog import SampleCatalog
+
+    for sample in SampleCatalog().samples.values():
+        assert sample.qa_rubric_path is not None, sample.id
+        rubric = load_rubric(sample.qa_rubric_path, sample.goal or sample.description)
+        assert rubric.goal == (sample.goal or sample.description)
+
+
+def test_sample_without_rubric_allows_generation(tmp_path):
+    """Discovery represents an absent optional file without inventing a contract."""
+    from agent_runtime.harness.sample_catalog import Sample
+
+    sample = Sample(id="new", name="New", description="Explain caching",
+                    implementation="new", directory=tmp_path)
+    assert sample.qa_rubric_path is None
+
+
+def test_launch_binds_selected_samples_rubric(monkeypatch, tmp_path):
+    """Console and batch setup select the lesson's rubric without loading models."""
+    from test_qa_judge import fixture_prices
+
+    from agent_runtime.harness import settings
+    from agent_runtime.harness.argument_parser import argument_parser
+    from agent_runtime.harness.sample_catalog import SampleCatalog
+
+    catalog = SampleCatalog()
+    launch = settings.Settings(live=True, output=tmp_path, prices=fixture_prices(),
+                               capture_content=True, overwrite=True, qa=QAJudge({}))
+    monkeypatch.setattr(settings, "settings_for", lambda *args, **kwargs: launch)
+    args = argument_parser().parse_args(["--live", "--qa"])
+    # The application normally resolves repeated --option arguments before setup.
+    args.options = {}
+    for name in ("simple_chat", "tool_chat"):
+        selected, _, _ = settings.prepare_sample(catalog, name, args)
+        assert selected.qa.goal == catalog.get(name).goal
+        assert selected.qa.sample_rubric_path == catalog.get(name).qa_rubric_path
+    assert launch.qa.sample_rubric_path is None

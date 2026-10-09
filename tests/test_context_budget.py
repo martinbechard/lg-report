@@ -319,7 +319,14 @@ def test_peer_compaction_and_child_isolation_across_turns(asynchronous, tmp_path
     assert all(f"Task T{number} —" in plan for number in range(1, 4))
     assert plan.count("Status: complete") == 3
     assert_step_sequence(requests.responses)
-    assert "tests not executed" in plan
+    assert "7 tests passed, exit code 0" in plan
+    assert result["test_execution"]["status"] == "passed"
+    assert result["test_execution"]["tests_run"] == 7
+    assert result["test_execution"]["exit_code"] == 0
+    # The independent reviewer and planner both receive the actual receipt,
+    # even if compaction discarded the worker's earlier conversation.
+    assert any('"tests_run": 7' in text for text in reviewers)
+    assert any('"tests_run": 7' in text for text in planners)
     assert "def slugify" in (tmp_path / "slug.py").read_text()
     assert "test_only_separators" in (tmp_path / "test_slug.py").read_text()
 
@@ -578,3 +585,63 @@ def test_stale_summary_cannot_authorize_next_task_file(asynchronous, tmp_path):
         )
         assert current["assignment"]["task_id"] == "T1"
         assert current["assignment"]["files"] == ["/slug.py"]
+
+
+@pytest.mark.parametrize('asynchronous', [False, True])
+def test_reviewer_extra_field_is_corrected_before_approval(tmp_path, asynchronous):
+    """The observed GPT-4.1 extra key must not abort work or bypass validation."""
+    models = list(make_simulated_models())
+    malformed = {'task_id': 'T1', 'verdict': 'revise', 'evidence': 'Missing boundary trim.',
+                 'evidence_severity': 'major'}
+    corrected = {key: value for key, value in malformed.items() if key != 'evidence_severity'}
+    models[2] = ScriptedChatModel(responses=[AIMessage(content=json.dumps(malformed)),
+                                           AIMessage(content=json.dumps(corrected))])
+    graph = build_workflow(*models, workspace_dir=tmp_path, max_attempts=1)
+    recorder = Requests()
+    payload = {'messages': [HumanMessage(USER_PROMPTS[0])]}
+    config = {'callbacks': [recorder]}
+    result = asyncio.run(graph.ainvoke(payload, config)) if asynchronous else graph.invoke(payload, config)
+    assert result['outcome'] == 'review_limit'
+    assert result['review'] == corrected
+    assert 'Status: complete' not in (tmp_path / 'plan.md').read_text()
+    assert any('Correct the reported problem and final handoff' in text for _, text in recorder.calls)
+
+
+def test_reviewer_format_correction_has_finite_limit(tmp_path):
+    """Three invalid handoffs fail without recording approval or completing a step."""
+    from pydantic import ValidationError
+
+    models = list(make_simulated_models())
+    models[2] = ScriptedChatModel(responses=[AIMessage(content='Not a handoff') for _ in range(3)])
+    graph = build_workflow(*models, workspace_dir=tmp_path)
+    recorder = Requests()
+    with pytest.raises(ValidationError):
+        graph.invoke({'messages': [HumanMessage(USER_PROMPTS[0])]}, {'callbacks': [recorder]})
+    assert sum(message.text == 'Not a handoff' for _, message in recorder.responses) == 3
+    assert 'Status: complete' not in (tmp_path / 'plan.md').read_text()
+
+
+@pytest.mark.parametrize('asynchronous', [False, True])
+def test_approved_task_cannot_be_redispatched_during_correction(tmp_path, asynchronous):
+    """Publish completed IDs outside summaries and reject duplicate work before routing."""
+    (tmp_path / 'plan.md').write_text('T1: implement the function.\n')
+    assignment = {'action': 'work', 'task_id': 'T1', 'files': ['/slug.py'], 'message': 'Implement T1'}
+    done = {'action': 'finish', 'task_id': '', 'files': [], 'message': 'T1 approved and complete'}
+    planning = ScriptedChatModel(responses=[AIMessage(content=json.dumps(value))
+                                          for value in (assignment, assignment, done)])
+    working = ScriptedChatModel(responses=[AIMessage(content='T1 implemented')])
+    reviewing = ScriptedChatModel(responses=[AIMessage(content=json.dumps({
+        'task_id': 'T1', 'verdict': 'approve', 'evidence': 'Fixture source inspected'}))])
+    summary = ScriptedChatModel(responses=[AIMessage(content='Stale summary: T1 pending')])
+    graph = build_workflow(planning, working, reviewing, summary, workspace_dir=tmp_path)
+    recorder = Requests()
+    payload = {'messages': [HumanMessage('Implement T1')]}
+    config = {'callbacks': [recorder]}
+    result = asyncio.run(graph.ainvoke(payload, config)) if asynchronous else graph.invoke(payload, config)
+    assert result['completed'] == ['T1']
+    assert result['outcome'] == 'complete'
+    assert sum(message.text == 'T1 implemented' for _, message in recorder.responses) == 1
+    update_systems = [text for _, text in recorder.systems if 'record_approved_step' in text]
+    assert len(update_systems) == 2
+    assert all('"completed_task_ids": ["T1"]' in text for text in update_systems)
+    assert any('already approved task' in text for _, text in recorder.calls)

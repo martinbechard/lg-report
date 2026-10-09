@@ -67,7 +67,7 @@ def main():
         "compare", help="Compare saved runs using each run's adjacent prices.json"
     )
     command_parser.add_argument("runs", type=Path, nargs="+", help="Two or more run.json files")
-    command_parser.add_argument("--title", default="Model comparison")
+    command_parser.add_argument("--title", default=None)
     command_parser.add_argument("--out", type=Path, default=Path("comparison.html"))
     command_parser = commands.add_parser("normalize")
     command_parser.add_argument(

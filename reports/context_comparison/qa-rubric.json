@@ -1,0 +1,79 @@
+{
+  "goal": "The assistant reports a detailed file plan, a service-independent Python slug implementation, strengthened boundary tests with their actual results, and an independent review with its outcome recorded. Missing execution or review evidence must not be claimed as complete.",
+  "goal_achievement": [
+    {
+      "id": "file_plan",
+      "description": "Reports a detailed file plan.",
+      "points": 20,
+      "met_when": "Identifies the files to create or change and states the intended change in each file.",
+      "partial_when": null
+    },
+    {
+      "id": "slug_implementation",
+      "description": "Provides a service-independent Python slug implementation.",
+      "points": 25,
+      "met_when": "Includes the Python implementation or a concrete patch and shows that slug generation does not depend on an external service.",
+      "partial_when": null
+    },
+    {
+      "id": "boundary_tests_and_results",
+      "description": "Strengthens boundary tests and reports their actual results.",
+      "points": 25,
+      "met_when": "Shows concrete added or strengthened boundary test cases and provides evidence of their execution with the observed results, including failures if any.",
+      "partial_when": null
+    },
+    {
+      "id": "independent_review_record",
+      "description": "Records an independent review and its outcome.",
+      "points": 20,
+      "met_when": "Provides evidence of review by someone other than the implementation author and records that review's outcome, including any findings.",
+      "partial_when": null
+    },
+    {
+      "id": "evidence_status",
+      "description": "Does not present unevidenced execution or review as complete.",
+      "points": 10,
+      "met_when": "Clearly marks any test execution or independent review lacking evidence as not completed or not verified; every completion claim is supported by the reported evidence.",
+      "partial_when": null
+    }
+  ],
+  "answer_quality": [
+    {
+      "id": "material_correctness",
+      "description": "Assesses whether the implementation and tests are materially sound.",
+      "points": 35,
+      "met_when": "The Python code is coherent and service-independent, and the test assertions are consistent with its stated slug behavior and any supplied requirements.",
+      "partial_when": "The approach is substantially sound but has a localized code or assertion defect that does not invalidate the overall approach."
+    },
+    {
+      "id": "task_relevance",
+      "description": "Assesses focus on the requested deliverables.",
+      "points": 20,
+      "met_when": "The response stays focused on the file plan, slug implementation, boundary tests and results, and review status, without material unrelated claims.",
+      "partial_when": "The requested work remains identifiable, but substantial unrelated material obscures it."
+    },
+    {
+      "id": "operational_clarity",
+      "description": "Assesses whether the reported work can be understood and located.",
+      "points": 20,
+      "met_when": "A reader can distinguish planned changes from provided code, tests, observed results, and review outcome, and can locate the relevant files or snippets.",
+      "partial_when": "Most work is understandable, but ambiguous organization or labels make one material item difficult to locate or interpret."
+    },
+    {
+      "id": "evidence_grounding",
+      "description": "Assesses support for result and review claims.",
+      "points": 25,
+      "met_when": "Claims about test results and independent review match the evidence presented; absent evidence is identified rather than replaced with invented output or an unsupported completion claim.",
+      "partial_when": "The response distinguishes known from unknown overall but leaves one material result or review-status claim insufficiently supported, without fabricating evidence."
+    }
+  ],
+  "speed": {
+    "tokens_per_second": 45.0,
+    "seconds_per_turn": 12.0,
+    "rationale": "Fixed half-credit anchors for a multi-part technical response: 45 output tokens per second for throughput and 12 Agent model seconds per turn for latency. Score each with a monotonic curve, increasing with throughput and decreasing with latency, then weight the two curves equally. Measure Agent model calls only, excluding test users and QA."
+  },
+  "cost": {
+    "usd_at_half_score": 0.05,
+    "rationale": "A fixed $0.05 total Agent-call cost earns 50 points under 100 × 0.05 / (cost + 0.05). This is a calibration for a multi-part technical response, not a user budget or industry benchmark. Include Agent model calls only, excluding test users and QA."
+  }
+}

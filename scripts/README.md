@@ -104,6 +104,14 @@ The live `quote_request` sample can ask questions in the terminal. The batch aut
 
 Open `index.html` in the output directory to inspect results. Each sample directory contains reports, accounting evidence, and `run.log`. Sample failures do not stop later samples; the batch returns exit code 1 if any sample fails.
 
+## Compare one sample across multiple models
+
+[run_model_comparison.py](run_model_comparison.py) runs the sample selected by
+`--sample` for each `provider:model` in `--models`, then writes a combined
+`report.html` and links to the individual reports. See the main README's
+[copy-and-paste comparison examples](../README.md#run-one-sample-with-multiple-models)
+for simple chat, context budgets with QA, and rebuilding saved results offline.
+
 ## Download RAG archives
 
 [download_rag.py](download_rag.py) downloads archive pieces listed in the [RAG checksum catalog](../data/rag/archives.json) into the catalog's directory. It verifies sizes and SHA-256 checksums, and reuses valid existing pieces.
@@ -209,11 +217,11 @@ python scripts/run_model_comparison.py --models openai:gpt-5.5 codex:gpt-5.5 ope
 
 Set `LG_CODEX_MODEL_CATALOG=~/.codex/models_cache.json` in the environment file
 to use the minimal Codex gateway profile. This reuses exact model metadata while
-removing native tools and duplicate application schemas; see
+removing native tools while retaining schema-constrained gateway decisions; see
 [Codex models](../docs/codex-models.md).
 
 Models run sequentially with medium Agent effort and no explicit OpenAI output
-limit, the same high-effort Codex
+limit. GPT-4.1 omits the unsupported reasoning-effort setting. Runs use the same high-effort Codex
 GPT-6 Luna user, and optional high-effort Sol 6 QA. Use a new output directory for
 a fresh experiment. Add `--saved-only` to rebuild the selected existing bundles
 without model calls; `--models` still selects and orders the report columns.
@@ -224,4 +232,28 @@ The saved goal must match the sample; this skips the rubric-planning call.
 To change scoring without rerunning Agents, copy the selected bundles into a
 new directory and pass `--rescore --out DIRECTORY`. This calls the judge for one
 rubric and each saved execution; `--saved-only` continues to make no model calls.
+Every comparison recalculates speed and cost as normal-curve percentiles over
+its measured live results. Speed uses total elapsed Agent time, including tools,
+tests, retries, and orchestration, while excluding user waits and QA judging.
+Parallel intervals count once. Adding or removing a run changes that population.
+Goal and answer-quality judgments remain saved; the weights are 35% goal,
+15% quality, 10% speed, and 40% cost. Rendering preserves input recordings.
 A failed child stops execution and retains its `run.log` and any captured evidence.
+Use `--continue-on-error` to include recorded failures and test the remaining
+models. `--resume` validates and reuses existing run bundles and the saved rubric,
+then executes only missing models. Neither option retries a recorded failure.
+
+For the most involved sample, select `--sample context_budget`. It exercises
+file-backed planning, implementation, generated unittest execution, isolated
+review, repair, and context compaction. For these longer traces, set
+`LG_QA_MAX_EVIDENCE_CHARS=1500000` when running the comparison; the judge
+receives the complete compacted evidence and the shared rubric. Put `openai:gpt-4.1` first in `--models` to make it the first report
+column. Supply a pricing snapshot containing GPT-4.1, such as
+`--prices reports/model_comparison/gpt-4.1/prices.json`.
+Large QA records use a lossless message catalog to avoid resending identical
+histories. Opaque encrypted provider continuation state is excluded from QA
+input; visible reasoning summaries, responses, and tool evidence are retained,
+and saved execution traces remain unchanged. Short event IDs are resolved back
+to their original trace IDs locally. `LG_QA_MAX_EVIDENCE_CHARS` can raise the default 200,000-character
+limit when the selected judge has enough context capacity; oversized evidence
+remains unscored, never truncated.

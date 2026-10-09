@@ -136,6 +136,43 @@ the workflow controls execution, not the list itself.
 Python `ScriptPrompter` and browser `WebScriptPrompter` each own their prompt
 position; the catalog only supplies data. Neither prompter supplies model responses.
 
+## Saved QA rubrics
+
+Each registered sample includes `qa-rubric.json` alongside `sample.py`, including
+the Langfuse and review-limit variants. These files were authored with AI
+assistance from the sample goals; they were not fitted to model results.
+For example, compare the [context-budget criteria](context_budget/qa-rubric.json)
+with the simpler [tool-chat criteria](tool_chat/qa-rubric.json).
+
+QA remains optional. When enabled, it uses explicit supplied criteria first,
+then the sample's file. A sample without a rubric still supports on-the-fly
+rubric generation. Merely adding a rubric does not enable QA or make simulated
+runs call a judge. The same selection applies to console and browser launches;
+comparison runs copy their chosen rubric into the output bundle and share it
+across models. Resuming a comparison preserves that bundle's existing rubric.
+
+Each rubric contains:
+
+- `goal`: the exact `SAMPLE["goal"]`, or its description if no goal is declared.
+- `goal_achievement`: observable binary checks, with points totaling 100.
+- `answer_quality`: correctness, grounding, and clarity checks totaling 100,
+  with explicit full-credit and half-credit conditions.
+- `speed` and `cost`: fixed standalone half-credit anchors and their rationale.
+  These are teaching calibrations, not empirical benchmarks. Comparisons use
+  measured cohort distributions for speed and cost, as described in the main README.
+
+Update the goal and rubric together when changing a lesson. The loader rejects
+malformed criteria, duplicate IDs, incorrect totals, and mismatched goals.
+It never replaces an invalid saved file with newly generated criteria. Saved
+historical results retain the rubric used at evaluation time; editing a sample
+rubric does not retroactively change their scores.
+
+Validate all shipped rubrics and selection behavior without model calls:
+
+```sh
+uv run pytest -q tests/test_qa_scoring.py tests/test_run_model_comparison.py
+```
+
 ## Read the code in this order
 
 1. **`sample.py`** declares `SAMPLE` metadata, `CONVERSATION`, and optional model factories.

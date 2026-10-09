@@ -39,6 +39,16 @@ class Sample:
     default_client: str = "static"
 
     @property
+    def qa_rubric_path(self) -> Path | None:
+        """Find optional checked-in criteria beside the sample's definition.
+
+        Absence allows generated criteria. Existing invalid files are left for
+        the QA loader to reject, never treated as a request to regenerate them.
+        """
+        path = self.directory / "qa-rubric.json"
+        return path if path.exists() else None
+
+    @property
     def workflow(self) -> str:
         """Locate the conventional workflow builder without storing a module path."""
         return f"agent_runtime.workflows.{self.implementation}:build_workflow"

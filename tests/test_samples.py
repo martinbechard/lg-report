@@ -36,7 +36,7 @@ from reporting.schema import Run
         ("shell_script", 2, 1, 1),
         ("thinking_agent", 7, 6, 1),
         ("subagent_chat", 4, 2, 1),
-        ("context_budget", 47, 32, 2),
+        ("context_budget", 48, 32, 2),
         ("circuit_breaker", 4, 3, 1),
         ("expert_dispatch", 12, 6, 3),
         ("review_loop", 4, 0, 1),
@@ -164,7 +164,7 @@ def test_standalone_application(name, calls, tools, turn_count, tmp_path):
         # Count-only compaction evidence survives normalization, is visible in
         # the default tree, and produces one focusable timeline tooltip each.
         compactions = [s for s in run.steps if s.context.get("compaction_event")]
-        assert len(compactions) == 2
+        assert len(compactions) == 3
         prices = load_prices(output / "prices.json")
         rows = execution_tree_view(tree_rows(run, prices), activities["scopes"])
         event_rows = [row for row in rows if row["step"] in compactions]

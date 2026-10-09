@@ -8,10 +8,21 @@
 {{ criterion.met_when }}{% if criterion.partial_when %}<br>Half credit: {{ criterion.partial_when }}{% endif %}
 </li>{% endfor %}</ul>
 {% endfor %}
+{% if comparison_scoring %}
+<h3>Speed and cost</h3>
+<p>Scores use the normal-curve percentile across this comparison. The mean scores 50; one population standard deviation better scores 84.1. Equal measurements score 50.</p>
+<p>Cost = 100 × Φ((mean cost − Agent cost) / standard deviation).</p>
+{% if comparison_scoring.method == 'normal-elapsed-v2' %}
+<p>Speed = 100 × Φ((mean time − total Agent elapsed time) / standard deviation). Total time includes tools, tests, retries, and orchestration across all Agent turns. User waits and QA judging are excluded; overlapping work counts once.</p>
+{% else %}
+<p>Speed is the average of 100 × Φ((output rate − mean rate) / standard deviation) and 100 × Φ((mean seconds per turn − seconds per turn) / standard deviation).</p>
+{% endif %}
+{% else %}
 <h3>Speed</h3>
 <p>50 × rate / (rate + {{ rubric.speed.tokens_per_second }}) + 50 × {{ rubric.speed.seconds_per_turn }} / (seconds per turn + {{ rubric.speed.seconds_per_turn }}).</p>
 <p>{{ rubric.speed.rationale }}</p>
 <h3>Cost</h3>
 <p>100 × {{ rubric.cost.usd_at_half_score }} / (Agent cost in USD + {{ rubric.cost.usd_at_half_score }}).</p>
 <p>{{ rubric.cost.rationale }}</p>
+{% endif %}
 </details>

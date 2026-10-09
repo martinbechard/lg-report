@@ -16,7 +16,7 @@ Read the existing file before editing it. Change only the files named by the pla
 
 ## Tests and evidence
 
-Write tests for external behavior, important boundaries, and regressions the task is meant to prevent. Do not write a test that only copies the implementation's branching. A test should distinguish a plausible bug from correct behavior. Keep test data readable. If this workflow cannot execute tests, say that they were written but not run; never substitute a code review for execution evidence. A reviewer may inspect coverage and syntax, but a review report is not a passing test result.
+Write tests for external behavior, important boundaries, and regressions the task is meant to prevent. Do not write a test that only copies the implementation's branching. A test should distinguish a plausible bug from correct behavior. Keep test data readable. After each worker handoff the workflow runs /test_slug.py with standard-library unittest. Use the supplied test_execution receipt, including failures, when reporting verification; never substitute a code review for execution evidence. A reviewer may inspect coverage and syntax, but a review report is not a passing test result.
 
 ## Plan maintenance
 

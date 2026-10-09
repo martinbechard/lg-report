@@ -150,7 +150,7 @@ class QACostScale(Record):
 class QARubric(Record):
     """Save one task-specific scoring contract shared by every evaluation.
 
-    Criteria are generated from the task before any result is judged. The
+    Criteria are authored or generated from the task before results are judged. The
     fingerprint compares the full contract, including the goal and all anchors.
     """
 
@@ -200,7 +200,27 @@ class QAAssessment(Record):
 
 
 # Fixed weights make scores comparable and prevent the judge changing arithmetic.
-QA_WEIGHTS = {"goal_achievement": 0.4, "answer_quality": 0.3, "speed": 0.15, "cost": 0.15}
+QA_WEIGHTS = {"goal_achievement": 0.35, "answer_quality": 0.15, "speed": 0.10, "cost": 0.40}
+
+
+class QANormalDistribution(Record):
+    """Save a comparison population's parameters so percentiles are auditable."""
+
+    count: int = Field(ge=0)
+    mean: float | None = None
+    stddev: float | None = Field(default=None, ge=0)
+
+
+class QAComparisonScoring(Record):
+    """Identify the cohort behind resource scores without changing judge criteria."""
+
+    method: Literal["normal-percentile-v1", "normal-elapsed-v2"] = "normal-percentile-v1"
+    members: list[str]
+    cost: QANormalDistribution
+    # Preserve historical throughput-based populations when loading old runs.
+    output_rate: QANormalDistribution | None = None
+    seconds_per_turn: QANormalDistribution | None = None
+    elapsed_seconds: QANormalDistribution | None = None
 
 
 class QAEvaluation(Record):
@@ -218,7 +238,10 @@ class QAEvaluation(Record):
     rubric: QARubric | None = None
     assessment: QAAssessment | None = None
     # Legacy saved judgments retain their original basis on load.
-    speed_method: Literal["judge-v1", "measured-v1", "shared-rubric-v2"] = "judge-v1"
+    speed_method: Literal["judge-v1", "measured-v1", "shared-rubric-v2", "comparison-normal-v1", "comparison-elapsed-v2"] = "judge-v1"
+    # Relative resource scores retain their population, including standalone
+    # exports of a compared run. The original judge rubric stays unchanged.
+    comparison_scoring: QAComparisonScoring | None = None
     # Older saved assessments included test-input generation in resource use.
     # Retain that distinction rather than silently relabeling historical scores.
     measurement_scope: Literal["execution", "assistant"] = "execution"

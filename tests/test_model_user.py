@@ -387,3 +387,27 @@ def test_live_user_provider_override_uses_shared_adapter(tmp_path, monkeypatch, 
     assert result is adapter.create_model.return_value
     assert adapter.create_model.call_args.args[0] == "chosen-model"
     assert adapter.create_model.call_args.args[1]["LG_EFFORT"] == "high"
+
+
+def test_malformed_completion_gets_bounded_metered_correction():
+    """A prose completion can be corrected without ending early or losing calls."""
+    client = user_client(['I cannot mark this complete.', decision(False, 'Tests unexecuted.')],
+                         goal='Execute tests', max_turns=1)
+    client.receive()
+    with patch.object(type(client.model), 'invoke', wraps=client.model.invoke) as invoke:
+        assert client.receive() is None
+    assert invoke.call_count == 2
+    assert all(call.kwargs['config']['metadata']['model_role'] == 'user' for call in invoke.call_args_list)
+    assert client.stop_outcome['user_test_status'] == 'turn_limit'
+    assert client.stop_outcome['user_test_reason'] == 'Tests unexecuted.'
+
+
+def test_repeated_malformed_completion_stops_after_three_calls():
+    """A persistent formatting failure remains an error, never inferred success."""
+    client = user_client(['not JSON'])
+    client.receive()
+    with (patch.object(type(client.model), 'invoke', wraps=client.model.invoke) as invoke,
+          pytest.raises(ValueError, match='three attempts')):
+        client.receive()
+    assert invoke.call_count == 3
+    assert not client.finished

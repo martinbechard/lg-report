@@ -1,0 +1,516 @@
+{
+  "candidate_order": [
+    "gpt-4.1",
+    "gpt-5.5",
+    "codex-gpt-5.5",
+    "gpt-5.6-luna",
+    "codex-gpt-6-luna",
+    "codex-gpt-6-sol"
+  ],
+  "weights": {
+    "goal_achievement": 0.35,
+    "answer_quality": 0.15,
+    "speed": 0.1,
+    "cost": 0.4
+  },
+  "rubric_sha256": "4fe672adf3a2258ab4a5472d2644ec305419e375c98fc1cc5f691b847f7cf32c",
+  "regression_tests_passed": 182,
+  "results": [
+    {
+      "model": "gpt-4.1",
+      "status": "ok",
+      "agent_calls": 32,
+      "model_errors": 0,
+      "missing_usage": 0,
+      "unpriced_calls": 0,
+      "cost_usd": "0.314936",
+      "qa_coverage": 1.0,
+      "overall": 76.7,
+      "test_executions": [
+        {
+          "command": "python -I -B -c <unittest runner>",
+          "suite": "test_slug.py",
+          "exit_code": null,
+          "tests_run": 0,
+          "status": "not_yet_written",
+          "stdout": "",
+          "stderr": "test_slug.py does not exist.",
+          "task_id": "1",
+          "attempt": 1
+        },
+        {
+          "command": "python -I -B -c <unittest runner>",
+          "suite": "test_slug.py",
+          "exit_code": 1,
+          "tests_run": 9,
+          "duration_ms": 128.99,
+          "stdout": "",
+          "stdout_truncated": false,
+          "stderr": "test_already_slug (test_slug.TestSlugify.test_already_slug)\nInput that is already a slug returns unchanged. ... ok\ntest_consecutive_non_alphanumerics (test_slug.TestSlugify.test_consecutive_non_alphanumerics)\nConsecutive non-alphanumeric chars collapse to a single hyphen. ... ok\ntest_empty_string (test_slug.TestSlugify.test_empty_string)\nEmpty input returns an empty output. ... ok\ntest_leading_trailing_non_alphanum (test_slug.TestSlugify.test_leading_trailing_non_alphanum)\nLeading and trailing spaces/punctuation are stripped after processing. ... ok\ntest_mixed_case (test_slug.TestSlugify.test_mixed_case)\nInput with various letter cases is normalized to lowercase. ... ok\ntest_none_input (test_slug.TestSlugify.test_none_input)\nNone as input raises a TypeError (since slugify expects str). ... ERROR\ntest_numeric_string (test_slug.TestSlugify.test_numeric_string)\nNumeric input as string returns unchanged. ... ok\ntest_only_non_alphanumeric (test_slug.TestSlugify.test_only_non_alphanumeric)\nA string of only non-alphanumeric characters returns an empty string. ... ok\ntest_standard_phrase (test_slug.TestSlugify.test_standard_phrase)\nA standard phrase with spaces and punctuation converts as expected. ... ok\n\n======================================================================\nERROR: test_none_input (test_slug.TestSlugify.test_none_input)\nNone as input raises a TypeError (since slugify expects str).\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/private/var/folders/h0/jvcm0_f17h71gp94vckmf03c0000gn/T/lg-context-budget-htc4g_5u/test_slug.py\", line 44, in test_none_input\n    slugify(None)\n  File \"/private/var/folders/h0/jvcm0_f17h71gp94vckmf03c0000gn/T/lg-context-budget-htc4g_5u/slug.py\", line 43, in slugify\n    lowered = text.lower()\n              ^^^^^^^^^^\nAttributeError: 'NoneType' object has no attribute 'lower'\n\n----------------------------------------------------------------------\nRan 9 tests in 0.001s\n\nFAILED (errors=1)\n",
+          "stderr_truncated": false,
+          "failures": 0,
+          "errors": 1,
+          "skipped": 0,
+          "expected_failures": 0,
+          "unexpected_successes": 0,
+          "status": "failed",
+          "task_id": "2",
+          "attempt": 1
+        },
+        {
+          "command": "python -I -B -c <unittest runner>",
+          "suite": "test_slug.py",
+          "exit_code": 0,
+          "tests_run": 9,
+          "duration_ms": 76.77,
+          "stdout": "",
+          "stdout_truncated": false,
+          "stderr": "test_already_slug (test_slug.TestSlugify.test_already_slug)\nInput that is already a slug returns unchanged. ... ok\ntest_consecutive_non_alphanumerics (test_slug.TestSlugify.test_consecutive_non_alphanumerics)\nConsecutive non-alphanumeric chars collapse to a single hyphen. ... ok\ntest_empty_string (test_slug.TestSlugify.test_empty_string)\nEmpty input returns an empty output. ... ok\ntest_leading_trailing_non_alphanum (test_slug.TestSlugify.test_leading_trailing_non_alphanum)\nLeading and trailing spaces/punctuation are stripped after processing. ... ok\ntest_mixed_case (test_slug.TestSlugify.test_mixed_case)\nInput with various letter cases is normalized to lowercase. ... ok\ntest_none_input (test_slug.TestSlugify.test_none_input)\nNone as input raises an AttributeError (since slugify calls .lower() on input). ... ok\ntest_numeric_string (test_slug.TestSlugify.test_numeric_string)\nNumeric input as string returns unchanged. ... ok\ntest_only_non_alphanumeric (test_slug.TestSlugify.test_only_non_alphanumeric)\nA string of only non-alphanumeric characters returns an empty string. ... ok\ntest_standard_phrase (test_slug.TestSlugify.test_standard_phrase)\nA standard phrase with spaces and punctuation converts as expected. ... ok\n\n----------------------------------------------------------------------\nRan 9 tests in 0.000s\n\nOK\n",
+          "stderr_truncated": false,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "expected_failures": 0,
+          "unexpected_successes": 0,
+          "status": "passed",
+          "task_id": "2",
+          "attempt": 2
+        },
+        {
+          "command": "python -I -B -c <unittest runner>",
+          "suite": "test_slug.py",
+          "exit_code": 0,
+          "tests_run": 18,
+          "duration_ms": 80.86,
+          "stdout": "",
+          "stdout_truncated": false,
+          "stderr": "test_all_underscore_string (test_slug.TestSlugify.test_all_underscore_string)\nA string of only underscores returns empty string. ... ok\ntest_already_slug (test_slug.TestSlugify.test_already_slug)\nInput that is already a slug returns unchanged. ... ok\ntest_alternating_letter_and_separator (test_slug.TestSlugify.test_alternating_letter_and_separator)\nAlternating pattern of single letters with single separator yields hyphens between. ... ok\ntest_consecutive_non_alphanumerics (test_slug.TestSlugify.test_consecutive_non_alphanumerics)\nConsecutive non-alphanumeric chars collapse to a single hyphen. ... ok\ntest_empty_string (test_slug.TestSlugify.test_empty_string)\nEmpty input returns an empty output (strengthened: always ''). ... ok\ntest_extremely_long_alphanumeric (test_slug.TestSlugify.test_extremely_long_alphanumeric)\nExtremely long string of alphanumerics returns the same string in lowercase. ... ok\ntest_extremely_long_alternating (test_slug.TestSlugify.test_extremely_long_alternating)\nExtremely long alternating alpha-nonalphanumeric pattern: 'a#a#a#...' ... ok\ntest_extremely_long_non_alphanumeric (test_slug.TestSlugify.test_extremely_long_non_alphanumeric)\nExtremely long string of non-alphanumeric characters returns empty string. ... ok\ntest_leading_trailing_non_alphanum (test_slug.TestSlugify.test_leading_trailing_non_alphanum)\nLeading and trailing spaces/punctuation are stripped after processing. ... ok\ntest_mixed_case (test_slug.TestSlugify.test_mixed_case)\nInput with various letter cases is normalized to lowercase. ... ok\ntest_mixed_separators (test_slug.TestSlugify.test_mixed_separators)\nMultiple different non-alphanumeric separator characters collapse between content. ... ok\ntest_none_input (test_slug.TestSlugify.test_none_input)\nNone as input raises an AttributeError (as .lower() is called on None). ... ok\ntest_numeric_string (test_slug.TestSlugify.test_numeric_string)\nNumeric input as string returns unchanged (already covered, here for completeness). ... ok\ntest_one_character_alphanumeric (test_slug.TestSlugify.test_one_character_alphanumeric)\nOne-character alphanumeric input returns itself in lowercase (if letter). ... ok\ntest_one_character_non_alphanumeric (test_slug.TestSlugify.test_one_character_non_alphanumeric)\nOne-character non-alphanumeric input returns empty string. ... ok\ntest_only_non_alphanumeric (test_slug.TestSlugify.test_only_non_alphanumeric)\nA string of only non-alphanumeric characters returns an empty string. ... ok\ntest_single_hyphen_underscore_space (test_slug.TestSlugify.test_single_hyphen_underscore_space)\nA string that is a single hyphen, underscore, or space yields empty string. ... ok\ntest_standard_phrase (test_slug.TestSlugify.test_standard_phrase)\nA standard phrase with spaces and punctuation converts as expected. ... ok\n\n----------------------------------------------------------------------\nRan 18 tests in 0.002s\n\nOK\n",
+          "stderr_truncated": false,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "expected_failures": 0,
+          "unexpected_successes": 0,
+          "status": "passed",
+          "task_id": "3",
+          "attempt": 1
+        }
+      ],
+      "user_test": {
+        "status": "turn_limit",
+        "label": "Turn limit reached \u2014 goal not met",
+        "turns": 3,
+        "goal": "The assistant reports a detailed file plan, a service-independent Python slug implementation, strengthened boundary tests with their actual results, and an independent review with its outcome recorded. Missing execution or review evidence must not be claimed as complete.",
+        "reason": "The detailed file plan is provided, and the reports claim a standard-library implementation, 18 passing tests, and a favorable review. But the implementation itself and independently verifiable execution and review evidence are absent, so completion cannot be confirmed."
+      },
+      "scores": {
+        "goal_achievement": 90.0,
+        "answer_quality": 65.0,
+        "speed": 93.9,
+        "cost": 65.1
+      },
+      "agent_elapsed_seconds": 123.017562
+    },
+    {
+      "model": "gpt-5.5",
+      "status": "ok",
+      "agent_calls": 30,
+      "model_errors": 0,
+      "missing_usage": 0,
+      "unpriced_calls": 0,
+      "cost_usd": "0.945850",
+      "qa_coverage": 1.0,
+      "overall": 62.9,
+      "test_executions": [
+        {
+          "command": "python -I -B -c <unittest runner>",
+          "suite": "test_slug.py",
+          "exit_code": null,
+          "tests_run": 0,
+          "status": "not_yet_written",
+          "stdout": "",
+          "stderr": "test_slug.py does not exist.",
+          "task_id": "SLUG-001",
+          "attempt": 1
+        },
+        {
+          "command": "python -I -B -c <unittest runner>",
+          "suite": "test_slug.py",
+          "exit_code": 0,
+          "tests_run": 9,
+          "duration_ms": 138.95,
+          "stdout": "",
+          "stdout_truncated": false,
+          "stderr": "test_all_separators_return_empty_string (test_slug.SlugifyBehaviorTests.test_all_separators_return_empty_string) ... ok\ntest_already_slugged_input_remains_unchanged (test_slug.SlugifyBehaviorTests.test_already_slugged_input_remains_unchanged) ... ok\ntest_basic_title_text_becomes_lowercase_slug (test_slug.SlugifyBehaviorTests.test_basic_title_text_becomes_lowercase_slug) ... ok\ntest_empty_string_returns_empty_string (test_slug.SlugifyBehaviorTests.test_empty_string_returns_empty_string) ... ok\ntest_mixed_case_input_lowercases_words (test_slug.SlugifyBehaviorTests.test_mixed_case_input_lowercases_words) ... ok\ntest_non_ascii_text_without_ascii_transliteration_returns_empty_string (test_slug.SlugifyBehaviorTests.test_non_ascii_text_without_ascii_transliteration_returns_empty_string) ... ok\ntest_non_string_input_raises_type_error (test_slug.SlugifyBehaviorTests.test_non_string_input_raises_type_error) ... ok\ntest_punctuation_and_spacing_collapse_to_single_hyphens (test_slug.SlugifyBehaviorTests.test_punctuation_and_spacing_collapse_to_single_hyphens) ... ok\ntest_unicode_text_transliterates_to_ascii_when_possible (test_slug.SlugifyBehaviorTests.test_unicode_text_transliterates_to_ascii_when_possible) ... ok\n\n----------------------------------------------------------------------\nRan 9 tests in 0.001s\n\nOK\n",
+          "stderr_truncated": false,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "expected_failures": 0,
+          "unexpected_successes": 0,
+          "status": "passed",
+          "task_id": "SLUG-002",
+          "attempt": 1
+        }
+      ],
+      "user_test": {
+        "status": "turn_limit",
+        "label": "Turn limit reached \u2014 goal not met",
+        "turns": 3,
+        "goal": "The assistant reports a detailed file plan, a service-independent Python slug implementation, strengthened boundary tests with their actual results, and an independent review with its outcome recorded. Missing execution or review evidence must not be claimed as complete.",
+        "reason": "A detailed file plan and service-independent implementation are described, and nine tests are reported as passing. However, the conversation says raw execution and review evidence are unavailable; the strengthened-test results and independent review therefore remain unverified."
+      },
+      "scores": {
+        "goal_achievement": 100.0,
+        "answer_quality": 100.0,
+        "speed": 80.5,
+        "cost": 12.2
+      },
+      "agent_elapsed_seconds": 182.813506
+    },
+    {
+      "model": "codex-gpt-5.5",
+      "status": "ok",
+      "agent_calls": 31,
+      "model_errors": 0,
+      "missing_usage": 0,
+      "unpriced_calls": 0,
+      "cost_usd": "1.091198",
+      "qa_coverage": 1.0,
+      "overall": 57.9,
+      "test_executions": [
+        {
+          "command": "python -I -B -c <unittest runner>",
+          "suite": "test_slug.py",
+          "exit_code": null,
+          "tests_run": 0,
+          "status": "not_yet_written",
+          "stdout": "",
+          "stderr": "test_slug.py does not exist.",
+          "task_id": "SLUG-001",
+          "attempt": 1
+        },
+        {
+          "command": "python -I -B -c <unittest runner>",
+          "suite": "test_slug.py",
+          "exit_code": 0,
+          "tests_run": 6,
+          "duration_ms": 146.55,
+          "stdout": "",
+          "stdout_truncated": false,
+          "stderr": "test_collapses_repeated_separators_to_single_hyphen (test_slug.SlugifyBehaviorTests.test_collapses_repeated_separators_to_single_hyphen) ... ok\ntest_normalizes_unicode_to_ascii_when_possible (test_slug.SlugifyBehaviorTests.test_normalizes_unicode_to_ascii_when_possible) ... ok\ntest_preserves_digits_and_letters_in_lowercase_form (test_slug.SlugifyBehaviorTests.test_preserves_digits_and_letters_in_lowercase_form) ... ok\ntest_returns_empty_string_when_no_alphanumeric_content_remains (test_slug.SlugifyBehaviorTests.test_returns_empty_string_when_no_alphanumeric_content_remains) ... ok\ntest_slugifies_ordinary_phrase_and_removes_punctuation (test_slug.SlugifyBehaviorTests.test_slugifies_ordinary_phrase_and_removes_punctuation) ... ok\ntest_trims_separator_boundaries (test_slug.SlugifyBehaviorTests.test_trims_separator_boundaries) ... ok\n\n----------------------------------------------------------------------\nRan 6 tests in 0.001s\n\nOK\n",
+          "stderr_truncated": false,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "expected_failures": 0,
+          "unexpected_successes": 0,
+          "status": "passed",
+          "task_id": "SLUG-002",
+          "attempt": 1
+        }
+      ],
+      "user_test": {
+        "status": "turn_limit",
+        "label": "Turn limit reached \u2014 goal not met",
+        "turns": 3,
+        "goal": "The assistant reports a detailed file plan, a service-independent Python slug implementation, strengthened boundary tests with their actual results, and an independent review with its outcome recorded. Missing execution or review evidence must not be claimed as complete.",
+        "reason": "The conversation reports six passing tests and approvals, but does not provide the detailed file plan, actual Python implementation, strengthened test cases with their actual results, or specifics of what the independent reviewer examined."
+      },
+      "scores": {
+        "goal_achievement": 100.0,
+        "answer_quality": 100.0,
+        "speed": 52.9,
+        "cost": 6.4
+      },
+      "agent_elapsed_seconds": 251.360566
+    },
+    {
+      "model": "gpt-5.6-luna",
+      "status": "ok",
+      "agent_calls": 71,
+      "model_errors": 0,
+      "missing_usage": 0,
+      "unpriced_calls": 0,
+      "cost_usd": "0.08096284",
+      "qa_coverage": 1.0,
+      "overall": 86.3,
+      "test_executions": [
+        {
+          "command": "python -I -B -c <unittest runner>",
+          "suite": "test_slug.py",
+          "exit_code": null,
+          "tests_run": 0,
+          "status": "not_yet_written",
+          "stdout": "",
+          "stderr": "test_slug.py does not exist.",
+          "task_id": "SLUG-001",
+          "attempt": 1
+        },
+        {
+          "command": "python -I -B -c <unittest runner>",
+          "suite": "test_slug.py",
+          "exit_code": 0,
+          "tests_run": 8,
+          "duration_ms": 133.96,
+          "stdout": "",
+          "stdout_truncated": false,
+          "stderr": "test_collapses_repeated_separators_and_strips_edges (test_slug.SlugifyBehaviorTests.test_collapses_repeated_separators_and_strips_edges) ... ok\ntest_converts_ordinary_text (test_slug.SlugifyBehaviorTests.test_converts_ordinary_text) ... ok\ntest_rejects_non_string_inputs (test_slug.SlugifyBehaviorTests.test_rejects_non_string_inputs) ... ok\ntest_returns_empty_for_empty_and_blank_text (test_slug.SlugifyBehaviorTests.test_returns_empty_for_empty_and_blank_text) ... ok\ntest_returns_empty_for_punctuation_only_text (test_slug.SlugifyBehaviorTests.test_returns_empty_for_punctuation_only_text) ... ok\ntest_transliterates_accented_unicode_text (test_slug.SlugifyBehaviorTests.test_transliterates_accented_unicode_text) ... ok\ntest_trims_surrounding_whitespace_and_lowercases (test_slug.SlugifyBehaviorTests.test_trims_surrounding_whitespace_and_lowercases) ... ok\ntest_uses_one_separator_for_punctuation_and_whitespace (test_slug.SlugifyBehaviorTests.test_uses_one_separator_for_punctuation_and_whitespace) ... ok\n\n----------------------------------------------------------------------\nRan 8 tests in 0.000s\n\nOK\n",
+          "stderr_truncated": false,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "expected_failures": 0,
+          "unexpected_successes": 0,
+          "status": "passed",
+          "task_id": "SLUG-002",
+          "attempt": 1
+        },
+        {
+          "command": "python -I -B -c <unittest runner>",
+          "suite": "test_slug.py",
+          "exit_code": 1,
+          "tests_run": 12,
+          "duration_ms": 136.79,
+          "stdout": "",
+          "stdout_truncated": false,
+          "stderr": "test_collapses_repeated_separators_and_strips_edges (test_slug.SlugifyBehaviorTests.test_collapses_repeated_separators_and_strips_edges) ... ok\ntest_converts_ordinary_text (test_slug.SlugifyBehaviorTests.test_converts_ordinary_text) ... ok\ntest_handles_already_separated_and_separator_only_inputs (test_slug.SlugifyBehaviorTests.test_handles_already_separated_and_separator_only_inputs) ... ok\ntest_normalizes_decomposed_combining_marks (test_slug.SlugifyBehaviorTests.test_normalizes_decomposed_combining_marks) ... ok\ntest_rejects_non_string_inputs (test_slug.SlugifyBehaviorTests.test_rejects_non_string_inputs) ... ok\ntest_returns_empty_for_empty_and_blank_text (test_slug.SlugifyBehaviorTests.test_returns_empty_for_empty_and_blank_text) ... ok\ntest_returns_empty_for_punctuation_only_text (test_slug.SlugifyBehaviorTests.test_returns_empty_for_punctuation_only_text) ... ok\ntest_transliterates_accented_unicode_text (test_slug.SlugifyBehaviorTests.test_transliterates_accented_unicode_text) ... ok\ntest_transliterates_explicitly_mapped_latin_letters (test_slug.SlugifyBehaviorTests.test_transliterates_explicitly_mapped_latin_letters) ... ok\ntest_trims_surrounding_whitespace_and_lowercases (test_slug.SlugifyBehaviorTests.test_trims_surrounding_whitespace_and_lowercases) ... ok\ntest_uses_non_ascii_punctuation_and_symbols_as_separators (test_slug.SlugifyBehaviorTests.test_uses_non_ascii_punctuation_and_symbols_as_separators) ... FAIL\ntest_uses_one_separator_for_punctuation_and_whitespace (test_slug.SlugifyBehaviorTests.test_uses_one_separator_for_punctuation_and_whitespace) ... ok\n\n======================================================================\nFAIL: test_uses_non_ascii_punctuation_and_symbols_as_separators (test_slug.SlugifyBehaviorTests.test_uses_non_ascii_punctuation_and_symbols_as_separators)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/private/var/folders/h0/jvcm0_f17h71gp94vckmf03c0000gn/T/lg-context-budget-ghsitjm0/test_slug.py\", line 57, in test_uses_non_ascii_punctuation_and_symbols_as_separators\n    self.assertEqual(\nAssertionError: 'helloworldreadytm-now' != 'hello-world-ready-now'\n- helloworldreadytm-now\n?                --\n+ hello-world-ready-now\n?      +     +\n\n\n----------------------------------------------------------------------\nRan 12 tests in 0.001s\n\nFAILED (failures=1)\n",
+          "stderr_truncated": false,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0,
+          "expected_failures": 0,
+          "unexpected_successes": 0,
+          "status": "failed",
+          "task_id": "SLUG-003",
+          "attempt": 1
+        },
+        {
+          "command": "python -I -B -c <unittest runner>",
+          "suite": "test_slug.py",
+          "exit_code": 1,
+          "tests_run": 12,
+          "duration_ms": 137.12,
+          "stdout": "",
+          "stdout_truncated": false,
+          "stderr": "test_collapses_repeated_separators_and_strips_edges (test_slug.SlugifyBehaviorTests.test_collapses_repeated_separators_and_strips_edges) ... ok\ntest_converts_ordinary_text (test_slug.SlugifyBehaviorTests.test_converts_ordinary_text) ... ok\ntest_handles_already_separated_and_separator_only_inputs (test_slug.SlugifyBehaviorTests.test_handles_already_separated_and_separator_only_inputs) ... ok\ntest_normalizes_decomposed_combining_marks (test_slug.SlugifyBehaviorTests.test_normalizes_decomposed_combining_marks) ... ok\ntest_rejects_non_string_inputs (test_slug.SlugifyBehaviorTests.test_rejects_non_string_inputs) ... ok\ntest_returns_empty_for_empty_and_blank_text (test_slug.SlugifyBehaviorTests.test_returns_empty_for_empty_and_blank_text) ... ok\ntest_returns_empty_for_punctuation_only_text (test_slug.SlugifyBehaviorTests.test_returns_empty_for_punctuation_only_text) ... ok\ntest_transliterates_accented_unicode_text (test_slug.SlugifyBehaviorTests.test_transliterates_accented_unicode_text) ... ok\ntest_transliterates_explicitly_mapped_latin_letters (test_slug.SlugifyBehaviorTests.test_transliterates_explicitly_mapped_latin_letters) ... ok\ntest_trims_surrounding_whitespace_and_lowercases (test_slug.SlugifyBehaviorTests.test_trims_surrounding_whitespace_and_lowercases) ... ok\ntest_uses_non_ascii_punctuation_and_symbols_as_separators (test_slug.SlugifyBehaviorTests.test_uses_non_ascii_punctuation_and_symbols_as_separators) ... FAIL\ntest_uses_one_separator_for_punctuation_and_whitespace (test_slug.SlugifyBehaviorTests.test_uses_one_separator_for_punctuation_and_whitespace) ... ok\n\n======================================================================\nFAIL: test_uses_non_ascii_punctuation_and_symbols_as_separators (test_slug.SlugifyBehaviorTests.test_uses_non_ascii_punctuation_and_symbols_as_separators)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/private/var/folders/h0/jvcm0_f17h71gp94vckmf03c0000gn/T/lg-context-budget-ghsitjm0/test_slug.py\", line 57, in test_uses_non_ascii_punctuation_and_symbols_as_separators\n    self.assertEqual(\nAssertionError: 'helloworldreadytm-now' != 'hello-world-ready-now'\n- helloworldreadytm-now\n?                --\n+ hello-world-ready-now\n?      +     +\n\n\n----------------------------------------------------------------------\nRan 12 tests in 0.002s\n\nFAILED (failures=1)\n",
+          "stderr_truncated": false,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0,
+          "expected_failures": 0,
+          "unexpected_successes": 0,
+          "status": "failed",
+          "task_id": "SLUG-003",
+          "attempt": 2
+        },
+        {
+          "command": "python -I -B -c <unittest runner>",
+          "suite": "test_slug.py",
+          "exit_code": 1,
+          "tests_run": 12,
+          "duration_ms": 137.22,
+          "stdout": "",
+          "stdout_truncated": false,
+          "stderr": "test_collapses_repeated_separators_and_strips_edges (test_slug.SlugifyBehaviorTests.test_collapses_repeated_separators_and_strips_edges) ... ok\ntest_converts_ordinary_text (test_slug.SlugifyBehaviorTests.test_converts_ordinary_text) ... ok\ntest_handles_already_separated_and_separator_only_inputs (test_slug.SlugifyBehaviorTests.test_handles_already_separated_and_separator_only_inputs) ... ok\ntest_normalizes_decomposed_combining_marks (test_slug.SlugifyBehaviorTests.test_normalizes_decomposed_combining_marks) ... ok\ntest_rejects_non_string_inputs (test_slug.SlugifyBehaviorTests.test_rejects_non_string_inputs) ... ok\ntest_returns_empty_for_empty_and_blank_text (test_slug.SlugifyBehaviorTests.test_returns_empty_for_empty_and_blank_text) ... ok\ntest_returns_empty_for_punctuation_only_text (test_slug.SlugifyBehaviorTests.test_returns_empty_for_punctuation_only_text) ... ok\ntest_transliterates_accented_unicode_text (test_slug.SlugifyBehaviorTests.test_transliterates_accented_unicode_text) ... ok\ntest_transliterates_explicitly_mapped_latin_letters (test_slug.SlugifyBehaviorTests.test_transliterates_explicitly_mapped_latin_letters) ... ok\ntest_trims_surrounding_whitespace_and_lowercases (test_slug.SlugifyBehaviorTests.test_trims_surrounding_whitespace_and_lowercases) ... ok\ntest_uses_non_ascii_punctuation_and_symbols_as_separators (test_slug.SlugifyBehaviorTests.test_uses_non_ascii_punctuation_and_symbols_as_separators) ... FAIL\ntest_uses_one_separator_for_punctuation_and_whitespace (test_slug.SlugifyBehaviorTests.test_uses_one_separator_for_punctuation_and_whitespace) ... ok\n\n======================================================================\nFAIL: test_uses_non_ascii_punctuation_and_symbols_as_separators (test_slug.SlugifyBehaviorTests.test_uses_non_ascii_punctuation_and_symbols_as_separators)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/private/var/folders/h0/jvcm0_f17h71gp94vckmf03c0000gn/T/lg-context-budget-ghsitjm0/test_slug.py\", line 57, in test_uses_non_ascii_punctuation_and_symbols_as_separators\n    self.assertEqual(\nAssertionError: 'helloworldreadytm-now' != 'hello-world-ready-now'\n- helloworldreadytm-now\n?                --\n+ hello-world-ready-now\n?      +     +\n\n\n----------------------------------------------------------------------\nRan 12 tests in 0.001s\n\nFAILED (failures=1)\n",
+          "stderr_truncated": false,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0,
+          "expected_failures": 0,
+          "unexpected_successes": 0,
+          "status": "failed",
+          "task_id": "SLUG-003",
+          "attempt": 3
+        },
+        {
+          "command": "python -I -B -c <unittest runner>",
+          "suite": "test_slug.py",
+          "exit_code": 0,
+          "tests_run": 12,
+          "duration_ms": 133.53,
+          "stdout": "",
+          "stdout_truncated": false,
+          "stderr": "test_collapses_repeated_separators_and_strips_edges (test_slug.SlugifyBehaviorTests.test_collapses_repeated_separators_and_strips_edges) ... ok\ntest_converts_ordinary_text (test_slug.SlugifyBehaviorTests.test_converts_ordinary_text) ... ok\ntest_handles_already_separated_and_separator_only_inputs (test_slug.SlugifyBehaviorTests.test_handles_already_separated_and_separator_only_inputs) ... ok\ntest_normalizes_decomposed_combining_marks (test_slug.SlugifyBehaviorTests.test_normalizes_decomposed_combining_marks) ... ok\ntest_rejects_non_string_inputs (test_slug.SlugifyBehaviorTests.test_rejects_non_string_inputs) ... ok\ntest_returns_empty_for_empty_and_blank_text (test_slug.SlugifyBehaviorTests.test_returns_empty_for_empty_and_blank_text) ... ok\ntest_returns_empty_for_punctuation_only_text (test_slug.SlugifyBehaviorTests.test_returns_empty_for_punctuation_only_text) ... ok\ntest_transliterates_accented_unicode_text (test_slug.SlugifyBehaviorTests.test_transliterates_accented_unicode_text) ... ok\ntest_transliterates_explicitly_mapped_latin_letters (test_slug.SlugifyBehaviorTests.test_transliterates_explicitly_mapped_latin_letters) ... ok\ntest_trims_surrounding_whitespace_and_lowercases (test_slug.SlugifyBehaviorTests.test_trims_surrounding_whitespace_and_lowercases) ... ok\ntest_uses_non_ascii_punctuation_and_symbols_as_separators (test_slug.SlugifyBehaviorTests.test_uses_non_ascii_punctuation_and_symbols_as_separators) ... ok\ntest_uses_one_separator_for_punctuation_and_whitespace (test_slug.SlugifyBehaviorTests.test_uses_one_separator_for_punctuation_and_whitespace) ... ok\n\n----------------------------------------------------------------------\nRan 12 tests in 0.001s\n\nOK\n",
+          "stderr_truncated": false,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "expected_failures": 0,
+          "unexpected_successes": 0,
+          "status": "passed",
+          "task_id": "SLUG-003",
+          "attempt": 1
+        }
+      ],
+      "user_test": {
+        "status": "turn_limit",
+        "label": "Turn limit reached \u2014 goal not met",
+        "turns": 3,
+        "goal": "The assistant reports a detailed file plan, a service-independent Python slug implementation, strengthened boundary tests with their actual results, and an independent review with its outcome recorded. Missing execution or review evidence must not be claimed as complete.",
+        "reason": "The conversation reports a 12-test pass and an independent approval, but provides no detailed file plan or inspectable Python implementation. The only detailed test receipt is the earlier failed run, so strengthened boundary tests' successful actual results are also missing."
+      },
+      "scores": {
+        "goal_achievement": 100.0,
+        "answer_quality": 100.0,
+        "speed": 30.0,
+        "cost": 83.3
+      },
+      "agent_elapsed_seconds": 303.424293
+    },
+    {
+      "model": "codex-gpt-6-luna",
+      "status": "ok",
+      "effort": "high",
+      "agent_calls": 56,
+      "model_errors": 0,
+      "missing_usage": 0,
+      "unpriced_calls": 0,
+      "cost_usd": "0.03593896",
+      "qa_coverage": 1.0,
+      "overall": 83.1,
+      "test_executions": [
+        {
+          "command": "python -I -B -c <unittest runner>",
+          "suite": "test_slug.py",
+          "exit_code": null,
+          "tests_run": 0,
+          "status": "not_yet_written",
+          "stdout": "",
+          "stderr": "test_slug.py does not exist.",
+          "task_id": "SLUG-1",
+          "attempt": 1
+        },
+        {
+          "command": "python -I -B -c <unittest runner>",
+          "suite": "test_slug.py",
+          "exit_code": 0,
+          "tests_run": 5,
+          "duration_ms": 79.06,
+          "stdout": "",
+          "stdout_truncated": false,
+          "stderr": "test_empty_or_non_ascii_only_input_returns_empty_string (test_slug.SlugifyTests.test_empty_or_non_ascii_only_input_returns_empty_string) ... ok\ntest_non_string_input_raises_type_error (test_slug.SlugifyTests.test_non_string_input_raises_type_error) ... ok\ntest_ordinary_text_becomes_lowercase_hyphenated_slug (test_slug.SlugifyTests.test_ordinary_text_becomes_lowercase_hyphenated_slug) ... ok\ntest_punctuation_and_whitespace_runs_collapse_to_one_hyphen (test_slug.SlugifyTests.test_punctuation_and_whitespace_runs_collapse_to_one_hyphen) ... ok\ntest_unicode_accents_decompose_and_non_ascii_characters_are_omitted (test_slug.SlugifyTests.test_unicode_accents_decompose_and_non_ascii_characters_are_omitted) ... ok\n\n----------------------------------------------------------------------\nRan 5 tests in 0.000s\n\nOK\n",
+          "stderr_truncated": false,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "expected_failures": 0,
+          "unexpected_successes": 0,
+          "status": "passed",
+          "task_id": "SLUG-2",
+          "attempt": 1
+        }
+      ],
+      "user_test": {
+        "status": "turn_limit",
+        "label": "Turn limit reached \u2014 goal not met",
+        "turns": 3,
+        "goal": "The assistant reports a detailed file plan, a service-independent Python slug implementation, strengthened boundary tests with their actual results, and an independent review with its outcome recorded. Missing execution or review evidence must not be claimed as complete.",
+        "reason": "The conversation includes a detailed file plan, boundary-test coverage and aggregate results (5 passed; exit status 0), and recorded independent approvals. It describes the slug behavior but does not provide the inspectable Python implementation itself."
+      },
+      "scores": {
+        "goal_achievement": 100.0,
+        "answer_quality": 87.5,
+        "speed": 5.9,
+        "cost": 85.9
+      },
+      "agent_elapsed_seconds": 393.787531
+    },
+    {
+      "model": "codex-gpt-6-sol",
+      "status": "ok",
+      "agent_calls": 31,
+      "model_errors": 0,
+      "missing_usage": 0,
+      "unpriced_calls": 0,
+      "cost_usd": "0.3649400",
+      "qa_coverage": 1.0,
+      "overall": 77.6,
+      "test_executions": [
+        {
+          "command": "python -I -B -c <unittest runner>",
+          "suite": "test_slug.py",
+          "exit_code": null,
+          "tests_run": 0,
+          "status": "not_yet_written",
+          "stdout": "",
+          "stderr": "test_slug.py does not exist.",
+          "task_id": "SLUG-01",
+          "attempt": 1
+        },
+        {
+          "command": "python -I -B -c <unittest runner>",
+          "suite": "test_slug.py",
+          "exit_code": 0,
+          "tests_run": 5,
+          "duration_ms": 76.66,
+          "stdout": "",
+          "stdout_truncated": false,
+          "stderr": "test_accented_latin_letters (test_slug.SlugifyTests.test_accented_latin_letters) ... ok\ntest_empty_and_all_discarded_input (test_slug.SlugifyTests.test_empty_and_all_discarded_input) ... ok\ntest_non_string_input_raises_type_error (test_slug.SlugifyTests.test_non_string_input_raises_type_error) ... ok\ntest_ordinary_words_and_case (test_slug.SlugifyTests.test_ordinary_words_and_case) ... ok\ntest_separator_runs_and_edge_trimming (test_slug.SlugifyTests.test_separator_runs_and_edge_trimming) ... ok\n\n----------------------------------------------------------------------\nRan 5 tests in 0.000s\n\nOK\n",
+          "stderr_truncated": false,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "expected_failures": 0,
+          "unexpected_successes": 0,
+          "status": "passed",
+          "task_id": "SLUG-02",
+          "attempt": 1
+        }
+      ],
+      "user_test": {
+        "status": "goal_met",
+        "label": "Goal met (user-model assessment)",
+        "turns": 3,
+        "goal": "The assistant reports a detailed file plan, a service-independent Python slug implementation, strengthened boundary tests with their actual results, and an independent review with its outcome recorded. Missing execution or review evidence must not be claimed as complete.",
+        "reason": "The conversation includes a file plan and contract, inspectable standard-library-only implementation and tests, boundary cases with reported results (5 tests, 0 failures or errors, exit status 0), and an independent review recorded as approved with no issues."
+      },
+      "scores": {
+        "goal_achievement": 100.0,
+        "answer_quality": 100.0,
+        "speed": 34.6,
+        "cost": 60.4
+      },
+      "agent_elapsed_seconds": 292.434549
+    }
+  ],
+  "preserved_previous_report": "/Users/martinbechard/dev/lg-report/outputs/context-receipts-20261007/previous-published",
+  "changes": [
+    "Retain completed Codex usage on process errors and timeouts",
+    "Expose provider capacity errors with a safe error type",
+    "Use a finite configurable Codex deadline (300 seconds for fresh trials)",
+    "Let the planner handle report-only follow-ups without worker dispatch"
+  ],
+  "luna6_refresh": {
+    "model": "codex:gpt-6-luna",
+    "effort": "high",
+    "source": "outputs/context-luna6-high-20261007",
+    "prior_comparison": "/Users/martinbechard/dev/lg-report/outputs/context-luna6-high-support-20261007/previous-publication",
+    "prior_luna_bundle": "reports/context_comparison/codex-gpt-5.6-luna"
+  },
+  "resource_scoring": {
+    "method": "normal-elapsed-v2",
+    "members": [
+      "openai:gpt-4.1-2025-04-14 \u00b7 01a116eb-fb01-7443-a7b4-3c15ca357a7d",
+      "openai:gpt-5.5-2026-04-23 \u00b7 01a11689-54cc-79d1-9216-a395961595b6",
+      "codex:gpt-5.5 \u00b7 01a1168d-508f-7452-b1d1-7d6f67f6db99",
+      "openai:gpt-5.6-luna \u00b7 01a11692-5cc1-75a2-a141-d7cdbef3380d",
+      "codex:gpt-6-luna \u00b7 01a116fe-61c3-7870-9e54-b246ce70d5fb",
+      "codex:gpt-6-sol \u00b7 01a1167f-3692-74e2-840c-b5deebecb9ae"
+    ],
+    "cost": {
+      "count": 6,
+      "mean": 0.47230429999999995,
+      "stddev": 0.4056126364147216
+    },
+    "output_rate": null,
+    "seconds_per_turn": null,
+    "elapsed_seconds": {
+      "count": 6,
+      "mean": 257.8063345,
+      "stddev": 87.182263705393
+    }
+  },
+  "scoring_regression_tests_passed": 75,
+  "previous_scoring_snapshot": "/Users/martinbechard/dev/lg-report/outputs/context-elapsed-time-20261007/previous-comparison"
+}

@@ -74,6 +74,8 @@ Path(os.environ["CODEX_TEST_CAPTURE"]).write_text(json.dumps({
 if os.environ.get("CODEX_TEST_SLEEP"):
     time.sleep(30)
 print(Path(os.environ["CODEX_TEST_EVENTS"]).read_text(), flush=True)
+if os.environ.get("CODEX_TEST_HANG_AFTER_RECEIPT"):
+    time.sleep(30)
 ''')
     executable.chmod(0o700)
     monkeypatch.setenv("CODEX_TEST_CAPTURE", str(capture))
@@ -207,7 +209,7 @@ def test_catalog_removes_native_tools_without_changing_model_settings(fake_cli, 
     expected = {**selected, "tool_mode": "direct", "shell_type": "disabled",
                 "apply_patch_tool_type": None, "experimental_supported_tools": []}
     assert data['catalog'] == {"models": [expected]}
-    assert data['schema'] is None
+    assert data['schema']['additionalProperties'] is False
     assert data['instructions'].count('Read the virtual file') == 1
     assert '"parameters"' in data['instructions']
     assert source.read_text() == original
@@ -299,3 +301,78 @@ def test_async_cancellation_reaps_process(fake_cli, monkeypatch):
     asyncio.run(cancel())
     with pytest.raises(ProcessLookupError):
         os.kill(json.loads(capture.read_text())["pid"], 0)
+
+
+def test_only_sdk_final_response_becomes_a_gateway_decision():
+    """Intermediate CLI messages must not be concatenated into the final JSON."""
+    wire = events({'input_tokens': 120, 'output_tokens': 55})
+    wire.insert(3, {'type': 'item.completed', 'item': {'type': 'agent_message',
+                 'text': '{"content":"","tool_calls":[{"name":"unbound","args":{}}]}'}})
+    final = '{"content":"Done","tool_calls":[]}'
+    wire[4]['item']['text'] = final
+    result = parse_result(jsonl(wire), 0, 'chosen')
+    model = CodexChatModel(model_name='chosen')
+    answer = model.gateway_result(result, {'tools': [{'function': {'name': 'read'}}]}).generations[0].message
+    assert answer.content == 'Done'
+    assert not answer.tool_calls
+    assert answer.usage_metadata['output_tokens'] == 55
+
+
+def test_capacity_failure_has_a_safe_identifiable_cause():
+    """Provider capacity rejection must survive as a useful, content-free type."""
+    from agent_runtime.harness.codex_model import CodexCapacityError
+
+    wire = [{'type': 'error', 'message': 'Selected model is at capacity. Please try a different model.'},
+            {'type': 'turn.failed', 'error': {'message': 'Selected model is at capacity.'}}]
+    with pytest.raises(CodexCapacityError) as failure:
+        parse_result(jsonl(wire), 1, 'chosen')
+    assert failure.value.result is None
+
+
+@pytest.mark.parametrize('asynchronous', [False, True])
+def test_timeout_after_completed_receipt_preserves_metering(fake_cli, monkeypatch, tmp_path, asynchronous):
+    """A CLI shutdown hang must not erase a completed turn's paid usage.
+
+    The call remains a timeout rather than executing a possibly incomplete tool
+    decision, but its receipt must reach the report in both invocation modes.
+    """
+    model, process_capture = fake_cli
+    model.request_timeout = 0.5
+    monkeypatch.setenv('CODEX_TEST_HANG_AFTER_RECEIPT', '1')
+    spans = tmp_path / 'timeout-spans.jsonl'
+    capture = TraceCapture(spans, provider='codex', model='chosen', capture_content=True)
+    try:
+        with pytest.raises(TimeoutError):
+            if asynchronous:
+                asyncio.run(model.ainvoke('Question', config={'callbacks': [capture]}))
+            else:
+                model.invoke('Question', config={'callbacks': [capture]})
+    finally:
+        capture.close()
+    step = next(s for s in normalize(spans, title='Timeout').steps if s.kind == 'model')
+    assert step.status == 'error'
+    assert step.usage.input_tokens == 100 and step.usage.output_tokens == 20
+    with pytest.raises(ProcessLookupError):
+        os.kill(json.loads(process_capture.read_text())['pid'], 0)
+
+
+def test_nonzero_exit_retains_completed_receipt():
+    """An unsuccessful process must still account for its completed inference."""
+    with pytest.raises(RuntimeError) as failure:
+        parse_result(jsonl(events({'input_tokens': 100, 'output_tokens': 20})), 1, 'chosen')
+    assert failure.value.result.generations[0].message.usage_metadata['total_tokens'] == 120
+
+
+@pytest.mark.parametrize('value', ['0', '-1', 'nan', 'inf', 'invalid'])
+def test_codex_timeout_configuration_rejects_unbounded_or_invalid_values(value):
+    """A configurable time budget must stay finite and positive."""
+    with pytest.raises(ValueError):
+        configured_model(settings={'LG_PROVIDER': 'codex', 'LG_MODEL': 'chosen',
+                                   'LG_CODEX_TIMEOUT_SECONDS': value})
+
+
+def test_codex_timeout_configuration():
+    """Long reasoning requests may use a larger time budget without a token cap."""
+    model, _, _ = configured_model(settings={'LG_PROVIDER': 'codex', 'LG_MODEL': 'chosen',
+                                             'LG_CODEX_TIMEOUT_SECONDS': '300'})
+    assert model.request_timeout == 300

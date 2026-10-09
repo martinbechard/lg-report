@@ -10,6 +10,7 @@ Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
+from math import isfinite
 from typing import Any, Protocol
 
 from langchain_core.language_models import BaseChatModel
@@ -132,7 +133,13 @@ def _codex(model, settings, options):
     """Defer CLI discovery/login checks until the first request."""
     from .codex_model import CodexChatModel
 
+    # Wall-clock time is independent of output-token limits. Keep a finite
+    # deadline, but allow complex reasoning calls more than the default 120 s.
+    timeout = float(settings.get("LG_CODEX_TIMEOUT_SECONDS") or 120)
+    if not isfinite(timeout) or timeout <= 0:
+        raise ValueError("LG_CODEX_TIMEOUT_SECONDS must be finite and positive")
     return CodexChatModel(model_name=model, executable=settings.get("LG_CODEX_CLI") or "codex",
+                          request_timeout=timeout,
                           capture_telemetry=settings.get("LG_CODEX_OTEL", "true").lower() != "false",
                           model_catalog_file=settings.get("LG_CODEX_MODEL_CATALOG") or None,
                           **options)

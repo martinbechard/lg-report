@@ -1,0 +1,65 @@
+{
+  "goal": "Both requested additions have been considered separately under the configured approval decisions. The assistant reports which changes were approved or rejected and the resulting file content, without claiming a rejected write occurred.",
+  "goal_achievement": [
+    {
+      "id": "separate_decisions",
+      "description": "Considers each of the two requested additions separately under the configured approval decisions.",
+      "points": 25,
+      "met_when": "Considers each of the two requested additions separately under the configured approval decisions.",
+      "partial_when": null
+    },
+    {
+      "id": "decision_report",
+      "description": "Accurately reports which changes were approved and which were rejected using the recorded decisions.",
+      "points": 25,
+      "met_when": "Accurately reports which changes were approved and which were rejected using the recorded decisions.",
+      "partial_when": null
+    },
+    {
+      "id": "resulting_content",
+      "description": "Reports the resulting file content consistently with observed reads and successful approved writes.",
+      "points": 25,
+      "met_when": "Reports the resulting file content consistently with observed reads and successful approved writes.",
+      "partial_when": null
+    },
+    {
+      "id": "approval_boundary",
+      "description": "Does not claim a rejected write occurred or present approval as evidence that a write actually succeeded.",
+      "points": 25,
+      "met_when": "Does not claim a rejected write occurred or present approval as evidence that a write actually succeeded.",
+      "partial_when": null
+    }
+  ],
+  "answer_quality": [
+    {
+      "id": "quality_correctness",
+      "description": "Material correctness of the File approval explanation or result.",
+      "points": 40,
+      "met_when": "All material statements agree with the recorded evidence and the task requirements; uncertainty is represented accurately.",
+      "partial_when": "The central conclusion is supported, but a localized factual error or overstatement affects a secondary detail."
+    },
+    {
+      "id": "quality_grounding",
+      "description": "Traceable support for claims about actions, results, and limitations.",
+      "points": 35,
+      "met_when": "Claims about executed actions and results are traceable to recorded evidence; proposed or illustrative actions are identified as such. No extra execution is required beyond the goal.",
+      "partial_when": "The main claims are traceable, but one secondary claim lacks clear support or its proposed versus observed status is ambiguous."
+    },
+    {
+      "id": "quality_clarity",
+      "description": "Clear and relevant communication of the File approval outcome.",
+      "points": 25,
+      "met_when": "The response directly addresses the task, explains the relationships needed to understand its outcome, and communicates material limitations without contradictions.",
+      "partial_when": "The main outcome is understandable and relevant, but a material explanation is ambiguous or difficult to follow. Brevity alone is not a defect."
+    }
+  ],
+  "speed": {
+    "tokens_per_second": 30.0,
+    "seconds_per_turn": 30.0,
+    "rationale": "Authored teaching calibration, not a measured benchmark: 30 output tokens/s and 30 seconds per Agent turn for a bounded lesson. Standalone scores use these fixed half-credit anchors; comparison resource scores use the saved cohort instead."
+  },
+  "cost": {
+    "usd_at_half_score": 0.1,
+    "rationale": "Authored teaching calibration, not a user budget or measured benchmark: $0.10 total Agent cost earns half credit in standalone evaluation. Comparison cost scores use the saved cohort instead."
+  }
+}

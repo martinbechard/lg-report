@@ -66,8 +66,9 @@ class ModelUserClient:
     request; at most ten clarification calls may occur within each turn. The
     model assesses the authored goal after each response and explains its stop.
     Without a goal, the authored request count is a minimum, unless a safety cap
-    ends the test first. Errors and empty/tool responses
-    fail visibly rather than switching back to scripted or human input.
+    ends the test first. Provider errors and empty/tool responses fail visibly.
+    Malformed completion JSON gets two format corrections before failing; the
+    client never switches back to scripted or human input.
     """
 
     def __init__(self, client, model, *, initial_request, scenario, max_turns=3,
@@ -159,12 +160,14 @@ class ModelUserClient:
         return request
 
     def _decision(self, *, capped=False):
-        """Require a portable JSON decision; malformed output fails visibly.
+        """Correct malformed JSON at most twice before failing visibly.
 
         JSON text works through every provider's existing adapter. The harness
-        owns the safety cap; a model's assessment never overrides that cap.
+        owns the safety cap; a model's assessment never overrides that cap. Each
+        correction is a separately metered user-role call on the same history.
+        Semantic stop/turn checks remain strict after format validation.
         """
-        text = self._generate(
+        instruction = (
             f"Evaluate the conversation after {self.turn} user turns. "
             f"Minimum turns: {self.minimum_turns}. Maximum turns: {self.max_turns}. "
             + ("The turn limit is reached; assess completion without proposing another turn. " if capped else "")
@@ -172,17 +175,23 @@ class ModelUserClient:
               '"message": "next user message, or empty when done or at the limit"}. '
               'Set done=true only when ALL stop-goal conditions (or all sample objectives if no goal) '
               'are satisfied. Before the minimum, done must be false. A turn limit is not success. '
-              'If continuing, ask about an unmet objective; do not repeat answered questions.',
-            self.turn,
+              'If continuing, ask about an unmet objective; do not repeat answered questions.'
         )
-        try:
-            decision = json.loads(text)
-        except json.JSONDecodeError as exc:
-            raise ValueError("User model must return a JSON completion decision") from exc
-        if (not isinstance(decision, dict) or type(decision.get("done")) is not bool
-                or not isinstance(decision.get("reason"), str) or not decision["reason"].strip()
-                or not isinstance(decision.get("message"), str)):
-            raise ValueError("User decision requires done, a nonempty reason, and message")
+        for attempt in range(3):
+            text = self._generate(instruction, self.turn)
+            try:
+                decision = json.loads(text)
+                if (not isinstance(decision, dict) or type(decision.get("done")) is not bool
+                        or not isinstance(decision.get("reason"), str) or not decision["reason"].strip()
+                        or not isinstance(decision.get("message"), str)):
+                    raise ValueError("User decision requires done, a nonempty reason, and message")
+                break
+            except ValueError as exc:
+                if attempt == 2:
+                    raise ValueError("User model must return a valid JSON completion decision after three attempts") from exc
+                instruction += (' Your previous response was not a valid completion object. '
+                                'Correct its format: exactly done (boolean), reason (nonempty string), '
+                                'and message (string). Return JSON only, without commentary or fences.')
         if decision["done"] and self.turn < self.minimum_turns:
             raise ValueError("User model ended before the scenario's minimum turns")
         if not decision["done"] and not capped and not decision["message"].strip():

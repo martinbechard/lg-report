@@ -284,7 +284,7 @@ def test_report_links_are_relative_and_only_link_existing_html(tmp_path):
 
 
 def test_models_share_one_graph_with_distinct_series(tmp_path):
-    """Models share axes while grouped stacks and line styles remain identifiable."""
+    """Models share request positions while line styles remain identifiable."""
     from html.parser import HTMLParser
 
     class Graph(HTMLParser):
@@ -322,8 +322,8 @@ def test_models_share_one_graph_with_distinct_series(tmp_path):
         paths.append(path)
         entries.append(comparison_entry(run, prices, str(path)))
     comparison_charts(entries)
-    # Every request group reserves one horizontal slot per model.
-    assert len({entry["chart"]["bars"][0]["comparison_x"] for entry in entries}) == 3
+    # All models align at the same request position to keep the chart compact.
+    assert len({entry["chart"]["bars"][0]["comparison_x"] for entry in entries}) == 1
     out = tmp_path / "comparison.html"
     render_comparison(paths, out)
     graph = Graph()
@@ -342,6 +342,11 @@ def test_qa_comparison_aligns_scores_and_preserves_missing_assessments(tmp_path)
     payload = '<script>alert("judge")</script>'
     for name, cost_score in (("complete", 60.0), ("partial", None), ("unjudged", None)):
         path, run, prices = bundle(tmp_path, name)
+        run.steps[0].context['report_turn'] = 1
+        run.steps[1].context['report_turn'] = 1
+        if name == 'partial':
+            run.steps[0].context = {}
+            run.steps[1].usage = None
         if name != "unjudged":
             run.qa = QAEvaluation(
                 status="completed", provider="codex", model="gpt-6-sol",
@@ -362,10 +367,10 @@ def test_qa_comparison_aligns_scores_and_preserves_missing_assessments(tmp_path)
     render_comparison(paths, output)
     html = output.read_text()
     assert 'aria-label="QA scores side by side"' in html
-    assert "79.5/100" in html and "82.9/100" in html
+    assert "68.5/100" in html and "87.0/100" in html
     assert html.count("codex:gpt-6-sol") == 1
     assert "Judge / status" not in html and "Rubric v" not in html
-    assert "100% rubric coverage" in html and "85% rubric coverage" in html
+    assert "100% rubric coverage" in html and "50% rubric coverage" in html
     assert "Partial assessment" in html and "Not evaluated" in html
     assert "Unscored" in html and "Missing usage" in html
     assert "0.987654" not in html and "$0.000350" in html
@@ -499,3 +504,25 @@ def test_native_timing_comparison_labels_missing_peer(tmp_path):
     assert 'Unavailable' in native
     assert 'Turn time' in native and 'Time to first token' in native
     assert 'Codex turn time' not in native and 'Time outside the Codex turn' not in native
+
+
+def test_speed_includes_metered_format_corrections(tmp_path):
+    """A recovered parsing error contributes its real inference time and usage."""
+    from reporting.performance import assistant_performance, speed_score
+
+    _, run, _ = bundle(tmp_path, 'correction-speed')
+    call = run.steps[1]
+    call.context['report_turn'] = 1
+    before = assistant_performance(run)
+    failed = call.model_copy(deep=True, update={'id': 'rejected', 'status': 'error',
+                                               'error': 'GatewayResponseError'})
+    failed.end_ns = failed.start_ns + int(call.duration_ms * 2_000_000)
+    run.steps.append(failed)
+    after = assistant_performance(run)
+    assert after['model_seconds_per_turn'] == pytest.approx(before['model_seconds_per_turn'] * 3)
+    assert after['tokens_per_second'] == pytest.approx(before['tokens_per_second'] * 2 / 3)
+    assert speed_score(run).score is not None
+    failed.usage = None
+    assert speed_score(run).score is None
+    run.status = 'error'
+    assert all(value is None for value in assistant_performance(run).values())

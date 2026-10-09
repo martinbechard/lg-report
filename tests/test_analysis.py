@@ -1069,7 +1069,7 @@ def test_scripted_context_tool_points_show_threshold_crossings(tmp_path):
 
     from reporting.render import conversation_turns, cost_chart, render
 
-    # Published samples use real models and therefore have variable call counts.
+    # Saved samples may use live models and therefore have variable call counts.
     # Generate the authored fixture privately to verify threshold rendering
     # without fixing counts to one estimator or constraining live report refreshes.
     root = Path(__file__).resolve().parents[1]
@@ -1101,7 +1101,7 @@ def test_scripted_context_tool_points_show_threshold_crossings(tmp_path):
     prices = load_prices(folder / "prices.json")
     turns = conversation_turns(run, prices)
     chart = cost_chart(turns, prices)
-    assert len(chart["bars"]) == 47
+    assert len(chart["bars"]) == 48
     assert len(chart["tool_points"]) == 32
     crossings = [p for p in chart["tool_points"] if p["context_tokens"] > 8500]
     # The tokenizer determines the crossing values. Require visible crossings

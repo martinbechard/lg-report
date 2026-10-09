@@ -37,6 +37,20 @@ class GatewayResponse(BaseModel):
     tool_calls: list[GatewayToolCall]
 
 
+class GatewayResponseError(ValueError):
+    """Keep a paid response available to tracing when its decision is invalid.
+
+    The exception text stays content-free. TraceCapture applies the same opt-in
+    content policy as successful calls; usage and timing survive either way.
+    Rejected decisions never reach graph tools.
+    """
+
+    def __init__(self, message: str, result: ChatResult):
+        """Retain the original receipt without embedding it in logs or errors."""
+        super().__init__(message)
+        self.result = result
+
+
 def gateway_response_schema(tools):
     """Constrain decisions with actual tool schemas when a CLI supports it.
 
@@ -191,15 +205,15 @@ class GatewayChatModel(BaseChatModel):
             decision = GatewayResponse.model_validate_json(message.content)
         except ValueError:
             # Do not echo possibly sensitive response bodies through exceptions.
-            raise ValueError("Gateway returned an invalid JSON tool decision") from None
+            raise GatewayResponseError("Gateway returned an invalid JSON tool decision", result) from None
         names = {tool["function"]["name"] for tool in tools}
         if any(call.name not in names for call in decision.tool_calls):
-            raise ValueError("Gateway requested an unbound tool")
+            raise GatewayResponseError("Gateway requested an unbound tool", result)
         calls = decision.tool_calls
         if (choice == "none" and calls or choice == "required" and not calls
                 or choice in names and (not calls or any(call.name != choice for call in calls))
                 or not parallel and len(calls) > 1):
-            raise ValueError("Gateway violated the requested tool_choice or parallel_tool_calls")
+            raise GatewayResponseError("Gateway violated the requested tool_choice or parallel_tool_calls", result)
         translated = message.model_copy(update={
             "content": decision.content,
             "tool_calls": [{"name": call.name, "args": call.args,
@@ -245,6 +259,8 @@ class GatewayChatModel(BaseChatModel):
             instructions += (
                 "\nYou are an LLM gateway. The application, not this CLI, executes tools. "
                 "Return ONLY one JSON object as your final answer, without commentary, "
+                "including when requesting an application tool. Never put a tool decision "
+                "in commentary or wait for its result inside this CLI turn. "
                 "with exactly two fields: content (a string), "
                 "and tool_calls (an array of objects with name (string) and args (object)). "
                 "Use declared defaults for optional parameters when supplying them explicitly. "

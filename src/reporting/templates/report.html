@@ -53,12 +53,11 @@ summary::-webkit-details-marker{display:none}
 /* The initial HTML is simplified even before JavaScript initializes. */
 #execution-tree.summary-view .full-detail, #execution-tree.summary-view .detail-only, #execution-tree .tree-row[hidden] { display:none; }
 </style></head><body><main>
-{# Header: demo alone triggers the offline label; real recordings make no simulation claim. #}<header><h1>{{ run.title }}</h1><span>{{ run.status }}</span>{% if run.demo %}<small>Offline demonstration · no provider billed</small>{% endif %}</header>
-{% if user_test %}<section class="call-context"><strong>User test: {{ user_test.label }}</strong> · {{ user_test.turns }} user turns<p><strong>Goal:</strong> {{ user_test.goal }}</p><p><strong>Why it stopped:</strong> {{ user_test.reason }}</p></section>{% endif %}
+{# Execution status describes runtime completion, not goal achievement or QA. #}
+{# Header: demo alone triggers the offline label; real recordings make no simulation claim. #}<header><h1>Application: {{ run.title }}</h1><span>Execution: {{ {"ok": "Finished without a runtime error", "error": "Runtime error", "interrupted": "Interrupted", "incomplete": "Incomplete"}[run.status] }}</span>{% if run.demo %}<small>Offline demonstration · no provider billed</small>{% endif %}</header>
 
 {# Summary: EUR requires recorded FX; missing pricing switches the USD label to known subtotal, never all-calls-priced. #}<div class="cards"><div class="card"><span>Estimated model cost</span><strong>{% if prices.exchange %}{{ '%.6f'|format(summary.known_cost * prices.exchange.rate) }} EUR{% else %}EUR unavailable{% endif %}</strong><strong>{{ '%.6f'|format(summary.known_cost) }} USD</strong><small>{{ 'known subtotal' if summary.unpriced_calls else 'all calls priced' }}</small></div><div class="card"><span>Input tokens · including cache</span><strong>{{ '{:,}'.format(summary.input_tokens) }}</strong></div><div class="card"><span>Output tokens · including reasoning</span><strong>{{ '{:,}'.format(summary.output_tokens) }}</strong></div><div class="card"><span>Model calls / elapsed</span><strong>{{ summary.model_calls }} / {{ '%.2f'|format(summary.duration_ms / 1000) }}s</strong></div></div>
 
-{% if run.qa %}{% set qa=run.qa %}{% include "qa.html" %}{% endif %}
 {# Missing-data notice: any unpriced call means subtotals cannot represent the full run; missing usage is reported separately. #}{% if summary.unpriced_calls %}<p class="notice">{{ summary.unpriced_calls }} model call(s) could not be priced; {{ summary.missing_usage }} have unknown token usage. Known subtotals are incomplete.</p>{% endif %}
 {# Present a known USD amount alongside its available EUR conversion. usd is the accounting subtotal; this macro emits markup only and does not decide whether that subtotal is complete. Money: only available FX permits conversion; reference dates are explained once in the reference section. show_date currently gates an empty block and adds no output. #}{% macro money(usd, show_date=true) %}<div class="euro">{% if prices.exchange %}{{ '%.6f'|format(usd * prices.exchange.rate) }} EUR{% else %}EUR unknown{% endif %}</div>{% if prices.exchange and show_date %}{% endif %}<div class="dollar">{{ '%.6f'|format(usd) }} USD</div>{% endmacro %}
 {# Give tree rows comparable token/cost columns from their projected metrics. metrics contains ordered cells plus usage and partial flags; show_date is forwarded to money. Token cells: show only selected categories. No model descendants means no usage cell; partial values display a known-subtotal marker. Reference age alone does not indicate a failed lookup. #}{% macro token_cells(metrics, show_date=true) %}{% for cell in metrics.cells %}{% if loop.index0 in visible_token_indices %}<td>{% if metrics.has_usage %}<div class="tokens">{{ '{:,}'.format(cell.tokens) }} <small>tokens</small>{% if cell.partial %}*{% endif %}</div>{{ money(cell.usd, show_date) }}{% if cell.partial %}<div class="partial">Known only / unknown remainder</div>{% endif %}{% else %}—{% endif %}</td>{% endif %}{% endfor %}{% endmacro %}
@@ -119,6 +118,11 @@ summary::-webkit-details-marker{display:none}
 </svg></div>
 {% else %}<p>EUR chart unavailable: no exchange rate was recorded.</p>{% endif %}
 
+
+{# Evaluation follows the cost chart so the opening stays focused on execution.
+   Keep the user-test outcome even when no independent QA evaluation was saved. #}
+{% if user_test %}<section class="call-context"><strong>User test: {{ user_test.label }}</strong> · {{ user_test.turns }} user turns<p><strong>Goal:</strong> {{ user_test.goal }}</p><p><strong>Why it stopped:</strong> {{ user_test.reason }}</p></section>{% endif %}
+{% if run.qa %}{% set qa=run.qa %}{% include "qa.html" %}{% endif %}
 
 <h2>Agent activity</h2>
 <p>Agents are identified by the named execution scopes enclosing model calls in the trace. Each entry is one invocation; times are relative to the run start. Costs include only that agent’s own model calls, excluding delegated agents.</p>

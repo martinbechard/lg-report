@@ -1,0 +1,51 @@
+{
+  "goal": "The specialist has echoed ReAct and the parent has explained how the specialist tool result returns to the parent, supported by the reported result.",
+  "goal_achievement": [
+    {
+      "id": "specialist_echo",
+      "description": "The specialist has echoed ReAct, as supported by the recorded specialist result.",
+      "points": 50,
+      "met_when": "The specialist has echoed ReAct, as supported by the recorded specialist result.",
+      "partial_when": null
+    },
+    {
+      "id": "return_path",
+      "description": "The parent explains how the specialist tool result returns to the parent, using the reported result as evidence.",
+      "points": 50,
+      "met_when": "The parent explains how the specialist tool result returns to the parent, using the reported result as evidence.",
+      "partial_when": null
+    }
+  ],
+  "answer_quality": [
+    {
+      "id": "quality_correctness",
+      "description": "Material correctness of the Subagent chat — Langfuse explanation or result.",
+      "points": 40,
+      "met_when": "All material statements agree with the recorded evidence and the task requirements; uncertainty is represented accurately.",
+      "partial_when": "The central conclusion is supported, but a localized factual error or overstatement affects a secondary detail."
+    },
+    {
+      "id": "quality_grounding",
+      "description": "Traceable support for claims about actions, results, and limitations.",
+      "points": 35,
+      "met_when": "Claims about executed actions and results are traceable to recorded evidence; proposed or illustrative actions are identified as such. No extra execution is required beyond the goal.",
+      "partial_when": "The main claims are traceable, but one secondary claim lacks clear support or its proposed versus observed status is ambiguous."
+    },
+    {
+      "id": "quality_clarity",
+      "description": "Clear and relevant communication of the Subagent chat — Langfuse outcome.",
+      "points": 25,
+      "met_when": "The response directly addresses the task, explains the relationships needed to understand its outcome, and communicates material limitations without contradictions.",
+      "partial_when": "The main outcome is understandable and relevant, but a material explanation is ambiguous or difficult to follow. Brevity alone is not a defect."
+    }
+  ],
+  "speed": {
+    "tokens_per_second": 30.0,
+    "seconds_per_turn": 30.0,
+    "rationale": "Authored teaching calibration, not a measured benchmark: 30 output tokens/s and 30 seconds per Agent turn for a bounded lesson. Standalone scores use these fixed half-credit anchors; comparison resource scores use the saved cohort instead."
+  },
+  "cost": {
+    "usd_at_half_score": 0.1,
+    "rationale": "Authored teaching calibration, not a user budget or measured benchmark: $0.10 total Agent cost earns half credit in standalone evaluation. Comparison cost scores use the saved cohort instead."
+  }
+}

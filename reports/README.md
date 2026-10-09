@@ -2,8 +2,50 @@
 # Sample results
 
 Open [the report index](index.html) to view HTML or download Excel for every sample.
+The [context-budget comparison](context_comparison/report.html) runs the most
+involved sample across six models, with GPT-4.1 first. The workflow now executes
+the generated unittest suite before independent review. It captures actual test
+counts, output, exit status, and failures; failed tests return for repair and
+cannot be overridden by a model's approval.
+
+The October 7, 2026 refresh validated Sol 6 first, then tested the other models
+with the same saved Sol 6 rubric and 35% goal / 15% quality / 10% speed / 40% cost
+weights. The Codex Luna column now uses **GPT-6 Luna at high effort**. GPT-4.1
+uses no reasoning-effort setting; the other candidates use medium effort.
+Cost and speed use normal-curve percentiles across these six runs. Speed rewards
+shorter total elapsed Agent time across all turns, including tools, tests, retries,
+and orchestration. User waits and QA judging are excluded; parallel intervals
+count once. Output tokens/s is diagnostic only. Cost rewards lower Agent cost.
+The mean scores 50 and equal measurements score 50. Population parameters are
+saved in [comparison-scoring.json](context_comparison/comparison-scoring.json).
+Complete receipts and the accounting audit are in
+[verification.json](context_comparison/verification.json).
+
+| Model | Observed test result | Workflow outcome |
+| --- | --- | --- |
+| OpenAI GPT-4.1 | 18 passed after repair | Finished at user turn limit; claimed plan completion was not recorded in the file |
+| OpenAI GPT-5.5 | 9 passed | Finished at user turn limit |
+| Codex GPT-5.5 | 6 passed | Finished at user turn limit |
+| OpenAI GPT-5.6 Luna | 12 passed after repair | Finished at user turn limit; execution caught a Unicode boundary failure before repair |
+| Codex GPT-6 Luna · high | 5 passed | Finished at user turn limit; final responses described the implementation without showing its source |
+| Codex GPT-6 Sol | 5 passed | Goal met; 100/100 goal achievement and answer quality |
+
+All six saved runs have complete token usage, pricing, and QA scoring coverage.
+Luna 6 high scored 83.1/100, with an estimated Agent cost of $0.03593896 across
+56 model calls. Judge costs are excluded. Earlier failed trials and the prior
+comparison are preserved in the local experiment directories. Saved user-stop
+decisions remain separate from the QA judgment of the complete execution.
+
+The implementation also requires the planner to create its plan before dispatch.
+The fixed runner was verified against passing, failing, empty, skipped, invalid,
+and timed-out suites, and against a reviewer incorrectly approving failed tests.
+The selected workflow, reporting, QA, and comparison regression suite passed
+160 tests; the subsequent scoring regression suite passed 75 tests. The deterministic [context-budget sample](context_budget/report.html)
+and its workbook were refreshed with actual five-test and seven-test receipts;
+no QA model was called for that static sample.
+
 The [model comparison](model_comparison/report.html) combines separate live
-GPT-5.5 and GPT-5.6 Luna runs through both OpenAI and Codex, plus Codex GPT-6 Sol, all starting from the same simple-chat request. GPT-6 Luna (Codex, high effort)
+GPT-5.5 and GPT-5.6 Luna runs through both OpenAI and Codex, plus Codex GPT-6 Sol and OpenAI GPT-4.1, all starting from the same simple-chat request. GPT-6 Luna (Codex, high effort)
 plays the user in every run, adapting follow-ups to each assistant. Conversations
 may therefore end at different turns. The shared goal covers workflow steps and
 tool observations, with no minimum turn count. Each run records the user model's
@@ -86,17 +128,21 @@ Reproduce with `LG_PROVIDER=codex LG_MODEL=gpt-6-luna uv run python -m agent_run
 --out reports/qa_evaluation` (as one shell command). This makes real model calls
 and replaces that example; the regular batch keeps the saved example linked.
 
-All five columns in the saved comparison were rerun on October 6, 2026 after
+The original five columns in the saved comparison were rerun on October 6, 2026 after
 switching simple chat to a tool-free LangGraph agent. Both API and Codex requests
 omit the eight unused application tools. Codex uses the minimal catalog profile
-with no native tools, skills, or identity guidance. Every Agent uses medium
+with no native tools, skills, or identity guidance. Those Agents use medium
 reasoning effort; the Codex GPT-6 Luna user and Sol 6 judge use high effort.
-All five assessments use the same saved scoring criteria. Goal and quality
+The sixth column adds a successful GPT-4.1 API run using the same workflow and
+rubric, with streaming timing and no explicit output limit. GPT-4.1 has no
+reasoning-effort setting. Its saved pricing snapshot includes the published
+GPT-4.1 rates and the exact `gpt-4.1-2025-04-14` snapshot alias.
+All six assessments use the same saved scoring criteria. Goal and quality
 scores are calculated from the judge's criterion checks; speed and cost use
 the shared numeric scales. The comparison shows turn time, time to first token, output rate,
 and a cost-calculation recap after the graph. Judge cost is omitted, and
 Agent performance measurements exclude both the judge and simulated user.
-Both direct API runs were refreshed with streaming first-output capture.
+All three direct API runs include streaming first-output capture.
 Timing rows are shared across providers; the root README documents
 client versus internal timing boundaries. QA cost assessments cover Agent
 model calls only. The exchange rate is shown once when shared. Extra backend

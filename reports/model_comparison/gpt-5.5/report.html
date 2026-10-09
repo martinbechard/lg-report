@@ -88,21 +88,21 @@ The example identifies what the tool returned and draws only a decision or claim
 <p>One cent in total Agent model cost is a fixed half-score calibration for a short explanation, not a user budget or competitor benchmark. Cost excludes test users and QA.</p>
 </details>
 
-<p><strong>Overall: 85.7/100</strong> · 100% rubric coverage</p>
+<p><strong>Overall: 71.7/100</strong> · 100% rubric coverage</p>
 <p>The Agent clearly explains the workflow and uses a grounded hypothetical tool observation to show how evidence supports an answer.</p>
 <dl>
-<dt>Goal achievement · 100.0/100 · 40% weight</dt><dd>Explains the main steps of an agent workflow. (35/35): The Agent describes receiving and understanding the task, planning and acting, observing results, iterating if needed, and answering.
+<dt>Goal achievement · 100.0/100 · 25% weight</dt><dd>Explains the main steps of an agent workflow. (35/35): The Agent describes receiving and understanding the task, planning and acting, observing results, iterating if needed, and answering.
 Explains how a tool observation informs a later decision. (35/35): The Agent says a tool&#39;s returned result helps it decide whether to continue, change direction, or answer based on information rather than a guess.
 Provides an example of using a tool observation. (30/30): A hypothetical weather API returns light rain and an 80% chance of rain; the Agent uses that result to recommend an umbrella.</dd>
 
-<dt>Answer quality · 100.0/100 · 30% weight</dt><dd>The workflow and evidence relationship are materially accurate. (40/40): The Agent distinguishes calling a tool from receiving its observation and bases the example answer on the stated result.
+<dt>Answer quality · 100.0/100 · 25% weight</dt><dd>The workflow and evidence relationship are materially accurate. (40/40): The Agent distinguishes calling a tool from receiving its observation and bases the example answer on the stated result.
 The answer stays focused on the requested explanation. (20/20): Both replies stay focused on workflow steps and how tool observations inform decisions.
 The answer is understandable and logically organized. (25/25): An ordered workflow and a labeled action–observation–answer example make both connections easy to follow.
 The example&#39;s conclusion is supported by its stated observation. (15/15): The stated API result supports the answer&#39;s rain conditions and the recommendation to bring an umbrella.</dd>
 
-<dt>Speed · 67.4/100 · 15% weight</dt><dd>60.78 output tokens/s; 4.13 seconds/turn. 50 × rate/(rate + 40) + 50 × 12/(seconds + 12).</dd>
+<dt>Speed · 67.4/100 · 10% weight</dt><dd>60.78 output tokens/s; 4.13 seconds/turn. 50 × rate/(rate + 40) + 50 × 12/(seconds + 12).</dd>
 
-<dt>Cost · 37.3/100 · 15% weight</dt><dd>Agent cost $0.016835; 100 × 0.01/(cost + 0.01).</dd>
+<dt>Cost · 37.3/100 · 40% weight</dt><dd>Agent cost $0.016835; 100 × 0.01/(cost + 0.01).</dd>
 </dl>
 
 

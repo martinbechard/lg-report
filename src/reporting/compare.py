@@ -17,11 +17,12 @@ from urllib.parse import quote
 
 from jinja2 import DictLoader, Environment, select_autoescape
 
+from reporting.comparison_scoring import score_comparison
 from reporting.native_timing import timing_rows
 from reporting.performance import assistant_performance
 from reporting.pricing import CATEGORIES, Prices, breakdown, load_prices, summarize
 from reporting.render import conversation_turns, cost_chart, user_test_outcome
-from reporting.schema import Run
+from reporting.schema import QA_WEIGHTS, Run
 
 
 def response_text(messages: list[dict]) -> str:
@@ -156,7 +157,7 @@ def comparison_charts(entries: list[dict]) -> list[dict]:
 
     cost_chart owns cost stacks, cache-write premiums, retained-output context,
     history identity, and missing-data flags. Only SVG placement changes here.
-    Requests share an ordinal group; model offsets keep cost stacks distinct.
+    Requests share an ordinal position so line spacing is independent of model count.
     Model colors identify solid cumulative-cost and dashed context lines.
     """
     charts = [entry["chart"] for entry in entries if entry["chart"]]
@@ -164,12 +165,13 @@ def comparison_charts(entries: list[dict]) -> list[dict]:
                    default=Decimal(0)) * Decimal("1.15") or Decimal(1)
     token_max = max((chart["token_max"] for chart in charts), default=1)
     count = max((len(chart["bars"]) for chart in charts), default=1)
-    width = max(1000, 200 + count * max(100, len(entries) * 30 + 40))
+    # Keep the axis margins while halving the space between request positions.
+    width = max(600, 200 + count * 30)
     palette = ["#2458a6", "#9c3f75", "#17734b", "#b35c16", "#6445a3", "#007f8b"]
     for index, entry in enumerate(entries):
         entry["color"] = palette[index % len(palette)]
         entry["series_number"] = index + 1
-    margin = 100 + len(entries) * 13
+    margin = 100
     positions = [width / 2 if count == 1 else margin + i * (width - 2 * margin) / (count - 1)
                  for i in range(count)]
     legend = {}
@@ -188,17 +190,11 @@ def comparison_charts(entries: list[dict]) -> list[dict]:
         previous = {}
         context_lines = []
         for index, bar in enumerate(chart["bars"]):
-            x = positions[index] + (entry["series_number"] - (len(entries) + 1) / 2) * 26
+            x = positions[index]
             bar["comparison_x"] = x
             bar["comparison_cost_y"] = 335 - float(bar["cumulative"] / cost_max) * 280
             bar["comparison_context_y"] = (335 - bar["context_tokens"] / token_max * 280
                                             if bar["context_tokens"] is not None else None)
-            accumulated = 0
-            for segment in bar["segments"]:
-                height = float(segment["eur"] / cost_max) * 280
-                accumulated += height
-                segment["comparison_y"] = 335 - accumulated
-                segment["comparison_height"] = height
             # Never bridge unknown context or connect independent histories.
             if bar["summary_request"]:
                 continue
@@ -216,7 +212,7 @@ def comparison_charts(entries: list[dict]) -> list[dict]:
 
 
 def render_comparison(
-    run_paths: list[Path], destination: Path, *, title: str = "Model comparison"
+    run_paths: list[Path], destination: Path, *, title: str | None = None
 ) -> None:
     """Write standalone HTML from at least two run.json/prices.json pairs.
 
@@ -251,6 +247,12 @@ def render_comparison(
             if qa else None
         )
         entries.append(entry)
+    # Shared application names come from saved run metadata, just as in the
+    # individual report. An explicit title remains available for mixed applications.
+    if title is None:
+        titles = {entry["run"].title for entry in entries}
+        title = f"Application: {next(iter(titles))}" if len(titles) == 1 else "Model comparison"
+    comparison_scoring = score_comparison(entries)
     qa_judges = list(dict.fromkeys(entry["qa_judge"] for entry in entries if entry["qa_judge"]))
     # Equality includes every check, weight and numerical anchor. A shared judge
     # name alone cannot make independently invented criteria comparable.
@@ -271,9 +273,10 @@ def render_comparison(
     template = env.from_string(
         files("reporting").joinpath("templates/comparison.html").read_text(encoding="utf-8")
     )
-    html = template.render(title=title, entries=entries, rows=rows, by_turn=by_turn,
+    html = template.render(title=title, entries=entries, rows=rows, by_turn=by_turn, qa_weights=QA_WEIGHTS,
                            legend=legend, shared_chart=shared_chart, qa_judges=qa_judges,
-                           shared_rubric=shared_rubric, mixed_rubrics=mixed_rubrics)
+                           shared_rubric=shared_rubric, mixed_rubrics=mixed_rubrics,
+                           comparison_scoring=comparison_scoring)
     # Preserve captured trailing spaces in the rendered text while keeping the
     # generated HTML free of source whitespace errors (common Markdown breaks).
     html = re.sub(r" +(?=\n)", lambda match: "&#32;" * len(match[0]), html)

@@ -30,7 +30,7 @@ from reporting.context import (
 )
 from reporting.native_timing import timing_rows
 from reporting.pricing import CATEGORIES, Prices, breakdown, rate_for_step, summarize
-from reporting.schema import Run
+from reporting.schema import QA_WEIGHTS, Run
 from reporting.workflow_diagram import workflow_diagrams
 
 
@@ -1201,6 +1201,7 @@ def render(run: Run, prices: Prices, destination: Path):
     destination.write_text(
         template.render(
             run=run,
+            qa_weights=QA_WEIGHTS,
             user_test=user_test_outcome(run),
             terminal_result=terminal_result,
             prices=prices,

@@ -1,13 +1,67 @@
-"""Compute repeatable assistant speed measurements and a fixed standalone score.
+"""Measure Agent elapsed execution and model throughput from recorded spans.
 
-The common boundary is the application's complete model invocation, available
-for both API and CLI transports. Internal backend timings are never substituted into only one model's score. Anchors are application
-calibration choices, not industry benchmarks, SLAs, or competitor rankings.
+Outer Agent turn spans measure complete execution, including tools and retries.
+Model-call spans separately retain throughput diagnostics for both API and CLI
+transports. The legacy standalone scale remains available for older assessments;
+comparison speed now uses elapsed Agent time exclusively.
 AI attribution: Generated with AI assistance by Alex Northstar.
 Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
 
 from reporting.schema import QAScore, Run
+
+
+def _merged_intervals(intervals):
+    """Combine overlapping spans so parallel work contributes elapsed time once."""
+    merged = []
+    for start, end in sorted(intervals):
+        if merged and start <= merged[-1][1]:
+            merged[-1] = (merged[-1][0], max(end, merged[-1][1]))
+        else:
+            merged.append((start, end))
+    return merged
+
+
+def agent_elapsed_seconds(run: Run) -> float | None:
+    """Measure complete Agent turn boundaries, including tools and orchestration.
+
+    The conversation harness tags each top-level Agent invocation with its turn.
+    Its span ends when the answer returns; gaps between invocations are user
+    waits and are never charged to the Agent. Merge root intervals to avoid
+    double counting parallel execution. Explicit user/judge intervals are
+    removed even when nested within a turn. Every Agent model call must belong
+    to a recorded turn root: missing boundaries cannot become a partial total.
+    Token receipts are not needed to measure elapsed time.
+    """
+    if run.demo or run.status != 'ok':
+        return None
+    excluded_roles = {'user', 'qa'}
+    by_id = {step.id: step for step in run.steps}
+    roots = [step for step in run.steps if step.parent_id is None
+             and step.kind in {'workflow', 'model'}
+             and step.context.get('report_turn') is not None
+             and step.context.get('model_role') not in excluded_roles]
+    calls = [step for step in run.steps if step.kind == 'model'
+             and step.context.get('model_role') not in excluded_roles]
+    if not roots or not calls or any(step.status == 'incomplete' for step in roots):
+        return None
+    root_ids = {step.id for step in roots}
+    for call in calls:
+        ancestor = call
+        while ancestor.parent_id is not None:
+            ancestor = by_id[ancestor.parent_id]
+        if ancestor.id not in root_ids or call.status == 'incomplete':
+            return None
+        # Malformed timestamps outside their parent would undercount work.
+        if not ancestor.start_ns <= call.start_ns <= call.end_ns <= ancestor.end_ns:
+            return None
+    active = _merged_intervals((step.start_ns, step.end_ns) for step in roots)
+    excluded = _merged_intervals((step.start_ns, step.end_ns) for step in run.steps
+                                 if step.context.get('model_role') in excluded_roles)
+    total = sum(end - start for start, end in active)
+    total -= sum(max(0, min(end, other_end) - max(start, other_start))
+                 for start, end in active for other_start, other_end in excluded)
+    return total / 1_000_000_000
 
 
 def assistant_performance(run: Run) -> dict:
@@ -17,12 +71,18 @@ def assistant_performance(run: Run) -> dict:
     by summed model-call time. It includes transport, startup, and preprocessing;
     the shared boundary deliberately does not isolate decoding. Model time per turn is
     also a sum, not wall latency for parallel calls or tool-heavy workflows.
-    Failed/static runs and absent usage or turn attribution remain unavailable.
+    Elapsed Agent time uses outer turn spans separately and needs no token
+    receipt. Failed/static runs remain unavailable; missing usage affects only
+    throughput, while missing boundaries prevent a complete elapsed total.
+    A recovered model-format error in a successful workflow is still measured
+    work: include its receipt and duration instead of hiding correction overhead.
     """
     calls = [step for step in run.steps if step.kind == "model"
              and step.context.get("model_role") not in {"user", "qa"}]
-    result = {"tokens_per_second": None, "model_seconds_per_turn": None}
-    if run.demo or run.status != "ok" or not calls or any(step.status != "ok" for step in calls):
+    result = {"tokens_per_second": None, "model_seconds_per_turn": None,
+              "agent_elapsed_seconds": agent_elapsed_seconds(run)}
+    if (run.demo or run.status != "ok" or not calls
+            or any(step.status not in {"ok", "error"} for step in calls)):
         return result
     seconds = sum(step.duration_ms for step in calls) / 1000
     if seconds > 0 and all(step.usage is not None for step in calls):

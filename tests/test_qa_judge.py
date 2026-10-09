@@ -7,7 +7,7 @@ Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
 
 import json
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 import pytest
 from langchain_core.language_models.fake_chat_models import FakeMessagesListChatModel
@@ -45,7 +45,7 @@ def fixture_prices():
         f"fixture:{model}": Rate(input="1", output="2") for model in ("assistant", "judge")})
 
 
-def install_judge(monkeypatch, text=None):
+def install_judge(monkeypatch, text=None, rubric=None):
     """Capture construction policy while emitting a genuine LangChain receipt."""
     model = FakeMessagesListChatModel(responses=[AIMessage(
         content=text if text is not None else assessment_text(),
@@ -62,7 +62,17 @@ def install_judge(monkeypatch, text=None):
         if text is None:
             evidence = json.loads(messages[-1].content)["execution"]
             event_id = next(event["id"] for event in evidence["events"] if event["kind"] == "model")
-            model.responses[0].content = assessment_text(event_id)
+            if rubric is None:
+                model.responses[0].content = assessment_text(event_id)
+            else:
+                # Saved sample contracts have their own IDs; cite a real event
+                # while exercising the production criterion-validation path.
+                assessment = {dimension: [{"criterion_id": c.id, "outcome": "met",
+                     "evidence_ids": [event_id], "reason": "Supported by the recorded answer."}
+                    for c in getattr(rubric, dimension)]
+                    for dimension in ("goal_achievement", "answer_quality")}
+                assessment["summary"] = "Fixture assessment of saved criteria."
+                model.responses[0].content = json.dumps(assessment)
         return original(model, messages, *args, **kwargs)
     monkeypatch.setattr(type(model), "_generate", lambda self, *args, **kwargs: (
         reply_for_evidence(*args, **kwargs) if self is model else original(self, *args, **kwargs)))
@@ -83,7 +93,7 @@ def test_scores_receipts_and_exports(monkeypatch, tmp_path):
     run.qa = QAJudge({"LG_QA_PROVIDER": "fixture", "LG_QA_MODEL": "judge",
                       "LG_MODEL": "other", "LG_MAX_TOKENS": "999"}, goal="Explain caching")(run, prices)
     assert run.qa.status == "completed"
-    assert run.qa.overall_score == 78.3
+    assert run.qa.overall_score == 71.5
     assert run.qa.speed_method == "shared-rubric-v2"
     assert run.qa.verdict.speed.score == 45.4
     assert run.qa.coverage == pytest.approx(1)
@@ -93,12 +103,12 @@ def test_scores_receipts_and_exports(monkeypatch, tmp_path):
     assert summarize(run, prices) == before
     assert "LG_MAX_TOKENS" not in provider.create_model.call_args.args[1]
     saved = Run.model_validate_json(run.model_dump_json())
-    assert saved.qa.overall_score == 78.3
+    assert saved.qa.overall_score == 71.5
     render(saved, prices, tmp_path / "report.html")
-    assert "Overall: 78.3/100" in (tmp_path / "report.html").read_text()
+    assert "Overall: 71.5/100" in (tmp_path / "report.html").read_text()
     export_workbook(workbook_data(saved, prices), tmp_path / "report.xlsx")
     book = load_workbook(tmp_path / "report.xlsx", data_only=True)
-    assert book["QA"]["B3"].value == 78.3
+    assert book["QA"]["B3"].value == 71.5
 
 
 def test_unknown_measurements_are_not_scores(monkeypatch):
@@ -109,7 +119,7 @@ def test_unknown_measurements_are_not_scores(monkeypatch):
     qa = QAJudge({})(run, fixture_prices())
     assert qa.verdict.cost.score is None
     assert qa.verdict.speed.score is None
-    assert qa.coverage == pytest.approx(.7)
+    assert qa.coverage == pytest.approx(.5)
 
 
 def test_assistant_resource_scope_excludes_input_generation(monkeypatch):
@@ -201,6 +211,71 @@ def test_oversized_evidence_is_unscored_without_call(monkeypatch):
     provider.create_model.assert_not_called()
 
 
+def test_long_repeated_histories_are_losslessly_referenced(monkeypatch):
+    """Reduce repeated input while retaining exact messages, order, and IDs."""
+    monkeypatch.setattr(qa_judge, "MAX_EVIDENCE_CHARS", 1000)
+    run = fixture_run()
+    message = {"role": "human", "content": "Exact repeated evidence. " * 500}
+    run.steps = [run.steps[0].model_copy(update={"id": str(i), "request": [message],
+                 "response": [{"role": "tool", "content": message["content"], "tool_call_id": str(i)}]})
+                 for i in range(8)]
+    evidence = evidence_for(run, fixture_prices(), "Explain caching")
+    before = json.dumps(evidence)
+    packed = qa_judge.compact_evidence(evidence)
+    assert len(json.dumps(packed)) < len(before) / 2
+    restored = {**packed, "events": []}
+    catalog = restored.pop("message_catalog")
+    texts = restored.pop("text_catalog")
+    event_ids = restored.pop("event_id_map")
+    assert texts
+    catalog = {key: {**message, "content": texts[message["content"]["text_ref"]]}
+               if isinstance(message.get("content"), dict) and "text_ref" in message["content"]
+               else message for key, message in catalog.items()}
+    for event in packed["events"]:
+        restored["events"].append({**event, "id": event_ids[event["id"]], **{
+            field: [catalog[ref] for ref in event[field]]
+            for field in ("request", "response")}})
+    assert restored == evidence
+    assert json.dumps(evidence) == before
+
+
+@pytest.mark.parametrize("limit", ["0", "-1", "invalid"])
+def test_invalid_evidence_limit_never_calls_judge(monkeypatch, limit):
+    """An invalid size override must not start paid work or discard evidence."""
+    provider = install_judge(monkeypatch)
+    result = QAJudge({"LG_QA_MAX_EVIDENCE_CHARS": limit})(fixture_run(), fixture_prices())
+    assert result.status == "skipped" and "positive integer" in result.error
+    provider.create_model.assert_not_called()
+
+
+def test_explicit_larger_evidence_limit_allows_complete_assessment(monkeypatch):
+    """A size override admits the full record without buying a partial score."""
+    monkeypatch.setattr(qa_judge, "MAX_EVIDENCE_CHARS", 1000)
+    provider = install_judge(monkeypatch)
+    run = fixture_run()
+    run.output = "complete answer " * 200
+    result = QAJudge({"LG_QA_MAX_EVIDENCE_CHARS": "20000"})(run, fixture_prices())
+    assert result.status == "completed" and not result.truncated
+    provider.create_model.assert_called_once()
+
+
+def test_judge_restores_short_citations_to_original_trace_ids(monkeypatch):
+    """Portable QA must cite source events, not temporary packet aliases."""
+    monkeypatch.setattr(qa_judge, "MAX_EVIDENCE_CHARS", 1000)
+    provider = install_judge(monkeypatch)
+    run = fixture_run()
+    run.steps[0].request = [{"role": "human", "content": "Repeated task evidence. " * 200}]
+    run.steps.append(run.steps[0].model_copy(update={"id": "second"}))
+    model = provider.create_model.return_value
+    with patch.object(type(model), "invoke", wraps=model.invoke) as invoke:
+        result = QAJudge({"LG_QA_MAX_EVIDENCE_CHARS": "20000"})(run, fixture_prices())
+    packet = json.loads(invoke.call_args.args[0][-1].content)
+    assert "event_id_map" not in packet["execution"]
+    assert result.status == "completed"
+    checks = result.assessment.goal_achievement + result.assessment.answer_quality
+    assert all(check.evidence_ids == ["answer"] for check in checks)
+
+
 def test_cli_defaults_and_sol_identity(monkeypatch):
     """QA stays off by default and does not inherit the assistant identity."""
     parser = argument_parser()
@@ -229,7 +304,7 @@ def test_derived_overall_recomputed_on_load():
     """Exports cannot trust edited arithmetic that disagrees with the rubric."""
     qa = QAEvaluation(status="completed", provider="fixture", model="judge",
                       verdict=QAVerdict.model_validate_json(verdict_text()), overall_score=0)
-    assert qa.overall_score == 79
+    assert qa.overall_score == 69
 
 
 @pytest.mark.parametrize("enabled", [False, True])
@@ -287,8 +362,12 @@ def test_web_session_judges_selected_goal(monkeypatch, tmp_path):
     from agent_runtime.harness.sample_catalog import SampleCatalog
     from agent_runtime.web.server import create_app
 
-    provider = install_judge(monkeypatch)
+    # Echo the real saved criterion IDs so this test exercises the sample
+    # default, rather than an assessment tied to the generic fixture rubric.
     catalog = SampleCatalog()
+    sample = catalog.get("simple_chat")
+    rubric = qa_judge.load_rubric(sample.qa_rubric_path, sample.goal)
+    provider = install_judge(monkeypatch, rubric=rubric)
     def live_fixture(selected, live):
         """Use a local graph fixture while testing a live session's QA policy."""
         return catalog.create_run(selected, False)
@@ -308,6 +387,7 @@ def test_web_session_judges_selected_goal(monkeypatch, tmp_path):
         saved = Run.model_validate_json((tmp_path / "simple_chat/run.json").read_text())
         assert saved.qa.status == "completed"
         assert saved.qa.goal == catalog.get("simple_chat").goal
+        assert saved.qa.rubric.fingerprint == rubric.fingerprint
         assert provider.create_model.call_count == 1
 
 
@@ -332,3 +412,22 @@ def test_failed_execution_survives_failed_qa(monkeypatch, tmp_path):
     saved = Run.model_validate_json((tmp_path / "run/run.json").read_text())
     assert saved.status == "error" and saved.qa.status == "error"
     assert provider.create_model.call_count == 1
+
+
+def test_qa_excludes_only_encrypted_provider_state_without_mutating_run():
+    """Ciphertext is protocol state; visible reasoning and tool evidence stay exact."""
+    run = fixture_run()
+    blocks = [{'type': 'reasoning', 'encrypted_content': 'opaque-token',
+               'summary': [{'type': 'summary_text', 'text': 'A visible rationale'}], 'id': 'r1'},
+              {'type': 'text', 'text': 'A visible answer'},
+              {'type': 'function_call', 'name': 'read_file', 'arguments': '{"path":"/plan.md"}'}]
+    run.steps[0].response = [{'role': 'ai', 'content': blocks}]
+    run.steps[0].request = [{'role': 'human', 'content': 'encrypted_content is literal user text'}]
+    before = run.model_dump_json()
+    evidence = evidence_for(run, fixture_prices(), 'Explain caching')
+    content = evidence['events'][0]['response'][0]['content']
+    assert 'encrypted_content' not in content[0]
+    assert content[0]['summary'] == blocks[0]['summary']
+    assert content[1:] == blocks[1:]
+    assert evidence['events'][0]['request'] == run.steps[0].request
+    assert run.model_dump_json() == before

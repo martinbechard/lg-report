@@ -88,21 +88,21 @@ The example identifies what the tool returned and draws only a decision or claim
 <p>One cent in total Agent model cost is a fixed half-score calibration for a short explanation, not a user budget or competitor benchmark. Cost excludes test users and QA.</p>
 </details>
 
-<p><strong>Overall: 84.7/100</strong> · 100% rubric coverage</p>
+<p><strong>Overall: 72.1/100</strong> · 100% rubric coverage</p>
 <p>The Agent clearly explains the workflow and uses a grounded hypothetical tool observation to show how evidence supports an answer.</p>
 <dl>
-<dt>Goal achievement · 100.0/100 · 40% weight</dt><dd>Explains the main steps of an agent workflow. (35/35): The Agent describes receiving and understanding a task, planning and taking action, observing results, then adjusting or responding.
+<dt>Goal achievement · 100.0/100 · 25% weight</dt><dd>Explains the main steps of an agent workflow. (35/35): The Agent describes receiving and understanding a task, planning and taking action, observing results, then adjusting or responding.
 Explains how a tool observation informs a later decision. (35/35): The Agent explains that returned information helps check an action, decide what to do next, revise the plan, or support the final answer.
 Provides an example of using a tool observation. (30/30): A hypothetical order-status tool returns shipping details, which the Agent uses in its specific answer.</dd>
 
-<dt>Answer quality · 100.0/100 · 30% weight</dt><dd>The workflow and evidence relationship are materially accurate. (40/40): The Agent distinguishes calling a tool from receiving its result and says answering without that result would be guessing.
+<dt>Answer quality · 100.0/100 · 25% weight</dt><dd>The workflow and evidence relationship are materially accurate. (40/40): The Agent distinguishes calling a tool from receiving its result and says answering without that result would be guessing.
 The answer stays focused on the requested explanation. (20/20): Both answers stay focused on the workflow and how observations guide decisions and answers.
 The answer is understandable and logically organized. (25/25): Ordered steps and a matching example make the workflow and observation-to-answer connection easy to follow.
 The example&#39;s conclusion is supported by its stated observation. (15/15): The stated tool result reports shipment via UPS and a tracking number; the example answer repeats only those supported details.</dd>
 
-<dt>Speed · 57.0/100 · 15% weight</dt><dd>34.96 output tokens/s; 5.81 seconds/turn. 50 × rate/(rate + 40) + 50 × 12/(seconds + 12).</dd>
+<dt>Speed · 57.0/100 · 10% weight</dt><dd>34.96 output tokens/s; 5.81 seconds/turn. 50 × rate/(rate + 40) + 50 × 12/(seconds + 12).</dd>
 
-<dt>Cost · 41.0/100 · 15% weight</dt><dd>Agent cost $0.014415; 100 × 0.01/(cost + 0.01).</dd>
+<dt>Cost · 41.0/100 · 40% weight</dt><dd>Agent cost $0.014415; 100 × 0.01/(cost + 0.01).</dd>
 </dl>
 
 

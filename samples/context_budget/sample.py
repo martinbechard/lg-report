@@ -5,7 +5,7 @@ create fresh simulated models only when called; live mode uses the provider.
 
 Real native tools write and read the plan, code, and tests. Scripted model
 responses make the lesson deterministic; compaction remains native middleware
-behavior, and reported usage is illustrative rather than provider billing.
+behavior, the workflow executes generated tests, and reported usage is illustrative rather than provider billing.
 
 AI attribution: Generated with AI assistance by Northstar.
 Copyright (c) 2026 Martin.Bechard@DevConsult.ca
@@ -20,7 +20,7 @@ SAMPLE = {
     # The adaptive test user evaluates this goal before requesting another turn.
     "goal": 'The assistant reports a detailed file plan, a service-independent Python slug implementation, strengthened boundary tests with their actual results, and an independent review with its outcome recorded. Missing execution or review evidence must not be claimed as complete.',
     "id": "context_budget",
-    "name": "Context budgets",
+    "name": "Context-budget sample",
     "description": "File-backed planner and worker with shared compaction and an isolated "
     "code reviewer.",
 }
@@ -59,7 +59,7 @@ Design contract: accept a string title. Normalize accented Latin letters to thei
 
 Implementation notes: prefer unicodedata.normalize over a third-party transliteration package. Encode decomposed text as ASCII while dropping characters that have no ASCII form. Explain that limitation in a docstring because some scripts become empty. Use a regular expression for separator runs and make its pattern explicit. Keep the public function side-effect free. Avoid broad exception handlers and hidden fallback behavior. Include a purpose header, AI attribution, and the project copyright in each Python file.
 
-Verification agreement: tests use only Python's standard library unittest. They should verify a normal title, repeated whitespace and punctuation, accented Latin input, leading and trailing separators, empty input, and invalid type. Tests are source artifacts until a command actually executes them; the agent in this workflow has file tools but no shell tool. The final report must distinguish written tests from passing tests. Review findings should name a triggering example and the affected task.
+Verification agreement: tests use only Python's standard library unittest. They should verify a normal title, repeated whitespace and punctuation, accented Latin input, leading and trailing separators, empty input, and invalid type. Tests are source artifacts until a command actually executes them; the workflow runs /test_slug.py after each worker handoff and supplies its execution receipt to the reviewer. The final report must distinguish written tests from passing tests. Review findings should name a triggering example and the affected task.
 
 Task T1 — implement the public function. Status: pending. Acceptance: /slug.py exposes slugify; ordinary words become lowercase with one hyphen; accents with Latin decompositions lose marks; punctuation runs do not create repeated hyphens; non-string values fail visibly. Read the plan after recording completion.
 
@@ -321,7 +321,7 @@ def slugify(title: str) -> str:
                     "old_string": "Task T1 — implement the public function. Status: pending.",
                     "new_string": "Task T1 — implement the public function. Status: complete. Review "
                     "evidence: independent reviewer approved current source; tests not "
-                    "executed.",
+                    "yet written.",
                 },
                 "id": "edit_file-3",
             }
@@ -410,7 +410,7 @@ def slugify(title: str) -> str:
                     "file_path": "/test_slug.py",
                     "content": '''"""Check the public slug contract with standard-library unittest.
 
-These are source tests; the sample's file-only agents do not execute them.
+The workflow executes this suite before independent source review.
 AI attribution: Generated with AI assistance by Northstar.
 Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
@@ -516,7 +516,7 @@ class SlugTests(unittest.TestCase):
                 "task_id": "T2",
                 "verdict": "approve",
                 "evidence": "/test_slug.py covers normal input, punctuation, accents, empty input and "
-                "invalid types as T2 requires. Tests not executed.",
+                "invalid types as T2 requires. The runner reports 5 tests passed, exit code 0.",
             }
         ),
     },
@@ -548,7 +548,7 @@ class SlugTests(unittest.TestCase):
                     "file_path": "/plan.md",
                     "old_string": "Task T2 — create focused tests. Status: pending.",
                     "new_string": "Task T2 — create focused tests. Status: complete. Review evidence: "
-                    "independent reviewer approved current source; tests not executed.",
+                    "independent reviewer approved current source; runner reported 5 tests passed, exit code 0.",
                 },
                 "id": "edit_file-6",
             }
@@ -586,7 +586,7 @@ class SlugTests(unittest.TestCase):
                 "action": "finish",
                 "task_id": "",
                 "files": [],
-                "message": "T1 and T2 independently approved and complete. Tests not executed.",
+                "message": "T1 and T2 independently approved and complete. Runner: 5 tests passed, exit code 0.",
             }
         ),
     },
@@ -778,7 +778,7 @@ class SlugTests(unittest.TestCase):
                 "task_id": "T3",
                 "verdict": "approve",
                 "evidence": "/test_slug.py adds test_only_separators and test_outer_punctuation; "
-                "existing tests preserved. Tests not executed.",
+                "existing tests preserved. Runner: 7 tests passed, exit code 0.",
             }
         ),
     },
@@ -810,8 +810,8 @@ class SlugTests(unittest.TestCase):
                     "file_path": "/plan.md",
                     "old_string": "Task T3 — extend boundary coverage. Status: pending.",
                     "new_string": "Task T3 — extend boundary coverage. Status: complete. Review "
-                    "evidence: independent reviewer approved current source; tests not "
-                    "executed.",
+                    "evidence: independent reviewer approved current source; runner reported "
+                    "7 tests passed, exit code 0.",
                 },
                 "id": "edit_file-11",
             }
@@ -849,8 +849,8 @@ class SlugTests(unittest.TestCase):
                 "action": "finish",
                 "task_id": "",
                 "files": [],
-                "message": "All assigned steps were independently approved and recorded complete. Tests "
-                "were written but not executed.",
+                "message": "All assigned steps were independently approved and recorded complete. "
+                "Runner: 7 tests passed, exit code 0.",
             }
         ),
     },

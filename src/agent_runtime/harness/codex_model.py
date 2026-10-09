@@ -26,39 +26,103 @@ from .codex_telemetry import CodexTelemetry
 from .gateway_model import GatewayChatModel, gateway_response_schema, text_result
 
 
-def parse_result(stdout: str, returncode: int, model: str) -> ChatResult:
-    """Require successful terminal evidence and preserve optional usage subsets.
+class CodexProcessError(RuntimeError):
+    """Expose a safe failure category while retaining any completed receipt."""
 
-    CLI warnings can be item-level errors before a turn starts. They are not
-    failed turns; a nonzero exit or turn.failed is authoritative. Raw stderr and
-    error bodies are not propagated because they may contain credentials or
-    provider request payloads. No usage receipt means unknown usage, never zero.
+    def __init__(self, message, result=None):
+        """Keep optional metering separate from the failed decision's usability."""
+        super().__init__(message)
+        self.result = result
+
+
+class CodexCapacityError(CodexProcessError):
+    """The provider explicitly rejected the selected model as at capacity."""
+
+
+class CodexRequestTimeout(TimeoutError):
+    """A bounded CLI call expired, possibly after producing a usage receipt."""
+
+    def __init__(self, result=None):
+        """Never imply that killing an unfinished call makes it free."""
+        super().__init__("Codex request timed out")
+        self.result = result
+
+
+def completed_result(events, model):
+    """Extract one authoritative receipt without deciding whether work succeeded.
+
+    A shutdown failure or rejected native action must not erase paid inference.
+    Multiple or absent terminal receipts remain unknown rather than guessing
+    which totals are inclusive. Callers separately validate process/protocol
+    success before permitting a response to reach graph tools.
     """
-    if returncode:
-        raise RuntimeError(f"Codex CLI failed (exit {returncode}); check CLI compatibility, login, and model access")
-    events = [json.loads(line) for line in stdout.splitlines() if line.strip()]
-    if any(event.get("type") in {"turn.failed", "error"} for event in events):
-        raise RuntimeError("Codex failed the requested turn")
     completed = [event for event in events if event.get("type") == "turn.completed"]
     if len(completed) != 1:
-        raise RuntimeError("Codex did not return exactly one completed turn")
-    items = [event["item"] for event in events if event.get("type") == "item.completed"]
-    # Graph tools are JSON decisions executed by LangGraph. Native CLI tool
-    # work would bypass that authority and invalidates the gateway response.
-    if any(item.get("type") not in {"agent_message", "reasoning", "error"} for item in items):
-        raise RuntimeError("Codex performed non-text work in request/response mode")
-    answers = [item["text"] for item in items if item.get("type") == "agent_message"]
-    if not answers:
-        raise RuntimeError("Codex completed without an assistant response")
+        return None
+    answers = [event["item"]["text"] for event in events
+               if event.get("type") == "item.completed"
+               and event.get("item", {}).get("type") == "agent_message"]
     receipt = completed[0].get("usage") or {}
-    # Only wire field names differ. Inclusive accounting and unknown-usage
-    # handling are shared with Copilot; retain the original receipt in metadata.
     names = {"cached_input_tokens": "cache_read_input_tokens",
              "cache_write_input_tokens": "cache_creation_input_tokens"}
-    return text_result("\n\n".join(answers), {
+    # SDK finalResponse semantics select the last agent message. Intermediate
+    # commentary remains charged by the full receipt, never executed as a tool.
+    return text_result(answers[-1] if answers else "", {
         "provider": "codex", "model_name": model, "usage": receipt,
         "usage_basis": "Codex CLI turn receipt; model identity is the explicit CLI selection",
     }, usage={names.get(key, key): value for key, value in receipt.items()})
+
+
+def timeout_result(stdout, model):
+    """Recover only complete JSONL receipts after terminating a timed-out CLI.
+
+    Killing a process can cut its final line in half. Ignore that incomplete
+    line; preceding complete receipts remain evidence. No partial token counts
+    or text-based token estimates are substituted for provider totals.
+    """
+    events = []
+    for line in stdout.decode("utf-8", errors="replace").splitlines():
+        try:
+            event = json.loads(line)
+        except ValueError:
+            continue
+        if isinstance(event, dict):
+            events.append(event)
+    return completed_result(events, model)
+
+
+def parse_result(stdout: str, returncode: int, model: str) -> ChatResult:
+    """Require successful terminal evidence, retaining usage even on failure.
+
+    Error bodies and stderr can contain credentials or payloads. Only known
+    capacity wording is classified; other errors use a fixed safe description.
+    Startup item warnings do not invalidate an otherwise successful turn.
+    """
+    try:
+        events = [json.loads(line) for line in stdout.splitlines() if line.strip()]
+    except ValueError:
+        if returncode:
+            raise CodexProcessError(f"Codex CLI failed (exit {returncode})") from None
+        raise
+    result = completed_result(events, model)
+    failures = [event for event in events if event.get("type") in {"turn.failed", "error"}]
+    if any("selected model is at capacity" in str(event.get("message", "")).lower()
+           or "selected model is at capacity" in str(event.get("error", {}).get("message", "")).lower()
+           for event in failures):
+        raise CodexCapacityError("Selected Codex model is at capacity", result)
+    if returncode:
+        raise CodexProcessError(f"Codex CLI failed (exit {returncode})", result)
+    if failures:
+        raise CodexProcessError("Codex failed the requested turn", result)
+    if result is None:
+        raise CodexProcessError("Codex did not return exactly one completed turn")
+    items = [event["item"] for event in events if event.get("type") == "item.completed"]
+    # Native actions bypass graph ownership and must fail even when metered.
+    if any(item.get("type") not in {"agent_message", "reasoning", "error"} for item in items):
+        raise CodexProcessError("Codex performed non-text work in request/response mode", result)
+    if not any(item.get("type") == "agent_message" for item in items):
+        raise CodexProcessError("Codex completed without an agent response", result)
+    return result
 
 
 def stop_process(process):
@@ -123,13 +187,12 @@ class CodexChatModel(GatewayChatModel):
         skills; the optional catalog profile also removes model-advertised
         native tools.
         """
-        # The minimal profile sends the complete tool contract once in the
-        # prompt, using the same validated JSON protocol as Copilot and open
-        # schemas. Live schema-only experiments produced duplicate decisions or
-        # repeated completed tools. Keep the original strict-format option for
-        # callers that have not selected the minimal catalog profile.
+        # Removing native CLI tools must not remove the gateway's output
+        # contract. Prompt-only Luna responses mixed task JSON with commentary
+        # and omitted the envelope. Keep the full history/protocol instructions
+        # alongside the schema: the schema constrains shape, not tool semantics.
         tools, _, _ = self.tool_options(kwargs)
-        response_schema = None if self.model_catalog_file else gateway_response_schema(tools)
+        response_schema = gateway_response_schema(tools)
         instructions_text, history = self.prepare_history(messages, stop, kwargs)
         catalog = self.gateway_catalog()
         executable = shutil.which(self.executable)
@@ -208,7 +271,11 @@ class CodexChatModel(GatewayChatModel):
                     result.generations[0].message.response_metadata["codex_telemetry"] = telemetry.evidence()
                 return self.gateway_result(result, kwargs)
             except subprocess.TimeoutExpired as exc:
-                raise TimeoutError("Codex request timed out") from exc
+                # communicate can be called again after killing the process. Its
+                # returned stdout contains everything, including buffered lines.
+                stop_process(process)
+                stdout, _ = process.communicate()
+                raise CodexRequestTimeout(timeout_result(stdout, self.model_name)) from exc
             finally:
                 stop_process(process)
                 process.communicate()
@@ -224,12 +291,19 @@ class CodexChatModel(GatewayChatModel):
                 *command, stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE, start_new_session=os.name == "posix",
             )
+            # Shield the single pipe reader: cancelling communicate discards
+            # bytes it already consumed, so a second call cannot recover them.
+            communication = asyncio.create_task(process.communicate(prompt))
             try:
-                stdout, _ = await asyncio.wait_for(process.communicate(prompt), self.request_timeout)
+                stdout, _ = await asyncio.wait_for(asyncio.shield(communication), self.request_timeout)
                 result = parse_result(stdout.decode("utf-8"), process.returncode, self.model_name)
                 if telemetry:
                     result.generations[0].message.response_metadata["codex_telemetry"] = telemetry.evidence()
                 return self.gateway_result(result, kwargs)
+            except TimeoutError as exc:
+                stop_process(process)
+                stdout, _ = await communication
+                raise CodexRequestTimeout(timeout_result(stdout, self.model_name)) from exc
             finally:
                 stop_process(process)
-                await process.communicate()
+                await communication

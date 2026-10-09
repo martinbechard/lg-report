@@ -163,7 +163,9 @@ def create_app(
 
         # A browser can select a different sample; judge its own goal rather
         # than the sample used to start the server. Each completed turn is judged.
-        judge = replace(qa, goal=catalog.get(selection.sample).goal or catalog.get(selection.sample).description) if qa else None
+        sample = catalog.get(selection.sample)
+        judge = replace(qa, goal=sample.goal or sample.description,
+                        sample_rubric_path=sample.qa_rubric_path) if qa else None
         thread_id = str(uuid4())
         sessions[thread_id] = WebConversation(
             graph,

@@ -3,6 +3,7 @@
 The normal sample launcher owns each conversation, adaptive user, optional QA,
 and recording. This script only supplies shared settings and runs the selected
 models sequentially, so concurrent trials cannot compete for local resources.
+Saved criteria default to the sample rubric; missing criteria are generated.
 Saved-only mode composes existing recordings without any model or price lookup.
 Fresh runs require unused bundle folders to preserve previous measurements.
 AI attribution: Generated with AI assistance by Alex Northstar.
@@ -19,7 +20,7 @@ from urllib.parse import quote
 from dotenv import dotenv_values
 
 from agent_runtime.harness.model_providers import get_provider
-from agent_runtime.harness.qa_judge import QAJudge, create_rubric
+from agent_runtime.harness.qa_judge import QAJudge, create_rubric, load_rubric
 from agent_runtime.harness.sample_catalog import SampleCatalog
 from reporting.compare import render_comparison
 from reporting.pricing import load_prices
@@ -51,11 +52,12 @@ def bundle_name(provider, model):
     return ("" if provider == "openai" else provider + "-") + quote(model, safe="-._")
 
 
-def validate_run(path, provider, model, effort):
-    """Reject wrong-provider, simulated, failed, or differently configured input.
+def validate_run(path, provider, model, effort, *, allow_failed=False):
+    """Reject wrong-provider, simulated, or differently configured input.
 
     Explicit saved pricing aliases allow a dated API snapshot to resolve to its
     requested name. They never allow one provider to stand in for another.
+    Failed executions require an explicit opt-in so benchmarks can retain them.
     """
     run = Run.model_validate_json(path.read_text(encoding="utf-8"))
     prices = load_prices(path.with_name("prices.json"))
@@ -63,9 +65,21 @@ def validate_run(path, provider, model, effort):
              and step.context.get("model_role") not in {"user", "qa"}]
     matching = [step for step in calls if step.provider == provider and (
         step.model == model or prices.aliases.get(f"{provider}:{step.model}") == f"{provider}:{model}")]
-    if run.demo or run.status != "ok" or not matching or any(step.effort != effort for step in matching):
-        raise ValueError(f"{path}: expected successful live {provider}:{model} with {effort} effort")
+    accepted = {"ok", "error", "interrupted"} if allow_failed else {"ok"}
+    if run.demo or run.status not in accepted or not matching or any(step.effort != effort for step in matching):
+        raise ValueError(f"{path}: expected live {provider}:{model} with {effort} effort and status in {sorted(accepted)}")
     return run
+
+
+def model_effort(provider, model, requested):
+    """Omit reasoning configuration for GPT-4.1, including its dated snapshot.
+
+    The comparison can mix reasoning and non-reasoning models. The same
+    resolved setting must govern both dispatch and saved-record validation.
+    """
+    if provider == "openai" and model in {"gpt-4.1", "gpt-4.1-2025-04-14"}:
+        return None
+    return requested or None
 
 
 def main(argv=None):
@@ -86,12 +100,16 @@ def main(argv=None):
     parser.add_argument("--prices", type=Path, default=ROOT / "models.json")
     parser.add_argument("--fx-file", type=Path, default=ROOT / "exchange-rate.json")
     parser.add_argument("--out", type=Path, default=ROOT / "outputs/model-comparison")
-    parser.add_argument("--title", default="Model comparison")
+    parser.add_argument("--title", default=None)
+    parser.add_argument("--resume", action="store_true",
+                        help="Reuse validated existing run bundles and execute missing models")
+    parser.add_argument("--continue-on-error", action="store_true",
+                        help="Keep recorded execution failures in the comparison and run later models")
     modes = parser.add_mutually_exclusive_group()
     modes.add_argument("--saved-only", action="store_true",
                         help="Build the report from existing selected runs; no model calls")
     modes.add_argument("--rescore", action="store_true",
-                       help="Judge saved executions with one new shared rubric; no Agent reruns")
+                       help="Judge saved executions with shared criteria; no Agent reruns")
     args = parser.parse_args(argv)
     names = [bundle_name(*model) for model in args.models]
     if len(names) < 2 or len(set(names)) != len(names):
@@ -103,7 +121,12 @@ def main(argv=None):
         # bundles makes transport/timing experiments inspectable and recoverable.
         if not args.saved_only and not args.rescore:
             for path in paths:
-                if path.parent.exists():
+                if path.parent.exists() and args.resume:
+                    index = paths.index(path)
+                    provider, model = args.models[index]
+                    validate_run(path, provider, model, model_effort(provider, model, args.effort),
+                                 allow_failed=args.continue_on_error)
+                elif path.parent.exists():
                     raise ValueError(f"Existing bundle: {path.parent}. Choose a new --out or use --saved-only.")
         output.mkdir(parents=True, exist_ok=True)
         rubric = None
@@ -117,27 +140,33 @@ def main(argv=None):
                 # Check every saved execution before buying a rubric or changing
                 # any assessments. A static run never enters the judge path.
                 for (provider, model), path in zip(args.models, paths):
-                    run = validate_run(path, provider, model, args.effort)
+                    run = validate_run(path, provider, model, model_effort(provider, model, args.effort),
+                                       allow_failed=args.continue_on_error)
                     if not run.qa or run.qa.goal != goal:
                         raise ValueError(f"{path}: saved goal does not match the selected sample")
             rubric_path = output / "qa-rubric.json"
-            if rubric_path.exists():
+            if rubric_path.exists() and not args.resume:
                 raise ValueError("Existing rubric: use a new output directory for rescoring")
             # Re-running a subset must retain the other columns' scoring
             # contract. An explicit rubric never triggers a planning call.
-            if args.qa_rubric:
-                rubric = QARubric.model_validate_json(args.qa_rubric.read_text(encoding="utf-8"))
+            if args.resume and rubric_path.exists():
+                rubric = QARubric.model_validate_json(rubric_path.read_text(encoding="utf-8"))
                 if rubric.goal != goal:
-                    raise ValueError("Supplied rubric goal does not match the selected sample")
+                    raise ValueError("Saved rubric goal does not match the selected sample")
             else:
-                rubric = create_rubric(qa_values, goal, sample.name)
+                # Explicit criteria override the sample default. Only absence
+                # permits planning; invalid or outdated files fail visibly.
+                source = args.qa_rubric or qa_values.get("LG_QA_RUBRIC") or sample.qa_rubric_path
+                rubric = (load_rubric(source, goal) if source else
+                          create_rubric(qa_values, goal, sample.name))
             rubric_path.write_text(rubric.model_dump_json(indent=2), encoding="utf-8")
             print("Shared scoring criteria saved.", flush=True)
         for (provider, model), path in zip(args.models, paths):
-            if not args.saved_only and not args.rescore:
+            effort = model_effort(provider, model, args.effort)
+            if not args.saved_only and not args.rescore and not (args.resume and path.exists()):
                 path.parent.mkdir()
                 env = {**os.environ, "LG_PROVIDER": provider, "LG_MODEL": model,
-                       "LG_EFFORT": args.effort, "LG_AVAILABLE_MODELS": "",
+                       "LG_EFFORT": effort or "", "LG_AVAILABLE_MODELS": "",
                        "LG_USER_EFFORT": "high", "LG_QA_EFFORT": "high"}
                 if rubric is not None:
                     env["LG_QA_RUBRIC"] = str(rubric_path)
@@ -154,13 +183,15 @@ def main(argv=None):
                            "--env-file", str(args.env_file.resolve()),
                            "--prices", str(args.prices.resolve()),
                            "--fx-file", str(args.fx_file.resolve()), "--out", str(path.parent)]
-                print(f"Running {provider}:{model} ({args.effort}) ...", flush=True)
+                print(f"Running {provider}:{model} ({effort or 'no reasoning effort'}) ...", flush=True)
                 with (path.parent / "run.log").open("w", encoding="utf-8") as log:
                     result = subprocess.run(command, cwd=ROOT, env=env, stdin=subprocess.DEVNULL,
                                             stdout=log, stderr=subprocess.STDOUT, check=False)
-                if result.returncode:
+                if result.returncode and not (args.continue_on_error and path.exists()):
                     raise ValueError(f"{provider}:{model} failed; see {path.parent / 'run.log'}")
-            run = validate_run(path, provider, model, args.effort)
+            run = validate_run(path, provider, model, effort, allow_failed=args.continue_on_error)
+            if run.status != "ok":
+                print(f"{provider}:{model}: execution {run.status}; preserved in comparison", flush=True)
             if args.rescore:
                 prices = load_prices(path.with_name("prices.json"))
                 run.qa = QAJudge(qa_values, goal=rubric.goal, rubric=rubric)(run, prices)

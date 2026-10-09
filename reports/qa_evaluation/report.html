@@ -55,25 +55,24 @@ summary::-webkit-details-marker{display:none}
 
 <section class="turn" aria-label="QA evaluation">
 <h2>QA evaluation</h2>
-<p>codex:gpt-6-sol · completed · Rubric v1</p>
+<p>codex:gpt-6-sol · completed</p>
 <p><strong>Goal:</strong> The user understands the main steps of an agent workflow AND how a tool observation supplies evidence for the next action or final answer. Both topics must be explained clearly, with an example of using a tool observation.</p>
 
-<p><strong>Overall: 71.9/100</strong> · 100% rubric coverage</p>
+
+<p><strong>Overall: 75.1/100</strong> · 100% rubric coverage</p>
 <p>The execution answered both questions clearly but only partially met the stated goal because it did not demonstrate how a specific tool observation supports a next action or final answer.</p>
 <dl>
-<dt>Goal achievement · 65.0/100 · 40% weight</dt><dd>The first CodexChatModel response (01a111d2-309c-7bc0-aaf3-f0a734a28bec) clearly explains the workflow steps, and the second (01a111d2-6342-7351-99ec-1f3a828fd569) explains how observations inform an answer or next action. The stated goal also requires an example of using a tool observation; naming file contents and test results does not show a specific observation leading to a decision.</dd>
+<dt>Goal achievement · 65.0/100 · 25% weight</dt><dd>The first CodexChatModel response (01a111d2-309c-7bc0-aaf3-f0a734a28bec) clearly explains the workflow steps, and the second (01a111d2-6342-7351-99ec-1f3a828fd569) explains how observations inform an answer or next action. The stated goal also requires an example of using a tool observation; naming file contents and test results does not show a specific observation leading to a decision.</dd>
 
-<dt>Answer quality · 72.0/100 · 30% weight</dt><dd>Both answers are clear, relevant, and appropriately concise. The observation answer is accurate but lacks a concrete evidence-to-action example. No tool was used, so the record does not support a claim that an actual observation was evaluated. The event record is not truncated.</dd>
+<dt>Answer quality · 72.0/100 · 25% weight</dt><dd>Both answers are clear, relevant, and appropriately concise. The observation answer is accurate but lacks a concrete evidence-to-action example. No tool was used, so the record does not support a claim that an actual observation was evaluated. The event record is not truncated.</dd>
 
-<dt>Speed · 80.0/100 · 15% weight</dt><dd>The recorded 17,884 ms covers two model calls and appears reasonable for two short chat answers. It includes workflow overhead; without an SLA or comparison baseline, a stronger speed judgment is not supported.</dd>
+<dt>Speed · 80.0/100 · 10% weight</dt><dd>The recorded 17,884 ms covers two model calls and appears reasonable for two short chat answers. It includes workflow overhead; without an SLA or comparison baseline, a stronger speed judgment is not supported.</dd>
 
-<dt>Cost · 82.0/100 · 15% weight</dt><dd>The estimated cost is $0.0034632 for two model calls, with no missing usage or unpriced calls. That is modest for the useful answers, though the missing concrete example reduces value. This is an estimate, not a subscription charge.</dd>
+<dt>Cost · 82.0/100 · 40% weight</dt><dd>The estimated cost is $0.0034632 for two model calls, with no missing usage or unpriced calls. That is modest for the useful answers, though the missing concrete example reduces value. This is an estimate, not a subscription charge.</dd>
 </dl>
 
 
 
-<p>Judge overhead (separate from execution totals): 13.47s · 0.035052 USD estimated.</p>
-<p>Scores are one model's assessment. Speed includes waits and provider startup; costs are token estimates. Partial overall scores reweight the available dimensions.</p>
 </section>
 
 
@@ -525,7 +524,7 @@ Specify subagent_type to select the agent. Usage notes:
 3. **Plan the work**, breaking it into manageable steps and deciding whether tools or collaborators are needed.
 4. **Take action** by making changes, answering questions, or using tools as appropriate.
 5. **Verify the result** against the requirements, using tests or checks when relevant.
-6. **Report back** with a concise summary of what was done and any limitations.</pre><div class="cost-line"><strong>Call cost</strong><div class="euro">0.001536 EUR</div><div class="dollar">0.001746 USD</div></div><div class="status">Status: ok</div></details></details></div></details><details open class="turn"><summary class="turn-heading"><strong>Turn 2</strong><span class="turn-cost">Turn cost <div class="euro">0.001511 EUR</div><div class="dollar">0.001717 USD</div></span></summary>
+6. **Report back** with a concise summary of what was done and any limitations.</pre><div class="cost-line"><strong>Call cost</strong><div class="euro">0.001536 EUR</div><div class="dollar">0.001746 USD</div></div><details><summary>Execution timing</summary><dl><dt>Turn time</dt><dd>12933.58 ms</dd></dl><p>Turn time covers the complete model call. API first-token timing is observed at the client; Codex supplies it internally and may include hidden reasoning.</p></details><div class="status">Status: ok</div></details></details></div></details><details open class="turn"><summary class="turn-heading"><strong>Turn 2</strong><span class="turn-cost">Turn cost <div class="euro">0.001511 EUR</div><div class="dollar">0.001717 USD</div></span></summary>
 <div class="conversation-thread"><details open class="conversation-agent" aria-label="Agent chat_agent"><summary class="agent-label">Agent · chat_agent · ok</summary><details id="request-01a111d2-6342-7351-99ec-1f3a828fd569" open class="event llm-event "><summary class="event-heading"><strong tabindex="0" data-cost-tip="R2 | Recorded answer: A tool observation gives the agent new information—such as file contents or test results—so it can ground its answer in evidence, check assumptions…">R2 · LLM request · 16905 tokens</strong> · gpt-6-luna<span class="status">· ok</span><span class="span-id">01a111d2-6342-7351-99ec-1f3a828fd569</span></summary><div class="agent-label">Agent · <a href="#agent-01a111d2-633c-7272-a8d1-d8e9b41ed4cf">chat_agent</a></div>
 <p class="request-comment">Recorded answer: A tool observation gives the agent new information—such as file contents or test results—so it can ground its answer in evidence, check assumptions…</p>
 <div class="cost-line"><strong>Conversation history · cache read · 0 tokens</strong><div class="euro">0.000000 EUR</div><div class="dollar">0.000000 USD</div></div>
@@ -807,7 +806,7 @@ Specify subagent_type to select the agent. Usage notes:
 
 
 
-<h5 class="llm-response-heading">LLM response · 53 tokens</h5><div class="response-costs" aria-label="Output token costs"><div class="cost-line"><strong>Output · non-reasoning · 53 tokens</strong><div class="euro">0.000023 EUR</div><div class="dollar">0.000027 USD</div></div></div><pre>A tool observation gives the agent new information—such as file contents or test results—so it can ground its answer in evidence, check assumptions, and decide what to do next.</pre><div class="cost-line"><strong>Call cost</strong><div class="euro">0.001511 EUR</div><div class="dollar">0.001717 USD</div></div><div class="status">Status: ok</div></details></details></div></details></div>
+<h5 class="llm-response-heading">LLM response · 53 tokens</h5><div class="response-costs" aria-label="Output token costs"><div class="cost-line"><strong>Output · non-reasoning · 53 tokens</strong><div class="euro">0.000023 EUR</div><div class="dollar">0.000027 USD</div></div></div><pre>A tool observation gives the agent new information—such as file contents or test results—so it can ground its answer in evidence, check assumptions, and decide what to do next.</pre><div class="cost-line"><strong>Call cost</strong><div class="euro">0.001511 EUR</div><div class="dollar">0.001717 USD</div></div><details><summary>Execution timing</summary><dl><dt>Turn time</dt><dd>4907.10 ms</dd></dl><p>Turn time covers the complete model call. API first-token timing is observed at the client; Codex supplies it internally and may include hidden reasoning.</p></details><div class="status">Status: ok</div></details></details></div></details></div>
 
 
 <h2>Execution tree</h2><p>Workflow steps, agents, model calls, and tools are shown by default. Enable all details to include internal adapters, routing callbacks, span IDs, and graph-step counters. Each billed token category has its own column with EUR and USD cost underneath. These table categories are disjoint: input at the standard rate excludes cache reads and writes; output excludes reasoning.</p>

@@ -88,6 +88,63 @@ Excel export uses XlsxWriter, installed by `uv sync --locked`. The batch needs n
 Codex installation, Node.js, or `LG_EXCEL_RUNTIME` setting.
 See [batch setup and output details](#run-all-local-samples-and-export-excel).
 
+### Run one sample with multiple models
+
+Run these commands from the repository root after `uv sync --locked`.
+`scripts/run_model_comparison.py` launches the selected sample once per model,
+then creates one HTML comparison with links to each individual report.
+No change to the sample configuration is needed: `--sample` selects the sample
+and `--models` selects the models to compare.
+
+**Example 1: simple chat with two models through Codex.** This uses your installed
+Codex CLI and existing login, including for the adaptive user that supplies follow-ups.
+
+```sh
+uv run python scripts/run_model_comparison.py \
+  --sample simple_chat \
+  --models codex:gpt-6-luna codex:gpt-6-sol \
+  --out outputs/simple-chat-comparison
+open outputs/simple-chat-comparison/report.html
+```
+
+**Example 2: context-budget sample with API and Codex models, plus QA.**
+Set `OPENAI_API_KEY` in `.env.local` and sign in to the Codex CLI first.
+The same independent QA judge evaluates all three runs against a shared rubric.
+
+```sh
+uv run python scripts/run_model_comparison.py \
+  --sample context_budget \
+  --models openai:gpt-4.1 codex:gpt-6-luna codex:gpt-6-sol \
+  --qa \
+  --out outputs/context-budget-comparison
+open outputs/context-budget-comparison/report.html
+```
+
+`open` launches the report on macOS; on other platforms, open that HTML file in
+your browser. Each model's subdirectory contains its individual `report.html`,
+`run.json`, saved prices, and execution log. The top-level `report.html` compares
+all selected models. Titles default to the application name saved by the sample.
+
+These examples use real model calls, medium Agent effort, and an adaptive Codex
+GPT-6 Luna user with at most three turns. QA is off unless `--qa` is supplied;
+its default judge is Codex GPT-6 Sol. Use `--user-turns 6` for a longer conversation.
+The script reads `.env.local`, `models.json`, and `exchange-rate.json` by default.
+Choose a new `--out` directory for each fresh experiment to preserve earlier runs.
+
+To rebuild the second example's HTML from its saved runs without calling models:
+
+```sh
+uv run python scripts/run_model_comparison.py \
+  --sample context_budget \
+  --models openai:gpt-4.1 codex:gpt-6-luna codex:gpt-6-sol \
+  --saved-only \
+  --out outputs/context-budget-comparison
+```
+
+You can also inspect the checked-in [context-budget comparison](reports/context_comparison/report.html)
+without running anything. See [comparison details](#compare-models-in-one-html-report)
+for scoring, provider settings, and other options.
+
 ### Run one sample from the command line
 
 Choose model behavior and whether the sample runs by itself:
@@ -404,19 +461,51 @@ existing Codex login. `--qa-model` / `LG_QA_MODEL` and `--qa-provider` /
 or user model. `LG_QA_EFFORT` and the API-only `LG_QA_MAX_TOKENS` control its
 reasoning and output budget. Other providers need their usual credentials.
 
-The judge first creates a task-specific rubric from the goal, before seeing
-candidate results. Goal checks are binary; quality checks define full, half,
+Every shipped sample has a saved `qa-rubric.json` beside its `sample.py`.
+QA loads that file automatically when enabled, in individual, browser, batch,
+and comparison runs. For example, inspect the
+[context-budget rubric](samples/context_budget/qa-rubric.json) or
+[simple-chat rubric](samples/simple_chat/qa-rubric.json).
+
+For a new evaluation, explicit criteria (`--qa-rubric PATH` for comparisons or
+`LG_QA_RUBRIC` for individual runs) override the sample's file. Comparisons also
+honor `LG_QA_RUBRIC`, with `--qa-rubric` taking precedence. If no explicit or
+sample rubric exists, the judge generates criteria from the sample goal before
+seeing candidate results. Invalid files and goals that no longer match the
+sample fail visibly; they do not trigger replacement criteria.
+
+The saved rubrics were authored with AI assistance from the declared sample
+goals, without using candidate scores. Their standalone speed and cost anchors
+are explicit teaching calibrations, not measured benchmarks or user budgets.
+Edit the sample's rubric when intentionally changing its scoring contract, and
+keep its `goal` identical to `SAMPLE["goal"]` (or the description when no goal is
+provided). The [sample rubric guide](samples/README.md#saved-qa-rubrics) explains
+contents, validation, and fallback behavior.
+
+Goal checks are binary; quality checks define full, half,
 and zero credit. Each dimension has 100 available points. During evaluation,
 the judge supplies criterion outcomes and evidence IDs; the application assigns
 the points. Fulfilling every goal check always earns 100 for goal achievement.
-The frozen rubric also defines numerical speed and cost anchors, so those
-scores are calculated from measurements rather than individual opinions.
-Weights remain goal 40%, quality 30%, speed 15%, and cost 15%.
+Standalone assessments use the frozen rubric's numerical speed and cost
+anchors. Comparisons recalculate those two scores as normal-curve percentiles
+using every available live result's mean and population standard deviation.
+Lower Agent cost and shorter total elapsed Agent time score higher. Speed uses
+the union of recorded Agent turn intervals, including tools, tests, retries,
+and orchestration. It excludes user waits and QA judging; parallel work counts
+once. Output tokens per second remains a diagnostic and does not affect scoring.
+Complete turn boundaries are required even when token usage is unavailable. The mean
+scores 50, one standard deviation better scores 84.1, and equal measurements
+score 50. Fewer than two known measurements leave that metric unscored.
+Goal and answer-quality assessments remain unchanged. Comparison scores and
+their saved population parameters can also be exported to individual reports.
+Weights are goal achievement 35%, answer quality 15%, speed 10%, and cost 40%.
 
-Comparison runs generate one `qa-rubric.json` and pass it to every evaluation.
+Comparison runs save a copy of the selected rubric as `qa-rubric.json` in the
+output directory and pass it to every evaluation. A resumed comparison retains
+its existing output rubric so model columns continue to share the same criteria.
 `LG_QA_RUBRIC` can supply the same saved criteria to separate launches; its goal
-must match. Standalone judges create criteria on first use and reuse them for
-subsequent turns with that goal. Expand **Scoring criteria** in the report to
+must match. When no saved rubric is available, standalone judges generate criteria on first
+use and reuse them for subsequent turns with that goal. Expand **Scoring criteria** in the report to
 inspect the common checks and formulas. Unknown dimensions remain unscored;
 partial overall scores reweight available dimensions and display coverage.
 Speed and cost include only Agent model calls. Static, simulated, and
@@ -435,8 +524,7 @@ assesses each saved turn using its captured history and the selected sample goal
 
 Open the saved [live model comparison](reports/model_comparison/report.html) to
 compare GPT-5.5 and GPT-5.6 Luna through both OpenAI and Codex, plus GPT-6 Sol
-through Codex, on the same initial simple-chat prompt, with GPT-6 Luna generating adaptive user follow-ups. The report uses the single-model cost/context diagram with all models plotted together on
-shared axes, then aligns responses side by side by recorded turn. Full-report
+through Codex, on the same initial simple-chat prompt, with GPT-6 Luna generating adaptive user follow-ups. The report plots cumulative cost lines for all models on shared axes, with context usage available through an unchecked checkbox, then aligns responses side by side by recorded turn. Full-report
 links retain the execution details and original pricing evidence. Without turn
 metadata, alignment is explicitly by request order; unequal prompts remain visible.
 
@@ -470,8 +558,8 @@ for the minimal Codex profile used by the refreshed reports; see
 The runner requires unused model folders for fresh runs
 and preserves previous measurements; choose a new `--out` for another trial.
 To reassess existing executions, copy the selected bundles to a new directory
-and use `--rescore --out DIRECTORY` with the same model list. This generates one
-new shared rubric and calls only the judge, preserving the Agent traces and
+and use `--rescore --out DIRECTORY` with the same model list. This selects the explicit or sample rubric (generating one only if neither is
+available) and calls only the judge, preserving the Agent traces and
 measurements. `--saved-only` remains completely offline.
 
 To rebuild the saved five-model example without making model calls:

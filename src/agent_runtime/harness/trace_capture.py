@@ -17,6 +17,7 @@ from threading import RLock
 from time import perf_counter_ns
 
 from langchain_core.callbacks import BaseCallbackHandler
+from langchain_core.outputs import LLMResult
 from langchain_core.tools import ToolException
 from langgraph.errors import GraphInterrupt
 from opentelemetry import trace
@@ -29,7 +30,9 @@ from opentelemetry.sdk.trace.export import (
 )
 from opentelemetry.trace import Status, StatusCode
 
+from agent_runtime.harness.codex_model import CodexProcessError, CodexRequestTimeout
 from agent_runtime.harness.demo_meter import message_record
+from agent_runtime.harness.gateway_model import GatewayResponseError
 from reporting.annotations import describe
 
 
@@ -519,7 +522,7 @@ class TraceCapture(BaseCallbackHandler):
                 if reason:
                     response_context["finish_reason"] = str(reason)
         self._annotate(run_id, response_context)
-        self._end(run_id, usage=usage, model=model)
+        self._end(run_id, usage=usage, model=model, error=kwargs.get("error"))
 
     def on_chain_end(self, outputs, *, run_id, **kwargs):
         """Record whether a workflow finished normally or paused for external input.
@@ -593,8 +596,17 @@ class TraceCapture(BaseCallbackHandler):
         self._end(run_id, error=error)
 
     def on_llm_error(self, error, *, run_id, **kwargs):
-        """Record a failed model call without assuming absent usage means free usage."""
-        self._end(run_id, error=error)
+        """Preserve completed transport receipts even when the invocation fails.
+
+        Format errors, CLI shutdown failures, and timeouts can follow a valid
+        usage receipt. Reuse normal capture while preserving the error status.
+        Without a completed receipt usage stays unknown.
+        """
+        if isinstance(error, (GatewayResponseError, CodexProcessError, CodexRequestTimeout)) and error.result is not None:
+            self.on_llm_end(LLMResult(generations=[error.result.generations]),
+                            run_id=run_id, error=error)
+        else:
+            self._end(run_id, error=error)
 
     def on_tool_error(self, error, *, run_id, **kwargs):
         """Record tool failure separately from any later model recovery attempt."""

@@ -1,6 +1,6 @@
 # Independent code review practices
 
-This review guidance ships with the sample and needs no external skill or server. The reviewer receives a separate task context. Only the assigned paths and their read results provide evidence about the work; the parent's unseen conversation does not.
+This review guidance ships with the sample and needs no external skill or server. The reviewer receives a separate task context. The assigned paths, their read results, and the supplied test_execution receipt provide evidence about the work; the parent's unseen conversation does not.
 
 ## Review contract
 
@@ -12,7 +12,7 @@ Trace the public function from input to output. Check ordinary examples, empty v
 
 ## Test pass
 
-Inspect whether tests cover the promised behavior and at least one meaningful boundary. A test should fail for a plausible broken implementation. Note untested branches only when they carry material risk. Code that looks correct may still be unverified: distinguish reading tests from executing them. If the worker has not supplied test output, mark execution as unverified, not passed. Check that test imports and paths appear consistent with the local file layout.
+Inspect whether tests cover the promised behavior and at least one meaningful boundary. A test should fail for a plausible broken implementation. Note untested branches only when they carry material risk. Code that looks correct may still be unverified: distinguish reading tests from executing them. Use the workflow-supplied test_execution receipt for the current attempt. Failed, missing, empty or timed-out tests require revision. not_yet_written allows source review for an implementation step before test creation. Check that test imports and paths appear consistent with the local file layout.
 
 ## Evidence and severity
 

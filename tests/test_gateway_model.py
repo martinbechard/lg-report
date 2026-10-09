@@ -178,3 +178,76 @@ def test_open_schemas_keep_the_prompted_protocol(argument_schema):
     assert gateway_response_schema([{"function": {
         "name": "store_json", "parameters": argument_schema,
     }}]) is None
+
+
+@pytest.mark.parametrize("capture_content", [False, True])
+@pytest.mark.parametrize("asynchronous", [False, True])
+def test_rejected_decision_keeps_usage_and_content_policy(gateway, tmp_path, capture_content, asynchronous):
+    """A paid but malformed response remains metered without executing its tools."""
+    from agent_runtime.harness.trace_capture import TraceCapture
+    from reporting.normalize import normalize
+
+    model, pending, _ = gateway
+    pending.append('private malformed response')
+    path = tmp_path / 'spans.jsonl'
+    capture = TraceCapture(path, provider=model.provider, model='test-model',
+                           capture_content=capture_content)
+    bound = model.bind_tools([read_note])
+    try:
+        with pytest.raises(ValueError, match='invalid JSON') as error:
+            if asynchronous:
+                asyncio.run(bound.ainvoke('Read', config={'callbacks': [capture]}))
+            else:
+                bound.invoke('Read', config={'callbacks': [capture]})
+        assert 'private' not in str(error.value)
+    finally:
+        capture.close()
+    run = normalize(path, title='Malformed decision')
+    calls = [step for step in run.steps if step.kind == 'model']
+    assert len(calls) == 1
+    assert calls[0].status == 'error'
+    assert calls[0].usage.input_tokens == 100
+    assert calls[0].usage.output_tokens == 20
+    assert ('private malformed response' in path.read_text()) == capture_content
+
+
+@pytest.mark.parametrize('asynchronous', [False, True])
+def test_graph_corrects_decision_without_replaying_or_losing_usage(gateway, tmp_path, asynchronous):
+    """Rejected text executes nothing, then one valid tool call uses its real result."""
+    from agent_runtime.harness.gateway_retry import GatewayDecisionMiddleware
+    from agent_runtime.harness.trace_capture import TraceCapture
+    from reporting.normalize import normalize
+
+    model, pending, requests = gateway
+    pending.extend(['{"action":"work"}',
+                    '{"content":"","tool_calls":[{"name":"read_note","args":{}}]}',
+                    '{"content":"Read successfully","tool_calls":[]}'])
+    graph = create_agent(model, tools=[read_note], middleware=[GatewayDecisionMiddleware()])
+    path = tmp_path / 'spans.jsonl'
+    capture = TraceCapture(path, provider=model.provider, model='test-model', capture_content=True)
+    payload = {'messages': [HumanMessage('Read the note')]}
+    try:
+        result = (asyncio.run(graph.ainvoke(payload, {'callbacks': [capture]})) if asynchronous
+                  else graph.invoke(payload, {'callbacks': [capture]}))
+    finally:
+        capture.close()
+    assert result['messages'][-1].content == 'Read successfully'
+    assert 'NONE of its requested operations' in requests[1][1]
+    run = normalize(path, title='Corrected decision')
+    calls = [step for step in run.steps if step.kind == 'model']
+    assert [step.status for step in calls] == ['error', 'ok', 'ok']
+    assert sum(step.usage.input_tokens for step in calls) == 300
+    assert len([step for step in run.steps if step.kind == 'tool']) == 1
+    assert run.status == 'ok'
+
+
+def test_graph_stops_after_three_rejected_decisions(gateway):
+    """Repeated malformed replies cannot turn into a tool action or endless retries."""
+    from agent_runtime.harness.gateway_retry import GatewayDecisionMiddleware
+
+    model, pending, requests = gateway
+    pending.extend(['not JSON'] * 3)
+    graph = create_agent(model, tools=[read_note], middleware=[GatewayDecisionMiddleware()])
+    with pytest.raises(ValueError, match='invalid JSON'):
+        graph.invoke({'messages': [HumanMessage('Read')]})
+    assert len(requests) == 3

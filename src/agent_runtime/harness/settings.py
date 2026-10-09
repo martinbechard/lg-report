@@ -143,7 +143,8 @@ def prepare_sample(catalog, sample_id, args):
     if settings.qa is not None:
         from dataclasses import replace
 
-        settings = replace(settings, qa=replace(settings.qa, goal=sample.goal or sample.description))
+        settings = replace(settings, qa=replace(settings.qa, goal=sample.goal or sample.description,
+                                               sample_rubric_path=sample.qa_rubric_path))
     prompts = None
     if args.request is not None:
         prompts = [args.request]

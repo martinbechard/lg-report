@@ -1,0 +1,23 @@
+{
+  "method": "normal-elapsed-v2",
+  "members": [
+    "openai:gpt-4.1-2025-04-14 · 01a116eb-fb01-7443-a7b4-3c15ca357a7d",
+    "openai:gpt-5.5-2026-04-23 · 01a11689-54cc-79d1-9216-a395961595b6",
+    "codex:gpt-5.5 · 01a1168d-508f-7452-b1d1-7d6f67f6db99",
+    "openai:gpt-5.6-luna · 01a11692-5cc1-75a2-a141-d7cdbef3380d",
+    "codex:gpt-6-luna · 01a116fe-61c3-7870-9e54-b246ce70d5fb",
+    "codex:gpt-6-sol · 01a1167f-3692-74e2-840c-b5deebecb9ae"
+  ],
+  "cost": {
+    "count": 6,
+    "mean": 0.47230429999999995,
+    "stddev": 0.4056126364147216
+  },
+  "output_rate": null,
+  "seconds_per_turn": null,
+  "elapsed_seconds": {
+    "count": 6,
+    "mean": 257.8063345,
+    "stddev": 87.182263705393
+  }
+}
