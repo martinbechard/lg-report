@@ -46,7 +46,7 @@ uv run python -m agent_runtime --sample simple_chat --static
 `--static` selects fixed prompts and a simulated model. With a provider key configured, omitting `--static` starts a conversation between live assistant and user agents. Select `--client console` for human chat. This executes a real graph
 with two predefined user turns and two prerecorded responses, without provider
 charges. Model-price refreshes may still access the network; use `--prices models.json`
-to avoid them. FX always reads the saved shared `exchange-rate.json`.
+to avoid them. FX always reads the saved `exchange-rate.local.json` (or the checked-in `exchange-rate.json` fallback).
 
 The standard LangGraph-backed agent has no registered tools or filesystem
 backend. Both API and CLI models receive the conversation without application

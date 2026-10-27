@@ -52,8 +52,8 @@ open reports/index.html
 Real calls use `.env.local` (or `--env-file PATH`); shell settings win. Live demos use the user agent to answer clarification questions. For an unattended offline run, use
 `uv run scripts/run_samples.py --simulated`.
 
-The live batch refreshes the shared `exchange-rate.json` once before running
-samples. Individual samples only read the saved file. HTML, Excel, and supporting
+The live batch refreshes the Git-ignored `exchange-rate.local.json` once before running
+samples. Individual samples prefer that file, falling back to `exchange-rate.json` when it is absent. HTML, Excel, and supporting
 evidence are included in Git so you can inspect [saved results](../reports/index.html)
 without running a model.
 

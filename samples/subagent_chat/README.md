@@ -21,7 +21,7 @@ The command prints the HTML path and creates `spans.jsonl`, `run.json`,
 `prices.json`, and `report.html` in `reports/subagent_chat/`, replacing the previous default run.
 `--out` selects another directory; reruns replace its generated reports.
 `--fx-file` supplies a local USD/EUR rate; otherwise the saved shared
-`exchange-rate.json` is used without network access. No Langfuse service or credentials are involved.
+`exchange-rate.local.json` (or the checked-in `exchange-rate.json` fallback) is used without network access. No Langfuse service or credentials are involved.
 
 For a real model:
 

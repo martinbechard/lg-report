@@ -60,6 +60,40 @@ def test_saved_exchange_rate_is_offline_even_when_old(tmp_path, monkeypatch):
         get_exchange_rate()
 
 
+def test_local_exchange_rate_precedence(tmp_path, monkeypatch):
+    """Local refreshes win by default, while explicit references stay reproducible."""
+    shared = tmp_path / "exchange-rate.json"
+    local = tmp_path / "exchange-rate.local.json"
+    shared.write_text('{"rate":"0.88","date":"2000-01-01"}')
+    monkeypatch.setattr(exchange, "DEFAULT_RATE_FILE", shared)
+    assert get_exchange_rate().rate == Decimal("0.88")
+    local.write_text('{"rate":"0.91","date":"2000-01-02"}')
+    assert get_exchange_rate().rate == Decimal("0.91")
+    assert get_exchange_rate(shared).rate == Decimal("0.88")
+    local.write_text('invalid JSON')
+    with pytest.raises(ValueError):
+        get_exchange_rate()
+
+
+def test_refresh_defaults_to_local_override(tmp_path, monkeypatch):
+    """Refreshing without --out must leave the tracked fallback byte-for-byte intact."""
+    import runpy
+    import sys
+
+    shared = tmp_path / "exchange-rate.json"
+    shared.write_text('{"rate":"0.88","date":"2000-01-01"}')
+    previous = shared.read_bytes()
+    root = Path(__file__).resolve().parents[1]
+    main = runpy.run_path(str(root / "scripts/update_exchange_rate.py"))["main"]
+    monkeypatch.setitem(main.__globals__, "DEFAULT_RATE_FILE", shared)
+    monkeypatch.setitem(main.__globals__, "fetch_exchange_rate",
+                        lambda: ExchangeRate(rate="0.91", date="2000-01-02"))
+    monkeypatch.setattr(sys, "argv", ["update_exchange_rate.py"])
+    assert main() == 0
+    assert shared.read_bytes() == previous
+    assert get_exchange_rate(tmp_path / "exchange-rate.local.json").rate == Decimal("0.91")
+
+
 @pytest.mark.parametrize("fails", [False, True])
 def test_exchange_refresh_preserves_snapshot_on_failure(tmp_path, monkeypatch, fails):
     """Only the refresh script fetches; unsuccessful refresh never erases evidence."""

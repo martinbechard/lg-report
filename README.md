@@ -128,7 +128,8 @@ all selected models. Titles default to the application name saved by the sample.
 These examples use real model calls, medium Agent effort, and an adaptive Codex
 GPT-6 Luna user with at most three turns. QA is off unless `--qa` is supplied;
 its default judge is Codex GPT-6 Sol. Use `--user-turns 6` for a longer conversation.
-The script reads `.env.local`, `models.json`, and `exchange-rate.json` by default.
+The script reads `.env.local`, `models.json`, and the saved exchange rate by default
+(`exchange-rate.local.json` takes precedence over `exchange-rate.json`).
 Choose a new `--out` directory for each fresh experiment to preserve earlier runs.
 
 To rebuild the second example's HTML from its saved runs without calling models:
@@ -307,9 +308,9 @@ Failures are listed in the index, remaining samples still run, and the command
 exits nonzero if any sample or export fails.
 
 The runner uses the checked-in pricing catalog without fetching prices. The live
-batch first runs `scripts/update_exchange_rate.py` once to refresh the shared
-`exchange-rate.json`. Failed refreshes preserve the saved rate. Individual samples
-only read that file; missing or invalid FX leaves EUR unavailable without stopping
+batch first runs `scripts/update_exchange_rate.py` once to refresh the Git-ignored
+`exchange-rate.local.json`. Failed refreshes preserve the saved rate. Individual samples
+prefer that file, using `exchange-rate.json` when it is absent; missing or invalid FX leaves EUR unavailable without stopping
 model execution. `--fx-file path/to/rate.json` and `--simulated` skip the refresh. `--prices path/to/models.json` overrides the catalog. The first RAG
 execution may need the local embedding model downloaded if it is not cached.
 
@@ -352,7 +353,7 @@ traces to Langfuse and print a trace URL; they create the same local bundle.
 | Reference/configuration | Role |
 | --- | --- |
 | `models.json` | Shared pricing catalog used when starting runs; not a run result |
-| `exchange-rate.json` | Saved USD/EUR reference; refreshed once by the live batch |
+| `exchange-rate.json` | Checked-in USD/EUR fallback; local refreshes use `exchange-rate.local.json` |
 | `samples/<sample>/.env` | Provider configuration for that sample |
 | `samples/<sample>/sample.py` | Discovery metadata, authored prompts, and scripted model factories |
 | `.cache/lg-report/prices/` and `.cache/lg-report/fx/` | Downloaded, reusable reference data; created dynamically, not execution reports |
@@ -671,9 +672,9 @@ Every cost identifies EUR or USD. The reference section records price verificati
 
 ## Daily EUR conversion
 
-The refresh script uses [Frankfurter's free API](https://frankfurter.dev/) for the latest published ECB USD/EUR rate and writes the shared, checked-in `exchange-rate.json`. The live batch invokes it once before starting samples. A lookup failure preserves the previous reference. Weekends and holidays can have an older publication date.
+The refresh script uses [Frankfurter's free API](https://frankfurter.dev/) for the latest published ECB USD/EUR rate and writes Git-ignored `exchange-rate.local.json`. The live batch invokes it once before starting samples. A lookup failure preserves the previous reference. Weekends and holidays can have an older publication date.
 
-Individual samples and report rendering read the saved `exchange-rate.json` without network access. Run `uv run scripts/update_exchange_rate.py` to refresh it independently. `--fx-file PATH` or `LG_FX_FILE` selects another saved reference; on the reporting CLI, place `--fx-file` before `render`.
+Individual samples and report rendering prefer `exchange-rate.local.json`, falling back to the checked-in `exchange-rate.json` when no local file exists, without network access. Run `uv run scripts/update_exchange_rate.py` to refresh the local override independently. Invalid local data is reported as unavailable EUR; it does not silently fall back. `--fx-file PATH` or `LG_FX_FILE` selects another saved reference; on the reporting CLI, place `--fx-file` before `render`.
 
 ```json
 {"base":"USD","quote":"EUR","rate":"0.871","date":"2026-09-17","source":"User-supplied reference rate"}

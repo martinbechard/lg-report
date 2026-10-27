@@ -376,6 +376,7 @@ def test_batch_continues_after_failure_and_hides_stale_links(tmp_path, monkeypat
     assert calls == ["simple_chat", "tool_chat"]
     assert len(refreshes) == 1
     assert refreshes[0][1].endswith("scripts/update_exchange_rate.py")
+    assert Path(refreshes[0][-1]).name == "exchange-rate.local.json"
     index = (tmp_path / "index.html").read_text()
     assert "simple_chat/report.xlsx" not in index
     assert "simple_chat/run.log" in index
@@ -553,3 +554,40 @@ def test_sample_settings_never_fetch_exchange_rate(tmp_path, monkeypatch, availa
     assert (settings.prices.exchange is not None) is available
     if not available:
         assert "FileNotFoundError" in settings.prices.exchange_error
+
+
+@pytest.mark.parametrize("refresh_succeeds", [False, True])
+def test_batch_resolves_override_after_refresh(tmp_path, monkeypatch, refresh_succeeds):
+    """First refresh selects new local data; failure keeps the shared fallback."""
+    import runpy
+
+    root = Path(__file__).resolve().parents[1]
+    main = runpy.run_path(str(root / "scripts/run_samples.py"))["main"]
+    state = main.__globals__
+    monkeypatch.setitem(state, "ROOT", tmp_path)
+    monkeypatch.setitem(state, "SAMPLES", ("simple_chat",))
+    monkeypatch.delenv("LG_FX_FILE", raising=False)
+    monkeypatch.setenv("LG_PROVIDER", "openai")
+    monkeypatch.setenv("OPENAI_API_KEY", "test-placeholder")
+    local = tmp_path / "exchange-rate.local.json"
+    shared = tmp_path / "exchange-rate.json"
+    shared.write_text('{"rate":"0.88","date":"2000-01-01"}')
+    calls = []
+
+    def refresh(command, **kwargs):
+        """Simulate the refresh boundary without contacting the exchange service."""
+        assert Path(command[-1]) == local
+        if refresh_succeeds:
+            local.write_text('{"rate":"0.91","date":"2000-01-02"}')
+        return subprocess.CompletedProcess(command, 0 if refresh_succeeds else 1)
+
+    def capture(name, directory, **kwargs):
+        """Record the file passed to the child without invoking a model."""
+        calls.append(kwargs["fx_file"])
+
+    monkeypatch.setattr(subprocess, "run", refresh)
+    monkeypatch.setitem(state, "run_sample", capture)
+    monkeypatch.setattr(sys, "argv", ["run_samples.py", "--prices", str(root / "models.json"),
+                                     "--out", str(tmp_path / "reports")])
+    assert main() == 0
+    assert calls == [local if refresh_succeeds else shared]

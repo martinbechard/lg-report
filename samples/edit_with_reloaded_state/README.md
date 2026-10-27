@@ -129,7 +129,7 @@ usage counts the actual inputs; neither mode models provider cache reuse.
 Output directories are reused. Omit `--out` to replace the report bundle and
 `context.json` in `reports/edit-with-patched-state/` or `reports/edit-with-reloaded-state/`. Use `--prices models.json` and
 `--fx-file PATH` for supplied pricing and exchange snapshots. FX otherwise reads the shared
-`exchange-rate.json` without a lookup. Use `--static` to keep model calls scripted even when an API key is configured.
+`exchange-rate.local.json` (or the checked-in `exchange-rate.json` fallback) without a lookup. Use `--static` to keep model calls scripted even when an API key is configured.
 
 ## Compare actual agent decisions
 

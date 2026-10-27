@@ -48,7 +48,7 @@ is insufficient. The corpus is a historical subset, not current Wikipedia.
 Standard options include `--out`, `--prices`, `--fx-file`, `--env-file`, and
 `--metadata-only`. Model-price refreshes can use the network even with a scripted
 model; supply `--prices models.json` to avoid them. FX reads the saved shared
-`exchange-rate.json`. Credentials remain ignored by Git; stable sample reports
+`exchange-rate.local.json` (or the checked-in `exchange-rate.json` fallback). Credentials remain ignored by Git; stable sample reports
 are included, and reruns replace their previous generated output.
 
 ## Code path

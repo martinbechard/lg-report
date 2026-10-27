@@ -18,6 +18,8 @@ from pathlib import Path
 
 from dotenv import dotenv_values
 
+from reporting.exchange import default_rate_file
+
 ROOT = Path(__file__).resolve().parents[1]
 from agent_runtime.harness.sample_catalog import SampleCatalog
 
@@ -259,7 +261,7 @@ def main():
         fx_file = (
             supplied_fx.resolve(strict=True)
             if supplied_fx
-            else ROOT / "exchange-rate.json"
+            else default_rate_file(ROOT)
         )
     except (OSError, RuntimeError) as exc:
         parser.exit(1, f"{exc}\n")
@@ -273,11 +275,15 @@ def main():
                 sys.executable,
                 str(ROOT / "scripts/update_exchange_rate.py"),
                 "--out",
-                str(fx_file),
+                str(ROOT / "exchange-rate.local.json"),
             ],
             env=env,
             check=False,
         )
+    # Resolve after refresh so the first successful refresh is used immediately;
+    # failure without a local snapshot retains the checked-in fallback.
+    if not supplied_fx:
+        fx_file = default_rate_file(ROOT)
     output.mkdir(parents=True, exist_ok=True)
     results = []
     # Replace a previous batch's index immediately, so unfinished lessons are

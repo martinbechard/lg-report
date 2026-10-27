@@ -151,7 +151,7 @@ python scripts/update_exchange_rate.py
 python scripts/update_exchange_rate.py --out reports/reference/exchange-rate.json
 ```
 
-`--out PATH` defaults to the repository's `exchange-rate.json`. A failed request or invalid response preserves the previous file and returns exit code 1. No model credentials are required.
+`--out PATH` defaults to the repository's Git-ignored `exchange-rate.local.json`. Default reads prefer this local override, falling back to the checked-in `exchange-rate.json` only when the local file is absent. A failed request or invalid response preserves the previous file and returns exit code 1. No model credentials are required.
 
 Live batches invoke this script once unless a saved rate is selected. Individual samples and report rendering consume saved rates. Missing valid rates leave EUR costs unknown.
 

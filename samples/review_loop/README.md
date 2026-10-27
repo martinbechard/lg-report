@@ -54,7 +54,7 @@ calls, and one user turn. The report includes both drafts and both judge respons
 only the final answer is returned to the chat client.
 
 The explicit `--static` mode makes no provider calls. To avoid model-price network lookups,
-supply `--prices models.json`. FX reads the saved shared `exchange-rate.json`.
+supply `--prices models.json`. FX reads the saved `exchange-rate.local.json` (or the checked-in `exchange-rate.json` fallback).
 
 ```sh
 test -f .env.local || cp .env.example .env.local

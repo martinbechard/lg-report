@@ -108,7 +108,7 @@ def main():
         if args.command != "normalize":
             try:
                 # CLI wins over a nonempty environment setting. Neither supplied
-                # means read the shared saved reference; neither path performs HTTP.
+                # means prefer local FX over the shared fallback; neither path performs HTTP.
                 rate_file = args.fx_file or (
                     Path(os.environ["LG_FX_FILE"]) if os.getenv("LG_FX_FILE") else None
                 )

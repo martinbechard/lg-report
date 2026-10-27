@@ -112,3 +112,7 @@ langfuse-data/
 !/frontend/dist/chat/
 /data/rag/*.tar.xz.part[0-9][0-9][0-9]
 /data/rag/.download-*/
+
+# Workstation FX refreshes must never dirty the shared reference.
+/exchange-rate.local.json
+/exchange-rate.local.json.tmp

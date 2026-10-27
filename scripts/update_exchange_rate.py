@@ -1,8 +1,9 @@
-"""Refresh the shared USD/EUR reference before a batch, never during a sample.
+"""Refresh the local USD/EUR reference before a batch, never during a sample.
 
 This is the only exchange-rate network boundary. Write a validated snapshot
-atomically so a failed lookup preserves the previous checked-in reference.
-Samples consume that local file and can still run with unknown EUR if it is absent.
+atomically so a failed lookup preserves the previous local reference. Default
+refreshes never modify the checked-in fallback. Samples prefer local data and
+can still run with unknown EUR if neither saved reference is usable.
 AI attribution: Generated with AI assistance by Northstar.
 Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 """
@@ -58,7 +59,9 @@ def main():
     No model calls or credentials are needed by this script.
     """
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--out", type=Path, default=DEFAULT_RATE_FILE)
+    parser.add_argument(
+        "--out", type=Path, default=DEFAULT_RATE_FILE.with_name("exchange-rate.local.json")
+    )
     args = parser.parse_args()
     temporary = args.out.with_suffix(args.out.suffix + ".tmp")
     try:

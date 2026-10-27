@@ -1,4 +1,4 @@
-"""Read the shared saved USD/EUR reference without network access.
+"""Read a local override or the shared saved USD/EUR reference without network access.
 
 A dated snapshot lets HTML and Excel explain and reproduce the same conversion.
 Only scripts/update_exchange_rate.py fetches rates; samples never wait on FX HTTP.
@@ -19,6 +19,18 @@ from reporting.schema import Record
 # Free public ECB reference data requires no API key or account.
 URL = "https://api.frankfurter.dev/v2/rate/usd/eur?providers=ecb"
 DEFAULT_RATE_FILE = Path(__file__).resolve().parents[2] / "exchange-rate.json"
+
+
+def default_rate_file(root: Path | None = None) -> Path:
+    """Prefer workstation data while retaining the checked-in offline fallback.
+
+    Resolve at read time because a batch may have just created the override.
+    Presence selects the local file; invalid contents must remain visible rather
+    than silently substituting a different conversion rate.
+    """
+    shared = root / "exchange-rate.json" if root is not None else DEFAULT_RATE_FILE
+    local = shared.with_name("exchange-rate.local.json")
+    return local if local.exists() else shared
 
 
 class ExchangeRate(Record):
@@ -42,12 +54,12 @@ class ExchangeRate(Record):
 def get_exchange_rate(file: Path | None = None) -> ExchangeRate:
     """Read a validated local reference, never fetch or repair it implicitly.
 
-    The default is the shared repository exchange-rate.json; an explicit file
-    takes precedence. Missing or invalid data raises so the caller can mark EUR
+    The default prefers exchange-rate.local.json over exchange-rate.json;
+    an explicit file takes precedence. Missing or invalid data raises so the caller can mark EUR
     unavailable while retaining USD accounting. Old publication dates remain
     honest provenance and do not cause blocking refreshes during model execution.
     """
-    path = file if file is not None else DEFAULT_RATE_FILE
+    path = file if file is not None else default_rate_file()
     data = json.loads(path.read_text(encoding="utf-8"))
     data.setdefault("source", str(path.resolve()))
     result = ExchangeRate.model_validate(data)

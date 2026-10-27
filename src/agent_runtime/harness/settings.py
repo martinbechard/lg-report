@@ -13,7 +13,7 @@ from pathlib import Path
 
 from dotenv import dotenv_values
 
-from reporting.exchange import get_exchange_rate
+from reporting.exchange import default_rate_file, get_exchange_rate
 from reporting.price_refresh import get_prices
 from reporting.pricing import Prices
 
@@ -83,11 +83,11 @@ def settings_for(app_file: str, description: str, *, args=None) -> Settings:
         print(f"{model_id}: {refresh_error}")
     try:
         # FX is prepared before batch execution, never fetched by a sample.
-        # Explicit files still override the shared checked-in reference.
+        # Explicit files override local data and the checked-in fallback.
         exchange_rate_file = args.fx_file or (
             Path(values["LG_FX_FILE"])
             if values.get("LG_FX_FILE")
-            else project_root / "exchange-rate.json"
+            else default_rate_file(project_root)
         )
         prices.exchange = get_exchange_rate(exchange_rate_file)
     except (OSError, ValueError, KeyError) as exc:

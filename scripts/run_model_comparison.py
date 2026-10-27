@@ -23,6 +23,7 @@ from agent_runtime.harness.model_providers import get_provider
 from agent_runtime.harness.qa_judge import QAJudge, create_rubric, load_rubric
 from agent_runtime.harness.sample_catalog import SampleCatalog
 from reporting.compare import render_comparison
+from reporting.exchange import default_rate_file
 from reporting.pricing import load_prices
 from reporting.render import render
 from reporting.schema import QARubric, Run
@@ -98,7 +99,7 @@ def main(argv=None):
                         help="Reuse saved scoring criteria for the same sample goal")
     parser.add_argument("--env-file", type=Path, default=ROOT / ".env.local")
     parser.add_argument("--prices", type=Path, default=ROOT / "models.json")
-    parser.add_argument("--fx-file", type=Path, default=ROOT / "exchange-rate.json")
+    parser.add_argument("--fx-file", type=Path, default=default_rate_file(ROOT))
     parser.add_argument("--out", type=Path, default=ROOT / "outputs/model-comparison")
     parser.add_argument("--title", default=None)
     parser.add_argument("--resume", action="store_true",

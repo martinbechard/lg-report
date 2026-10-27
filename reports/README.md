@@ -99,7 +99,7 @@ uv run scripts/run_samples.py --simulated  # Explicit offline models
 ```
 
 The live batch first runs `scripts/update_exchange_rate.py` once to refresh the
-shared `exchange-rate.json`. Individual samples only read this saved reference;
+Git-ignored `exchange-rate.local.json`. Individual samples prefer it over the checked-in `exchange-rate.json` fallback;
 a failed refresh preserves the previous rate. Missing/invalid saved FX makes EUR
 unavailable without preventing model execution. `--fx-file PATH` uses another
 saved reference and skips the refresh. Simulated batches also skip the refresh.

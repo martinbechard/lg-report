@@ -28,7 +28,7 @@ uv run python -m agent_runtime --sample tool_chat --live --env-file .env.local
 ```
 
 `--static` runs use the simulator, so they do not call a model provider. FX reads the shared
-`exchange-rate.json` without a network lookup. Live mode incurs model
+`exchange-rate.local.json` (or the checked-in `exchange-rate.json` fallback) without a network lookup. Live mode incurs model
 charges and is not required to follow the scripted call sequence.
 
 ## Code and execution flow
