@@ -11,86 +11,90 @@ Copyright (c) 2026 Martin.Bechard@DevConsult.ca
 
 import os
 from contextlib import contextmanager
+from uuid import uuid4
 
-from langfuse import Langfuse
+from langfuse import Langfuse, propagate_attributes
 from langfuse.langchain import CallbackHandler
 
 
 class ConversationTrace:
-    """Supply tracing hooks to a conversation without executing or recording it locally."""
+    """Group independent turn traces without owning conversation state or accounting."""
 
-    def __init__(self, client, root, name, simulated):
-        """Retain the open root observation and inputs belonging to this session."""
+    def __init__(self, client, name, simulated, session_id, public_trace):
+        """Retain correlation and visibility policy; observations start with turns."""
         self.client = client
-        self.root = root
         self.name = name
         self.simulated = simulated
-        self.requests = []
-        self.trace_id = root.trace_id
+        self.session_id = session_id
+        self.public_trace = public_trace
+        self.trace_id = None
 
     @contextmanager
     def turn_scope(self, number, request):
-        """Enclose a user turn, including resumes, in one child observation."""
-        self.requests.append(request.content())
-        self.root.update(input=list(self.requests))
+        """Record one request and its resumes as a trace in the conversation session.
+
+        A root per turn gives replay the request/answer pairs. The Turn span
+        retains model/tool ancestry. SDK scopes mark exceptions as errors.
+        """
         with self.client.start_as_current_observation(
-            name=f"Turn {number}",
-            as_type="span",
+            name=self.name,
+            as_type="agent",
             input=request.content(),
-            metadata={"report_turn": number},
-        ) as turn:
-
-            def complete(result):
-                """Attach the completed graph result without executing another turn."""
-                messages = result.get("messages", [])
-                turn.update(
-                    output=messages[-1].content if messages else None,
-                    metadata={
-                        "report_turn": number,
-                        "interrupted": bool(result.get("__interrupt__")),
-                    },
-                )
-
-            # Exceptions unwind through the SDK scope and mark the observation
-            # as failed; the conversation only calls complete on normal return.
-            yield complete
-
-    def complete(self, result):
-        """Label the session outcome; an empty conversation is not a success."""
-        history = result.get("messages", []) if result is not None else []
-        status = (
-            "incomplete"
-            if result is None
-            else "interrupted"
-            if result.get("__interrupt__")
-            else "ok"
-        )
-        self.root.update(
-            output=history[-1].content if history else None,
             metadata={
                 "sample": self.name,
                 "simulated": self.simulated,
-                "session_status": status,
+                "report_turn": number,
             },
-        )
+        ) as root:
+            self.trace_id = root.trace_id
+            if self.public_trace:
+                root.set_trace_as_public()
+            with self.client.start_as_current_observation(
+                name=f"Turn {number}",
+                as_type="span",
+                input=request.content(),
+                metadata={"report_turn": number},
+            ) as turn:
+
+                def complete(result):
+                    """Publish the final response without replaying execution."""
+                    messages = result.get("messages", [])
+                    output = messages[-1].content if messages else None
+                    interrupted = bool(result.get("__interrupt__"))
+                    turn.update(
+                        output=output,
+                        metadata={"report_turn": number, "interrupted": interrupted},
+                    )
+                    root.update(
+                        output=output,
+                        metadata={
+                            "session_status": "interrupted" if interrupted else "ok"
+                        },
+                    )
+
+                yield complete
+
+    def session_url(self):
+        """Discover the project URL through the SDK instead of hardcoding its ID."""
+        if self.trace_id is None:
+            return None
+        trace_url = self.client.get_trace_url(trace_id=self.trace_id)
+        return trace_url.rsplit("/traces/", 1)[0] + "/sessions/" + self.session_id
 
 
 @contextmanager
-def conversation_trace(client, *, trace_name, simulated, public_trace=False):
-    """Open optional remote instrumentation around the caller's single execution.
+def conversation_trace(
+    client, *, trace_name, simulated, public_trace=False, session_id=None
+):
+    """Propagate session identity across turns and model-driven client calls.
 
-    This scope owns observations only. The caller owns graph construction, local
-    reporting, and SDK shutdown. Publication requires an explicit opt-in because
-    requests can contain user files. Exceptions reach the SDK's failure handling.
+    No conversation-wide root stays open: each turn becomes its own trace.
+    UUIDs avoid embedding prompts or identifying user content in session IDs.
+    Publication remains opt-in per trace; the session itself stays private.
     """
-    with client.start_as_current_observation(
-        name=trace_name,
-        as_type="agent",
-        metadata={"sample": trace_name, "simulated": simulated},
-    ) as root:
-        if public_trace:
-            root.set_trace_as_public()
-        yield ConversationTrace(client, root, trace_name, simulated)
+    session_id = session_id or str(uuid4())
+    with propagate_attributes(session_id=session_id):
+        yield ConversationTrace(client, trace_name, simulated, session_id, public_trace)
 
 
 class LangfuseCapture:
@@ -123,14 +127,24 @@ class LangfuseCapture:
 
     @contextmanager
     def scope(self, thread_id, run_id, name):
-        """Group independently streamed runs by stable session trace identity."""
-        with self.client.start_as_current_observation(
-            name=name,
-            as_type="agent",
-            trace_context={"trace_id": self.client.create_trace_id(seed=thread_id)},
-            metadata={"thread_id": thread_id, "run_id": run_id},
+        """Give each browser request a trace; approval resumes share the session.
+
+        Propagation covers the official callback and delegated tool calls.
+        """
+        with (
+            propagate_attributes(session_id=thread_id),
+            self.client.start_as_current_observation(
+                name=name,
+                as_type="agent",
+                trace_context={
+                    "trace_id": self.client.create_trace_id(
+                        seed=f"{thread_id}:{run_id}"
+                    )
+                },
+                metadata={"thread_id": thread_id, "run_id": run_id},
+            ) as root,
         ):
-            yield
+            yield root
         self.client.flush()
 
     def close(self):

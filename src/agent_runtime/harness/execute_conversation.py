@@ -83,14 +83,17 @@ def execute_conversation(
             with scope as trace:
                 # Construct the client-driven loop; no prompts or models run yet.
                 conversation = Conversation(
-                    graph, client, turn_scope=trace.turn_scope if trace else None
+                    graph,
+                    client,
+                    turn_scope=trace.turn_scope if trace else None,
+                    thread_id=trace.session_id if trace else None,
                 )
                 # Execution starts here: execute_runnable attaches capture, then calls
                 # conversation.invoke({}, config). That call runs the entire loop:
                 # receive a prompt, execute/resume the workflow, display its result,
                 # and repeat until the client finishes or the workflow is cancelled.
                 # execute_runnable saves the local report before returning (also on failure).
-                result = execute_runnable(
+                execute_runnable(
                     conversation,
                     {},
                     settings.output,
@@ -104,13 +107,12 @@ def execute_conversation(
                     config=config,
                     qa=settings.qa,
                 )
-                if trace:
-                    trace.complete(result)
             if sample.interaction and getattr(client, "last_status", None) is not None:
                 print(json.dumps({"status": client.last_status}))
-            if recorder:
+            if recorder and trace.trace_id:
                 # A URL identifies the trace; asynchronous ingestion is not verified here.
                 recorder.client.flush()
+                print(f"Session: {trace.session_url()}")
                 print(
                     f"Trace: {recorder.client.get_trace_url(trace_id=trace.trace_id)}"
                 )

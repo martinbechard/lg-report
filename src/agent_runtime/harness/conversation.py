@@ -98,10 +98,12 @@ class Conversation:
     and resume. The checkpoint owns history; this class never reconstructs it.
     """
 
-    def __init__(self, graph, client: ChatClient, *, turn_scope=None):
+    def __init__(self, graph, client: ChatClient, *, turn_scope=None, thread_id=None):
         self.graph = graph
         self.client = client
         self.turn_scope = turn_scope
+        # Share the tracing session UUID with the checkpoint thread when supplied.
+        self.thread_id = thread_id
 
     def invoke(self, inputs, config):
         """Bridge the synchronous recorder to an async client event consumer."""
@@ -122,7 +124,7 @@ class Conversation:
             open_graph,
         )
 
-        thread = str(uuid4())
+        thread = self.thread_id or str(uuid4())
         saver = InMemorySaver()
         result = None
         # Adaptive clients generate billable model calls outside the graph.

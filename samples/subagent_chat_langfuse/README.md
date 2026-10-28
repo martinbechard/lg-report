@@ -47,13 +47,17 @@ execution; the workflow is not run twice.
 `sample.py` declares the shared delegation workflow and Langfuse tracing.
 `execute_conversation` owns the same graph, execution, local-report, and cleanup sequence
 for every console sample. `LangfuseCapture` handles configuration, project
-authentication, the official callback, and shutdown; `conversation_trace` adds
-trace visibility and turn spans. It also serves the
+authentication, the official callback, and shutdown; `conversation_trace` propagates a conversation session ID and adds
+a separate trace per turn, with turn spans and opt-in trace visibility. It also serves the
 simple-chat Langfuse sample, so neither application duplicates this plumbing.
 
 The handler is attached once at the parent invocation. DeepAgents propagates it
 through `task` into the specialist. Attaching a second handler to the specialist
 would risk duplicate observations and misleading totals.
+
+The launcher prints the session URL and the last turn trace URL. Parent, specialist,
+and tool observations share the session ID. Sessions remain private even when
+`--public-trace` makes individual traces public.
 
 ## Expected trace
 

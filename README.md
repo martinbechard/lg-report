@@ -236,7 +236,9 @@ Runtime imports use `agent_runtime`; report imports use `reporting`. The install
 All samples use the same client/conversation architecture. Agent definitions,
 workflow composition, and callable tools live in their shared packages. Sample
 directories contain entry points, test cases, READMEs, and configuration examples.
-Langfuse variants reuse the corresponding workflow and test case.
+Langfuse variants reuse the corresponding workflow and test case. The
+[coding workflow with Langfuse](samples/context_budget_langfuse/README.md) provides
+a practical planner/worker/reviewer exercise with real files and test execution.
 
 See [context management](docs/chat-composition.md#context-management) for shared
 peer histories, isolated or forked subagents, and summarization `trigger` and

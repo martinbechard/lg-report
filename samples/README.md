@@ -17,6 +17,7 @@ See [composition diagrams](../docs/chat-composition.md).
 | [Simple chat with Langfuse](simple_chat_langfuse/README.md) | Official callback, trace hierarchy, and conversation grouping | 2 model calls; requires Langfuse |
 | [Parent and subagent](subagent_chat/README.md) | Isolated delegation and combined model costs | 4 model calls, 2 tool executions |
 | [Context budgets](context_budget/README.md) | File-backed planner and worker, shared compaction, and an isolated code reviewer | 47 model calls including 2 summaries, 32 tool executions, 2 turns |
+| [Coding workflow with Langfuse](context_budget_langfuse/README.md) | Build Python code, execute tests, inspect independent review and repairs | Shared context-budget scenario; requires Langfuse |
 | [Nested workflows](nested_workflows/README.md) | Parent dispatch to a child author/judge review loop | 5 simulated model calls: 1 planner and 2 author/judge rounds |
 | [Parent and subagent with Langfuse](subagent_chat_langfuse/README.md) | Nested tracing of the same delegation | 4 model calls; requires Langfuse |
 | [RAG with Chroma](rag_chat/README.md) | Retrieve from millions of indexed tokens | 2 model calls, 1 real vector search; ingest first |
@@ -212,7 +213,7 @@ It supports tool-free text request/response; begin with `simple_chat`.
 Static runs use an offline model with a stateful context simulator and need no LLM API key. For live execution, copy the repository root `.env.example` to `.env.local` if that file does not already exist, configure `LG_PROVIDER` and its API key, and pass `--env-file .env.local` to the sample command. `--static` forces scripted execution even with credentials; `--live` forces real execution and reports missing or invalid credentials as errors. The two flags are mutually exclusive.
 Shell environment variables take precedence. Without `--env-file`, the launcher still reads the selected sample’s `.env`; it does not automatically load the root `.env.local`.
 
-The root `.env.example` also contains the Langfuse endpoint and project-key settings for `simple_chat_langfuse` and `subagent_chat_langfuse`. Configure them in `.env.local` and pass `--env-file .env.local`, including for `--static` runs that send real traces. The `.env.example` file is a template only; the runtime never loads it automatically.
+The root `.env.example` also contains the Langfuse endpoint and project-key settings for `simple_chat_langfuse`, `subagent_chat_langfuse`, and `context_budget_langfuse`. Configure them in `.env.local` and pass `--env-file .env.local`, including for `--static` runs that send real traces. The `.env.example` file is a template only; the runtime never loads it automatically.
 
 The runtime defaults to 32,768 output tokens for both providers, including full-document replacement tool arguments. No environment file is needed to set this default. `LG_MAX_TOKENS` explicitly overrides it; existing environment files and shell settings retain their configured limits.
 Provider behavior, reasoning visibility, cache hits, and call counts can differ

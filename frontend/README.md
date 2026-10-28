@@ -33,7 +33,7 @@ uv run --extra chat python -m agent_runtime --client angular
 ```
 
 The catalog includes all local samples, file approval, quote clarification, both
-claims-context strategies, and the two Langfuse recording variants. Langfuse
+claims-context strategies, and the three Langfuse recording variants. Langfuse
 selections require configured tracing credentials; they fail visibly rather than
 silently disabling remote recording. Retrieval uses the existing index setup.
 

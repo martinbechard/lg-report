@@ -34,7 +34,14 @@ USER_PROMPTS = [entry["content"] for entry in CONVERSATION if entry["role"] == "
 
 
 def trace_conversation(
-    graph, client, callback, *, chat_client, simulated, trace_name, public_trace=False,
+    graph,
+    client,
+    callback,
+    *,
+    chat_client,
+    simulated,
+    trace_name,
+    public_trace=False,
     metadata=None,
 ):
     """Exercise tracing hooks with the real loop independently of CLI setup.
@@ -55,10 +62,9 @@ def trace_conversation(
             public_trace=public_trace,
         ) as trace,
     ):
-        result = Conversation(graph, chat_client, turn_scope=trace.turn_scope).invoke(
-            {}, {"callbacks": [callback], "metadata": metadata or {}}
-        )
-        trace.complete(result)
+        result = Conversation(
+            graph, chat_client, turn_scope=trace.turn_scope, thread_id=trace.session_id
+        ).invoke({}, {"callbacks": [callback], "metadata": metadata or {}})
     return trace.trace_id, result.get("messages", []) if result else []
 
 
@@ -85,9 +91,9 @@ def capture():
         client.shutdown()
 
 
-# Two turns should share one trace while retaining per-turn usage and
+# Two turns should share one session with separate traces, retaining usage and
 # conversation ancestry in the in-memory exporter.
-def test_two_turns_share_trace_and_preserve_usage(capture):
+def test_two_turns_share_session_and_preserve_usage(capture):
     """Check topology, growing context, usage partitions, and model annotations."""
     client, callback, exporter = capture
     trace_id, history = trace_conversation(
@@ -103,13 +109,27 @@ def test_two_turns_share_trace_and_preserve_usage(capture):
     )
     client.flush()
     spans = exporter.get_finished_spans()
-    assert len({s.context.trace_id for s in spans}) == 1
-    assert f"{spans[0].context.trace_id:032x}" == trace_id
+    assert len({s.context.trace_id for s in spans}) == 2
+    assert trace_id in {f"{s.context.trace_id:032x}" for s in spans}
+    sessions = {s.attributes.get("session.id") for s in spans}
+    assert len(sessions) == 1 and None not in sessions
     root = next(s for s in spans if s.name == "simple-chat-langfuse")
     assert root.attributes.get("langfuse.trace.public", False) is False
     turns = [s for s in spans if s.name in {"Turn 1", "Turn 2"}]
     assert len(turns) == 2
-    assert all(s.parent.span_id == root.context.span_id for s in turns)
+    roots_by_time = sorted(
+        (s for s in spans if s.name == "simple-chat-langfuse"),
+        key=lambda s: s.start_time,
+    )
+    assert [
+        s.attributes["langfuse.observation.input"] for s in roots_by_time
+    ] == USER_PROMPTS
+    assert [s.attributes["langfuse.observation.output"] for s in roots_by_time] == [
+        history[1].content,
+        history[3].content,
+    ]
+    roots = {s.context.span_id for s in spans if s.name == "simple-chat-langfuse"}
+    assert all(s.parent.span_id in roots for s in turns)
     generations = sorted(
         (
             s
@@ -379,16 +399,21 @@ def test_empty_and_interrupted_sessions(capture):
     assert history[-1].content == "Confirmed"
     client.flush()
     spans = exporter.get_finished_spans()
-    for name, expected in [("empty", "incomplete"), ("pause", "ok")]:
-        root = next(s for s in spans if s.name == name)
-        assert (
-            root.attributes["langfuse.observation.metadata.session_status"] == expected
-        )
+    assert not any(s.name == "empty" for s in spans)
+    root = next(s for s in spans if s.name == "pause")
+    assert root.attributes["langfuse.observation.metadata.session_status"] == "ok"
+    assert len({s.context.trace_id for s in spans}) == 1
+    assert all(s.attributes.get("session.id") for s in spans)
     assert not any(s.name == "Turn 2" for s in spans)
 
 
 @pytest.mark.parametrize(
-    "sample_id,calls", [("simple_chat_langfuse", 2), ("subagent_chat_langfuse", 4)]
+    "sample_id,calls",
+    [
+        ("simple_chat_langfuse", 2),
+        ("subagent_chat_langfuse", 4),
+        ("context_budget_langfuse", None),
+    ],
 )
 @pytest.mark.parametrize("capture_content", [False, True])
 def test_langfuse_launch_always_records_locally(
@@ -435,13 +460,25 @@ def test_langfuse_launch_always_records_locally(
     )
     run = json.loads((tmp_path / "run.json").read_text())
     assert run["status"] == "ok"
-    assert sum(step["kind"] == "model" for step in run["steps"]) == calls
+    recorded_calls = sum(step["kind"] == "model" for step in run["steps"])
+    if calls is not None:
+        assert recorded_calls == calls
     generations = [
         span
         for span in exporter.get_finished_spans()
         if span.attributes.get("langfuse.observation.type") == "generation"
     ]
-    assert len(generations) == calls
+    assert len(generations) == recorded_calls
+    if sample_id == "context_budget_langfuse":
+        # Real file/test/review steps must survive remote instrumentation, and
+        # every recorded generation must stay in the same conversation session.
+        spans = exporter.get_finished_spans()
+        assert {"planning_step", "working_step", "test_step", "review_step"} <= {
+            s.name for s in spans
+        }
+        sessions = {s.attributes.get("session.id") for s in spans}
+        assert len(sessions) == 1 and None not in sessions
+        assert len({s.context.trace_id for s in spans}) == 2
     if not capture_content:
         assert run.get("output") is None
     else:
@@ -555,3 +592,52 @@ def test_structured_status_and_cleanup_share_launch_path(
     assert json.dumps({"status": client.last_status}) in capsys.readouterr().out
     assert closed == [True]
     assert (tmp_path / "report.html").is_file()
+
+
+def test_browser_runs_share_session_not_trace(capture):
+    """Independent browser requests correlate without merging separate chats."""
+    client, _, exporter = capture
+    recorder = object.__new__(runtime.LangfuseCapture)
+    recorder.client = client
+    for thread, run in [
+        ("chat-a", "turn-1"),
+        ("chat-a", "resume-1"),
+        ("chat-b", "turn-1"),
+    ]:
+        with (
+            recorder.scope(thread, run, "browser-chat"),
+            client.start_as_current_observation(name="nested-tool", as_type="tool"),
+        ):
+            pass
+    client.flush()
+    spans = exporter.get_finished_spans()
+    assert len({s.context.trace_id for s in spans}) == 3
+    for session, count in [("chat-a", 4), ("chat-b", 2)]:
+        assert sum(s.attributes.get("session.id") == session for s in spans) == count
+
+
+def test_client_calls_inherit_session_and_scope_does_not_leak(capture):
+    """Model-driven user work belongs to its conversation even between turns."""
+    client, _, exporter = capture
+    sessions = []
+    for _ in range(2):
+        with runtime.conversation_trace(
+            client, trace_name="chat", simulated=False
+        ) as trace:
+            sessions.append(trace.session_id)
+            with client.start_as_current_observation(
+                name="user-model", as_type="generation"
+            ):
+                pass
+    with client.start_as_current_observation(name="unrelated"):
+        pass
+    client.flush()
+    spans = exporter.get_finished_spans()
+    assert sessions[0] != sessions[1]
+    assert {
+        s.attributes.get("session.id") for s in spans if s.name == "user-model"
+    } == set(sessions)
+    assert (
+        next(s for s in spans if s.name == "unrelated").attributes.get("session.id")
+        is None
+    )

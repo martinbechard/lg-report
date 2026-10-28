@@ -54,15 +54,18 @@ content from the local bundle. Excel remains a separate export.
    The shared launcher selects the client; the workflow requests its model from the factory.
 2. `execute_conversation` creates `LangfuseCapture`, which validates project access
    before graph construction. The console application supplies the client.
-3. `conversation_trace` opens one root and supplies turn observation hooks.
+3. `conversation_trace` propagates a conversation session ID and supplies turn observation hooks.
    `execute_conversation` attaches the official callback and calls `execute_runnable` once,
    capturing the same conversation locally, including failures.
 4. `Conversation` requests each user turn, retains history, and invokes the graph.
-   Its optional scope hook opens `Turn N`, records the result, and closes the span.
+   Its optional scope hook opens a separate root trace with `Turn N`, records the request
+   and final response, and closes both observations. Approval resumes stay in that turn.
 5. The callback records nested graph/model/tool observations. The wrapper flushes
-   and shuts down the SDK before exit and prints the trace URL on success.
+   and shuts down the SDK before exit and prints the session and final trace URLs on success.
 
-Inspect one root, two turn spans, and two model observations in the default test.
+Inspect one session containing two traces, each with a turn span and model observation.
+The session uses the conversation UUID; model-driven user calls also inherit it.
+`--public-trace` publishes individual turn traces, not the session itself.
 The second model request should include the first prompt and answer. Scripted and
 console clients use identical history rules. Client waiting time belongs to the
 root duration, not the turn duration.

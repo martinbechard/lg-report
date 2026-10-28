@@ -416,9 +416,14 @@ captured by default; `--metadata-only` omits it from saved reports. Unknown
 usage or pricing remains unknown. Ordinary browser samples disable ambient
 LangSmith tracing; selecting a Langfuse sample explicitly adds its recorder.
 
-Langfuse console sessions retain their existing root/turn observations. Browser
-Langfuse runs share a deterministic trace identity derived from the session and
-retain nested agent callbacks. Configuration/authentication errors prevent
+Langfuse uses the conversation UUID as its session ID, propagated to every
+observation, including model-driven user calls. Console turns each create a
+separate root trace and nested Turn span; approval resumes stay inside that turn.
+Browser requests derive distinct trace IDs from the thread/run pair, so resumes
+remain in the same session without merging separate request traces. Roots record
+request/response content for replay and retain nested agent callbacks. Console
+runs print a session URL and the final turn's trace URL. Empty conversations emit
+no placeholder trace. Existing historical traces are not retroactively grouped. Configuration/authentication errors prevent
 execution. SDK ingestion is external; in-memory tests prove callback behavior,
 not remote delivery. Session deletion, expiry, and server shutdown release
 browser recording resources and temporary file workspaces.

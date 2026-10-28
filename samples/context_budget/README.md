@@ -31,6 +31,9 @@ The scripted two-turn run produces three compactions at this threshold. The trig
 
 The context estimate uses reported total input plus estimated output retained for the next request. Fresh and cache-read input are constituents of that input total. Reasoning counts only when a reasoning item is retained. A new user or tool message is estimated locally until a provider receipt arrives. A history rewrite invalidates the older receipt, so the next estimate uses the current messages. This is a useful budget signal, not the provider's exact tokenizer or capacity.
 
+For a practical live request with session replay and call timings, use the
+[Langfuse coding variant](../context_budget_langfuse/README.md).
+
 ## Run and inspect
 
 From the repository root:

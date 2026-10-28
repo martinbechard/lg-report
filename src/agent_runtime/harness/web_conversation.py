@@ -142,8 +142,17 @@ class WebConversation:
                         )
                         if recorder
                         else nullcontext()
-                    ),
+                    ) as remote_turn,
                 ):
+                    if remote_turn is not None:
+                        # Capture the submitted request, including approval resumes.
+                        payload = input_data.model_dump(mode="json")
+                        remote_turn.update(
+                            input={
+                                "messages": payload["messages"],
+                                "resume": payload.get("resume"),
+                            }
+                        )
                     async with aclosing(agent.run(input_data)) as events:
                         async for event in events:
                             if event.type == EventType.RUN_ERROR:
@@ -164,6 +173,19 @@ class WebConversation:
                                 )
                             else:
                                 yield event
+                    if remote_turn is not None:
+                        # Complete replay content before the remote root closes.
+                        remote_state = await graph.aget_state(
+                            {"configurable": {"thread_id": input_data.thread_id}}
+                        )
+                        remote_messages = remote_state.values.get("messages", [])
+                        remote_turn.update(
+                            output=remote_messages[-1].content
+                            if remote_messages
+                            else None,
+                            level="ERROR" if status == "error" else "DEFAULT",
+                            metadata={"session_status": status},
+                        )
                 # Read the final checkpoint, not AG-UI's display transcript or
                 # the last model call. edit-with-reloaded-state claims retain a separate working
                 # field; its explicit empty list must not fall back to history.
